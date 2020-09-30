@@ -22,7 +22,7 @@ const int GLOBALSUPPLYCAP	= 100;		//Global variables declarations
 //Implemenent "window" to follow cursor and minimize print size
 const int WINDOW_HEIGHT = 5;
 const int WINDOW_WIDTH = 5;
-
+//This is an edit.
 
 
 
