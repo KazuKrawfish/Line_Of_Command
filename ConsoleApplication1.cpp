@@ -24,7 +24,6 @@
 
 
 #include "MasterBoard.hpp"
-#include "Cursor.hpp"
 #include "Tile.hpp"
 #include "Minion.hpp"
 
@@ -34,10 +33,9 @@ using namespace std;
 
 char Input					= ' ';	
 class Minion;
-int turnFlag				= 1;
-string eventText = "";
+string eventText			= "";
 
-Cursor cursor;
+
 MasterBoard GameBoard;
 Minion minionRoster[GLOBALSUPPLYCAP];
 
@@ -54,7 +52,7 @@ int printScreen(MasterBoard * boardToPrint)
 	{
 		for (j = x; j < x + WINDOW_WIDTH; j++)
 		{
-			if (i * BOARD_WIDTH + j == cursor.Location)										//Print whomever has "priority. cursor first, then unit, then terrain."
+			if (i * BOARD_WIDTH + j == GameBoard.cursor.Location)										//Print whomever has "priority. cursor first, then unit, then terrain."
 			{
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					//Is there a cursor there?
 				cout << '+';
@@ -90,33 +88,33 @@ int printScreen(MasterBoard * boardToPrint)
 		cout << endl;
 	}
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-	cout << "Player " << turnFlag << "'s Turn." << endl;
-	cout << boardToPrint->Board[cursor.Location].description<<endl;				//Print out description of minion and terrain.
-	if (boardToPrint->Board[cursor.Location].hasMinionOnTop == true)
-		cout << "Player " << boardToPrint->Board[cursor.Location].minionOnTop->team << "'s " << boardToPrint->Board[cursor.Location].minionOnTop->description << ": "<<boardToPrint->Board[cursor.Location].minionOnTop->health <<" Health Left." << endl;
+	cout << "Player " << GameBoard.newTurnFlag << "'s Turn." << endl;
+	cout << boardToPrint->Board[GameBoard.cursor.Location].description<<endl;				//Print out description of minion and terrain.
+	if (boardToPrint->Board[GameBoard.cursor.Location].hasMinionOnTop == true)
+		cout << "Player " << boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->team << "'s " << boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->description << ": "<<boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->health <<" Health Left." << endl;
 	else cout << endl;
 
-	if (boardToPrint->Board[cursor.Location].hasMinionOnTop == true)
+	if (boardToPrint->Board[GameBoard.cursor.Location].hasMinionOnTop == true)
 	{
-		if (boardToPrint->Board[cursor.Location].minionOnTop->hasMoved == true)
+		if (boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->hasMoved == true)
 			cout << "Has moved this turn." << endl;
 		else cout << "Ready to move." << endl;
 	}
 	else cout << endl;
 	
-	if (boardToPrint->Board[cursor.Location].hasMinionOnTop == true)
+	if (boardToPrint->Board[GameBoard.cursor.Location].hasMinionOnTop == true)
 	{
-		if (boardToPrint->Board[cursor.Location].minionOnTop->hasAttacked == true)
+		if (boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->hasAttacked == true)
 			cout << "Has attacked this turn." << endl;
 		else
-			if (boardToPrint->Board[cursor.Location].minionOnTop->artilleryCanAttack == true || boardToPrint->Board[cursor.Location].minionOnTop->type != 'R' || boardToPrint->Board[cursor.Location].minionOnTop->type != 'A')
+			if (boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->artilleryCanAttack == true || boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->type != 'R' || boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->type != 'A')
 				cout << "Ready to attack." << endl;
 			else cout << "Cannot attack." << endl;
 	
 	}
 
 	else cout << endl;
-	cout << eventText << "Cursor Location: " << cursor.getX()<<cursor.getY()<<endl;
+	cout << eventText << "Cursor Location: " << GameBoard.cursor.getX()<< GameBoard.cursor.getY()<<endl;
 	cout << GameBoard.windowLocation<<endl;
 	eventText = "";
 	for (i = 0; i < 10; i++)
@@ -129,63 +127,63 @@ int userInput(char * Input, MasterBoard * boardToInput)
 {
 		*Input = _getch();
 	if (*Input == 'a')											//Take user input and move cursor around.
-		if (cursor.getX() != 0)
+		if (GameBoard.cursor.getX() != 0)
 		{
-			cursor.Location--;
+			GameBoard.cursor.Location--;
 		}
 
 	if (*Input == 'd')
-		if (cursor.getX() != BOARD_WIDTH-1)
+		if (GameBoard.cursor.getX() != BOARD_WIDTH-1)
 		{
-			cursor.Location++;
+			GameBoard.cursor.Location++;
 		}
 
 	if (*Input == 's')
-		if (cursor.getY() < BOARD_HEIGHT-1)
+		if (GameBoard.cursor.getY() < BOARD_HEIGHT-1)
 		{
-			cursor.Location += BOARD_WIDTH;
+			GameBoard.cursor.Location += BOARD_WIDTH;
 		}
 
 	if (*Input == 'w')
-		if (cursor. getY() > 0)
+		if (GameBoard.cursor. getY() > 0)
 		{
-			cursor.Location -= BOARD_WIDTH;
+			GameBoard.cursor.Location -= BOARD_WIDTH;
 		}
 
 	
 
 	if (*Input == 't')
-		if (cursor.selectMinionFlag == false && GameBoard.Board[cursor.Location].hasMinionOnTop == true)
-			GameBoard.selectMinion(cursor.Location);
-		else if(cursor.selectMinionFlag == true) GameBoard.deselectMinion();
+		if (GameBoard.cursor.selectMinionFlag == false && GameBoard.Board[GameBoard.cursor.Location].hasMinionOnTop == true)
+			GameBoard.selectMinion(GameBoard.cursor.Location);
+		else if(GameBoard.cursor.selectMinionFlag == true) GameBoard.deselectMinion();
 
-	if (*Input == 'm' && cursor.selectMinionFlag == true && GameBoard.Board[cursor.Location].hasMinionOnTop == false)		//If not on top, then move the unit.
+	if (*Input == 'm' && GameBoard.cursor.selectMinionFlag == true && GameBoard.Board[GameBoard.cursor.Location].hasMinionOnTop == false)		//If not on top, then move the unit.
 	{
-		if (GameBoard.moveMinion(cursor.Location) == 0)
+		if (GameBoard.moveMinion(GameBoard.cursor.Location) == 0)
 		{
-			cursor.selectMinionPointer->artilleryCanAttack = false;			//Successful movement means artillery cannot fire this turn.
+			GameBoard.cursor.selectMinionPointer->artilleryCanAttack = false;			//Successful movement means artillery cannot fire this turn.
 			GameBoard.deselectMinion();
 		}
 	}
 
-	if(*Input == 'm' && cursor.selectMinionFlag == true && cursor.selectMinionPointer->Location == cursor.Location)			//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
+	if(*Input == 'm' && GameBoard.cursor.selectMinionFlag == true && GameBoard.cursor.selectMinionPointer->Location == GameBoard.cursor.Location)			//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
 	{
-		cursor.selectMinionPointer->hasMoved = true;
+		GameBoard.cursor.selectMinionPointer->hasMoved = true;
 		GameBoard.deselectMinion();
 	}
 
-	if (*Input == 'r' && cursor.selectMinionFlag == true && GameBoard.Board[cursor.Location].hasMinionOnTop == true			//Can attack if minion is selected
-		&& cursor.Location != cursor.selectMinionPointer->Location															//And you're not targeting your selected minion
-		&& GameBoard.Board[cursor.Location].minionOnTop->team != cursor.selectMinionPointer->team							//And it's enemy team's.
-		&& GameBoard.Board[cursor.Location].withinRange == true)															//And it's within range.
+	if (*Input == 'r' && GameBoard.cursor.selectMinionFlag == true && GameBoard.Board[GameBoard.cursor.Location].hasMinionOnTop == true			//Can attack if minion is selected
+		&& GameBoard.cursor.Location != GameBoard.cursor.selectMinionPointer->Location															//And you're not targeting your selected minion
+		&& GameBoard.Board[GameBoard.cursor.Location].minionOnTop->team != GameBoard.cursor.selectMinionPointer->team							//And it's enemy team's.
+		&& GameBoard.Board[GameBoard.cursor.Location].withinRange == true)															//And it's within range.
 	{
-		if(GameBoard.attackMinion(cursor.Location) == 0)
+		if(GameBoard.attackMinion(GameBoard.cursor.Location) == 0)
 			GameBoard.deselectMinion();
 	}
 
 	if (*Input == 'p')									//Ends the turn and passes it to the next player.
 	{
-		if (cursor.selectMinionFlag == true)
+		if (GameBoard.cursor.selectMinionFlag == true)
 			GameBoard.deselectMinion();
 		GameBoard.endTurn();
 	}
@@ -195,16 +193,24 @@ int userInput(char * Input, MasterBoard * boardToInput)
 	return 0;
 }
 
+int scenarioLoad(int scenarioNumber) {
+	switch (scenarioNumber)
+		case 1: {
+		GameBoard.createMinion('T', 17, 1);
+		GameBoard.createMinion('T', 07, 1);
+		GameBoard.createMinion('C', 07, 1);
+		GameBoard.createMinion('i', 46, 2);
+		GameBoard.createMinion('i', 47, 2);
+		GameBoard.createMinion('i', 48, 2);
+		GameBoard.createMinion('R', 87, 2);
+	
+	}
+	return 1;
+}
+
 int main()
 {
-	GameBoard.createMinion('T', 17, 1);
-	GameBoard.createMinion('T', 07, 1);
-	GameBoard.createMinion('C', 07, 1);
-
-	GameBoard.createMinion('i', 46, 2);
-	GameBoard.createMinion('i', 47, 2);
-	GameBoard.createMinion('i', 48, 2);
-	GameBoard.createMinion('R', 87, 2);
+	scenarioLoad(1);
 	
 	printScreen(&GameBoard);
 	for (int i = 0; i > -1; i++)		//Run as long as the user wants. Infinite for loop.

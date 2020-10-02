@@ -4,8 +4,7 @@
 
 using namespace std;
 
-extern Cursor cursor;
-extern int turnFlag;
+
 extern Minion minionRoster[GLOBALSUPPLYCAP];
 extern string eventText;
 
@@ -76,6 +75,8 @@ double consultAttackValuesChart(char attackerType, char defenderType)			//Assign
 
 MasterBoard::MasterBoard() 
 {
+	newTurnFlag = 1;
+	cursor.Location = 1;
 	for (int i = 0; i < BOARD_SIZE; i++)			//Initialize with clear terrain. Need to fill with other terrain types.
 	{
 		Board[i].symbol = '.';
@@ -108,7 +109,7 @@ int MasterBoard::setRangeField(int inputLocation, int inputRange)
 
 
 
-	if (Board[inputLocation].hasMinionOnTop == true && Board[inputLocation].minionOnTop->team != turnFlag) 
+	if (Board[inputLocation].hasMinionOnTop == true && Board[inputLocation].minionOnTop->team != newTurnFlag) 
 	{ 
 		return 0; 
 	}
@@ -168,7 +169,7 @@ int MasterBoard::createMinion(char inputType, int inputLocation, int inputTeam)
 
 int MasterBoard::selectMinion(int inputLocation) 
 {
-	if (Board[inputLocation].hasMinionOnTop == true && Board[inputLocation].minionOnTop->team == turnFlag) 
+	if (Board[inputLocation].hasMinionOnTop == true && Board[inputLocation].minionOnTop->team == newTurnFlag) 
 	{
 		Board[inputLocation].minionOnTop->isMinionSelected = true;
 		cursor.selectMinionPointer = Board[inputLocation].minionOnTop;
@@ -248,7 +249,7 @@ int MasterBoard::destroyMinion(Minion * inputMinion)
 	inputMinion->isAlive = false;
 	Board[inputMinion->Location].hasMinionOnTop = false;		//Tell the board it has no minions associated.
 	eventText += "PLAYER ";									//Create event text stream telling us it was destroyed.
-	eventText += char(turnFlag-32);							//MUST FIX IMPLEMENTATION!!!!
+	eventText += char(newTurnFlag-32);							//MUST FIX IMPLEMENTATION!!!!
 	eventText += "'s ";
 	eventText += inputMinion->description;
 	eventText += " DESTROYED!";
@@ -257,10 +258,10 @@ int MasterBoard::destroyMinion(Minion * inputMinion)
 
 int MasterBoard::endTurn() {
 	
-	if (turnFlag < NUMBEROFPLAYERS)					//Either increment turnFlag or set it to zero, thus cycling through the players.
-		turnFlag++;
-	else if (turnFlag >= NUMBEROFPLAYERS)
-		turnFlag = 1;
+	if (newTurnFlag < NUMBEROFPLAYERS)					//Either increment turnFlag or set it to zero, thus cycling through the players.
+		newTurnFlag++;
+	else if (newTurnFlag >= NUMBEROFPLAYERS)
+		newTurnFlag = 1;
 
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{

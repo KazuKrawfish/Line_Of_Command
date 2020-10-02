@@ -3,9 +3,9 @@
 
 #include "Minion.hpp"
 #include "Tile.hpp"
+#include "Cursor.hpp"
 
-const int BOARD_WIDTH		= 20;  //Size of total board
-const int BOARD_HEIGHT		= 20;
+
 const int BOARD_SIZE		= BOARD_WIDTH * BOARD_HEIGHT;
 const int NUMBEROFPLAYERS	= 2;
 const int GLOBALSUPPLYCAP	= 100;		//Global variables declarations
@@ -26,7 +26,8 @@ public:
 	int destroyMinion(Minion * inputMinion);
 	int windowLocation;
 	int checkWindow();
-
+	int newTurnFlag;
+	Cursor cursor;
 };
 
 #endif /* MASTERBOARD_HPP__ */
