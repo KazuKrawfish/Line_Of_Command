@@ -87,6 +87,7 @@ MasterBoard::MasterBoard()
 
 }
 
+//Ensures cursor stays within the window.
 int MasterBoard::checkWindow() 
 {
 	if (cursor.getX() == (windowLocation % BOARD_WIDTH) && cursor.getX() != 0)						//If the cursor moves to the left edge of the window AND it's not at the edge of the board
@@ -104,6 +105,7 @@ int MasterBoard::checkWindow()
 	return 0;
 }
 
+//Determine movement range field.
 int MasterBoard::setRangeField(int inputLocation, int inputRange) 
 {
 
@@ -133,6 +135,7 @@ int MasterBoard::setRangeField(int inputLocation, int inputRange)
 	return 0;
 }
 
+//Determine attack range field.
 int MasterBoard::setAttackField(int inputLocation, int inputRange)		//Primary difference between move and attack is attack range goes over all units, ignoring them.
 {
 	for (int i = 0; i < BOARD_SIZE; i++)
@@ -215,6 +218,7 @@ int MasterBoard::deselectMinion()
 	return 0;
 }
 
+//Additionally, can only attack twice, if artillery, cannot have moved or be adjacent.
 int MasterBoard::attackMinion(int inputLocation) 
 {
 	if (cursor.selectMinionPointer->hasAttacked == true)			//Cannot attack twice!

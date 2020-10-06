@@ -1,16 +1,9 @@
 #include <iostream>
 #include <ctype.h>
+
 #ifdef _WIN32
 #include <conio.h>
-
-//BEGIN CODE REQUIRED FOR GRAPHICS
-//#include "stdafx.h"
-//#include <gdiplus.h>
 #include <windows.h>
-//#include <objidl.h>
-//using namespace Gdiplus;
-//#pragma comment (lib,"Gdiplus.lib")
-//END CODE REQUIRED FOR GRAPHICS
 #elif defined(__unix__)
 #include <iostream>
 #include <stdio.h>
@@ -29,13 +22,11 @@
 
 using namespace std;
 
-//This is an edit.
+//Global variables need to be moved.
 
 char Input					= ' ';	
-class Minion;
 string eventText			= "";
-
-
+char scenarioNames[10];
 MasterBoard GameBoard;
 Minion minionRoster[GLOBALSUPPLYCAP];
 
@@ -52,7 +43,7 @@ int printScreen(MasterBoard * boardToPrint)
 	{
 		for (j = x; j < x + WINDOW_WIDTH; j++)
 		{
-			if (i * BOARD_WIDTH + j == GameBoard.cursor.Location)										//Print whomever has "priority. cursor first, then unit, then terrain."
+			if (i * BOARD_WIDTH + j == GameBoard.cursor.Location)										//Print whomever has priority. cursor first, then unit, then terrain.
 			{
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					//Is there a cursor there?
 				cout << '+';
@@ -117,7 +108,7 @@ int printScreen(MasterBoard * boardToPrint)
 	cout << eventText << "Cursor Location: " << GameBoard.cursor.getX()<< GameBoard.cursor.getY()<<endl;
 	cout << GameBoard.windowLocation<<endl;
 	eventText = "";
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 10; i++)		//Buffer the screen to clear the old map window.
 		cout << endl;
 
 	return 0;
@@ -151,12 +142,13 @@ int userInput(char * Input, MasterBoard * boardToInput)
 		}
 
 	
-
-	if (*Input == 't')
+	//Select minion command
+	if (*Input == 't')	
 		if (GameBoard.cursor.selectMinionFlag == false && GameBoard.Board[GameBoard.cursor.Location].hasMinionOnTop == true)
 			GameBoard.selectMinion(GameBoard.cursor.Location);
 		else if(GameBoard.cursor.selectMinionFlag == true) GameBoard.deselectMinion();
 
+	//Move minion command
 	if (*Input == 'm' && GameBoard.cursor.selectMinionFlag == true && GameBoard.Board[GameBoard.cursor.Location].hasMinionOnTop == false)		//If not on top, then move the unit.
 	{
 		if (GameBoard.moveMinion(GameBoard.cursor.Location) == 0)
@@ -166,12 +158,14 @@ int userInput(char * Input, MasterBoard * boardToInput)
 		}
 	}
 
-	if(*Input == 'm' && GameBoard.cursor.selectMinionFlag == true && GameBoard.cursor.selectMinionPointer->Location == GameBoard.cursor.Location)			//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
+	//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
+	if(*Input == 'm' && GameBoard.cursor.selectMinionFlag == true && GameBoard.cursor.selectMinionPointer->Location == GameBoard.cursor.Location)			
 	{
 		GameBoard.cursor.selectMinionPointer->hasMoved = true;
 		GameBoard.deselectMinion();
 	}
 
+	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours.
 	if (*Input == 'r' && GameBoard.cursor.selectMinionFlag == true && GameBoard.Board[GameBoard.cursor.Location].hasMinionOnTop == true			//Can attack if minion is selected
 		&& GameBoard.cursor.Location != GameBoard.cursor.selectMinionPointer->Location															//And you're not targeting your selected minion
 		&& GameBoard.Board[GameBoard.cursor.Location].minionOnTop->team != GameBoard.cursor.selectMinionPointer->team							//And it's enemy team's.
@@ -203,17 +197,19 @@ int scenarioLoad(int scenarioNumber) {
 		GameBoard.createMinion('i', 47, 2);
 		GameBoard.createMinion('i', 48, 2);
 		GameBoard.createMinion('R', 87, 2);
-	
 	}
 	return 1;
 }
 
 int main()
 {
-	scenarioLoad(1);
+	scenarioNames[0] = '1';
+	cout << "Choose your scenario number: " << endl;
+	int scenarioNumber = _getch();
+	scenarioLoad(scenarioNumber - '0');
 	
 	printScreen(&GameBoard);
-	for (int i = 0; i > -1; i++)		//Run as long as the user wants. Infinite for loop.
+	while (true)		//Run as long as the user wants. Infinite for loop.
 	{
 		userInput(&Input, &GameBoard);
 		printScreen(&GameBoard);

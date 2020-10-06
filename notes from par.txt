@@ -13,3 +13,12 @@ eventText could be object within main which the masterboard function checks on p
 overall strategy: globals should become members of classes and then handed around as needed. ie. a masterboard holds a minion roster.
 
 globals are bad- what if you want 2 masterboards? (IE for a save state)
+
+make unit class with:
+display information
+hit points
+movement points
+armor value
+etc.
+
+using a function to access private data in place of a public data call helps to keep all of your calls in one place, instead of scattered around. editing a data access only takes one edit.
