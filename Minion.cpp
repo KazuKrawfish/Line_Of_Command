@@ -1,9 +1,12 @@
 #include "Minion.hpp"
-#include "MasterBoard.hpp"
 
-extern MasterBoard GameBoard;
-extern Minion minionRoster[GLOBALSUPPLYCAP];
 
+
+extern Minion* minionRoster[GLOBALSUPPLYCAP];
+
+//
+//Default Constructor. Should not be used.
+//
 Minion::Minion()
 {
 	Location = -1;
@@ -17,8 +20,9 @@ Minion::Minion()
 	
 }
 
-int Minion::addMinion(int inputSeniority, int inputLocation, char inputType, int inputTeam)
+Minion::Minion(int inputSeniority, int inputLocation, char inputType, int inputTeam, MasterBoard* Environment)
 {
+	minionEnvironment = Environment;
 	Location = inputLocation;
 	type = inputType;
 	switch (inputType)
@@ -61,10 +65,10 @@ int Minion::addMinion(int inputSeniority, int inputLocation, char inputType, int
 	}
 
 	team = inputTeam;
-	GameBoard.Board[inputLocation].minionOnTop = &minionRoster[inputSeniority];
-	GameBoard.Board[inputLocation].hasMinionOnTop = true;
+	Environment->Board[inputLocation].minionOnTop = minionRoster[inputSeniority];
+	Environment->Board[inputLocation].hasMinionOnTop = true;
 	health = 100;
 	isAlive = true;
-	return 0;
 }
 
+Minion::~Minion() {}

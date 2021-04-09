@@ -2,11 +2,19 @@
 #define MINION_HPP__
 
 #include <string>
+#include "MasterBoard.hpp"
 
 class Minion
-{	public:
-	int addMinion(int inputSeniority, int inputLocation, char inputType, int inputTeam);
+{	
+	public:
+	
+	//Constructors
+	Minion(int inputSeniority, int inputLocation, char inputType, int inputTeam, MasterBoard* Environment);
 	Minion();
+	~Minion();
+	
+	
+	//Member variables. Should be protected with functions dealing with them!
 	bool isAlive;
 	int Location;
 	char type;
@@ -19,6 +27,7 @@ class Minion
 	bool hasAttacked;
 	double health;
 	bool artilleryCanAttack;
+	MasterBoard* minionEnvironment;
 };
 
 #endif /* MINION_HPP__ */

@@ -1,12 +1,10 @@
 #include "MasterBoard.hpp"
 #include "Cursor.hpp"
 #include <string>
+#include <iostream>
 
-using namespace std;
-
-
-extern Minion minionRoster[GLOBALSUPPLYCAP];
-extern string eventText;
+extern Minion* minionRoster[GLOBALSUPPLYCAP];
+extern std::string eventText;
 
 
 bool isAdjacent(int input1, int input2) 
@@ -20,17 +18,21 @@ bool isAdjacent(int input1, int input2)
 }
 
 //Attacker vs defender matrix. Attacker determines row number, while defender determines column number.
-//In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.
-												 // I   T    A    C    R
+//In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.	
+//												  I    T    A     C    R
 const double ATTACK_VALUES_MATRIX[5][5] = {		0.50, 0.05,0.10,0.10,0.25,
 												0.65,0.50,0.60,0.60,0.70,
 												0.60,0.40,0.50,0.55,0.60,
 												0.60,0.10,0.20,0.35,0.45,
 												0.80,0.60,0.65,0.70,0.80};
 
-double consultAttackValuesChart(char attackerType, char defenderType)			//Assign numeric values for different units to access attack values matrix easier.
+//Assign numeric values for different units to access attack values matrix easier.
+//Needs defaults to catch error!!!!
+double consultAttackValuesChart(char attackerType, char defenderType)			
 {
-	int x, y;
+	int x = -1;
+	int y = -1;
+
 	switch (defenderType)
 	{
 	case('i'):
@@ -69,15 +71,21 @@ double consultAttackValuesChart(char attackerType, char defenderType)			//Assign
 		break;
 	}
 
+	if (x == -1 || y == -1)
+	{
+		std::cout << "ERROR ERROR ERROR" << std::endl;
+	}
 
 	return ATTACK_VALUES_MATRIX[y][x];
 }
 
+//Initialize with clear terrain. Need to fill with other terrain types.
+//Put your test minions here!
 MasterBoard::MasterBoard() 
 {
 	newTurnFlag = 1;
 	cursor.Location = 1;
-	for (int i = 0; i < BOARD_SIZE; i++)			//Initialize with clear terrain. Need to fill with other terrain types.
+	for (int i = 0; i < BOARD_SIZE; i++)			
 	{
 		Board[i].symbol = '.';
 		Board[i].description = "Clear terrain.";
@@ -159,11 +167,14 @@ int MasterBoard::setAttackField(int inputLocation, int inputRange)		//Primary di
 
 int MasterBoard::createMinion(char inputType, int inputLocation, int inputTeam)
 {
+	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
+	//Right now we're using "isAlive" which could probably be just a NULL minion pointer.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
-		if (minionRoster[i].isAlive == false)
+		if (minionRoster[i]->isAlive == false)
 		{
-			minionRoster[i].addMinion(i, inputLocation, inputType, inputTeam);
+			minionRoster[i] = new Minion(i, inputLocation, inputType, inputTeam, this);
 			i = GLOBALSUPPLYCAP;
+			
 		}
 
 	return 0;
@@ -227,16 +238,16 @@ int MasterBoard::attackMinion(int inputLocation)
 	if ((cursor.selectMinionPointer->type == 'A' || cursor.selectMinionPointer->type == 'R') && (isAdjacent(cursor.Location, cursor.selectMinionPointer->Location) ))	 //If artillery type, cannot attack adjacent (MIN range)
 		return 1;																																																				//Also, if artillery type, cannot attack if it's actually moved that turn.				
 
-	double attackFactor = consultAttackValuesChart(cursor.selectMinionPointer->type, Board[inputLocation].minionOnTop->type);		//First perform offensive fire
-	Board[inputLocation].minionOnTop->health -= attackFactor * cursor.selectMinionPointer->health;				//Decrease health by attack value, for now it's 1.
+	double attackerFirePower = consultAttackValuesChart(cursor.selectMinionPointer->type, Board[inputLocation].minionOnTop->type);		//First perform offensive fire
+	Board[inputLocation].minionOnTop->health -= attackerFirePower * cursor.selectMinionPointer->health;				//Decrease health by attack value, for now it's 1.
 
 	if (Board[inputLocation].minionOnTop->health <= 0)
 		destroyMinion((Board[inputLocation].minionOnTop));
 	else
 		if (Board[inputLocation].minionOnTop->type != 'A' && Board[inputLocation].minionOnTop->type != 'R' && cursor.selectMinionPointer->type != 'A' && cursor.selectMinionPointer->type != 'R')		//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
 		{
-			attackFactor = consultAttackValuesChart(Board[inputLocation].minionOnTop->type, cursor.selectMinionPointer->type);	//If still alive, then perform defensive counterfire.
-			cursor.selectMinionPointer->health -= attackFactor * Board[inputLocation].minionOnTop->health;
+			double defenderFirePower = consultAttackValuesChart(Board[inputLocation].minionOnTop->type, cursor.selectMinionPointer->type);	//If still alive, then perform defensive counterfire.
+			cursor.selectMinionPointer->health -= defenderFirePower * Board[inputLocation].minionOnTop->health;
 		}	
 	
 	cursor.selectMinionPointer->hasAttacked = true;
@@ -249,14 +260,22 @@ int MasterBoard::attackMinion(int inputLocation)
 }
 
 int MasterBoard::destroyMinion(Minion * inputMinion) 
-{ 
-	inputMinion->isAlive = false;
-	Board[inputMinion->Location].hasMinionOnTop = false;		//Tell the board it has no minions associated.
-	eventText += "PLAYER ";									//Create event text stream telling us it was destroyed.
+{
+	//Tell the board it has no minions associated in the location where the Minion was alive.
+	Board[inputMinion->Location].hasMinionOnTop = false;		
+	
+	//Create event text telling player it was destroyed.
+	eventText += "PLAYER ";								
 	eventText += char(newTurnFlag-32);							//MUST FIX IMPLEMENTATION!!!!
 	eventText += "'s ";
 	eventText += inputMinion->description;
 	eventText += " DESTROYED!";
+	
+	
+	delete inputMinion;
+	inputMinion = NULL;
+
+	
 	return 0;													
 }
 
@@ -269,9 +288,9 @@ int MasterBoard::endTurn() {
 
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
-		minionRoster[i].hasAttacked = false;
-		minionRoster[i].hasMoved = false;
-		minionRoster[i].artilleryCanAttack = true;
+		minionRoster[i]->hasAttacked = false;
+		minionRoster[i]->hasMoved = false;
+		minionRoster[i]->artilleryCanAttack = true;
 	}
 		
 	
