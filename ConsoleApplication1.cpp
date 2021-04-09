@@ -1,5 +1,10 @@
+//Advance Wars Simulation
+//Copyright 2021, Park Family Software Laboratory (ParkLab)
+
+
 #include <iostream>
 #include <ctype.h>
+#include <fstream>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -20,13 +25,10 @@
 #include "Tile.hpp"
 #include "Minion.hpp"
 
-using namespace std;
-
 //Global variables need to be moved.
 
 char Input					= ' ';	
-string eventText			= "";
-char scenarioNames[10];
+std::string eventText			= "";
 MasterBoard GameBoard;
 Minion minionRoster[GLOBALSUPPLYCAP];
 
@@ -46,7 +48,7 @@ int printScreen(MasterBoard * boardToPrint)
 			if (i * BOARD_WIDTH + j == GameBoard.cursor.Location)										//Print whomever has priority. cursor first, then unit, then terrain.
 			{
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					//Is there a cursor there?
-				cout << '+';
+				std::cout << '+';
 			}
 			else if (boardToPrint->Board[i * BOARD_WIDTH + j].hasMinionOnTop == true)						//Is there a minion there?
 			{
@@ -63,53 +65,53 @@ int printScreen(MasterBoard * boardToPrint)
 					break;
 				}
 
-				cout << boardToPrint->Board[i * BOARD_WIDTH + j].minionOnTop->type;							//Print out the minion.
+				std::cout << boardToPrint->Board[i * BOARD_WIDTH + j].minionOnTop->type;							//Print out the minion.
 			}
 			else if (boardToPrint->Board[i * BOARD_WIDTH + j].withinRange == true)								
 			{
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					//If no minion, see if it's "in range" is set
-				cout << ':';																				//And if so print the symbol for "in range"
+				std::cout << ':';																				//And if so print the symbol for "in range"
 			}\
 			else 
 			{
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					//Otherwise put out the terrain for that square.
-				cout << boardToPrint->Board[i * BOARD_WIDTH + j].symbol; 
+				std::cout << boardToPrint->Board[i * BOARD_WIDTH + j].symbol; 
 			}
 		}
-		cout << endl;
+		std::cout << std::endl;
 	}
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-	cout << "Player " << GameBoard.newTurnFlag << "'s Turn." << endl;
-	cout << boardToPrint->Board[GameBoard.cursor.Location].description<<endl;				//Print out description of minion and terrain.
+	std::cout << "Player " << GameBoard.newTurnFlag << "'s Turn." << std::endl;
+	std::cout << boardToPrint->Board[GameBoard.cursor.Location].description<<std::endl;				//Print out description of minion and terrain.
 	if (boardToPrint->Board[GameBoard.cursor.Location].hasMinionOnTop == true)
-		cout << "Player " << boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->team << "'s " << boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->description << ": "<<boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->health <<" Health Left." << endl;
-	else cout << endl;
+		std::cout << "Player " << boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->team << "'s " << boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->description << ": "<<boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->health <<" Health Left." << std::endl;
+	else std::cout << std::endl;
 
 	if (boardToPrint->Board[GameBoard.cursor.Location].hasMinionOnTop == true)
 	{
 		if (boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->hasMoved == true)
-			cout << "Has moved this turn." << endl;
-		else cout << "Ready to move." << endl;
+			std::cout << "Has moved this turn." << std::endl;
+		else std::cout << "Ready to move." << std::endl;
 	}
-	else cout << endl;
+	else std::cout << std::endl;
 	
 	if (boardToPrint->Board[GameBoard.cursor.Location].hasMinionOnTop == true)
 	{
 		if (boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->hasAttacked == true)
-			cout << "Has attacked this turn." << endl;
+			std::cout << "Has attacked this turn." << std::endl;
 		else
 			if (boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->artilleryCanAttack == true || boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->type != 'R' || boardToPrint->Board[GameBoard.cursor.Location].minionOnTop->type != 'A')
-				cout << "Ready to attack." << endl;
-			else cout << "Cannot attack." << endl;
+				std::cout << "Ready to attack." << std::endl;
+			else std::cout << "Cannot attack." << std::endl;
 	
 	}
 
-	else cout << endl;
-	cout << eventText << "Cursor Location: " << GameBoard.cursor.getX()<< GameBoard.cursor.getY()<<endl;
-	cout << GameBoard.windowLocation<<endl;
+	else std::cout << std::endl;
+	std::cout << eventText << "Cursor Location: " << GameBoard.cursor.getX()<< GameBoard.cursor.getY()<<std::endl;
+	std::cout << GameBoard.windowLocation<<std::endl;
 	eventText = "";
 	for (i = 0; i < 10; i++)		//Buffer the screen to clear the old map window.
-		cout << endl;
+		std::cout << std::endl;
 
 	return 0;
 }
@@ -187,27 +189,55 @@ int userInput(char * Input, MasterBoard * boardToInput)
 	return 0;
 }
 
-int scenarioLoad(int scenarioNumber) {
-	switch (scenarioNumber)
-		case 1: {
-		GameBoard.createMinion('T', 17, 1);
-		GameBoard.createMinion('T', 07, 1);
-		GameBoard.createMinion('C', 07, 1);
-		GameBoard.createMinion('i', 46, 2);
-		GameBoard.createMinion('i', 47, 2);
-		GameBoard.createMinion('i', 48, 2);
-		GameBoard.createMinion('R', 87, 2);
+int scenarioSave(std::string saveGameName) 
+{//Still need to implement terrain saving.
+	saveGameName += ".txt";
+	std::ofstream saveGame(saveGameName);
+
+	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
+	for (int i = 0; minionRoster[i].isAlive; i++) {
+		saveGame << minionRoster[i].type 
+			<< minionRoster[i].Location
+			<< minionRoster[i].team
+			<< int(minionRoster[i].hasAttacked)
+			<< int(minionRoster[i].hasMoved)
+			<< minionRoster[i].health << std::endl;
 	}
+	saveGame.close();
+	return 1;
+}
+
+//Still needs editing to load scenario.
+int scenarioLoad(std::string scenarioName) {
+	std::ifstream saveGame;
+	saveGame.open(scenarioName+ ".txt");
+	if (saveGame.is_open())
+	{
+		std::cout << "Successfully loaded!" << std::endl;
+	}
+
+	std::string line;
+	while (getline(saveGame, line))
+	{
+		std::cout << line << '\n';
+	}
+
+saveGame.close();
 	return 1;
 }
 
 int main()
 {
-	scenarioNames[0] = '1';
-	cout << "Choose your scenario number: " << endl;
-	int scenarioNumber = _getch();
-	scenarioLoad(scenarioNumber - '0');
+	std::string scenarioToLoad = "";
+	std::cout << "Choose which scenario to load (Case sensitive): " << std::endl;
 	
+	std::cin >> scenarioToLoad;
+	scenarioLoad(scenarioToLoad);
+	std::cout << "Choose where to save your game:" << std::endl;
+	std::string saveName;
+	std::cin >> saveName;
+	scenarioSave(saveName);
+
 	printScreen(&GameBoard);
 	while (true)		//Run as long as the user wants. Infinite for loop.
 	{
