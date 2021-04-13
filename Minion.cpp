@@ -1,4 +1,5 @@
 #include "Minion.hpp"
+#include "MasterBoard.hpp"
 
 
 
@@ -20,6 +21,9 @@ Minion::Minion()
 	
 }
 
+//
+//Always use this constructor, it gives the new Minion all required properties.
+//
 Minion::Minion(int inputSeniority, int inputLocation, char inputType, int inputTeam, MasterBoard* Environment)
 {
 	minionEnvironment = Environment;
@@ -71,4 +75,7 @@ Minion::Minion(int inputSeniority, int inputLocation, char inputType, int inputT
 	isAlive = true;
 }
 
+//
+//Destructor. Minion has no dynamic variables to clean up so it is empty.
+//
 Minion::~Minion() {}

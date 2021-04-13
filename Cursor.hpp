@@ -3,10 +3,10 @@
 
 #include "Minion.hpp"
 
-//Implemenent "window" to follow cursor and minimize print size
-const int WINDOW_HEIGHT = 5;										//Still need to be eliminated as globals
+//Window HAS been implemented to minimize total print size!!
+const int WINDOW_HEIGHT = 5;										
 const int WINDOW_WIDTH = 5;
-const int BOARD_WIDTH = 20;  //Size of total board
+const int BOARD_WIDTH = 20;  
 const int BOARD_HEIGHT = 20;
 
 class Cursor 

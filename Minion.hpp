@@ -2,7 +2,10 @@
 #define MINION_HPP__
 
 #include <string>
-#include "MasterBoard.hpp"
+
+
+//Forward declaration for MasterBoard.
+class MasterBoard;
 
 class Minion
 {	

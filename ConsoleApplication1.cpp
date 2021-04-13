@@ -29,7 +29,6 @@
 
 	
 std::string eventText			= "";
-
 Minion* minionRoster[GLOBALSUPPLYCAP];
 
 int printScreen(MasterBoard * boardToPrint) 
@@ -37,22 +36,32 @@ int printScreen(MasterBoard * boardToPrint)
 	
 	int i, j;
 	
+
+	//windowLocation is a single scalar representing x and y.
+	//We do some basic math to break it into the two values for the function.
+	//Need to convert windowLocation into a better two part variable.
 	int y = boardToPrint->windowLocation / BOARD_WIDTH;
 	int x = boardToPrint->windowLocation % BOARD_WIDTH;
 
-
+	//Go through the whole "board", via x and y.
 	for (i = y; i < y + WINDOW_HEIGHT; i++)
 	{
 		for (j = x; j < x + WINDOW_WIDTH; j++)
 		{
-			if (i * BOARD_WIDTH + j == boardToPrint->cursor.Location)										//Print whomever has priority. cursor first, then unit, then terrain.
-			{
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					//Is there a cursor there?
+			//Print whomever has priority. cursor first, then unit, then terrain.
+
+			//Is there a cursor there?
+			if (i * BOARD_WIDTH + j == boardToPrint->cursor.Location)										
+			{	
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
 				std::cout << '+';
-			}
-			else if (boardToPrint->Board[i * BOARD_WIDTH + j].hasMinionOnTop == true)						//Is there a minion there?
-			{
-				switch (boardToPrint->Board[i * BOARD_WIDTH + j].minionOnTop->team)							//Determine team and then set the color.
+			}	
+			else
+				//Is there a minion there?
+				if (boardToPrint->Board[i * BOARD_WIDTH + j].hasMinionOnTop == true)						
+			{	
+				//Determine team and then set the color.
+				switch (boardToPrint->Board[i * BOARD_WIDTH + j].minionOnTop->team)							
 				{
 				case(0):
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
@@ -64,17 +73,20 @@ int printScreen(MasterBoard * boardToPrint)
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
 					break;
 				}
-
-				std::cout << boardToPrint->Board[i * BOARD_WIDTH + j].minionOnTop->type;							//Print out the minion.
+				//Print out the minion.
+				std::cout << boardToPrint->Board[i * BOARD_WIDTH + j].minionOnTop->type;							
 			}
 			else if (boardToPrint->Board[i * BOARD_WIDTH + j].withinRange == true)								
-			{
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					//If no minion, see if it's "in range" is set
-				std::cout << ':';																				//And if so print the symbol for "in range"
+			{	
+				//If no minion, see if it's "in range" is set
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
+				//And if so print the symbol for "in range" which is ':'
+				std::cout << ':';																				
 			}\
 			else 
 			{
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					//Otherwise put out the terrain for that square.
+				//Otherwise put out the terrain for that square.
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
 				std::cout << boardToPrint->Board[i * BOARD_WIDTH + j].symbol; 
 			}
 		}
@@ -120,6 +132,8 @@ int printScreen(MasterBoard * boardToPrint)
 	return 0;
 }
 
+//Needs serious refactoring. Chains of if statements that can probably be handled differently, plus multiple references to variables.
+//Handle with a single local variable doing one reference.
 int userInput(char * Input, MasterBoard * boardToInput)		
 {
 		*Input = _getch();
