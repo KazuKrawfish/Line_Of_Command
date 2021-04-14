@@ -18,7 +18,7 @@ public:
 	int moveMinion(int inputLocation);
 	int deselectMinion();
 	int createMinion(char inputType, int inputLocation, int inputTeam);
-	tile Board[BOARD_SIZE];
+	tile Board[BOARD_WIDTH][BOARD_HEIGHT];
 	int setRangeField(int inputLocation, int inputRange);
 	int setAttackField(int inputLocation, int inputRange);
 	int endTurn();

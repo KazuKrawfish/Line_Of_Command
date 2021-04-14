@@ -31,37 +31,80 @@
 std::string eventText			= "";
 Minion* minionRoster[GLOBALSUPPLYCAP];
 
+int printStatus(MasterBoard* boardToPrint) 
+{
+	tile currentTile = boardToPrint->Board[boardToPrint->cursor.getY()][boardToPrint->cursor.getX()];
+
+	std::cout << currentTile.description << std::endl;
+
+	if(currentTile.hasMinionOnTop == true)
+	{
+		Minion* currentMinion = currentTile.minionOnTop;
+		std::cout << "Player " << currentMinion->team
+			<< "'s " << currentMinion->description
+			<< ": " << currentMinion->health <<
+			" Health Left." << std::endl;
+	
+		if (currentMinion->hasMoved == true)
+			std::cout << "Has moved this turn." << std::endl;
+		else std::cout << "Ready to move." << std::endl;
+
+		if (currentMinion->hasAttacked == true)
+			std::cout << "Has attacked this turn." << std::endl;
+		else
+			if (currentMinion->artilleryCanAttack == true || 
+				currentMinion->type != 'R' || currentMinion->type != 'A')//Arty is a mess to fix.
+				std::cout << "Ready to attack." << std::endl;
+			else std::cout << "Cannot attack." << std::endl;
+	}
+	else
+	{ 
+		std::cout << std::endl << std::endl << std::endl; 
+	}
+	
+	//Print current turn.
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+	std::cout << "Player " << boardToPrint->newTurnFlag << "'s Turn." << std::endl;
+
+	//Debug purposes- print cursor location coordinates and window coordinates.
+	std::cout << eventText << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
+	std::cout << boardToPrint->windowLocation << std::endl;
+	eventText = "";
+
+	return 0;
+}
+
 int printScreen(MasterBoard * boardToPrint) 
 {
-	
+	//These are just iterators.
 	int i, j;
 	
 
 	//windowLocation is a single scalar representing x and y.
 	//We do some basic math to break it into the two values for the function.
 	//Need to convert windowLocation into a better two part variable.
-	int y = boardToPrint->windowLocation / BOARD_WIDTH;
-	int x = boardToPrint->windowLocation % BOARD_WIDTH;
+	int windowY = boardToPrint->windowLocation / BOARD_WIDTH;
+	int windowX = boardToPrint->windowLocation % BOARD_WIDTH;
 
-	//Go through the whole "board", via x and y.
-	for (i = y; i < y + WINDOW_HEIGHT; i++)
+	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
+	for (i = windowY; i < windowY + WINDOW_HEIGHT; i++)
 	{
-		for (j = x; j < x + WINDOW_WIDTH; j++)
+		for (j = windowX; j < windowX + WINDOW_WIDTH; j++)
 		{
 			//Print whomever has priority. cursor first, then unit, then terrain.
 
-			//Is there a cursor there?
-			if (i * BOARD_WIDTH + j == boardToPrint->cursor.Location)										
+			//If there is a cursor there, it takes priority for printing.
+			if ( i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX() ) // * BOARD_WIDTH + j == boardToPrint->cursor.Location)										
 			{	
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
 				std::cout << '+';
 			}	
 			else
 				//Is there a minion there?
-				if (boardToPrint->Board[i * BOARD_WIDTH + j].hasMinionOnTop == true)						
+				if (boardToPrint->Board[i][j].hasMinionOnTop == true)						
 			{	
 				//Determine team and then set the color.
-				switch (boardToPrint->Board[i * BOARD_WIDTH + j].minionOnTop->team)							
+				switch (boardToPrint->Board[i][j].minionOnTop->team)
 				{
 				case(0):
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
@@ -74,56 +117,26 @@ int printScreen(MasterBoard * boardToPrint)
 					break;
 				}
 				//Print out the minion.
-				std::cout << boardToPrint->Board[i * BOARD_WIDTH + j].minionOnTop->type;							
+				std::cout << boardToPrint->Board[i][j].minionOnTop->type;
 			}
-			else if (boardToPrint->Board[i * BOARD_WIDTH + j].withinRange == true)								
+			else if (boardToPrint->Board[i][j].withinRange == true)
 			{	
 				//If no minion, see if it's "in range" is set
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
 				//And if so print the symbol for "in range" which is ':'
 				std::cout << ':';																				
-			}\
+			}
 			else 
 			{
 				//Otherwise put out the terrain for that square.
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
-				std::cout << boardToPrint->Board[i * BOARD_WIDTH + j].symbol; 
+				std::cout << boardToPrint->Board[i][j].symbol;
 			}
 		}
 		std::cout << std::endl;
 	}
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-	std::cout << "Player " << boardToPrint->newTurnFlag << "'s Turn." << std::endl;
 
-	//Print out description of minion and terrain.
-	std::cout << boardToPrint->Board[boardToPrint->cursor.Location].description<<std::endl;				
-	if (boardToPrint->Board[boardToPrint->cursor.Location].hasMinionOnTop == true)
-		std::cout << "Player " << boardToPrint->Board[boardToPrint->cursor.Location].minionOnTop->team << "'s " << boardToPrint->Board[boardToPrint->cursor.Location].minionOnTop->description << ": "<<boardToPrint->Board[boardToPrint->cursor.Location].minionOnTop->health <<" Health Left." << std::endl;
-	else std::cout << std::endl;
-
-	if (boardToPrint->Board[boardToPrint->cursor.Location].hasMinionOnTop == true)
-	{
-		if (boardToPrint->Board[boardToPrint->cursor.Location].minionOnTop->hasMoved == true)
-			std::cout << "Has moved this turn." << std::endl;
-		else std::cout << "Ready to move." << std::endl;
-	}
-	else std::cout << std::endl;
-	
-	if (boardToPrint->Board[boardToPrint->cursor.Location].hasMinionOnTop == true)
-	{
-		if (boardToPrint->Board[boardToPrint->cursor.Location].minionOnTop->hasAttacked == true)
-			std::cout << "Has attacked this turn." << std::endl;
-		else
-			if (boardToPrint->Board[boardToPrint->cursor.Location].minionOnTop->artilleryCanAttack == true || boardToPrint->Board[boardToPrint->cursor.Location].minionOnTop->type != 'R' || boardToPrint->Board[boardToPrint->cursor.Location].minionOnTop->type != 'A')
-				std::cout << "Ready to attack." << std::endl;
-			else std::cout << "Cannot attack." << std::endl;
-	
-	}
-
-	else std::cout << std::endl;
-	std::cout << eventText << "Cursor Location: " << boardToPrint->cursor.getX()<< boardToPrint->cursor.getY()<<std::endl;
-	std::cout << boardToPrint->windowLocation<<std::endl;
-	eventText = "";
+	printStatus(boardToPrint);
 
 	//Buffer the screen to clear the old map window.
 	for (i = 0; i < 10; i++)		
@@ -140,25 +153,25 @@ int userInput(char * Input, MasterBoard * boardToInput)
 	if (*Input == 'a')											//Take user input and move cursor around.
 		if (boardToInput->cursor.getX() != 0)
 		{
-			boardToInput->cursor.Location--;
+			boardToInput->cursor.XCoord--;
 		}
 
 	if (*Input == 'd')
 		if (boardToInput->cursor.getX() != BOARD_WIDTH-1)
 		{
-			boardToInput->cursor.Location++;
+			boardToInput->cursor.XCoord++;
 		}
 
 	if (*Input == 's')
 		if (boardToInput->cursor.getY() < BOARD_HEIGHT-1)
 		{
-			boardToInput->cursor.Location += BOARD_WIDTH;
+			boardToInput->cursor.YCoord++;
 		}
 
 	if (*Input == 'w')
 		if (boardToInput->cursor. getY() > 0)
 		{
-			boardToInput->cursor.Location -= BOARD_WIDTH;
+			boardToInput->cursor.YCoord--;
 		}
 
 	

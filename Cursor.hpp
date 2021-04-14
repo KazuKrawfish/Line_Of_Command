@@ -13,9 +13,11 @@ class Cursor
 {	public:
 	bool selectMinionFlag = false;
 	Minion*  selectMinionPointer;
-	int Location;
-	int getX() { return Location % BOARD_WIDTH; }
-	int getY() { return Location / BOARD_WIDTH; }
+	//int Location;
+	int XCoord;
+	int YCoord;
+	int getX() { return XCoord; }				// { return Location % BOARD_WIDTH; }
+	int getY() { return YCoord; }				// (return Location	 / BOARD_WIDTH; }
 };
 
 #endif /* CURSOR_HPP__ */
