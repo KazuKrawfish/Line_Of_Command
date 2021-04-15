@@ -77,6 +77,7 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	if (x == -1 || y == -1)
 	{
 		std::cout << "ERROR ERROR ERROR" << std::endl;
+		return -1;
 	}
 
 	return ATTACK_VALUES_MATRIX[y][x];
@@ -121,17 +122,17 @@ int MasterBoard::checkWindow()
 }
 
 //Determine movement range field.
+//Recursive function -_- but makes sense for this type of action.
 int MasterBoard::setRangeField(int inputX, int inputY, int inputRange) 
 {
-
-
-
+	
 	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team != newTurnFlag) 
 	{ 
 		return 0; 
 	}
 
-	if (inputRange == 0)									//If this is the edge of the range, set within range and return.
+	//If this is the edge of the range, set within range and return.
+	if (inputRange == 0)									
 	{ 
 		Board[inputX][inputY].withinRange = true; 
 		return 0; 
@@ -142,10 +143,10 @@ int MasterBoard::setRangeField(int inputX, int inputY, int inputRange)
 	
 //Otherwise, perform function on all adjacent spaces without enemies.				
 //Recursion on each direction, with IF statements to prevent us from leaving the matrix.
-	if (inputLocation % BOARD_WIDTH != 0)					setRangeField(inputLocation - 1, inputRange);
-	if (inputLocation % BOARD_WIDTH != BOARD_WIDTH - 1)		setRangeField(inputLocation + 1, inputRange);
-	if (inputLocation < (BOARD_HEIGHT- 1) * (BOARD_WIDTH))		setRangeField(inputLocation + BOARD_WIDTH, inputRange);
-	if (inputLocation > BOARD_WIDTH)						setRangeField(inputLocation - BOARD_WIDTH, inputRange);
+	if (inputX != 0)							setRangeField(inputX - 1, inputY, inputRange);
+	if (inputX != (BOARD_WIDTH - 1))			setRangeField(inputX + 1, inputY, inputRange);
+	if (inputY < (BOARD_HEIGHT- 1))				setRangeField(inputX, inputY +1, inputRange);
+	if (inputY > 0)								setRangeField(inputX, inputY -1, inputRange);
 	
 	return 0;
 }
@@ -156,9 +157,9 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	int distanceX = 0;
 	int distanceY = 0;
 
-	for (int x = 0; x < BOARD_SIZE; x++)
+	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
-		for (int y= 0; y < BOARD_SIZE; y++)
+		for (int y= 0; y < BOARD_HEIGHT; y++)
 		{
 			//int inputLocationX = inputLocation % BOARD_WIDTH;
 			//int inputLocationY = (inputLocation - (inputLocation % BOARD_WIDTH)) / BOARD_WIDTH;	//Convert input coordinate to x and y.
@@ -241,9 +242,9 @@ int MasterBoard::deselectMinion()
 	cursor.selectMinionFlag = false;
 	cursor.selectMinionPointer = NULL;
 	
-	for (int x = 0; x < BOARD_SIZE; x++)
+	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
-		for (int y = 0; y < BOARD_SIZE; y++)
+		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
 			Board[x][y].withinRange = false;
 		}
