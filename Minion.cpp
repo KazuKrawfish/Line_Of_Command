@@ -10,7 +10,8 @@ extern Minion* minionRoster[GLOBALSUPPLYCAP];
 //
 Minion::Minion()
 {
-	Location = -1;
+	locationX = -1;
+	locationY = -1;
 	type = ' ';
 	isMinionSelected = false;
 	team = 0;						//Team 0 is the neutral team.
@@ -24,10 +25,11 @@ Minion::Minion()
 //
 //Always use this constructor, it gives the new Minion all required properties.
 //
-Minion::Minion(int inputSeniority, int inputLocation, char inputType, int inputTeam, MasterBoard* Environment)
+Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment)
 {
 	minionEnvironment = Environment;
-	Location = inputLocation;
+	locationX = inputX;
+	locationY = inputY;
 	type = inputType;
 	switch (inputType)
 	{
@@ -69,8 +71,8 @@ Minion::Minion(int inputSeniority, int inputLocation, char inputType, int inputT
 	}
 
 	team = inputTeam;
-	Environment->Board[inputLocation].minionOnTop = minionRoster[inputSeniority];
-	Environment->Board[inputLocation].hasMinionOnTop = true;
+	Environment->Board[inputX][inputY].minionOnTop = minionRoster[inputSeniority];
+	Environment->Board[inputX][inputY].hasMinionOnTop = true;
 	health = 100;
 	isAlive = true;
 }

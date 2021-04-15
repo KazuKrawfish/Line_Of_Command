@@ -6,15 +6,18 @@
 extern Minion* minionRoster[GLOBALSUPPLYCAP];
 extern std::string eventText;
 
-
-bool isAdjacent(int input1, int input2) 
+//If the two input coordinates are next to each other, return true. Otherwise, return false.
+//This can be either horizontal or vertical adjacency.
+bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 {
-	if (abs(input1 - input2) == 1)		//Horizontally adjacent
+	if ((abs(inputX1 - inputX2) == 1) || (abs(inputY1 - inputY2) == 1))
+	{
 		return true;
-	if (abs(input1 - input2) == BOARD_WIDTH)		//Vertically adjacent
-		return true;
-
-	return false;
+	}
+	else 
+	{
+		return false;
+	}
 }
 
 //Attacker vs defender matrix. Attacker determines row number, while defender determines column number.
@@ -84,15 +87,19 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 MasterBoard::MasterBoard() 
 {
 	newTurnFlag = 1;
-	cursor.Location = 1;
-	for (int i = 0; i < BOARD_SIZE; i++)			
+	cursor.XCoord = 1;
+	cursor.YCoord = 1;
+	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
-		Board[i].symbol = '.';
-		Board[i].description = "Clear terrain.";
-		Board[i].hasMinionOnTop = false;
-		Board[i].withinRange = false;
-	}
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			Board[x][y].symbol = '.';
+			Board[x][y].description = "Clear terrain.";
+			Board[x][y].hasMinionOnTop = false;
+			Board[x][y].withinRange = false;
 
+		}
+	}
 }
 
 //Ensures cursor stays within the window.
@@ -114,24 +121,24 @@ int MasterBoard::checkWindow()
 }
 
 //Determine movement range field.
-int MasterBoard::setRangeField(int inputLocation, int inputRange) 
+int MasterBoard::setRangeField(int inputX, int inputY, int inputRange) 
 {
 
 
 
-	if (Board[inputLocation].hasMinionOnTop == true && Board[inputLocation].minionOnTop->team != newTurnFlag) 
+	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team != newTurnFlag) 
 	{ 
 		return 0; 
 	}
 
 	if (inputRange == 0)									//If this is the edge of the range, set within range and return.
 	{ 
-		Board[inputLocation].withinRange = true; 
+		Board[inputX][inputY].withinRange = true; 
 		return 0; 
 	}		
 
 	inputRange--;
-	Board[inputLocation].withinRange = true;
+	Board[inputX][inputY].withinRange = true;
 	
 //Otherwise, perform function on all adjacent spaces without enemies.				
 //Recursion on each direction, with IF statements to prevent us from leaving the matrix.
@@ -144,35 +151,38 @@ int MasterBoard::setRangeField(int inputLocation, int inputRange)
 }
 
 //Determine attack range field.
-int MasterBoard::setAttackField(int inputLocation, int inputRange)		//Primary difference between move and attack is attack range goes over all units, ignoring them.
+int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Primary difference between move and attack is attack range goes over all units, ignoring them.
 {
-	for (int i = 0; i < BOARD_SIZE; i++)
+	int distanceX = 0;
+	int distanceY = 0;
+
+	for (int x = 0; x < BOARD_SIZE; x++)
 	{
-		int inputLocationX = inputLocation % BOARD_WIDTH;
-		int inputLocationY = (inputLocation - (inputLocation % BOARD_WIDTH)) / BOARD_WIDTH;	//Convert input coordinate to x and y.
+		for (int y= 0; y < BOARD_SIZE; y++)
+		{
+			//int inputLocationX = inputLocation % BOARD_WIDTH;
+			//int inputLocationY = (inputLocation - (inputLocation % BOARD_WIDTH)) / BOARD_WIDTH;	//Convert input coordinate to x and y.
 
-		int iX = i % BOARD_WIDTH;
-		int iY = (i - (i % BOARD_WIDTH)) / BOARD_WIDTH;	//Do the same with i.
+			distanceX = abs(inputX - x);
+			distanceY = abs(inputY - y);
 
-		int distanceX = abs(inputLocationX - iX);
-		int distanceY = abs(inputLocationY - iY);
-
-		if ((distanceX + distanceY) <= Board[inputLocation].minionOnTop->attackRange)
-			Board[i].withinRange = true;
-		else Board[i].withinRange = false;
+			if ((distanceX + distanceY) <= Board[inputX][inputY].minionOnTop->attackRange)
+				Board[x][y].withinRange = true;
+			else Board[x][y].withinRange = false;
+		}
 	}
 	return 0;
 
 }
 
-int MasterBoard::createMinion(char inputType, int inputLocation, int inputTeam)
+int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	//Right now we're using "isAlive" which could probably be just a NULL minion pointer.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 		if (minionRoster[i]->isAlive == false)
 		{
-			minionRoster[i] = new Minion(i, inputLocation, inputType, inputTeam, this);
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this);
 			i = GLOBALSUPPLYCAP;
 			
 		}
@@ -181,37 +191,47 @@ int MasterBoard::createMinion(char inputType, int inputLocation, int inputTeam)
 
 }
 
-int MasterBoard::selectMinion(int inputLocation) 
+int MasterBoard::selectMinion(int inputX, int inputY) 
 {
-	if (Board[inputLocation].hasMinionOnTop == true && Board[inputLocation].minionOnTop->team == newTurnFlag) 
+	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == newTurnFlag) 
 	{
-		Board[inputLocation].minionOnTop->isMinionSelected = true;
-		cursor.selectMinionPointer = Board[inputLocation].minionOnTop;
+		Board[inputX][inputY].minionOnTop->isMinionSelected = true;
+		cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
 		cursor.selectMinionFlag = true;
 		if (cursor.selectMinionPointer->hasMoved == false)
-			setRangeField(inputLocation, cursor.selectMinionPointer->movementRange);
+			setRangeField(inputX, inputY, cursor.selectMinionPointer->movementRange);
 		else if (cursor.selectMinionPointer->hasAttacked == false && (cursor.selectMinionPointer->artilleryCanAttack == true || (cursor.selectMinionPointer->type != 'A' && cursor.selectMinionPointer->type != 'R')))	
-			setAttackField(inputLocation, cursor.selectMinionPointer->attackRange);
+			setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 	}
 	return 0;
 }
 
-int MasterBoard::moveMinion(int inputLocation)
+int MasterBoard::moveMinion(int inputX, int inputY)
 {
-	if (Board[inputLocation].withinRange == false)
+	Minion* selectedMinion = cursor.selectMinionPointer;
+	
+	//First make sure the move is legal.
+	if (Board[inputX][inputY].withinRange == false)
 		return 1;
 	if (cursor.selectMinionPointer->hasMoved == true)
 		return 1;
 
-	int OLD = cursor.selectMinionPointer->Location;		//Find old address of the minion
-	Board[OLD].hasMinionOnTop = false;					//Clear the old tile, set the new tile.
-	Board[inputLocation].hasMinionOnTop = true;
+	//Find old address of the minion
+	int oldX = selectedMinion->locationX;
+	int oldY = selectedMinion->locationY;
+	
+	//Clear the old tile, set the new tile.
+	Board[oldX][oldY].hasMinionOnTop = false;					
+	Board[inputX][inputY].hasMinionOnTop = true;
 
-	Board[inputLocation].minionOnTop = Board[OLD].minionOnTop;
-	Board[OLD].minionOnTop = NULL;
+	Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+	Board[oldX][oldY].minionOnTop = NULL;
 
-	cursor.selectMinionPointer->Location = inputLocation;
-	cursor.selectMinionPointer->hasMoved = true;
+	//"Move" the minion to the new location.
+	selectedMinion->locationX = inputX;
+	selectedMinion->locationY = inputY;
+
+	selectedMinion->hasMoved = true;
 	return 0;
 }
 
@@ -221,33 +241,37 @@ int MasterBoard::deselectMinion()
 	cursor.selectMinionFlag = false;
 	cursor.selectMinionPointer = NULL;
 	
-	for (int i = 0; i < BOARD_SIZE; i++)
+	for (int x = 0; x < BOARD_SIZE; x++)
 	{
-		Board[i].withinRange = false;
+		for (int y = 0; y < BOARD_SIZE; y++)
+		{
+			Board[x][y].withinRange = false;
+		}
 	}
 		
 	return 0;
 }
 
-//Additionally, can only attack twice, if artillery, cannot have moved or be adjacent.
-int MasterBoard::attackMinion(int inputLocation) 
+//Additionally, can only attack once. If artillery, cannot have moved or be adjacent.
+int MasterBoard::attackMinion(int inputX, int inputY)
 {
 	if (cursor.selectMinionPointer->hasAttacked == true)			//Cannot attack twice!
 		return 1;
 
-	if ((cursor.selectMinionPointer->type == 'A' || cursor.selectMinionPointer->type == 'R') && (isAdjacent(cursor.Location, cursor.selectMinionPointer->Location) ))	 //If artillery type, cannot attack adjacent (MIN range)
+	if ((cursor.selectMinionPointer->type == 'A' || cursor.selectMinionPointer->type == 'R') 
+		&& (isAdjacent(cursor.getX(), cursor.selectMinionPointer->locationX, cursor.getY(), cursor.selectMinionPointer->locationY) ))	 //If artillery type, cannot attack adjacent (MIN range)
 		return 1;																																																				//Also, if artillery type, cannot attack if it's actually moved that turn.				
 
-	double attackerFirePower = consultAttackValuesChart(cursor.selectMinionPointer->type, Board[inputLocation].minionOnTop->type);		//First perform offensive fire
-	Board[inputLocation].minionOnTop->health -= attackerFirePower * cursor.selectMinionPointer->health;				//Decrease health by attack value, for now it's 1.
+	double attackerFirePower = consultAttackValuesChart(cursor.selectMinionPointer->type, Board[inputX][inputY].minionOnTop->type);		//First perform offensive fire
+	Board[inputX][inputY].minionOnTop->health -= attackerFirePower * cursor.selectMinionPointer->health;				//Decrease health by attack value, for now it's 1.
 
-	if (Board[inputLocation].minionOnTop->health <= 0)
-		destroyMinion((Board[inputLocation].minionOnTop));
+	if (Board[inputX][inputY].minionOnTop->health <= 0)
+		destroyMinion((Board[inputX][inputY].minionOnTop));
 	else
-		if (Board[inputLocation].minionOnTop->type != 'A' && Board[inputLocation].minionOnTop->type != 'R' && cursor.selectMinionPointer->type != 'A' && cursor.selectMinionPointer->type != 'R')		//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
+		if (Board[inputX][inputY].minionOnTop->type != 'A' && Board[inputX][inputY].minionOnTop->type != 'R' && cursor.selectMinionPointer->type != 'A' && cursor.selectMinionPointer->type != 'R')		//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
 		{
-			double defenderFirePower = consultAttackValuesChart(Board[inputLocation].minionOnTop->type, cursor.selectMinionPointer->type);	//If still alive, then perform defensive counterfire.
-			cursor.selectMinionPointer->health -= defenderFirePower * Board[inputLocation].minionOnTop->health;
+			double defenderFirePower = consultAttackValuesChart(Board[inputX][inputY].minionOnTop->type, cursor.selectMinionPointer->type);	//If still alive, then perform defensive counterfire.
+			cursor.selectMinionPointer->health -= defenderFirePower * Board[inputX][inputY].minionOnTop->health;
 		}	
 	
 	cursor.selectMinionPointer->hasAttacked = true;
@@ -262,7 +286,7 @@ int MasterBoard::attackMinion(int inputLocation)
 int MasterBoard::destroyMinion(Minion * inputMinion) 
 {
 	//Tell the board it has no minions associated in the location where the Minion was alive.
-	Board[inputMinion->Location].hasMinionOnTop = false;		
+	Board[inputMinion->locationX][inputMinion->locationY].hasMinionOnTop = false;		
 	
 	//Create event text telling player it was destroyed.
 	eventText += "PLAYER ";								

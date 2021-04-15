@@ -177,14 +177,21 @@ int userInput(char * Input, MasterBoard * boardToInput)
 	
 	//Select minion command
 	if (*Input == 't')	
-		if (boardToInput->cursor.selectMinionFlag == false && boardToInput->Board[boardToInput->cursor.Location].hasMinionOnTop == true)
-			boardToInput->selectMinion(boardToInput->cursor.Location);
-		else if(boardToInput->cursor.selectMinionFlag == true) boardToInput->deselectMinion();
+		if (boardToInput->cursor.selectMinionFlag == false && boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
+		{
+			boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY());
+		}
+		else 
+			if (boardToInput->cursor.selectMinionFlag == true)
+			{
+				boardToInput->deselectMinion();
+			}
 
 	//Move minion command
-	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true && boardToInput->Board[boardToInput->cursor.Location].hasMinionOnTop == false)		//If not on top, then move the unit.
+	//If not on top, then move the unit.
+	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true && boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
 	{
-		if (boardToInput->moveMinion(boardToInput->cursor.Location) == 0)
+		if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 		{
 			boardToInput->cursor.selectMinionPointer->artilleryCanAttack = false;			//Successful movement means artillery cannot fire this turn.
 			boardToInput->deselectMinion();
@@ -192,20 +199,25 @@ int userInput(char * Input, MasterBoard * boardToInput)
 	}
 
 	//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
-	if(*Input == 'm' && boardToInput->cursor.selectMinionFlag == true && boardToInput->cursor.selectMinionPointer->Location == boardToInput->cursor.Location)			
+	if(*Input == 'm' && boardToInput->cursor.selectMinionFlag == true && boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX() && boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY())
 	{
 		boardToInput->cursor.selectMinionPointer->hasMoved = true;
 		boardToInput->deselectMinion();
 	}
 
 	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours.
-	if (*Input == 'r' && boardToInput->cursor.selectMinionFlag == true && boardToInput->Board[boardToInput->cursor.Location].hasMinionOnTop == true			//Can attack if minion is selected
-		&& boardToInput->cursor.Location != boardToInput->cursor.selectMinionPointer->Location															//And you're not targeting your selected minion
-		&& boardToInput->Board[boardToInput->cursor.Location].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team							//And it's enemy team's.
-		&& boardToInput->Board[boardToInput->cursor.Location].withinRange == true)															//And it's within range.
-	{
-		if(boardToInput->attackMinion(boardToInput->cursor.Location) == 0)
+	if (*Input == 'r' && boardToInput->cursor.selectMinionFlag == true && boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true			//Can attack if minion is selected
+		&& boardToInput->cursor.getX() != boardToInput->cursor.selectMinionPointer->locationX															//And you're not targeting your selected minion
+		&& boardToInput->cursor.getY() != boardToInput->cursor.selectMinionPointer->locationY
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team							//And it's enemy team's.
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true)															//And it's within range.
+	{	
+		//This is the actual attack portion. Return of 0 indicates successful attack.
+		bool attackSuccess = boardToInput->attackMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY());
+		if (attackSuccess == 0)
+		{
 			boardToInput->deselectMinion();
+		}
 	}
 
 	if (*Input == 'p')									//Ends the turn and passes it to the next player.
@@ -228,7 +240,8 @@ int scenarioSave(std::string saveGameName)
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
 	for (int i = 0; minionRoster[i] != NULL; i++) {
 		saveGame << minionRoster[i]->type 
-			<< minionRoster[i]->Location
+			<< minionRoster[i]->locationX
+			<< minionRoster[i]->locationY
 			<< minionRoster[i]->team
 			<< int(minionRoster[i]->hasAttacked)
 			<< int(minionRoster[i]->hasMoved)

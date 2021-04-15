@@ -14,15 +14,15 @@ class MasterBoard
 {
 public:
 	MasterBoard();
-	int selectMinion(int inputLocation);
-	int moveMinion(int inputLocation);
+	int selectMinion(int inputX, int inputY);
+	int moveMinion(int inputX, int inputY);
 	int deselectMinion();
-	int createMinion(char inputType, int inputLocation, int inputTeam);
+	int createMinion(char inputType, int inputX, int inputY, int inputTeam);
 	tile Board[BOARD_WIDTH][BOARD_HEIGHT];
-	int setRangeField(int inputLocation, int inputRange);
-	int setAttackField(int inputLocation, int inputRange);
+	int setRangeField(int inputX, int inputY, int inputRange);
+	int setAttackField(int inputX, int inputY, int inputRange);
 	int endTurn();
-	int attackMinion(int inputLocation);
+	int attackMinion(int inputX, int inputY);
 	int destroyMinion(Minion * inputMinion);
 	int windowLocation;
 	int checkWindow();

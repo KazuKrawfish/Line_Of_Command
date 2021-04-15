@@ -12,14 +12,15 @@ class Minion
 	public:
 	
 	//Constructors
-	Minion(int inputSeniority, int inputLocation, char inputType, int inputTeam, MasterBoard* Environment);
+	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment);
 	Minion();
 	~Minion();
 	
 	
 	//Member variables. Should be protected with functions dealing with them!
 	bool isAlive;
-	int Location;
+	int locationX;
+	int locationY;
 	char type;
 	bool isMinionSelected;
 	int movementRange;
