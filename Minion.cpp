@@ -13,12 +13,9 @@ Minion::Minion()
 	locationX = -1;
 	locationY = -1;
 	type = ' ';
-	isMinionSelected = false;
 	team = 0;						//Team 0 is the neutral team.
-	hasAttacked = false;
-	hasMoved = false;
+	status = hasntmovedorfired;
 	health = 100;
-	isAlive = false;
 	
 }
 
@@ -27,6 +24,7 @@ Minion::Minion()
 //
 Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment)
 {
+	seniority = inputSeniority;
 	minionEnvironment = Environment;
 	locationX = inputX;
 	locationY = inputY;
@@ -71,10 +69,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	}
 
 	team = inputTeam;
-	Environment->Board[inputX][inputY].minionOnTop = minionRoster[inputSeniority];
+	Environment->Board[inputX][inputY].minionOnTop = minionRoster[seniority];
 	Environment->Board[inputX][inputY].hasMinionOnTop = true;
 	health = 100;
-	isAlive = true;
+
 }
 
 //

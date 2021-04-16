@@ -85,9 +85,9 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 
 //Initialize with clear terrain. Need to fill with other terrain types.
 //Put your test minions here!
-MasterBoard::MasterBoard() 
+MasterBoard::MasterBoard()
 {
-	newTurnFlag = 1;
+	playerFlag = 1;
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
 	for (int x = 0; x < BOARD_WIDTH; x++)
@@ -100,6 +100,12 @@ MasterBoard::MasterBoard()
 			Board[x][y].withinRange = false;
 
 		}
+	}
+
+	//Initialize MinionRoster to NULL.
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	{
+		minionRoster[i] = NULL;
 	}
 }
 
@@ -126,7 +132,7 @@ int MasterBoard::checkWindow()
 int MasterBoard::setRangeField(int inputX, int inputY, int inputRange) 
 {
 	
-	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team != newTurnFlag) 
+	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team != playerFlag) 
 	{ 
 		return 0; 
 	}
@@ -179,42 +185,64 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
-	//Right now we're using "isAlive" which could probably be just a NULL minion pointer.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
-		if (minionRoster[i]->isAlive == false)
+	{
+		if (minionRoster[i] == NULL)
 		{
+			//Successful creation of new minion.
 			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this);
-			i = GLOBALSUPPLYCAP;
-			
+			if (minionRoster != NULL)
+			{
+				return 0;
+			}
 		}
-
+	}
+	
+	//No room found, print error message and return 0.
+	std::cout << "ERROR, no more supply cap for new minion!" << std::endl;
 	return 0;
 
 }
 
+//Still need to figure out minor situation of: minion has already moved and shot, you shouldn't be able to select.
 int MasterBoard::selectMinion(int inputX, int inputY) 
 {
-	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == newTurnFlag) 
+	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == playerFlag) 
 	{
-		Board[inputX][inputY].minionOnTop->isMinionSelected = true;
 		cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
 		cursor.selectMinionFlag = true;
-		if (cursor.selectMinionPointer->hasMoved == false)
+
+		//If minion hasn't moved or fired yet, display its movement range.
+		if (cursor.selectMinionPointer->status == hasntmovedorfired)		
+		{
 			setRangeField(inputX, inputY, cursor.selectMinionPointer->movementRange);
-		else if (cursor.selectMinionPointer->hasAttacked == false && (cursor.selectMinionPointer->artilleryCanAttack == true || (cursor.selectMinionPointer->type != 'A' && cursor.selectMinionPointer->type != 'R')))	
-			setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
+			return 0;
+		}
+		else //If minion has moved but hasn't fired, and is direct combat, display attack range.
+			if (cursor.selectMinionPointer->status == hasmovedhasntfired && cursor.selectMinionPointer->rangeType == directFire)
+			{
+				setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
+				return 0;
+			}
+		
+			else //If minion stood in place and hasn't fired, display attack range.
+				if (cursor.selectMinionPointer->status == gaveupmovehasntfired)
+				{
+					setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
+					return 0;
+				}
 	}
-	return 0;
+	return 1;
 }
 
 int MasterBoard::moveMinion(int inputX, int inputY)
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
 	
-	//First make sure the move is legal.
+	//First make sure the move is legal. Must be within range, must not have moved.
 	if (Board[inputX][inputY].withinRange == false)
 		return 1;
-	if (cursor.selectMinionPointer->hasMoved == true)
+	if (cursor.selectMinionPointer->status == hasfired || cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)
 		return 1;
 
 	//Find old address of the minion
@@ -232,13 +260,14 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	selectedMinion->locationX = inputX;
 	selectedMinion->locationY = inputY;
 
-	selectedMinion->hasMoved = true;
+	selectedMinion->status = hasmovedhasntfired;
+
+	
 	return 0;
 }
 
 int MasterBoard::deselectMinion() 
 {
-	cursor.selectMinionPointer->isMinionSelected = false;
 	cursor.selectMinionFlag = false;
 	cursor.selectMinionPointer = NULL;
 	
@@ -275,7 +304,7 @@ int MasterBoard::attackMinion(int inputX, int inputY)
 			cursor.selectMinionPointer->health -= defenderFirePower * Board[inputX][inputY].minionOnTop->health;
 		}	
 	
-	cursor.selectMinionPointer->hasAttacked = true;
+	cursor.selectMinionPointer->status = hasfired;
 
 	if (cursor.selectMinionPointer->health <= 0)			//The attacker can be destroyed too!
 		destroyMinion(cursor.selectMinionPointer);
@@ -291,30 +320,28 @@ int MasterBoard::destroyMinion(Minion * inputMinion)
 	
 	//Create event text telling player it was destroyed.
 	eventText += "PLAYER ";								
-	eventText += char(newTurnFlag-32);							//MUST FIX IMPLEMENTATION!!!!
+	eventText += char(playerFlag-32);							//MUST FIX IMPLEMENTATION!!!!
 	eventText += "'s ";
 	eventText += inputMinion->description;
 	eventText += " DESTROYED!";
 	
-	
+	//Clean up.
+	minionRoster[inputMinion->seniority] = NULL;
 	delete inputMinion;
-	inputMinion = NULL;
-
 	
 	return 0;													
 }
 
 int MasterBoard::endTurn() {
 	
-	if (newTurnFlag < NUMBEROFPLAYERS)					//Either increment turnFlag or set it to zero, thus cycling through the players.
-		newTurnFlag++;
-	else if (newTurnFlag >= NUMBEROFPLAYERS)
-		newTurnFlag = 1;
+	if (playerFlag < NUMBEROFPLAYERS)					//Either increment turnFlag or set it to zero, thus cycling through the players.
+		playerFlag++;
+	else if (playerFlag >= NUMBEROFPLAYERS)
+		playerFlag = 1;
 
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
-		minionRoster[i]->hasAttacked = false;
-		minionRoster[i]->hasMoved = false;
+		minionRoster[i]->status = hasntmovedorfired;
 		minionRoster[i]->artilleryCanAttack = true;
 	}
 		

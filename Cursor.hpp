@@ -11,6 +11,39 @@ const int BOARD_HEIGHT = 20;
 
 class Cursor 
 {	public:
+
+	//Obviously this needs to move to cursor.cpp but I can't get the thing to work yet.
+	int move(char * Input) {
+
+		//Take user input and move cursor around.
+
+		if (*Input == 'a')
+			if (getX() != 0)
+			{
+				XCoord--;
+			}
+
+		if (*Input == 'd')
+			if (getX() != BOARD_WIDTH - 1)
+			{
+				XCoord++;
+			}
+
+		if (*Input == 's')
+			if (getY() < BOARD_HEIGHT - 1)
+			{
+				YCoord++;
+			}
+
+		if (*Input == 'w')
+			if (getY() > 0)
+			{
+				YCoord--;
+			}
+
+	}
+
+
 	bool selectMinionFlag = false;
 	Minion*  selectMinionPointer;
 	//int Location;

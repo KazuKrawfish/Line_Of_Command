@@ -13,6 +13,7 @@ const int GLOBALSUPPLYCAP	= 100;		//Global variables declarations
 class MasterBoard
 {
 public:
+	Minion* minionRoster[GLOBALSUPPLYCAP];
 	MasterBoard();
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
@@ -26,7 +27,7 @@ public:
 	int destroyMinion(Minion * inputMinion);
 	int windowLocation;
 	int checkWindow();
-	int newTurnFlag;
+	int playerFlag;
 	Cursor cursor;
 };
 

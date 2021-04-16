@@ -29,7 +29,6 @@
 
 	
 std::string eventText			= "";
-Minion* minionRoster[GLOBALSUPPLYCAP];
 
 int printStatus(MasterBoard* boardToPrint) 
 {
@@ -45,8 +44,8 @@ int printStatus(MasterBoard* boardToPrint)
 			<< ": " << currentMinion->health <<
 			" Health Left." << std::endl;
 	
-		if (currentMinion->hasMoved == true)
-			std::cout << "Has moved this turn." << std::endl;
+		if (currentMinion->status == hasmovedhasntfired || currentMinion->status == hasfired)
+			std::cout << "Has already moved/fired this turn." << std::endl;
 		else std::cout << "Ready to move." << std::endl;
 
 		if (currentMinion->hasAttacked == true)
@@ -64,7 +63,7 @@ int printStatus(MasterBoard* boardToPrint)
 	
 	//Print current turn.
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-	std::cout << "Player " << boardToPrint->newTurnFlag << "'s Turn." << std::endl;
+	std::cout << "Player " << boardToPrint->playerFlag << "'s Turn." << std::endl;
 
 	//Debug purposes- print cursor location coordinates and window coordinates.
 	std::cout << eventText << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
@@ -150,28 +149,10 @@ int printScreen(MasterBoard * boardToPrint)
 int userInput(char * Input, MasterBoard * boardToInput)		
 {
 		*Input = _getch();
-	if (*Input == 'a')											//Take user input and move cursor around.
-		if (boardToInput->cursor.getX() != 0)
+	
+		if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
 		{
-			boardToInput->cursor.XCoord--;
-		}
-
-	if (*Input == 'd')
-		if (boardToInput->cursor.getX() != BOARD_WIDTH-1)
-		{
-			boardToInput->cursor.XCoord++;
-		}
-
-	if (*Input == 's')
-		if (boardToInput->cursor.getY() < BOARD_HEIGHT-1)
-		{
-			boardToInput->cursor.YCoord++;
-		}
-
-	if (*Input == 'w')
-		if (boardToInput->cursor. getY() > 0)
-		{
-			boardToInput->cursor.YCoord--;
+			boardToInput->cursor.move(Input);
 		}
 
 	
@@ -189,7 +170,8 @@ int userInput(char * Input, MasterBoard * boardToInput)
 
 	//Move minion command
 	//If not on top, then move the unit.
-	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true && boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
+	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true 
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
 	{
 		if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 		{
@@ -199,9 +181,11 @@ int userInput(char * Input, MasterBoard * boardToInput)
 	}
 
 	//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
-	if(*Input == 'm' && boardToInput->cursor.selectMinionFlag == true && boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX() && boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY())
+	if(*Input == 'm' && boardToInput->cursor.selectMinionFlag == true 
+		&& boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX() 
+		&& boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY())
 	{
-		boardToInput->cursor.selectMinionPointer->hasMoved = true;
+		boardToInput->cursor.selectMinionPointer->status = gaveupmovehasntfired;
 		boardToInput->deselectMinion();
 	}
 
@@ -232,20 +216,22 @@ int userInput(char * Input, MasterBoard * boardToInput)
 	return 0;
 }
 
-int scenarioSave(std::string saveGameName) 
-{//Still need to implement terrain saving.
+int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
+{
+	//Still need to implement terrain saving.
 	saveGameName += ".txt";
 	std::ofstream saveGame(saveGameName);
 
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
-	for (int i = 0; minionRoster[i] != NULL; i++) {
-		saveGame << minionRoster[i]->type 
-			<< minionRoster[i]->locationX
-			<< minionRoster[i]->locationY
-			<< minionRoster[i]->team
-			<< int(minionRoster[i]->hasAttacked)
-			<< int(minionRoster[i]->hasMoved)
-			<< minionRoster[i]->health << std::endl;
+	//Need to ensure correctness.
+	for (int i = 0; boardToPrint->minionRoster[i] != NULL; i++) {
+		saveGame << boardToPrint->minionRoster[i]->type
+			<< boardToPrint->minionRoster[i]->locationX
+			<< boardToPrint->minionRoster[i]->locationY
+			<< boardToPrint->minionRoster[i]->team
+			<< int(boardToPrint->minionRoster[i]->hasAttacked)
+			<< int(boardToPrint->minionRoster[i]->status)
+			<< boardToPrint->minionRoster[i]->health << std::endl;
 	}
 	saveGame.close();
 	return 1;
@@ -264,7 +250,7 @@ int scenarioLoad(std::string scenarioName) {
 	std::string line;
 	while (getline(saveGame, line))
 	{
-		std::cout << line << '\n';
+		std::cout << line << '\n';	//Debug purposes.
 	}
 
 saveGame.close();
@@ -285,7 +271,7 @@ int main()
 	//Prompt user and save scenario. This should happen when user presses save keyword.
 	std::cout << "Choose where to save your game:" << std::endl;
 	std::cin >> saveName;
-	scenarioSave(saveName);
+	scenarioSave(saveName, &GameBoard);
 
 	
 	printScreen(&GameBoard);
