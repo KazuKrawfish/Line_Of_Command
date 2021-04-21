@@ -9,7 +9,7 @@ extern std::string eventText;
 //This can be either horizontal or vertical adjacency.
 bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 {
-	if ((abs(inputX1 - inputX2) == 1) || (abs(inputY1 - inputY2) == 1))
+	if ((abs(inputX1 - inputX2) <= 1) && (abs(inputY1 - inputY2) <= 1))
 	{
 		return true;
 	}
@@ -112,7 +112,7 @@ MasterBoard::MasterBoard()
 	createMinion('i', 1, 2, 1);
 	createMinion('i', 1, 3, 1);
 	
-	createMinion('t', 3, 1, 2);
+
 	createMinion('R', 3, 1, 2);
 
 }
@@ -333,7 +333,7 @@ int MasterBoard::attackMinion(int inputX, int inputY)
 		destroyMinion((defendingMinion));
 	}
 	else	//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
-		if (defendingMinion->rangeType != rangedFire)	
+		if (defendingMinion->rangeType == directFire && (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
 		{
 			//If defender still alive, then perform defensive counterfire.
 			double defenderFirePower = consultAttackValuesChart(defendingMinion->type, attackingMinion->type);	
@@ -382,7 +382,7 @@ int MasterBoard::endTurn() {
 			playerFlag = 1;
 		}
 
-	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	for (int i = 0; minionRoster[i] != NULL; i++)
 	{
 		minionRoster[i]->status = hasntmovedorfired;
 	}

@@ -6,7 +6,7 @@
 //Window HAS been implemented to minimize total print size!!
 const int WINDOW_HEIGHT = 5;										
 const int WINDOW_WIDTH = 5;
-const int BOARD_WIDTH = 20;  
+const int BOARD_WIDTH = 15;  
 const int BOARD_HEIGHT = 20;
 
 class Cursor 
