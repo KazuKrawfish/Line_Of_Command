@@ -1,10 +1,6 @@
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
 
-
-
-extern Minion* minionRoster[GLOBALSUPPLYCAP];
-
 //
 //Default Constructor. Should not be used.
 //
@@ -38,7 +34,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 1;
 		break;
 	}
-	case('T'):
+	case('t'):
 	{
 		description = "Tank";
 		movementRange = 6;
@@ -69,7 +65,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	}
 
 	team = inputTeam;
-	Environment->Board[inputX][inputY].minionOnTop = minionRoster[seniority];
+
 	Environment->Board[inputX][inputY].hasMinionOnTop = true;
 	health = 100;
 

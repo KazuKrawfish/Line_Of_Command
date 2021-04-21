@@ -1,4 +1,4 @@
-//Project X
+//Advance Wars Simulation
 //Copyright 2021, Park Family Software Laboratory (ParkLab)
 
 
@@ -44,17 +44,21 @@ int printStatus(MasterBoard* boardToPrint)
 			<< ": " << currentMinion->health <<
 			" Health Left." << std::endl;
 	
-		if (currentMinion->status == hasmovedhasntfired || currentMinion->status == hasfired)
-			std::cout << "Has already moved/fired this turn." << std::endl;
-		else std::cout << "Ready to move." << std::endl;
-
-		if (currentMinion->hasAttacked == true)
+		if (currentMinion->status == hasmovedhasntfired)
+		{
+			std::cout << "Has already moved this turn." << std::endl;
+			std::cout << "Ready to attack." << std::endl;
+		}
+		if (currentMinion->status == hasfired)
+		{
+			std::cout << "Has already moved this turn." << std::endl;
 			std::cout << "Has attacked this turn." << std::endl;
-		else
-			if (currentMinion->artilleryCanAttack == true || 
-				currentMinion->type != 'R' || currentMinion->type != 'A')//Arty is a mess to fix.
-				std::cout << "Ready to attack." << std::endl;
-			else std::cout << "Cannot attack." << std::endl;
+		}
+		if (currentMinion->status == hasntmovedorfired)
+		{
+			std::cout << "Ready to move." << std::endl;
+			std::cout << "Ready to attack." << std::endl;
+		}
 	}
 	else
 	{ 
@@ -86,9 +90,9 @@ int printScreen(MasterBoard * boardToPrint)
 	int windowX = boardToPrint->windowLocation % BOARD_WIDTH;
 
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
-	for (i = windowY; i < windowY + WINDOW_HEIGHT; i++)
+	for (i = windowY; i < (windowY + WINDOW_HEIGHT); i++)
 	{
-		for (j = windowX; j < windowX + WINDOW_WIDTH; j++)
+		for (j = windowX; j < (windowX + WINDOW_WIDTH); j++)
 		{
 			//Print whomever has priority. cursor first, then unit, then terrain.
 
@@ -174,8 +178,8 @@ int userInput(char * Input, MasterBoard * boardToInput)
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
 	{
 		if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
-		{
-			boardToInput->cursor.selectMinionPointer->artilleryCanAttack = false;			//Successful movement means artillery cannot fire this turn.
+		{	//Change status appropriately for successful movement.
+			boardToInput->cursor.selectMinionPointer->status = hasmovedhasntfired;
 			boardToInput->deselectMinion();
 		}
 	}
@@ -229,7 +233,7 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 			<< boardToPrint->minionRoster[i]->locationX
 			<< boardToPrint->minionRoster[i]->locationY
 			<< boardToPrint->minionRoster[i]->team
-			<< int(boardToPrint->minionRoster[i]->hasAttacked)
+			<< int(boardToPrint->minionRoster[i]->rangeType)
 			<< int(boardToPrint->minionRoster[i]->status)
 			<< boardToPrint->minionRoster[i]->health << std::endl;
 	}
@@ -273,7 +277,6 @@ int main()
 	std::cin >> saveName;
 	scenarioSave(saveName, &GameBoard);
 	*/
-
 	
 	printScreen(&GameBoard);
 	char Input = ' ';

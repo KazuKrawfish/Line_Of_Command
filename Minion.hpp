@@ -29,9 +29,7 @@ class Minion
 	int attackRange;
 	std::string description;	//For user interface only.
 	int team;
-	bool hasAttacked;
 	double health;
-	bool artilleryCanAttack;
 	MasterBoard* minionEnvironment;
 	minionStatus status;
 	rangeType rangeType;

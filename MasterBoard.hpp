@@ -13,22 +13,29 @@ const int GLOBALSUPPLYCAP	= 100;		//Global variables declarations
 class MasterBoard
 {
 public:
-	Minion* minionRoster[GLOBALSUPPLYCAP];
+	
 	MasterBoard();
+	
+	int setRangeField(int inputX, int inputY, int inputRange);
+	int setAttackField(int inputX, int inputY, int inputRange);
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam);
-	tile Board[BOARD_WIDTH][BOARD_HEIGHT];
-	int setRangeField(int inputX, int inputY, int inputRange);
-	int setAttackField(int inputX, int inputY, int inputRange);
 	int endTurn();
 	int attackMinion(int inputX, int inputY);
-	int destroyMinion(Minion * inputMinion);
-	int windowLocation;
+	int destroyMinion(Minion* inputMinion);
 	int checkWindow();
-	int playerFlag;
+	Minion* minionRoster[GLOBALSUPPLYCAP];
+	tile Board[BOARD_WIDTH][BOARD_HEIGHT];
 	Cursor cursor;
+	int windowLocation;
+	int playerFlag;
+
+
+private:
+
+//To move variables later. Not now!
 };
 
 #endif /* MASTERBOARD_HPP__ */

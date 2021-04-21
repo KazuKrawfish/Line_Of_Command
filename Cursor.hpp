@@ -14,6 +14,7 @@ class Cursor
 
 	//Obviously this needs to move to cursor.cpp but I can't get the thing to work yet.
 	int move(char * Input) {
+		int didItMove =1 ;
 
 		//Take user input and move cursor around.
 
@@ -21,26 +22,30 @@ class Cursor
 			if (getX() != 0)
 			{
 				XCoord--;
+				didItMove = 0;
 			}
 
 		if (*Input == 'd')
 			if (getX() != BOARD_WIDTH - 1)
 			{
 				XCoord++;
+				didItMove = 0;
 			}
 
 		if (*Input == 's')
 			if (getY() < BOARD_HEIGHT - 1)
 			{
 				YCoord++;
+				didItMove = 0;
 			}
 
 		if (*Input == 'w')
 			if (getY() > 0)
 			{
 				YCoord--;
+				didItMove = 0;
 			}
-
+		return didItMove;
 	}
 
 

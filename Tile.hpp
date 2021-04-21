@@ -5,12 +5,14 @@
 #include <string>
 
 class tile 
-{public:
+{
+public:
 	char symbol;
 	bool hasMinionOnTop;
 	Minion* minionOnTop;
 	bool withinRange;
 	std::string description;
+	double defenseFactor;		//Higher is better (ie mountains are 1.4)
 };
 
 #endif /* TILE_H__ */
