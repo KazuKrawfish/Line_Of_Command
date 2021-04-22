@@ -18,13 +18,14 @@ Minion::Minion()
 //
 //Always use this constructor, it gives the new Minion all required properties.
 //
-Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment)
+Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth)
 {
 	seniority = inputSeniority;
 	minionEnvironment = Environment;
 	locationX = inputX;
 	locationY = inputY;
 	type = inputType;
+	health = inputHealth;
 	switch (inputType)
 	{
 	case('i'):

@@ -41,7 +41,7 @@ int printStatus(MasterBoard* boardToPrint)
 		Minion* currentMinion = currentTile.minionOnTop;
 		std::cout << "Player " << currentMinion->team
 			<< "'s " << currentMinion->description
-			<< ": " << currentMinion->health <<
+			<< ": " << int(currentMinion->health) <<
 			" Health Left." << std::endl;
 	
 		if (currentMinion->status == gaveupmovehasntfired) 
@@ -49,10 +49,18 @@ int printStatus(MasterBoard* boardToPrint)
 			std::cout << "Holding position." << std::endl;
 			std::cout << "Ready to attack." << std::endl;
 		}
+
 		if (currentMinion->status == hasmovedhasntfired)
 		{
 			std::cout << "Has already moved this turn." << std::endl;
-			std::cout << "Ready to attack." << std::endl;
+			if (currentMinion->rangeType == rangedFire) 
+			{
+				std::cout<<"Cannot attack after moving." << std::endl;
+			}
+			if (currentMinion->rangeType == directFire) 
+			{ 
+				std::cout << "Ready to attack." << std::endl; 
+			}
 		}
 		if (currentMinion->status == hasfired)
 		{
@@ -236,6 +244,24 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 	saveGameName += ".txt";
 	std::ofstream saveGame(saveGameName);
 
+	//First save the map size:
+	saveGame << BOARD_WIDTH << "_" << BOARD_HEIGHT <<std::endl;
+
+	//Then save player data:
+	saveGame << boardToPrint->playerFlag<<std::endl;
+
+
+	//Terrain save:
+	//Iterate through board and save the exact symbol. This should be easy.
+	for (int y = 0; y < BOARD_HEIGHT; y++)
+	{
+		for (int x = 0; x < BOARD_WIDTH; x++)
+		{
+			saveGame << boardToPrint->Board[x][y].symbol;
+		}
+		saveGame << std::endl;
+	}
+	
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
 	//Need to ensure correctness.
 	for (int i = 0; boardToPrint->minionRoster[i] != NULL; i++) {
@@ -243,9 +269,10 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 			<< boardToPrint->minionRoster[i]->locationX
 			<< boardToPrint->minionRoster[i]->locationY
 			<< boardToPrint->minionRoster[i]->team
+			<< boardToPrint->minionRoster[i]->seniority
 			<< int(boardToPrint->minionRoster[i]->rangeType)
 			<< int(boardToPrint->minionRoster[i]->status)
-			<< boardToPrint->minionRoster[i]->health << std::endl;
+			<< int(boardToPrint->minionRoster[i]->health) << std::endl;
 	}
 	saveGame.close();
 	return 1;
@@ -281,12 +308,12 @@ int main()
 	std::cout << "Choose which scenario to load (Case sensitive): " << std::endl;
 	std::cin >> scenarioToLoad;
 	scenarioLoad(scenarioToLoad);
-
+	*/
 	//Prompt user and save scenario. This should happen when user presses save keyword.
 	std::cout << "Choose where to save your game:" << std::endl;
 	std::cin >> saveName;
 	scenarioSave(saveName, &GameBoard);
-	*/
+	
 	
 	printScreen(&GameBoard);
 	char Input = ' ';

@@ -14,7 +14,7 @@ class Minion
 	public:
 	
 	//Constructors
-	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment);
+	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth);
 	Minion();
 	~Minion();
 	

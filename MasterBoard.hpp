@@ -21,7 +21,7 @@ public:
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();
-	int createMinion(char inputType, int inputX, int inputY, int inputTeam);
+	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth);
 	int endTurn();
 	int attackMinion(int inputX, int inputY);
 	int destroyMinion(Minion* inputMinion);

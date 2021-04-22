@@ -107,13 +107,11 @@ MasterBoard::MasterBoard()
 	{
 		minionRoster[i] = NULL;
 	}
-
-	createMinion('i', 1, 1, 1);
-	createMinion('i', 1, 2, 1);
-	createMinion('i', 1, 3, 1);
-	
-
-	createMinion('R', 3, 1, 2);
+	//TEST TEST TEST
+	createMinion('i', 1, 1, 1, 100);
+	createMinion('i', 1, 2, 1, 100);
+	createMinion('i', 1, 3, 1, 100);
+	createMinion('R', 3, 1, 2, 100);
 
 }
 
@@ -190,7 +188,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 }
 
-int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam)
+int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -198,7 +196,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this);
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth);
 			Board[inputX][inputY].minionOnTop = minionRoster[i];
 			if (minionRoster != NULL)
 			{
