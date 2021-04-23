@@ -30,6 +30,37 @@
 	
 std::string eventText			= "";
 
+int finishLoadingBoard(MasterBoard * LoadBoard) 
+{
+	
+	
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			switch (LoadBoard->Board[x][y].symbol)
+			{
+			case('.'):
+			{
+				LoadBoard->Board[x][y].description = "Clear terrain.";
+				LoadBoard->Board[x][y].defenseFactor = 1.1;
+				break;
+			}
+			case('#'):
+			{
+				LoadBoard->Board[x][y].description = "City.";
+				LoadBoard->Board[x][y].defenseFactor = 1.3;
+				break;
+			}
+			}
+
+
+		}
+	}
+	return 0;
+}
+
+
 int printStatus(MasterBoard* boardToPrint) 
 {
 	tile currentTile = boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
@@ -240,7 +271,6 @@ int userInput(char * Input, MasterBoard * boardToInput)
 
 int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 {
-	//Still need to implement terrain saving.
 	saveGameName += ".txt";
 	std::ofstream saveGame(saveGameName);
 
@@ -249,7 +279,6 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 
 	//Then save player data:
 	saveGame << boardToPrint->playerFlag<<std::endl;
-
 
 	//Terrain save:
 	//Iterate through board and save the exact symbol. This should be easy.
@@ -280,22 +309,49 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 
 //Load saved game and initialize the board with its contents.
 //Still needs editing to load scenario.
-int scenarioLoad(std::string scenarioName) {
+int scenarioLoad(std::string scenarioName, MasterBoard* boardToPrint) {
+	
 	std::ifstream saveGame;
+	std::string line;
+	int sg_board_width = 0;
+	int sg_board_height = 0; 
+	char garbage;
+
+
 	saveGame.open(scenarioName+ ".txt");
 	if (saveGame.is_open())
 	{
 		std::cout << "Successfully loaded!" << std::endl;
 	}
 
-	std::string line;
-	while (getline(saveGame, line))
-	{
-		std::cout << line << '\n';	//Debug purposes.
-	}
 
+	//First load the map size:
+	saveGame >> sg_board_width;
+	saveGame >>  garbage;
+	saveGame >> sg_board_height;
+
+	//Then load player data:
+	saveGame >> boardToPrint->playerFlag;
+
+
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			
+			for (int x = 0; x < BOARD_WIDTH; x++)
+			{
+				saveGame >> boardToPrint->Board[x][y].symbol;
+			}
+		}
+		finishLoadingBoard(boardToPrint);
+
+	//TEST TEST TEST
+	boardToPrint->createMinion('i', 1, 1, 1, 100);
+	boardToPrint->createMinion('i', 1, 2, 1, 100);
+	boardToPrint->createMinion('i', 1, 3, 1, 100);
+	boardToPrint->createMinion('R', 3, 1, 2, 100);
+	//Test Test Test
 saveGame.close();
-	return 1;
+return 1;
 }
 
 int main()
@@ -303,12 +359,12 @@ int main()
 	MasterBoard GameBoard;
 	std::string scenarioToLoad = "";
 	std::string saveName = "";
-	/*
+	
 	//Prompt user and load scenario
 	std::cout << "Choose which scenario to load (Case sensitive): " << std::endl;
 	std::cin >> scenarioToLoad;
-	scenarioLoad(scenarioToLoad);
-	*/
+	scenarioLoad(scenarioToLoad, &GameBoard);
+	
 	//Prompt user and save scenario. This should happen when user presses save keyword.
 	std::cout << "Choose where to save your game:" << std::endl;
 	std::cin >> saveName;

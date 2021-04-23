@@ -7,6 +7,11 @@
 class tile 
 {
 public:
+	tile() {
+		hasMinionOnTop = false;
+		withinRange = false;
+		minionOnTop = NULL;
+	}
 	char symbol;
 	bool hasMinionOnTop;
 	Minion* minionOnTop;

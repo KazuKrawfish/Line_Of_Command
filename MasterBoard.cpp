@@ -19,7 +19,7 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 	}
 }
 
-//Attacker vs defender matrix. Attacker determines row number, while defender determines column number.
+//Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.	
 //												  i    t    A     C    R
 const double ATTACK_VALUES_MATRIX[5][5] = {		0.50, 0.05,0.10,0.10,0.25,
@@ -82,36 +82,19 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	return ATTACK_VALUES_MATRIX[y][x];
 }
 
-//Initialize with clear terrain. Need to fill with other terrain types.
-//Put your test minions here!
+//Currently this is not doing what it should be doing- only partial initialization.
+
 MasterBoard::MasterBoard()
 {
-	playerFlag = 1;
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
-	for (int x = 0; x < BOARD_WIDTH; x++)
-	{
-		for (int y = 0; y < BOARD_HEIGHT; y++)
-		{
-			Board[x][y].symbol = '.';
-			Board[x][y].description = "Clear terrain.";
-			Board[x][y].defenseFactor = 1.1;
-			Board[x][y].hasMinionOnTop = false;
-			Board[x][y].withinRange = false;
-
-		}
-	}
 
 	//Initialize MinionRoster to NULL.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		minionRoster[i] = NULL;
 	}
-	//TEST TEST TEST
-	createMinion('i', 1, 1, 1, 100);
-	createMinion('i', 1, 2, 1, 100);
-	createMinion('i', 1, 3, 1, 100);
-	createMinion('R', 3, 1, 2, 100);
+
 
 }
 
