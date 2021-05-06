@@ -46,20 +46,49 @@ int finishLoadingBoard(MasterBoard * LoadBoard)
 				LoadBoard->Board[x][y].defenseFactor = 1.1;
 				break;
 			}
-			case('#'):
+			case('n'):
 			{
-				LoadBoard->Board[x][y].description = "City.";
+				LoadBoard->Board[x][y].description = "Housing.";
 				LoadBoard->Board[x][y].defenseFactor = 1.3;
 				break;
 			}
+			case('h'):
+			{
+				LoadBoard->Board[x][y].description = "Factory.";
+				LoadBoard->Board[x][y].defenseFactor = 1.3;
+				break;
+			}			
+			case('H'):
+			{
+				LoadBoard->Board[x][y].description = "Headquarters.";
+				LoadBoard->Board[x][y].defenseFactor = 1.4;
+				break;
 			}
-
+			case('='):
+			{
+				LoadBoard->Board[x][y].description = "Road.";
+				LoadBoard->Board[x][y].defenseFactor = 1.0;
+				break;
+			}
+			case('^'):
+			{
+				LoadBoard->Board[x][y].description = "Hill.";
+				LoadBoard->Board[x][y].defenseFactor = 1.1;
+				break;
+			}
+			case('+'):
+			{
+				LoadBoard->Board[x][y].description = "Forest.";
+				LoadBoard->Board[x][y].defenseFactor = 1.2;
+				break;
+			}
+			}
+			//Other terrain types go here
 
 		}
 	}
 	return 0;
 }
-
 
 int printStatus(MasterBoard* boardToPrint) 
 {
@@ -144,7 +173,7 @@ int printScreen(MasterBoard * boardToPrint)
 			if ( i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX() ) // * BOARD_WIDTH + j == boardToPrint->cursor.Location)										
 			{	
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
-				std::cout << '+';
+				std::cout << '*';
 			}	
 			else
 				//Is there a minion there?
@@ -291,17 +320,26 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 		saveGame << std::endl;
 	}
 	
+	//Note the number of minions:
+	saveGame << boardToPrint->totalNumberOfMinions<<std::endl;
+
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
 	//Need to ensure correctness.
-	for (int i = 0; boardToPrint->minionRoster[i] != NULL; i++) {
-		saveGame << boardToPrint->minionRoster[i]->type
-			<< boardToPrint->minionRoster[i]->locationX
-			<< boardToPrint->minionRoster[i]->locationY
-			<< boardToPrint->minionRoster[i]->team
-			<< boardToPrint->minionRoster[i]->seniority
-			<< int(boardToPrint->minionRoster[i]->rangeType)
-			<< int(boardToPrint->minionRoster[i]->status)
+	//FIX FIX FIX - need to not just check for initial NULL, there may be minions beyond that first NULL if a guy was killed and not replaced on
+	//The array.
+	for (int i = 0; i< GLOBALSUPPLYCAP; i++)
+	{
+		if (boardToPrint->minionRoster[i] != NULL) 
+		{
+			saveGame << boardToPrint->minionRoster[i]->type << " "
+			<< boardToPrint->minionRoster[i]->locationX << " "
+			<< boardToPrint->minionRoster[i]->locationY << " "
+			<< boardToPrint->minionRoster[i]->team << " "
+			<< boardToPrint->minionRoster[i]->seniority << " "
+			<< int(boardToPrint->minionRoster[i]->rangeType) << " "
+			<< int(boardToPrint->minionRoster[i]->status) << " "
 			<< int(boardToPrint->minionRoster[i]->health) << std::endl;
+		}
 	}
 	saveGame.close();
 	return 1;
@@ -344,12 +382,31 @@ int scenarioLoad(std::string scenarioName, MasterBoard* boardToPrint) {
 		}
 		finishLoadingBoard(boardToPrint);
 
-	//TEST TEST TEST
-	boardToPrint->createMinion('i', 1, 1, 1, 100);
-	boardToPrint->createMinion('i', 1, 2, 1, 100);
-	boardToPrint->createMinion('i', 1, 3, 1, 100);
-	boardToPrint->createMinion('R', 3, 1, 2, 100);
-	//Test Test Test
+/*	//Then load minion data:
+	int numberOfMinions;
+	saveGame >> numberOfMinions;
+	int health, locationX, locationY, team, seniority, rangeType, status;
+	char type;
+	for (int y = 0; y < numberOfMinions; y++)
+	{
+		saveGame >> type 
+			>> locationX 
+			>> locationY 
+			>> team 
+			>> seniority 
+			>> rangeType 
+			>> status 
+			>> health;
+			boardToPrint->createMinion(type, locationX, locationY, team, health, status);
+	}
+	*/
+
+//TEST TEST TEST
+boardToPrint->createMinion('i', 1, 1, 1, 100, 0);
+boardToPrint->createMinion('i', 1, 2, 1, 100, 0);
+boardToPrint->createMinion('i', 1, 3, 1, 100, 0);
+boardToPrint->createMinion('R', 3, 1, 2, 100, 0);
+//Test Test Test
 saveGame.close();
 return 1;
 }

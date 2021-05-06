@@ -21,7 +21,7 @@ public:
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();
-	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth);
+	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status);
 	int endTurn();
 	int attackMinion(int inputX, int inputY);
 	int destroyMinion(Minion* inputMinion);
@@ -31,7 +31,7 @@ public:
 	Cursor cursor;
 	int windowLocation;
 	int playerFlag;
-
+	int totalNumberOfMinions;
 
 private:
 

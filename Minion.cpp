@@ -36,15 +36,15 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		break;
 	}
-	case('t'):
+	case('a'):
 	{
-		description = "Tank";
+		description = "Armor";
 		movementRange = 6;
 		attackRange = 1; 
 		rangeType = directFire;
 		break;
 	}
-	case('A'):
+	case('r'):
 	{
 		description = "Artillery";
 		movementRange = 5;
@@ -52,7 +52,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = rangedFire;
 		break;
 	}
-	case('C'):
+	case('c'):
 	{
 		description = "Cavalry";
 		movementRange = 8;

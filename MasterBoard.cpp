@@ -21,7 +21,7 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.	
-//												  i    t    A     C    R
+//												  i    a    r     c    R
 const double ATTACK_VALUES_MATRIX[5][5] = {		0.50, 0.05,0.10,0.10,0.25,
 												0.65,0.50,0.60,0.60,0.70,
 												0.60,0.40,0.50,0.55,0.60,
@@ -88,6 +88,7 @@ MasterBoard::MasterBoard()
 {
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
+	totalNumberOfMinions = 0;
 
 	//Initialize MinionRoster to NULL.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -171,7 +172,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 }
 
-int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth)
+int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -180,9 +181,11 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		{
 			//Successful creation of new minion.
 			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth);
-			Board[inputX][inputY].minionOnTop = minionRoster[i];
 			if (minionRoster != NULL)
 			{
+				minionRoster[i]->status = (minionStatus)status;
+				Board[inputX][inputY].minionOnTop = minionRoster[i];
+				totalNumberOfMinions++;
 				return 0;
 			}
 		}
@@ -343,7 +346,9 @@ int MasterBoard::destroyMinion(Minion * inputMinion)
 	eventText += inputMinion->description;
 	eventText += " DESTROYED!";
 	
-	//Clean up.
+	//Clean up. Currently since we're not cleaning up the minion roster after a death, there is a hole that may prevent saving properly.
+	//FIX FIX FIX
+	totalNumberOfMinions--;
 	minionRoster[inputMinion->seniority] = NULL;
 	delete inputMinion;
 	
