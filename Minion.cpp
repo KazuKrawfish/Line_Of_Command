@@ -73,8 +73,6 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	team = inputTeam;
 
 	Environment->Board[inputX][inputY].hasMinionOnTop = true;
-	health = 100;
-
 }
 
 //
