@@ -16,6 +16,7 @@ public:
 	
 	MasterBoard();
 	
+	int treasury[NUMBEROFPLAYERS+1];	//1 extra to avoid potential error when accessing, later.
 	int setRangeField(int inputX, int inputY, int inputRange);
 	int setAttackField(int inputX, int inputY, int inputRange);
 	int selectMinion(int inputX, int inputY);

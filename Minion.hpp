@@ -8,7 +8,6 @@
 class MasterBoard;
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired};
 enum rangeType {directFire, rangedFire};
-
 class Minion
 {	
 	public:

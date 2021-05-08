@@ -11,7 +11,12 @@ public:
 		hasMinionOnTop = false;
 		withinRange = false;
 		minionOnTop = NULL;
+		controller = 0;
+		production = 0;
 	}
+
+	int production;				//Amount of money it produces
+	int controller;				//Player number 1/2 or neutral 0.
 	char symbol;
 	bool hasMinionOnTop;
 	Minion* minionOnTop;

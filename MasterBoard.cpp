@@ -86,6 +86,7 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 
 MasterBoard::MasterBoard()
 {
+
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
 	totalNumberOfMinions = 0;
@@ -96,6 +97,10 @@ MasterBoard::MasterBoard()
 		minionRoster[i] = NULL;
 	}
 
+	for (int i = 0; i < NUMBEROFPLAYERS+1; i++)
+	{
+		treasury[i] = 0;
+	}
 
 }
 
@@ -157,9 +162,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	{
 		for (int y= 0; y < BOARD_HEIGHT; y++)
 		{
-			//int inputLocationX = inputLocation % BOARD_WIDTH;
-			//int inputLocationY = (inputLocation - (inputLocation % BOARD_WIDTH)) / BOARD_WIDTH;	//Convert input coordinate to x and y.
-
+			
 			distanceX = abs(inputX - x);
 			distanceY = abs(inputY - y);
 
@@ -372,7 +375,23 @@ int MasterBoard::endTurn() {
 	{
 		minionRoster[i]->status = hasntmovedorfired;
 	}
-		
+	
+	//Provide income for the next player based on properties he controls.
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			if (this->Board[x][y].controller == playerFlag) 
+			{
+				this->treasury[playerFlag] += Board[x][y].production;
+			}
+
+		}
+	}
+
+	
+
+
 	return 0;
 
 }

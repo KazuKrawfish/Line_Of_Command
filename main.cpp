@@ -29,8 +29,10 @@
 
 	
 std::string eventText			= "";
+enum gameInputLayer { gameBoard, menu, unitAction};
+gameInputLayer inputLayer = gameBoard;
 
-int finishLoadingBoard(MasterBoard * LoadBoard) 
+int setCharacteristics(MasterBoard * LoadBoard) 
 {
 	
 	
@@ -46,22 +48,39 @@ int finishLoadingBoard(MasterBoard * LoadBoard)
 				LoadBoard->Board[x][y].defenseFactor = 1.1;
 				break;
 			}
+			case('H'):
+			{
+				LoadBoard->Board[x][y].description = "City.";
+				LoadBoard->Board[x][y].defenseFactor = 1.3;
+				LoadBoard->Board[x][y].production = 2000;
+				break;
+			}
+			case('m'):
+			{
+				LoadBoard->Board[x][y].description = "Mine.";
+				LoadBoard->Board[x][y].defenseFactor = 1.2;
+				LoadBoard->Board[x][y].production = 3000;
+				break;
+			}
 			case('n'):
 			{
-				LoadBoard->Board[x][y].description = "Housing.";
+				LoadBoard->Board[x][y].description = "Settlement.";
 				LoadBoard->Board[x][y].defenseFactor = 1.3;
+				LoadBoard->Board[x][y].production = 1000;
 				break;
 			}
 			case('h'):
 			{
 				LoadBoard->Board[x][y].description = "Factory.";
 				LoadBoard->Board[x][y].defenseFactor = 1.3;
+				LoadBoard->Board[x][y].production = 1000;
 				break;
 			}			
-			case('H'):
+			case('Q'):
 			{
 				LoadBoard->Board[x][y].description = "Headquarters.";
 				LoadBoard->Board[x][y].defenseFactor = 1.4;
+				LoadBoard->Board[x][y].production = 1000;
 				break;
 			}
 			case('='):
@@ -72,11 +91,11 @@ int finishLoadingBoard(MasterBoard * LoadBoard)
 			}
 			case('^'):
 			{
-				LoadBoard->Board[x][y].description = "Hill.";
+				LoadBoard->Board[x][y].description = "Hill.";	
 				LoadBoard->Board[x][y].defenseFactor = 1.1;
 				break;
 			}
-			case('+'):
+			case('+'):		//Would like to have convertible to woodlot by engineer.....maybe
 			{
 				LoadBoard->Board[x][y].description = "Forest.";
 				LoadBoard->Board[x][y].defenseFactor = 1.2;
@@ -140,7 +159,7 @@ int printStatus(MasterBoard* boardToPrint)
 	
 	//Print current turn.
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-	std::cout << "Player " << boardToPrint->playerFlag << "'s Turn." << std::endl;
+	std::cout << "Player " << boardToPrint->playerFlag << "'s Turn. Treasury total: " << boardToPrint->treasury[boardToPrint->playerFlag]<<std::endl;
 
 	//Debug purposes- print cursor location coordinates and window coordinates.
 	std::cout << eventText << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
@@ -191,9 +210,11 @@ int printScreen(MasterBoard * boardToPrint)
 				case(2):
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
 					break;
+
 				}
 				//Print out the minion.
 				std::cout << boardToPrint->Board[j][i].minionOnTop->type;
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 			}
 			else if (boardToPrint->Board[j][i].withinRange == true)
 			{	
@@ -205,8 +226,20 @@ int printScreen(MasterBoard * boardToPrint)
 			else 
 			{
 				//Otherwise put out the terrain for that square.
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
-				std::cout << boardToPrint->Board[j][i].symbol;
+				switch (boardToPrint->Board[j][i].controller)
+				{
+				case(0):
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+					break;
+				case(1):
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+					break;
+				case(2):
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+					break;
+				}
+			std::cout << boardToPrint->Board[j][i].symbol;
+			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 			}
 		}
 		std::cout << std::endl;
@@ -233,7 +266,9 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 	saveGame << boardToPrint->playerFlag << std::endl;
 
 	//Terrain save:
-	//Iterate through board and save the exact symbol. This should be easy.
+	//Iterate through board and save the exact symbol.
+	//Saving symbol and controller separately for ease of edit and viewing.
+	//Only pain point is do mass control-edits, but viewability is protected.
 	for (int y = 0; y < BOARD_HEIGHT; y++)
 	{
 		for (int x = 0; x < BOARD_WIDTH; x++)
@@ -242,7 +277,18 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 		}
 		saveGame << std::endl;
 	}
+	
+	//Iterate through board and save the controller.
+	for (int y = 0; y < BOARD_HEIGHT; y++)
+	{
+		for (int x = 0; x < BOARD_WIDTH; x++)
+		{
+			saveGame << boardToPrint->Board[x][y].controller;
 
+		}
+		saveGame << std::endl;
+	}
+	
 	//Note the number of minions:
 	saveGame << boardToPrint->totalNumberOfMinions << std::endl;
 
@@ -270,7 +316,7 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 
 //Needs serious refactoring. Chains of if statements that can probably be handled differently, plus multiple references to variables.
 //Handle with a single local variable doing one reference.
-int userInput(char * Input, MasterBoard * boardToInput)		
+int gameBoardInput(char * Input, MasterBoard * boardToInput)		
 {
 		*Input = _getch();
 	
@@ -334,11 +380,13 @@ int userInput(char * Input, MasterBoard * boardToInput)
 	}
 
 	//Ends the turn and passes it to the next player.
+	//Autosave every turn.
 	if (*Input == 'p')									
 	{
 		if (boardToInput->cursor.selectMinionFlag == true)
 			boardToInput->deselectMinion();
 		boardToInput->endTurn();
+		scenarioSave("Autosave", boardToInput);
 	}
 
 	if (*Input == '1')					
@@ -357,6 +405,7 @@ int userInput(char * Input, MasterBoard * boardToInput)
 
 //Load saved game and initialize the board with its contents.
 int scenarioLoad(MasterBoard* boardToPrint) {
+	
 	
 	std::ifstream saveGame;
 	std::string line;
@@ -408,8 +457,18 @@ int scenarioLoad(MasterBoard* boardToPrint) {
 				saveGame >> boardToPrint->Board[x][y].symbol;
 			}
 		}
-		finishLoadingBoard(boardToPrint);
+		setCharacteristics(boardToPrint);
+		
+		char inputGarb;
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
 
+			for (int x = 0; x < BOARD_WIDTH; x++)
+			{
+				saveGame >> inputGarb;
+				boardToPrint->Board[x][y].controller = (int (inputGarb))-48;
+			}
+		}
 	//Then load minion data:
 	int numberOfMinions;
 	saveGame >> numberOfMinions;
@@ -443,7 +502,14 @@ int main()
 	char Input = ' ';
 	while (true)		//Run as long as the user wants. Infinite for loop.
 	{
-		userInput(&Input, &GameBoard);
+		//Major change beginning: Use flag inputLayer to determine which input handler gets called.
+		//Ned an input handler for menu and minion action (Attack, capture, etc)
+		//Need each button press to potentially update the inputLayer flag as needed.
+		if (inputLayer == gameBoard) 
+		{
+			gameBoardInput(&Input, &GameBoard);
+		}
+
 		printScreen(&GameBoard);
 	}
 
