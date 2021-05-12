@@ -200,10 +200,12 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 
 }
 
-//Still need to figure out minor situation of: minion has already moved and shot, you shouldn't be able to select.
+//First check ensures if minion has moved and shot, you can't select. Also if it's ranged and moved, you can't.
 int MasterBoard::selectMinion(int inputX, int inputY) 
 {
-	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == playerFlag) 
+	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == playerFlag
+		&& Board[inputX][inputY].minionOnTop->status != hasfired && 
+		(Board[inputX][inputY].minionOnTop->rangeType != rangedFire || Board[inputX][inputY].minionOnTop->status != hasmovedhasntfired))
 	{
 		cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
 		cursor.selectMinionFlag = true;

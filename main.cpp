@@ -200,8 +200,8 @@ int printBoardMenu() {
 }
 
 int	printPropertyMenu() { 
-	std::cout << " )" << std::endl;
-	std::cout << "  " << std::endl;
+	std::cout << " sss" << std::endl;
+	std::cout << " sss " << std::endl;
 	return 0; }
 
 int printMenu() { 
@@ -396,39 +396,24 @@ int gameBoardInput(char * Input, MasterBoard * boardToInput)
 			boardToInput->cursor.move(Input);
 		}
 
-		//Select minion. If minion is not selected, select it.
+		//Select minion. If minion is not selected, select it. Must be successful to set flag.
 		if (*Input == 't')
 		{
 			if (boardToInput->cursor.selectMinionFlag == false 
 				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
 			{
-				boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY());
-				inputLayer = minionAction;
+				if (boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+				{
+					inputLayer = minionAction;
+				}
 			}
 
 		}
 
-
-	//Ends the turn and passes it to the next player.
-	//Autosave every turn.
-	if (*Input == 'p')									
-	{
-		if (boardToInput->cursor.selectMinionFlag == true)
-			boardToInput->deselectMinion();
-		boardToInput->endTurn();
-		scenarioSave("Autosave", boardToInput);
-	}
-
-	if (*Input == '1')					
-	{
-		//Prompt user and save scenario.
-		std::string saveName = "";
-		std::cout << "Choose where to save your game:" << std::endl;
-		std::cin >> saveName;
-		scenarioSave(saveName, boardToInput);
-	}
-
-	boardToInput->checkWindow();
+		if (*Input == 'm')
+		{
+			inputLayer = menu;
+		}
 
 	return 0;
 }
@@ -492,6 +477,44 @@ int minionInput(char* Input, MasterBoard * boardToInput) {
 						}
 					}
 
+
+	return 0;
+}
+
+int menuInput(char* Input, MasterBoard* boardToInput) {
+	
+	//Ends the turn and passes it to the next player.
+	//Autosave every turn.
+	if (*Input == 't')
+	{
+		if (boardToInput->cursor.selectMinionFlag == true)
+			boardToInput->deselectMinion();
+		boardToInput->endTurn();
+		scenarioSave("Autosave", boardToInput);
+		inputLayer = gameBoard;
+	}
+
+	if (*Input == 'l') 
+	{
+		inputLayer = gameBoard;
+		//Load new map
+	}
+
+	//Prompt user and save scenario.
+	if (*Input == 's')
+	{
+		std::string saveName = "";
+		std::cout << "Choose where to save your game:" << std::endl;
+		std::cin >> saveName;
+		scenarioSave(saveName, boardToInput);
+		inputLayer = gameBoard;
+	}
+
+	//Exit menu
+	if (*Input == 'm') 
+	{
+		inputLayer = gameBoard;
+	}
 
 	return 0;
 }
@@ -607,6 +630,12 @@ int main()
 		{
 			minionInput(&Input, &GameBoard);
 		}
+		else if (inputLayer == menu)
+		{
+			menuInput(&Input, &GameBoard);
+		}
+
+		GameBoard.checkWindow();
 
 		printScreen(&GameBoard);
 	}
