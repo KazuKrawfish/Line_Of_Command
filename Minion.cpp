@@ -18,13 +18,14 @@ Minion::Minion()
 //
 //Always use this constructor, it gives the new Minion all required properties.
 //
-Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment)
+Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth)
 {
 	seniority = inputSeniority;
 	minionEnvironment = Environment;
 	locationX = inputX;
 	locationY = inputY;
 	type = inputType;
+	health = inputHealth;
 	switch (inputType)
 	{
 	case('i'):
@@ -35,15 +36,15 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		break;
 	}
-	case('t'):
+	case('a'):
 	{
-		description = "Tank";
+		description = "Armor";
 		movementRange = 6;
 		attackRange = 1; 
 		rangeType = directFire;
 		break;
 	}
-	case('A'):
+	case('r'):
 	{
 		description = "Artillery";
 		movementRange = 5;
@@ -51,7 +52,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = rangedFire;
 		break;
 	}
-	case('C'):
+	case('c'):
 	{
 		description = "Cavalry";
 		movementRange = 8;
@@ -72,8 +73,6 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	team = inputTeam;
 
 	Environment->Board[inputX][inputY].hasMinionOnTop = true;
-	health = 100;
-
 }
 
 //

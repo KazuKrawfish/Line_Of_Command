@@ -19,9 +19,9 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 	}
 }
 
-//Attacker vs defender matrix. Attacker determines row number, while defender determines column number.
+//Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.	
-//												  i    t    A     C    R
+//												  i    a    r     c    R
 const double ATTACK_VALUES_MATRIX[5][5] = {		0.50, 0.05,0.10,0.10,0.25,
 												0.65,0.50,0.60,0.60,0.70,
 												0.60,0.40,0.50,0.55,0.60,
@@ -82,25 +82,14 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	return ATTACK_VALUES_MATRIX[y][x];
 }
 
-//Initialize with clear terrain. Need to fill with other terrain types.
-//Put your test minions here!
+//Currently this is not doing what it should be doing- only partial initialization.
+
 MasterBoard::MasterBoard()
 {
-	playerFlag = 1;
+
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
-	for (int x = 0; x < BOARD_WIDTH; x++)
-	{
-		for (int y = 0; y < BOARD_HEIGHT; y++)
-		{
-			Board[x][y].symbol = '.';
-			Board[x][y].description = "Clear terrain.";
-			Board[x][y].defenseFactor = 1.1;
-			Board[x][y].hasMinionOnTop = false;
-			Board[x][y].withinRange = false;
-
-		}
-	}
+	totalNumberOfMinions = 0;
 
 	//Initialize MinionRoster to NULL.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -108,12 +97,10 @@ MasterBoard::MasterBoard()
 		minionRoster[i] = NULL;
 	}
 
-	createMinion('i', 1, 1, 1);
-	createMinion('i', 1, 2, 1);
-	createMinion('i', 1, 3, 1);
-	
-
-	createMinion('R', 3, 1, 2);
+	for (int i = 0; i < NUMBEROFPLAYERS+1; i++)
+	{
+		treasury[i] = 0;
+	}
 
 }
 
@@ -175,9 +162,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	{
 		for (int y= 0; y < BOARD_HEIGHT; y++)
 		{
-			//int inputLocationX = inputLocation % BOARD_WIDTH;
-			//int inputLocationY = (inputLocation - (inputLocation % BOARD_WIDTH)) / BOARD_WIDTH;	//Convert input coordinate to x and y.
-
+			
 			distanceX = abs(inputX - x);
 			distanceY = abs(inputY - y);
 
@@ -190,7 +175,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 }
 
-int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam)
+int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -198,10 +183,12 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this);
-			Board[inputX][inputY].minionOnTop = minionRoster[i];
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth);
 			if (minionRoster != NULL)
 			{
+				minionRoster[i]->status = (minionStatus)status;
+				Board[inputX][inputY].minionOnTop = minionRoster[i];
+				totalNumberOfMinions++;
 				return 0;
 			}
 		}
@@ -213,10 +200,12 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 
 }
 
-//Still need to figure out minor situation of: minion has already moved and shot, you shouldn't be able to select.
+//First check ensures if minion has moved and shot, you can't select. Also if it's ranged and moved, you can't.
 int MasterBoard::selectMinion(int inputX, int inputY) 
 {
-	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == playerFlag) 
+	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == playerFlag
+		&& Board[inputX][inputY].minionOnTop->status != hasfired && 
+		(Board[inputX][inputY].minionOnTop->rangeType != rangedFire || Board[inputX][inputY].minionOnTop->status != hasmovedhasntfired))
 	{
 		cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
 		cursor.selectMinionFlag = true;
@@ -275,9 +264,6 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	selectedMinion->locationX = inputX;
 	selectedMinion->locationY = inputY;
 
-	selectedMinion->status = hasmovedhasntfired;
-
-	
 	return 0;
 }
 
@@ -340,8 +326,6 @@ int MasterBoard::attackMinion(int inputX, int inputY)
 			double attackerDefenseFactor = Board[cursor.selectMinionPointer->locationX][cursor.selectMinionPointer->locationY].defenseFactor;
 			attackingMinion->health -= defenderFirePower * defendingMinion->health / attackerDefenseFactor;
 		}	
-	
-	attackingMinion->status = hasfired;
 
 	if (attackingMinion->health <= 0)			//The attacker can be destroyed too!
 		destroyMinion(attackingMinion);
@@ -362,7 +346,9 @@ int MasterBoard::destroyMinion(Minion * inputMinion)
 	eventText += inputMinion->description;
 	eventText += " DESTROYED!";
 	
-	//Clean up.
+	//Clean up. Currently since we're not cleaning up the minion roster after a death, there is a hole that may prevent saving properly.
+	//FIX FIX FIX
+	totalNumberOfMinions--;
 	minionRoster[inputMinion->seniority] = NULL;
 	delete inputMinion;
 	
@@ -386,7 +372,23 @@ int MasterBoard::endTurn() {
 	{
 		minionRoster[i]->status = hasntmovedorfired;
 	}
-		
+	
+	//Provide income for the next player based on properties he controls.
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			if (this->Board[x][y].controller == playerFlag) 
+			{
+				this->treasury[playerFlag] += Board[x][y].production;
+			}
+
+		}
+	}
+
+	
+
+
 	return 0;
 
 }
