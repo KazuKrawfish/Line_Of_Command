@@ -262,9 +262,6 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	selectedMinion->locationX = inputX;
 	selectedMinion->locationY = inputY;
 
-	selectedMinion->status = hasmovedhasntfired;
-
-	
 	return 0;
 }
 
@@ -327,8 +324,6 @@ int MasterBoard::attackMinion(int inputX, int inputY)
 			double attackerDefenseFactor = Board[cursor.selectMinionPointer->locationX][cursor.selectMinionPointer->locationY].defenseFactor;
 			attackingMinion->health -= defenderFirePower * defendingMinion->health / attackerDefenseFactor;
 		}	
-	
-	attackingMinion->status = hasfired;
 
 	if (attackingMinion->health <= 0)			//The attacker can be destroyed too!
 		destroyMinion(attackingMinion);

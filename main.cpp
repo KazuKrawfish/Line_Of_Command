@@ -29,7 +29,7 @@
 
 	
 std::string eventText			= "";
-enum gameInputLayer { gameBoard, menu, unitAction};
+enum gameInputLayer { gameBoard, menu, minionAction, propertyAction};
 gameInputLayer inputLayer = gameBoard;
 
 int setCharacteristics(MasterBoard * LoadBoard) 
@@ -109,11 +109,11 @@ int setCharacteristics(MasterBoard * LoadBoard)
 	return 0;
 }
 
-int printStatus(MasterBoard* boardToPrint) 
+int printStatus(MasterBoard* boardToPrint)
 {
 	tile currentTile = boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
 
-	std::cout << currentTile.description << std::endl;
+	std::cout << currentTile.description<< " ";
 
 	if(currentTile.hasMinionOnTop == true)
 	{
@@ -125,13 +125,13 @@ int printStatus(MasterBoard* boardToPrint)
 	
 		if (currentMinion->status == gaveupmovehasntfired) 
 		{
-			std::cout << "Holding position." << std::endl;
-			std::cout << "Ready to attack." << std::endl;
+			std::cout << "Holding position. ";
+			std::cout << "Ready to attack. "<< std::endl;
 		}
 
 		if (currentMinion->status == hasmovedhasntfired)
 		{
-			std::cout << "Has already moved this turn." << std::endl;
+			std::cout << "Has already moved this turn. " ;
 			if (currentMinion->rangeType == rangedFire) 
 			{
 				std::cout<<"Cannot attack after moving." << std::endl;
@@ -143,18 +143,18 @@ int printStatus(MasterBoard* boardToPrint)
 		}
 		if (currentMinion->status == hasfired)
 		{
-			std::cout << "Has already moved this turn." << std::endl;
+			std::cout << "Has already moved this turn. ";
 			std::cout << "Has attacked this turn." << std::endl;
 		}
 		if (currentMinion->status == hasntmovedorfired)
 		{
-			std::cout << "Ready to move." << std::endl;
+			std::cout << "Ready to move. ";
 			std::cout << "Ready to attack." << std::endl;
 		}
 	}
 	else
 	{ 
-		std::cout << std::endl << std::endl << std::endl; 
+		std::cout << std::endl << std::endl;
 	}
 	
 	//Print current turn.
@@ -162,19 +162,83 @@ int printStatus(MasterBoard* boardToPrint)
 	std::cout << "Player " << boardToPrint->playerFlag << "'s Turn. Treasury total: " << boardToPrint->treasury[boardToPrint->playerFlag]<<std::endl;
 
 	//Debug purposes- print cursor location coordinates and window coordinates.
-	std::cout << eventText << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
-	std::cout << boardToPrint->windowLocation << std::endl;
+	//std::cout << eventText << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
+	//std::cout << boardToPrint->windowLocation << std::endl;
 	eventText = "";
 
 	return 0;
 }
 
-int printScreen(MasterBoard * boardToPrint) 
-{
-	//These are just iterators.
-	int i, j;
-	
+int printMinionMenu(MasterBoard* boardToPrint) {
 
+	minionStatus mystatus = boardToPrint->cursor.selectMinionPointer->status;
+
+	if (mystatus == hasntmovedorfired)
+	{
+		std::cout << "Move cursor(WASD) | Move minion (m)" << std::endl;
+		std::cout << "Deselect minion (t) | Capture move (c)" << std::endl;
+	}
+
+	if (mystatus == hasmovedhasntfired || mystatus == gaveupmovehasntfired) 
+	{
+		std::cout << "Move cursor(WASD) | Attack (r)" << std::endl;
+		std::cout << "Deselect minion (t) | Capture (c)" << std::endl;	
+	}
+	if (mystatus == hasfired)
+	{
+		std::cout << std::endl;
+		std::cout << std::endl;
+	}
+	return 0;
+
+}
+
+int printBoardMenu() {
+	std::cout << "Move cursor (WASD) | Menu (m)" << std::endl;
+	std::cout << "Select minion (t)" << std::endl;	
+	return 0;
+}
+
+int	printPropertyMenu() { 
+	std::cout << " )" << std::endl;
+	std::cout << "  " << std::endl;
+	return 0; }
+
+int printMenu() { 
+	std::cout << "Save game (s) | Load new game (L)" << std::endl;
+	std::cout << "End turn (t) | Exit menu (m)" << std::endl;
+	return 0; 
+}
+
+int printLowerScreen(MasterBoard* boardToPrint) {
+	
+	if (inputLayer == gameBoard) 
+	{
+		printBoardMenu();
+	}else
+
+	if (inputLayer == menu)
+	{
+		printMenu();
+	}else
+
+	if (inputLayer == minionAction)
+	{
+		printMinionMenu(boardToPrint);
+	}else
+
+	if (inputLayer == propertyAction)
+	{
+		printPropertyMenu();
+	}
+
+	printStatus(boardToPrint);
+
+	return 0;
+
+}
+
+int printUpperScreen(MasterBoard* boardToPrint) {
 	//windowLocation is a single scalar representing x and y.
 	//We do some basic math to break it into the two values for the function.
 	//Need to convert windowLocation into a better two part variable.
@@ -182,73 +246,80 @@ int printScreen(MasterBoard * boardToPrint)
 	int windowX = boardToPrint->windowLocation % BOARD_WIDTH;
 
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
-	for (i = windowY; i < (windowY + WINDOW_HEIGHT); i++)
+	for (int i = windowY; i < (windowY + WINDOW_HEIGHT); i++)
 	{
-		for (j = windowX; j < (windowX + WINDOW_WIDTH); j++)
+		for (int j = windowX; j < (windowX + WINDOW_WIDTH); j++)
 		{
 			//Print whomever has priority. cursor first, then unit, then terrain.
 
 			//If there is a cursor there, it takes priority for printing.
-			if ( i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX() ) // * BOARD_WIDTH + j == boardToPrint->cursor.Location)										
-			{	
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
+			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX()) // * BOARD_WIDTH + j == boardToPrint->cursor.Location)										
+			{
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 				std::cout << '*';
-			}	
+			}
 			else
 				//Is there a minion there?
-				if (boardToPrint->Board[j][i].hasMinionOnTop == true)						
-			{	
-				//Determine team and then set the color.
-				switch (boardToPrint->Board[j][i].minionOnTop->team)
+				if (boardToPrint->Board[j][i].hasMinionOnTop == true)
 				{
-				case(0):
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-					break;
-				case(1):
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
-					break;
-				case(2):
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
-					break;
+					//Determine team and then set the color.
+					switch (boardToPrint->Board[j][i].minionOnTop->team)
+					{
+					case(0):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+						break;
+					case(1):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+						break;
+					case(2):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_RED);
+						break;
 
-				}
-				//Print out the minion.
-				std::cout << boardToPrint->Board[j][i].minionOnTop->type;
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-			}
-			else if (boardToPrint->Board[j][i].withinRange == true)
-			{	
-				//If no minion, see if it's "in range" is set
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);					
-				//And if so print the symbol for "in range" which is ':'
-				std::cout << ':';																				
-			}
-			else 
-			{
-				//Otherwise put out the terrain for that square.
-				switch (boardToPrint->Board[j][i].controller)
-				{
-				case(0):
+					}
+					//Print out the minion.
+					std::cout << boardToPrint->Board[j][i].minionOnTop->type;
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-					break;
-				case(1):
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
-					break;
-				case(2):
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
-					break;
 				}
-			std::cout << boardToPrint->Board[j][i].symbol;
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-			}
+				else if (boardToPrint->Board[j][i].withinRange == true)
+				{
+					//If no minion, see if it's "in range" is set
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+					//And if so print the symbol for "in range" which is ':'
+					std::cout << ':';
+				}
+				else
+				{
+					//Otherwise put out the terrain for that square.
+					switch (boardToPrint->Board[j][i].controller)
+					{
+					case(0):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+						break;
+					case(1):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
+						break;
+					case(2):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+						break;
+					}
+					std::cout << boardToPrint->Board[j][i].symbol;
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+				}
 		}
 		std::cout << std::endl;
 	}
 
-	printStatus(boardToPrint);
+	return 0;
+}
+
+int printScreen(MasterBoard * boardToPrint) 
+{
+	printUpperScreen(boardToPrint);
+
+	printLowerScreen(boardToPrint);
 
 	//Buffer the screen to clear the old map window.
-	for (i = 0; i < 10; i++)		
+	for (int i = 0; i < 10; i++)
 		std::cout << std::endl;
 
 	return 0;
@@ -314,7 +385,7 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 	return 1;
 }
 
-//Needs serious refactoring. Chains of if statements that can probably be handled differently, plus multiple references to variables.
+//Need to change to take different inputs based on current inputLayer.
 //Handle with a single local variable doing one reference.
 int gameBoardInput(char * Input, MasterBoard * boardToInput)		
 {
@@ -325,59 +396,18 @@ int gameBoardInput(char * Input, MasterBoard * boardToInput)
 			boardToInput->cursor.move(Input);
 		}
 
-	
-	//Select minion command
+		//Select minion. If minion is not selected, select it.
 		if (*Input == 't')
 		{
 			if (boardToInput->cursor.selectMinionFlag == false 
 				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
 			{
 				boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY());
+				inputLayer = minionAction;
 			}
-			else
-				if (boardToInput->cursor.selectMinionFlag == true)
-				{
-					boardToInput->deselectMinion();
-				}
+
 		}
 
-	//Move minion command
-	//If not on top, then move the unit.
-	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true 
-		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false
-		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
-	{
-		if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
-		{	//Change status appropriately for successful movement.
-			boardToInput->cursor.selectMinionPointer->status = hasmovedhasntfired;
-			boardToInput->deselectMinion();
-		}
-	}
-
-	//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
-	if(*Input == 'm' && boardToInput->cursor.selectMinionFlag == true 
-		&& boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX() 
-		&& boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY()
-		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
-	{
-		boardToInput->cursor.selectMinionPointer->status = gaveupmovehasntfired;
-		boardToInput->deselectMinion();
-	}
-
-	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours.
-	if (*Input == 'r' && boardToInput->cursor.selectMinionFlag == true)
-		if(boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
-			if((boardToInput->cursor.getX() != boardToInput->cursor.selectMinionPointer->locationX) || (boardToInput->cursor.getY() != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
-				if(boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
-					if(boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true)	//In range
-	{	
-		//This is the actual attack portion. Return of 0 indicates successful attack.
-		bool attackSuccess = boardToInput->attackMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY());
-		if (attackSuccess == 0)
-		{
-			boardToInput->deselectMinion();
-		}
-	}
 
 	//Ends the turn and passes it to the next player.
 	//Autosave every turn.
@@ -399,6 +429,69 @@ int gameBoardInput(char * Input, MasterBoard * boardToInput)
 	}
 
 	boardToInput->checkWindow();
+
+	return 0;
+}
+
+int minionInput(char* Input, MasterBoard * boardToInput) {
+	
+	if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
+	{
+		boardToInput->cursor.move(Input);
+	}
+
+	//Deselect
+	if (*Input == 't')
+	{
+		if (boardToInput->cursor.selectMinionFlag == true)
+		{
+			boardToInput->deselectMinion();
+			inputLayer = gameBoard;
+		}
+	}
+
+	//Move minion command
+	//If not on top, then move the unit.
+	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false
+		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
+	{
+		if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+		{	//Change status appropriately for successful movement.
+			boardToInput->cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
+			boardToInput->deselectMinion();
+			inputLayer = gameBoard;
+		}
+	}
+
+	//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
+	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX()
+		&& boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY()
+		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
+	{
+		boardToInput->cursor.selectMinionPointer->status = gaveupmovehasntfired;	//I think this is doubletap.
+		boardToInput->deselectMinion();
+		inputLayer = gameBoard;
+	}
+	
+	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours.
+	if (*Input == 'r' && boardToInput->cursor.selectMinionFlag == true)
+		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
+			if ((boardToInput->cursor.getX() != boardToInput->cursor.selectMinionPointer->locationX) || (boardToInput->cursor.getY() != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
+				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
+					if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true)	//In range
+					{
+						//This is the actual attack portion. Return of 0 indicates successful attack.
+						bool attackSuccess = boardToInput->attackMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY());
+						if (attackSuccess == 0)
+						{
+							boardToInput->cursor.selectMinionPointer->status = hasfired;
+							boardToInput->deselectMinion();
+							inputLayer = gameBoard;
+						}
+					}
+
 
 	return 0;
 }
@@ -502,12 +595,17 @@ int main()
 	char Input = ' ';
 	while (true)		//Run as long as the user wants. Infinite for loop.
 	{
+
 		//Major change beginning: Use flag inputLayer to determine which input handler gets called.
 		//Ned an input handler for menu and minion action (Attack, capture, etc)
 		//Need each button press to potentially update the inputLayer flag as needed.
 		if (inputLayer == gameBoard) 
 		{
 			gameBoardInput(&Input, &GameBoard);
+		} 
+		else if (inputLayer == minionAction)
+		{
+			minionInput(&Input, &GameBoard);
 		}
 
 		printScreen(&GameBoard);
