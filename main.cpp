@@ -389,7 +389,7 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 //Handle with a single local variable doing one reference.
 int gameBoardInput(char * Input, MasterBoard * boardToInput)		
 {
-		*Input = _getch();
+
 	
 		if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
 		{
@@ -595,7 +595,7 @@ int main()
 	char Input = ' ';
 	while (true)		//Run as long as the user wants. Infinite for loop.
 	{
-
+		Input = _getch();
 		//Major change beginning: Use flag inputLayer to determine which input handler gets called.
 		//Ned an input handler for menu and minion action (Attack, capture, etc)
 		//Need each button press to potentially update the inputLayer flag as needed.
