@@ -25,10 +25,11 @@ public:
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status);
 	int endTurn();
 	int attackMinion(int inputX, int inputY);
-	int destroyMinion(Minion* inputMinion);
+	int destroyMinion(Minion* inputMinion, bool printMessage);
 	int checkWindow();
+	int clearBoard();
 	Minion* minionRoster[GLOBALSUPPLYCAP];
-	tile Board[BOARD_WIDTH][BOARD_HEIGHT];
+	tile  Board[BOARD_WIDTH][BOARD_HEIGHT];
 	Cursor cursor;
 	int windowLocation;
 	int playerFlag;

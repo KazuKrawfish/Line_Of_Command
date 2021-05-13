@@ -6,6 +6,8 @@
 //Window HAS been implemented to minimize total print size!!
 const int WINDOW_HEIGHT = 5;										
 const int WINDOW_WIDTH = 5;
+
+//These need to move to masterboard.
 const int BOARD_WIDTH = 15;  
 const int BOARD_HEIGHT = 20;
 

@@ -27,15 +27,14 @@
 
 //Global variables need to be moved.
 
+int scenarioLoad(MasterBoard* boardToPrint);
 	
 std::string eventText			= "";
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction};
 gameInputLayer inputLayer = gameBoard;
 
 int setCharacteristics(MasterBoard * LoadBoard) 
-{
-	
-	
+{	
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -496,6 +495,7 @@ int menuInput(char* Input, MasterBoard* boardToInput) {
 
 	if (*Input == 'l') 
 	{
+		scenarioLoad(boardToInput);
 		inputLayer = gameBoard;
 		//Load new map
 	}
@@ -522,12 +522,13 @@ int menuInput(char* Input, MasterBoard* boardToInput) {
 //Load saved game and initialize the board with its contents.
 int scenarioLoad(MasterBoard* boardToPrint) {
 	
-	
+	//Clear board in case scenario load was called by player menu later in game.
+	boardToPrint->clearBoard();
+
 	std::ifstream saveGame;
 	std::string line;
-	int sg_board_width = 0;
-	int sg_board_height = 0; 
 	char garbage;
+	int garb1, garb2;
 	std::string scenarioToLoad = "";
 	std::string saveName = "";
 	bool loadsuccessful = false;
@@ -557,9 +558,9 @@ int scenarioLoad(MasterBoard* boardToPrint) {
 	}
 
 	//First load the map size:
-	saveGame >> sg_board_width;
+	saveGame >> garb1;
 	saveGame >>  garbage;
-	saveGame >> sg_board_height;
+	saveGame >> garb2;
 
 	//Then load player data:
 	saveGame >> boardToPrint->playerFlag;

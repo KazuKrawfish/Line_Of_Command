@@ -104,6 +104,42 @@ MasterBoard::MasterBoard()
 
 }
 
+int MasterBoard::clearBoard() 
+{
+	//Need a way to clear board before loading. Using constructor doesn't do the trick.
+
+	cursor.XCoord = 1;
+	cursor.YCoord = 1;
+	totalNumberOfMinions = 0;
+
+	//Initialize MinionRoster to NULL AND kill all minions.
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	{
+		if (minionRoster[i] != NULL)
+		{
+			destroyMinion(minionRoster[i], false);
+			minionRoster[i] = NULL;
+		}
+	}
+
+	//Clear map
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			Board[x][y].clearTile();
+		}
+	}
+
+	//Reset treasury
+	for (int i = 0; i < NUMBEROFPLAYERS + 1; i++)
+	{
+		treasury[i] = 0;
+	}
+
+	return 0;
+}
+
 //Ensures cursor stays within the window.
 int MasterBoard::checkWindow() 
 {
@@ -316,7 +352,8 @@ int MasterBoard::attackMinion(int inputX, int inputY)
 	if (defendingMinion->health <= 0)
 	{
 		//If defender falls below 0, it dies.
-		destroyMinion((defendingMinion));
+		bool printMessage = true;
+		destroyMinion(defendingMinion, printMessage);
 	}
 	else	//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
 		if (defendingMinion->rangeType == directFire && (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
@@ -328,23 +365,29 @@ int MasterBoard::attackMinion(int inputX, int inputY)
 		}	
 
 	if (attackingMinion->health <= 0)			//The attacker can be destroyed too!
-		destroyMinion(attackingMinion);
+	{	
+		bool printMessage = true;
+		destroyMinion(attackingMinion, printMessage);
+	}
 
 	return 0;
 
 }
 
-int MasterBoard::destroyMinion(Minion * inputMinion) 
+int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage)
 {
 	//Tell the board it has no minions associated in the location where the Minion was alive.
-	Board[inputMinion->locationX][inputMinion->locationY].hasMinionOnTop = false;		
-	
+	Board[inputMinion->locationX][inputMinion->locationY].hasMinionOnTop = false;
+
+	if (printMessage == true) 
+	{
 	//Create event text telling player it was destroyed.
-	eventText += "PLAYER ";								
-	eventText += char(playerFlag-32);							//MUST FIX IMPLEMENTATION!!!!
+	eventText += "PLAYER ";
+	eventText += char(playerFlag - 32);							//MUST FIX IMPLEMENTATION!!!!
 	eventText += "'s ";
 	eventText += inputMinion->description;
 	eventText += " DESTROYED!";
+	}
 	
 	//Clean up. Currently since we're not cleaning up the minion roster after a death, there is a hole that may prevent saving properly.
 	//FIX FIX FIX
