@@ -34,5 +34,14 @@ class Minion
 	rangeType rangeType;
 };
 
+
+class typesOfMinions {
+	char type;
+	int movementRange;
+	int attackRange;
+	int cost;
+	//Probably should move all minion aspects that wouldn't change, over here.
+};
+
 #endif /* MINION_HPP__ */
 

@@ -40,5 +40,6 @@ private:
 //To move variables later. Not now!
 };
 
+
 #endif /* MASTERBOARD_HPP__ */
 

@@ -32,6 +32,7 @@ int scenarioLoad(MasterBoard* boardToPrint);
 std::string eventText			= "";
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction};
 gameInputLayer inputLayer = gameBoard;
+bool tryingToBuy = false;
 
 int setCharacteristics(MasterBoard * LoadBoard) 
 {	
@@ -198,10 +199,32 @@ int printBoardMenu() {
 	return 0;
 }
 
-int	printPropertyMenu() { 
-	std::cout << " sss" << std::endl;
-	std::cout << " sss " << std::endl;
-	return 0; }
+int	printPropertyMenu() {
+	int cost_of_unit = 1;
+	int treasury = 10;
+	//Need a cost lookup table.
+
+	if (tryingToBuy == false) 
+	{
+		std::cout << " Enter symbol for unit you wish to buy." << std::endl;
+		std::cout << " Go back (Q) " << std::endl;
+	}
+	if (tryingToBuy == true)
+	{
+		std::cout << "Any unit" <<"costs: " << "1" <<std::endl;
+	}
+	if (cost_of_unit < treasury) 
+	{
+		std::cout << "Confirm Purchase (c) | Cancel (Q) " << std::endl;
+	}
+	else 
+	{
+		std::cout << "You lack the funds." << std::endl;
+	}
+
+	return 0; 
+
+}
 
 int printMenu() { 
 	std::cout << "Save game (s) | Load new game (L)" << std::endl;
@@ -395,17 +418,25 @@ int gameBoardInput(char * Input, MasterBoard * boardToInput)
 			boardToInput->cursor.move(Input);
 		}
 
-		//Select minion. If minion is not selected, select it. Must be successful to set flag.
+		//Select minion or property.
 		if (*Input == 't')
 		{
-			if (boardToInput->cursor.selectMinionFlag == false 
+			//If minion is not selected, select it.Must be successful to set flag.
+			if (boardToInput->cursor.selectMinionFlag == false //This is probably not needed since it's always true/false in conj. with inputLayer.
 				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
 			{
 				if (boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 				{
 					inputLayer = minionAction;
 				}
-			}
+			}	//Else if empty property, select it. No minion on top, right team, must be factory.
+			else 
+				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'h'
+					&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].controller == boardToInput->playerFlag
+					&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
+				{
+					inputLayer = propertyAction;
+				}
 
 		}
 
@@ -514,6 +545,35 @@ int menuInput(char* Input, MasterBoard* boardToInput) {
 	if (*Input == 'm') 
 	{
 		inputLayer = gameBoard;
+	}
+
+	return 0;
+}
+
+int propertyMenuInput(char* Input, MasterBoard* boardToInput) {
+
+	int cost_of_unit = 1;
+	int treasury = 10;
+	//Need a cost lookup table.
+
+	if (tryingToBuy == false)
+	{
+		std::cout << " Enter symbol for unit you wish to buy." << std::endl;
+		std::cout << " Go back (Q) " << std::endl;
+	}
+	if (tryingToBuy == true)
+	{
+		//Lookup that symbol actually represents real minion.
+		//Ensure I can afford i.e. look up the cost too.
+		std::cout << "Any unit" << "costs: " << "1" << std::endl;
+	}
+	if (cost_of_unit < treasury)
+	{
+		std::cout << "Confirm Purchase (c) | Cancel (Q) " << std::endl;
+	}
+	else
+	{
+		std::cout << "You lack the funds." << std::endl;
 	}
 
 	return 0;
@@ -634,6 +694,10 @@ int main()
 		else if (inputLayer == menu)
 		{
 			menuInput(&Input, &GameBoard);
+		}
+		else if (inputLayer == propertyAction)
+		{
+			propertyMenuInput(&Input, &GameBoard);
 		}
 
 		GameBoard.checkWindow();
