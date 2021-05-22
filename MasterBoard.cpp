@@ -2,8 +2,8 @@
 #include "Cursor.hpp"
 #include <string>
 #include <iostream>
+#include "inputLayer.hpp"
 
-extern std::string eventText;
 
 //If the two input coordinates are next to each other, return true. Otherwise, return false.
 //This can be either horizontal or vertical adjacency.
@@ -130,7 +130,7 @@ MasterBoard::MasterBoard()
 
 }
 
-int MasterBoard::clearBoard() 
+int MasterBoard::clearBoard(inputLayer* InputLayer) 
 {
 	//Need a way to clear board before loading. Using constructor doesn't do the trick.
 
@@ -143,7 +143,7 @@ int MasterBoard::clearBoard()
 	{
 		if (minionRoster[i] != NULL)
 		{
-			destroyMinion(minionRoster[i], false);
+			destroyMinion(minionRoster[i], false, InputLayer);
 			minionRoster[i] = NULL;
 		}
 	}
@@ -346,7 +346,7 @@ int MasterBoard::deselectMinion()
 }
 
 //Additionally, can only attack once. If artillery, cannot have moved or be adjacent.
-int MasterBoard::attackMinion(int inputX, int inputY)
+int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 {
 	//Simplify by finding shorthand values first.
 	Minion* attackingMinion = cursor.selectMinionPointer;
@@ -379,7 +379,7 @@ int MasterBoard::attackMinion(int inputX, int inputY)
 	{
 		//If defender falls below 0, it dies.
 		bool printMessage = true;
-		destroyMinion(defendingMinion, printMessage);
+		destroyMinion(defendingMinion, printMessage, InputLayer);
 	}
 	else	//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
 		if (defendingMinion->rangeType == directFire && (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
@@ -393,14 +393,14 @@ int MasterBoard::attackMinion(int inputX, int inputY)
 	if (attackingMinion->health <= 0)			//The attacker can be destroyed too!
 	{	
 		bool printMessage = true;
-		destroyMinion(attackingMinion, printMessage);
+		destroyMinion(attackingMinion, printMessage, InputLayer);
 	}
 
 	return 0;
 
 }
 
-int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage)
+int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer)
 {
 	//Tell the board it has no minions associated in the location where the Minion was alive.
 	Board[inputMinion->locationX][inputMinion->locationY].hasMinionOnTop = false;
@@ -408,11 +408,11 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage)
 	if (printMessage == true) 
 	{
 	//Create event text telling player it was destroyed.
-	eventText += "PLAYER ";
-	eventText += char(playerFlag - 32);							//MUST FIX IMPLEMENTATION!!!!
-	eventText += "'s ";
-	eventText += inputMinion->description;
-	eventText += " DESTROYED!";
+	InputLayer->eventText += "PLAYER ";
+	InputLayer->eventText += char(playerFlag - 32);							//MUST FIX IMPLEMENTATION of Char-32 nonsense.
+	InputLayer->eventText += "'s ";
+	InputLayer->eventText += inputMinion->description;
+	InputLayer->eventText += " DESTROYED!";
 	}
 	
 	//Clean up. Currently since we're not cleaning up the minion roster after a death, there is a hole that may prevent saving properly.
