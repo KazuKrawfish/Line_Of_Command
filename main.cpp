@@ -28,13 +28,64 @@
 //Global variables need to be moved.
 
 int scenarioLoad(MasterBoard* boardToPrint);
-	
+
+
+//These will all be wrapped into the inputLayer class soon.
 std::string eventText			= "";
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction};
 gameInputLayer inputLayer = gameBoard;
-bool tryingToBuy = false;
+char requestedMinionToBuy = '\n';
+int unitPrice = -1;
 
-int setCharacteristics(MasterBoard * LoadBoard) 
+//Messes up minions!
+//Still need to add them after.
+//This lumps all the terrain at the end, need to find a way to count neighbors and based on those, distribute tiles.
+int scrambleMap(MasterBoard* LoadBoard) 
+{
+	int numberOfHillsAndMountains = BOARD_SIZE / 10;	//Actual amount you want to see.
+	int mountainWeight = numberOfHillsAndMountains;		//This will change throughout function
+	int numberOfForests = BOARD_SIZE / 10;	
+	int forestWeight = numberOfForests;
+	int plainsWeight = BOARD_SIZE - numberOfHillsAndMountains - numberOfForests;
+
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			LoadBoard->Board[x][y].clearTile();
+			int mountainChance = (rand() % 100) * mountainWeight;         
+			int forestChance = (rand() % 100) * forestWeight;
+			int plainsChance = (rand() % 100) * plainsWeight;
+			if (mountainChance > forestChance && mountainChance > plainsChance)
+			{
+				if ((rand() % 100) < 50)
+				{
+					LoadBoard->Board[x][y].symbol = 'M';
+					LoadBoard->Board[x][y].description = "Mountain.";
+					LoadBoard->Board[x][y].defenseFactor = 1.4;
+				}
+				else
+				{
+					LoadBoard->Board[x][y].symbol = '^';
+					LoadBoard->Board[x][y].description = "Hill.";
+					LoadBoard->Board[x][y].defenseFactor = 1.1;
+				}
+				mountainWeight--;
+			}
+			else if (forestChance > plainsChance)
+			{
+				LoadBoard->Board[x][y].symbol = '+';
+				LoadBoard->Board[x][y].description = "Forest.";
+				LoadBoard->Board[x][y].defenseFactor = 1.2;
+				forestWeight--;
+			}
+			else plainsWeight--;
+		}
+	}
+	return 0;
+}
+
+int setCharacteristics(MasterBoard* LoadBoard) 
 {	
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
@@ -93,6 +144,12 @@ int setCharacteristics(MasterBoard * LoadBoard)
 			{
 				LoadBoard->Board[x][y].description = "Hill.";	
 				LoadBoard->Board[x][y].defenseFactor = 1.1;
+				break;
+			}
+			case('M'):
+			{
+				LoadBoard->Board[x][y].description = "Mountain.";
+				LoadBoard->Board[x][y].defenseFactor = 1.4;
 				break;
 			}
 			case('+'):		//Would like to have convertible to woodlot by engineer.....maybe
@@ -194,35 +251,40 @@ int printMinionMenu(MasterBoard* boardToPrint) {
 }
 
 int printBoardMenu() {
-	std::cout << "Move cursor (WASD) | Menu (m)" << std::endl;
-	std::cout << "Select minion (t)" << std::endl;	
+	std::cout << "Move cursor (WASD) |s Menu (m)" << std::endl;
+	std::cout << "Select minion/property (t)" << std::endl;	
 	return 0;
 }
 
 int	printPropertyMenu() {
-	int cost_of_unit = 1;
-	int treasury = 10;
-	//Need a cost lookup table.
 
-	if (tryingToBuy == false) 
+	//If this is not the second valid purchase input
+	if (requestedMinionToBuy == '\n')
 	{
-		std::cout << " Enter symbol for unit you wish to buy." << std::endl;
-		std::cout << " Go back (Q) " << std::endl;
-	}
-	if (tryingToBuy == true)
+		std::cout << "Input Minion to Buy" << std::endl;
+		std::cout << "Deselect Property (P)" << std::endl;
+
+	}	
+	else if (requestedMinionToBuy != '\n')
 	{
-		std::cout << "Any unit" <<"costs: " << "1" <<std::endl;
-	}
-	if (cost_of_unit < treasury) 
-	{
-		std::cout << "Confirm Purchase (c) | Cancel (Q) " << std::endl;
-	}
-	else 
-	{
-		std::cout << "You lack the funds." << std::endl;
+		if (requestedMinionToBuy == '!') 
+		{
+			std::cout << "Can't afford, try another symbol." << std::endl;
+			std::cout << "Input Minion to Buy | Deselect Property (P)" << std::endl;
+		}
+		else if (requestedMinionToBuy == '?') 
+		{
+			std::cout << "Invalid input. Try another symbol." << std::endl;
+			std::cout << "Input Minion to Buy  | Deselect Property (P)" << std::endl;
+		}
+		else 
+		{ 
+			std::cout << requestedMinionToBuy << " costs: " << unitPrice << std::endl; 
+			std::cout << "Confirm (C) | Cancel (P)" << std::endl;
+		}
 	}
 
-	return 0; 
+	return 0;
 
 }
 
@@ -513,6 +575,12 @@ int minionInput(char* Input, MasterBoard * boardToInput) {
 
 int menuInput(char* Input, MasterBoard* boardToInput) {
 	
+	//This is a working key.
+	if (*Input == 'g') 
+	{
+		scrambleMap(boardToInput);
+	}
+
 	//Ends the turn and passes it to the next player.
 	//Autosave every turn.
 	if (*Input == 't')
@@ -552,28 +620,60 @@ int menuInput(char* Input, MasterBoard* boardToInput) {
 
 int propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 
-	int cost_of_unit = 1;
-	int treasury = 10;
-	//Need a cost lookup table.
+	//Player treasury, cost of unit initialized to -1 to show bad inputs.
+	unitPrice = -1;
+	int treasury = boardToInput->treasury[boardToInput->playerFlag];
 
-	if (tryingToBuy == false)
+	//If this is NOT the second valid purchase input
+	//IE we have not yet gotten any valid input for propertyLayer.
+	//Thus one of the three states (prestate, too expensive, not a real unit).
+	if (requestedMinionToBuy == '\n' || requestedMinionToBuy == '!' || requestedMinionToBuy == '?')
 	{
-		std::cout << " Enter symbol for unit you wish to buy." << std::endl;
-		std::cout << " Go back (Q) " << std::endl;
+		if (*Input == 'p')
+		{
+			//Deselect
+			inputLayer = gameBoard;
+			return 0;
+		}
+		//Consult cost table:
+		unitPrice = boardToInput->consultMinionCostChart(*Input);
+		
+		//If it is a real unit we are trying to purchase
+		//Aka unitPrica is not -1 aka non-error
+		if (unitPrice > 0) 
+		{
+			requestedMinionToBuy = *Input;
+			
+			//If we can't afford, use special ! character
+			if (unitPrice > treasury) 
+			{
+				//Indicates you can't afford
+				requestedMinionToBuy = '!';
+			}				
+		}
+		else 
+		{
+			requestedMinionToBuy = '?';
+		}
+			
 	}
-	if (tryingToBuy == true)
+
+	//This is the second valid input.
+	else 
 	{
-		//Lookup that symbol actually represents real minion.
-		//Ensure I can afford i.e. look up the cost too.
-		std::cout << "Any unit" << "costs: " << "1" << std::endl;
-	}
-	if (cost_of_unit < treasury)
-	{
-		std::cout << "Confirm Purchase (c) | Cancel (Q) " << std::endl;
-	}
-	else
-	{
-		std::cout << "You lack the funds." << std::endl;
+		if (*Input == 'p') 
+		{
+			//Cancel purchase
+			requestedMinionToBuy = '\n';
+		}
+		if (*Input == 'c') 
+		{
+		//Confirm purchase
+			boardToInput->createMinion(requestedMinionToBuy, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag, 100, hasfired);
+			boardToInput->treasury[boardToInput->playerFlag] -= unitPrice;
+			inputLayer = gameBoard;
+			requestedMinionToBuy = '\n';
+		}
 	}
 
 	return 0;
@@ -669,10 +769,11 @@ saveGame.close();
 return 1;
 }
 
+
 int main()
 {
 	MasterBoard GameBoard;
-
+	
 	scenarioLoad(&GameBoard);
 
 	printScreen(&GameBoard);
@@ -701,7 +802,6 @@ int main()
 		}
 
 		GameBoard.checkWindow();
-
 		printScreen(&GameBoard);
 	}
 

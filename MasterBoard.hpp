@@ -28,6 +28,7 @@ public:
 	int destroyMinion(Minion* inputMinion, bool printMessage);
 	int checkWindow();
 	int clearBoard();
+	int consultMinionCostChart(char minionType);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	tile  Board[BOARD_WIDTH][BOARD_HEIGHT];
 	Cursor cursor;

@@ -17,6 +17,7 @@ Minion::Minion()
 
 //
 //Always use this constructor, it gives the new Minion all required properties.
+//When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, and consultMinionCostChart.
 //
 Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth)
 {

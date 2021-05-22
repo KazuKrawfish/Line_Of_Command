@@ -20,7 +20,8 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 }
 
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
-//In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.	
+//In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.
+//When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //												  i    a    r     c    R
 const double ATTACK_VALUES_MATRIX[5][5] = {		0.50, 0.05,0.10,0.10,0.25,
 												0.65,0.50,0.60,0.60,0.70,
@@ -40,13 +41,13 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('i'):
 		x = 0;
 		break;
-	case('t'):
+	case('a'):
 		x = 1;
 		break;
-	case('A'):
+	case('r'):
 		x = 2;
 		break;
-	case('C'):
+	case('c'):
 		x = 3;
 		break;
 	case('R'):
@@ -59,13 +60,13 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('i'):
 		y = 0;
 		break;
-	case('t'):
+	case('a'):
 		y = 1;
 		break;
-	case('A'):
+	case('r'):
 		y = 2;
 		break;
-	case('C'):
+	case('c'):
 		y = 3;
 		break;
 	case('R'):
@@ -82,8 +83,33 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	return ATTACK_VALUES_MATRIX[y][x];
 }
 
-//Currently this is not doing what it should be doing- only partial initialization.
+//Return of -1 indicates the minion requested does not exist.
+int MasterBoard::consultMinionCostChart(char minionType)
+{
+	int price = -1;
+	switch (minionType)
+	{
+	case('i'):
+		price = 1000;
+		break;
+	case('a'):
+		price = 7000;
+		break;
+	case('r'):
+		price = 7000;
+		break;
+	case('c'):
+		price = 4000;
+		break;
+	case('R'):
+		price = 15000;
+		break;
+	}
+	
+	return price;
+}
 
+//Currently this is not doing what it should be doing- only partial initialization.
 MasterBoard::MasterBoard()
 {
 
