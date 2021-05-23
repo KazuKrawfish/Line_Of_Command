@@ -17,8 +17,13 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer);
 int inputLayer::printStatus(MasterBoard* boardToPrint)
 {
 	tile currentTile = boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
-
+	
+	if (currentTile.controller != 0)
+	{
+		std::cout << "Player " << currentTile.controller << "'s ";
+	}
 	std::cout << currentTile.description << " ";
+	
 
 	if (currentTile.hasMinionOnTop == true)
 	{
@@ -188,14 +193,14 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 			//Print whomever has priority. cursor first, then unit, then terrain.
 
 			//If there is a cursor there, it takes priority for printing.
-			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX()) // * BOARD_WIDTH + j == boardToPrint->cursor.Location)										
+			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX()) 									
 			{
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 				std::cout << '*';
 			}
 			else
-				//Is there a minion there?
-				if (boardToPrint->Board[j][i].hasMinionOnTop == true)
+				//Is there a minion there? Are we hiding them right now?
+				if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions)
 				{
 					//Determine team and then set the color.
 					switch (boardToPrint->Board[j][i].minionOnTop->team)
@@ -215,11 +220,11 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 					std::cout << boardToPrint->Board[j][i].minionOnTop->type;
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 				}
-				else if (boardToPrint->Board[j][i].withinRange == true)
+				//If no minion show range, unless "hide" is on.
+				else if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
 				{
-					//If no minion, see if it's "in range" is set
+					
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-					//And if so print the symbol for "in range" which is ':'
 					std::cout << ':';
 				}
 				else
@@ -262,11 +267,22 @@ int inputLayer::printScreen(MasterBoard* boardToPrint)
 
 int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 {
-
-
 	if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
 	{
 		boardToInput->cursor.move(Input);
+	}
+
+	//Need char for shift
+	if (*Input == '0')
+	{
+		if (minionVisibleStatus == hideMinions)
+		{
+			minionVisibleStatus = showMinions;
+		}
+		else if (minionVisibleStatus == showMinions)
+		{
+			minionVisibleStatus = hideMinions;
+		}
 	}
 
 	//Select minion or property.
@@ -280,7 +296,7 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 			{
 				status = minionAction;
 			}
-		}	//Else if empty property, select it. No minion on top, right team, must be factory.
+		}	//Else if empty property, select it. No minion on top, right team, must be factory to select.
 		else
 			if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'h'
 				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].controller == boardToInput->playerFlag
@@ -304,6 +320,19 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
 	{
 		boardToInput->cursor.move(Input);
+	}
+	
+	//Need char for shift
+	if (*Input == '0')
+	{
+		if (minionVisibleStatus == hideMinions)
+		{
+			minionVisibleStatus = showMinions;
+		}
+		else if (minionVisibleStatus == showMinions)
+		{
+			minionVisibleStatus = hideMinions;
+		}
 	}
 
 	//Deselect
@@ -367,8 +396,22 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	//This is a working key.
 	if (*Input == 'g')
 	{
-		scrambleMap(boardToInput);
+		scrambleMap(boardToInput);	//This needs to be cleaned up to deal with minions.
 	}
+
+	//Need char for shift
+	if (*Input == '0')
+	{
+		if (minionVisibleStatus == hideMinions)
+		{
+			minionVisibleStatus = showMinions;
+		}
+		else if (minionVisibleStatus == showMinions)
+		{
+			minionVisibleStatus = hideMinions;
+		}
+	}
+
 
 	//Ends the turn and passes it to the next player.
 	//Autosave every turn.
@@ -408,6 +451,20 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 }
 
 int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
+
+	//Need char for shift
+ 	if (*Input == '0')
+	{
+		if (minionVisibleStatus == hideMinions)
+		{
+			minionVisibleStatus = showMinions;
+		}
+		else if (minionVisibleStatus == showMinions)
+		{
+			minionVisibleStatus = hideMinions;
+		}
+		return 0;
+	}
 
 	//Player treasury, cost of unit initialized to -1 to show bad inputs.
 	unitPrice = -1;

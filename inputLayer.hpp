@@ -2,6 +2,7 @@
 #define INPUT_HPP__
 
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction };
+enum specialKey {showMinions, hideMinions};
 
 class inputLayer
 {
@@ -23,6 +24,7 @@ public:
 	std::string eventText = "";
 
 	gameInputLayer status = gameBoard;
+	specialKey minionVisibleStatus = showMinions;
 	char requestedMinionToBuy = '\n';
 	int unitPrice = -1;
 

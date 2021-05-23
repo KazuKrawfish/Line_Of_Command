@@ -278,6 +278,7 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer) {
 		}
 		setCharacteristics(boardToPrint);
 		
+		//Is this for control of properties?
 		char inputGarb;
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
@@ -311,7 +312,6 @@ saveGame.close();
 return 1;
 }
 
-
 int main()
 {
 	MasterBoard GameBoard;
@@ -321,12 +321,10 @@ int main()
 
 	InputLayer.printScreen(&GameBoard);
 	char Input = ' ';
-	while (true)		//Run as long as the user wants. Infinite for loop.
+	while (true)		//Run as long as the user wants. Infinite while loop.
 	{
 		Input = _getch();
-		//Major change beginning: Use flag inputLayer to determine which input handler gets called.
-		//Ned an input handler for menu and minion action (Attack, capture, etc)
-		//Need each button press to potentially update the inputLayer flag as needed.
+		
 		if (InputLayer.status == gameBoard) 
 		{
 			InputLayer.gameBoardInput(&Input, &GameBoard);
