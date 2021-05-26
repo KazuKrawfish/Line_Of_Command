@@ -4,6 +4,7 @@
 #include "Minion.hpp"
 #include "Tile.hpp"
 #include "Cursor.hpp"
+#include "inputLayer.hpp"
 
 
 const int BOARD_SIZE		= BOARD_WIDTH * BOARD_HEIGHT;
@@ -24,10 +25,12 @@ public:
 	int deselectMinion();
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status);
 	int endTurn();
-	int attackMinion(int inputX, int inputY);
-	int destroyMinion(Minion* inputMinion, bool printMessage);
+	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
+	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer);
 	int checkWindow();
-	int clearBoard();
+	int clearBoard(inputLayer* InputLayer);
+	int consultMinionCostChart(char minionType);
+	std::string captureProperty(tile* inputTile, Minion* inputMinion);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	tile  Board[BOARD_WIDTH][BOARD_HEIGHT];
 	Cursor cursor;
