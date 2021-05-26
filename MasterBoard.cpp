@@ -9,7 +9,8 @@
 //This can be either horizontal or vertical adjacency.
 bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 {
-	if ((abs(inputX1 - inputX2) <= 1) && (abs(inputY1 - inputY2) <= 1))
+	if (   (abs(inputX1 - inputX2) <= 1) && (abs(inputY1 - inputY2) == 0)
+		|| (abs(inputX1 - inputX2) == 0) && (abs(inputY1 - inputY2) <= 1) )
 	{
 		return true;
 	}
@@ -136,7 +137,7 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
-	totalNumberOfMinions = 0;
+	//totalNumberOfMinions = 0; Don't do this because destroyMinion will decrement the totalNumberOfMinions so we don't want to double dip.
 
 	//Initialize MinionRoster to NULL AND kill all minions.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -184,34 +185,73 @@ int MasterBoard::checkWindow()
 	return 0;
 }
 
-//Determine movement range field.
-//Recursive function -_- but makes sense for this type of action.
-int MasterBoard::setRangeField(int inputX, int inputY, int inputRange) 
+//Somehow infantry are only getting two move, need to investigate.
+int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft) 
 {
-	
-	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team != playerFlag) 
-	{ 
-		return 0; 
+	//If an enemy minion on this square, return.
+	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team != playerFlag)
+	{
+		return 0;
 	}
 
-	//If this is the edge of the range, set within range and return.
-	if (inputRange == 0)									
-	{ 
-		Board[inputX][inputY].withinRange = true; 
-		return 0; 
-	}		
-
-	inputRange--;
+	//We made it, so set to within range.
 	Board[inputX][inputY].withinRange = true;
-	
-//Otherwise, perform function on all adjacent spaces without enemies.				
-//Recursion on each direction, with IF statements to prevent us from leaving the matrix.
-	if (inputX != 0)							setRangeField(inputX - 1, inputY, inputRange);
-	if (inputX != (BOARD_WIDTH - 1))			setRangeField(inputX + 1, inputY, inputRange);
-	if (inputY < (BOARD_HEIGHT- 1))				setRangeField(inputX, inputY +1, inputRange);
-	if (inputY > 0)								setRangeField(inputX, inputY -1, inputRange);
-	
+	   
+	if (moveLeft <= 0)
+	{
+		return 0;
+	}
+
+	int nextX = inputX;
+	int nextY = inputY;
+
+	//Each adjacent square will be called.
+	if (inputX != 0)
+	{
+		nextX = inputX - 1;
+		int costToMoveHere = Board[nextX][inputY].consultMovementChart(this->cursor.selectMinionPointer->type, Board[nextX][inputY].symbol);
+		if (costToMoveHere <= moveLeft)
+		{
+			setRangeField(nextX, inputY, moveLeft-costToMoveHere);
+		}
+	}
+
+
+	if (inputX < (BOARD_WIDTH - 1))
+	{
+		nextX = inputX + 1;
+		int costToMoveHere = Board[nextX][inputY].consultMovementChart(this->cursor.selectMinionPointer->type, Board[nextX][inputY].symbol);
+		if (costToMoveHere <= moveLeft)
+		{
+			setRangeField(nextX, inputY, moveLeft - costToMoveHere);
+		}
+	}
+
+	if (inputY < (BOARD_HEIGHT - 1))
+	{
+		
+		nextY = inputY + 1;
+		int costToMoveHere = Board[inputX][nextY].consultMovementChart(this->cursor.selectMinionPointer->type, Board[inputX][nextY].symbol);
+		if (costToMoveHere <= moveLeft)
+		{
+			setRangeField(inputX, nextY, moveLeft - costToMoveHere);
+		}
+		
+	}
+	if (inputY != 0)
+	{
+
+		nextY = inputY - 1;
+		int costToMoveHere = Board[inputX][nextY].consultMovementChart(this->cursor.selectMinionPointer->type, Board[inputX][nextY].symbol);
+		if (costToMoveHere <= moveLeft)
+		{
+			setRangeField(inputX, nextY, moveLeft - costToMoveHere);
+		}
+
+	}
 	return 0;
+	
+	
 }
 
 //Determine attack range field.
@@ -304,12 +344,15 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	{
 		return 1;
 	}
+	
+	//Make sure minion is able to move.
 	if (cursor.selectMinionPointer->status == hasfired ||
 		cursor.selectMinionPointer->status == hasmovedhasntfired ||
 		cursor.selectMinionPointer->status == gaveupmovehasntfired)
 	{
 		return 1;
 	}
+
 
 	//Find old address of the minion
 	int oldX = selectedMinion->locationX;
@@ -322,11 +365,38 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
 	Board[oldX][oldY].minionOnTop = NULL;
 
+	//Reset capture points for tile.
+	Board[oldX][oldY].capturePoints = 20;
+
 	//"Move" the minion to the new location.
 	selectedMinion->locationX = inputX;
 	selectedMinion->locationY = inputY;
 
 	return 0;
+}
+
+std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion) 
+{
+	std::string textToReturn = "";
+	//Subtract capturing minion's health
+	int pointsToTake = int((inputMinion->health) / 10);
+	inputTile->capturePoints -= pointsToTake;
+	
+	//
+	if (inputTile->capturePoints <= 0)
+	{
+		inputTile->controller = inputMinion->team;
+		inputTile->capturePoints = 20;
+		
+		//Create event text telling player property was captured.
+		textToReturn += "PLAYER ";
+		textToReturn += char(this->playerFlag);							//MUST FIX IMPLEMENTATION of Char-32 nonsense.
+		textToReturn += "'s ";
+		textToReturn += inputTile->description;
+		textToReturn += " CAPTURED!";
+	}
+
+	return textToReturn;
 }
 
 int MasterBoard::deselectMinion() 
@@ -351,10 +421,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	//Simplify by finding shorthand values first.
 	Minion* attackingMinion = cursor.selectMinionPointer;
 	Minion* defendingMinion = Board[inputX][inputY].minionOnTop;
-
 	
-
-
 	//Cannot attack twice!
 	if (attackingMinion->status == hasfired)			
 	{
@@ -403,7 +470,10 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer)
 {
 	//Tell the board it has no minions associated in the location where the Minion was alive.
+	//Reset capture points for the property.
 	Board[inputMinion->locationX][inputMinion->locationY].hasMinionOnTop = false;
+	Board[inputMinion->locationX][inputMinion->locationY].capturePoints = 20;
+
 
 	if (printMessage == true) 
 	{

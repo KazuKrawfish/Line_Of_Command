@@ -30,6 +30,7 @@ public:
 	int checkWindow();
 	int clearBoard(inputLayer* InputLayer);
 	int consultMinionCostChart(char minionType);
+	std::string captureProperty(tile* inputTile, Minion* inputMinion);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	tile  Board[BOARD_WIDTH][BOARD_HEIGHT];
 	Cursor cursor;

@@ -8,6 +8,7 @@
 class MasterBoard;
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired};
 enum rangeType {directFire, rangedFire};
+enum specialtyGroupType {normal, infantry};
 class Minion
 {	
 	public:
@@ -32,16 +33,10 @@ class Minion
 	MasterBoard* minionEnvironment;
 	minionStatus status;
 	rangeType rangeType;
+	specialtyGroupType specialtyGroup;
 };
 
 
-class typesOfMinions {
-	char type;
-	int movementRange;
-	int attackRange;
-	int cost;
-	//Probably should move all minion aspects that wouldn't change, over here.
-};
 
 #endif /* MINION_HPP__ */
 

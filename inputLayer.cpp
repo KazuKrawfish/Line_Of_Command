@@ -9,25 +9,30 @@
 
 
 
-int scrambleMap(MasterBoard* LoadBoard);
+int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint);
 int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer);
 
 
 int inputLayer::printStatus(MasterBoard* boardToPrint)
 {
-	tile currentTile = boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
+	tile* currentTile = &boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
 	
-	if (currentTile.controller != 0)
+	if (currentTile->controller != 0)
 	{
-		std::cout << "Player " << currentTile.controller << "'s ";
+		std::cout << "Player " << currentTile->controller << "'s ";
 	}
-	std::cout << currentTile.description << " ";
+	std::cout << currentTile->description << " ";
 	
-
-	if (currentTile.hasMinionOnTop == true)
+	//If tile is undergoing capture, let us know.
+	if (currentTile->capturePoints != 20)
 	{
-		Minion* currentMinion = currentTile.minionOnTop;
+		std::cout << "Capture Points Left: " << currentTile->capturePoints<< " ";
+	}
+
+	if (currentTile->hasMinionOnTop == true)
+	{
+		Minion* currentMinion = currentTile->minionOnTop;
 		std::cout << "Player " << currentMinion->team
 			<< "'s " << currentMinion->description
 			<< ": " << int(currentMinion->health) <<
@@ -72,7 +77,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 	std::cout << "Player " << boardToPrint->playerFlag << "'s Turn. Treasury total: " << boardToPrint->treasury[boardToPrint->playerFlag] << std::endl;
 
 	//Debug purposes- print cursor location coordinates and window coordinates.
-	//std::cout << eventText << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
+	std::cout << eventText<<std::endl; // << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
 	//std::cout << boardToPrint->windowLocation << std::endl;
 	eventText = "";
 
@@ -206,13 +211,19 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 					switch (boardToPrint->Board[j][i].minionOnTop->team)
 					{
 					case(0):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
 						break;
 					case(1):
 						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
 						break;
 					case(2):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+						break;
+					case(3):
 						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_RED);
+						break;
+					case(4):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN);
 						break;
 
 					}
@@ -240,6 +251,12 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 						break;
 					case(2):
 						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+						break;
+					case(3):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_RED);
+						break;
+					case(4):
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN);
 						break;
 					}
 					std::cout << boardToPrint->Board[j][i].symbol;
@@ -387,6 +404,27 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 						}
 					}
 
+	//Press 'c' to capture property minion is currently on.
+	//First, minion must be available.
+	//Also, must be infantry type. (Cavalry can capture too).
+	if (*Input == 'c' && boardToInput->cursor.selectMinionFlag == true )
+		if ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired
+		|| boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+		&& boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry)
+	{
+		tile* tileToCheck = &boardToInput->Board[boardToInput->cursor.selectMinionPointer->locationX][boardToInput->cursor.selectMinionPointer->locationY];
+		
+		//Must be property and must not be the current player's property (Could be neutral).
+		if ((tileToCheck->symbol == 'n' || tileToCheck->symbol == 'h' || tileToCheck->symbol == 'H' || tileToCheck->symbol == 'Q' || tileToCheck->symbol == 'm')
+			&& tileToCheck->controller != boardToInput->playerFlag)
+		{
+			eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer);
+			boardToInput->cursor.selectMinionPointer->status = hasfired;
+			boardToInput->deselectMinion();
+			status = gameBoard;
+		}
+	}
+	
 
 	return 0;
 }
@@ -396,7 +434,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	//This is a working key.
 	if (*Input == 'g')
 	{
-		scrambleMap(boardToInput);	//This needs to be cleaned up to deal with minions.
+		scrambleMap(boardToInput, this);	//This needs to be cleaned up to deal with minions.
 	}
 
 	//Need char for shift

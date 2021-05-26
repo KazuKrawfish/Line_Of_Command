@@ -1,4 +1,4 @@
-//Project X
+//Crisis Front (Project X)
 //Copyright 2021, Park Family Software Laboratory (ParkLab)
 
 
@@ -31,12 +31,13 @@
 int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer);
 
 
-
 //Messes up minions!
 //Still need to add them after.
 //This lumps all the terrain at the end, need to find a way to count neighbors and based on those, distribute tiles.
-int scrambleMap(MasterBoard* LoadBoard) 
+int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer) 
 {
+	LoadBoard->clearBoard(InputLayer);
+
 	int numberOfHillsAndMountains = BOARD_SIZE / 10;	//Actual amount you want to see.
 	int mountainWeight = numberOfHillsAndMountains;		//This will change throughout function
 	int numberOfForests = BOARD_SIZE / 10;	
@@ -278,15 +279,15 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer) {
 		}
 		setCharacteristics(boardToPrint);
 		
-		//Is this for control of properties?
-		char inputGarb;
+		//This is for properties.
+		char inputProperties;
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
 
 			for (int x = 0; x < BOARD_WIDTH; x++)
 			{
-				saveGame >> inputGarb;
-				boardToPrint->Board[x][y].controller = (int (inputGarb))-48;
+				saveGame >> inputProperties;
+				boardToPrint->Board[x][y].controller = (int (inputProperties))-48;
 			}
 		}
 	//Then load minion data:
