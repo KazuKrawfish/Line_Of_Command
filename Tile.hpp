@@ -30,6 +30,7 @@ public:
 		controller = 0;
 		production = 0;
 		capturePoints = 20;
+
 	}
 
 	int consultMovementChart(char minionType, char terrainType)
@@ -103,6 +104,32 @@ public:
 	
 	}
 
+	bool checkForProperty()
+	{
+		bool isProperty = false;
+
+		//Non property included for clarity.
+		switch (this->symbol)
+		{
+		case('.'):
+		case('+'):
+		case('^'):
+		case('M'):
+		case('='):
+			isProperty = false;
+			break;
+		case('H'):
+		case('m'):
+		case('n'):
+		case('h'):
+		case('Q'):
+			isProperty = true;
+			break;
+		}
+
+		return isProperty;
+	}
+
 	int production;				//Amount of money it produces
 	int controller;				//Player number 1/2 or neutral 0.
 	char symbol;
@@ -112,6 +139,8 @@ public:
 	std::string description;
 	double defenseFactor;		//Higher is better (ie mountains are 1.4)
 	int capturePoints;
+	int locationX;
+	int locationY;
 	int clearTile() {
 		symbol = '.';
 		defenseFactor = 1.1;
@@ -123,6 +152,7 @@ public:
 		controller = 0;
 		production = 0;
 		capturePoints = 20;
+
 		return 0;
 	}
 

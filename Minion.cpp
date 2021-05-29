@@ -12,6 +12,7 @@ Minion::Minion()
 	team = 0;						//Team 0 is the neutral team.
 	status = hasntmovedorfired;
 	health = 100;
+
 	
 }
 

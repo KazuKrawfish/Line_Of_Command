@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include "inputLayer.hpp"
+#include "compie.hpp"
 
 
 //If the two input coordinates are next to each other, return true. Otherwise, return false.
@@ -129,6 +130,14 @@ MasterBoard::MasterBoard()
 		treasury[i] = 0;
 	}
 
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			Board[x][y].locationX = x;
+			Board[x][y].locationY = y;
+		}
+	}
 }
 
 int MasterBoard::clearBoard(inputLayer* InputLayer) 
@@ -338,7 +347,7 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 int MasterBoard::moveMinion(int inputX, int inputY)
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
-	
+
 	//First make sure the move is legal. Must be within range, must not have moved.
 	if (Board[inputX][inputY].withinRange == false)
 	{
@@ -353,6 +362,25 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 		return 1;
 	}
 
+	//If there is a minion below cursor AND it's not this exact minion, movement failure
+	if (Board[cursor.getX()][cursor.getY()].hasMinionOnTop == true
+		&& !(cursor.selectMinionPointer->locationX == cursor.getX()
+			&& cursor.selectMinionPointer->locationY == cursor.getY()))
+	{
+		return 1;
+	}
+
+	//If there is a minion below cursor AND it IS this exact minion, "fake" move.
+	if (Board[cursor.getX()][cursor.getY()].hasMinionOnTop == true
+		&& (cursor.selectMinionPointer->locationX == cursor.getX()
+			&& cursor.selectMinionPointer->locationY == cursor.getY()))
+	{
+		cursor.selectMinionPointer->status = hasmovedhasntfired;
+		deselectMinion();
+		return 0;
+	}
+
+	//Otherwise move.
 
 	//Find old address of the minion
 	int oldX = selectedMinion->locationX;
@@ -371,6 +399,9 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	//"Move" the minion to the new location.
 	selectedMinion->locationX = inputX;
 	selectedMinion->locationY = inputY;
+
+	cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
+	deselectMinion();
 
 	return 0;
 }
@@ -461,6 +492,12 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	{	
 		bool printMessage = true;
 		destroyMinion(attackingMinion, printMessage, InputLayer);
+	}
+	else 
+	{
+		//If the attacker survived, deselect.
+		attackingMinion->status = hasfired;
+		deselectMinion();
 	}
 
 	return 0;

@@ -1,8 +1,12 @@
 #ifndef INPUT_HPP__
 #define INPUT_HPP__
 
+#include "compie.hpp"
+
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction };
 enum specialKey {showMinions, hideMinions};
+class compie;
+
 
 class inputLayer
 {
@@ -20,14 +24,14 @@ public:
 	int menuInput(char* Input, MasterBoard* boardToInput);
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);
-	//These will all be wrapped into the inputLayer class soon.
+	
 	std::string eventText = "";
 
 	gameInputLayer status = gameBoard;
 	specialKey minionVisibleStatus = showMinions;
 	char requestedMinionToBuy = '\n';
 	int unitPrice = -1;
-
+	compie* computerPlayer;
 
 private:
 

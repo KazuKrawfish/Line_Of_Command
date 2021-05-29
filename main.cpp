@@ -25,11 +25,11 @@
 #include "Tile.hpp"
 #include "Minion.hpp"
 #include "inputLayer.hpp"
+#include "compie.hpp"
 
 //Global variables need to be moved.
 
-int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer);
-
+int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer);
 
 //Messes up minions!
 //Still need to add them after.
@@ -223,10 +223,12 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 }
 
 //Load saved game and initialize the board with its contents.
-int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer) {
+int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer) {
 	
 	//Clear board in case scenario load was called by player menu later in game.
 	boardToPrint->clearBoard(InputLayer);
+	InputLayer->computerPlayer = ComputerPlayer;
+	ComputerPlayer->InputLayer = InputLayer;
 
 	std::ifstream saveGame;
 	std::string line;
@@ -317,8 +319,9 @@ int main()
 {
 	MasterBoard GameBoard;
 	inputLayer InputLayer;
+	compie ComputerPlayer;
 	
-	scenarioLoad(&GameBoard, &InputLayer);
+	scenarioLoad(&GameBoard, &InputLayer, &ComputerPlayer);
 
 	InputLayer.printScreen(&GameBoard);
 	char Input = ' ';

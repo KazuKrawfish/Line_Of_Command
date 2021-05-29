@@ -6,12 +6,13 @@
 #include <fstream>
 #include <conio.h>
 #include <windows.h>
+#include "compie.hpp"
 
 
 
 int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint);
-int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer);
+int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer);
 
 
 int inputLayer::printStatus(MasterBoard* boardToPrint)
@@ -311,6 +312,9 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 		{
 			if (boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 			{
+				//DEBUG
+				computerPlayer->determineMinionTasks(boardToInput);
+				//DEBUG
 				status = minionAction;
 			}
 		}	//Else if empty property, select it. No minion on top, right team, must be factory to select.
@@ -363,28 +367,17 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	}
 
 	//Move minion command
-	//If not on top, then move the unit.
+	//If minion selected and hasn't moved or fired, attempt to move.
+	//The moveMinion function will check if we are on top of ourselves or another minion.
 	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true
-		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false
 		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
 	{
 		if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 		{	//Change status appropriately for successful movement.
-			boardToInput->cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
-			boardToInput->deselectMinion();
+			//boardToInput->cursor.selectMinionPointer->status = hasmovedhasntfired;
+			//boardToInput->deselectMinion();
 			status = gameBoard;
 		}
-	}
-
-	//If already on top, just "move" by not moving. This allows the user to fire without actually changing position.
-	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true
-		&& boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX()
-		&& boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY()
-		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
-	{
-		boardToInput->cursor.selectMinionPointer->status = gaveupmovehasntfired;	//I think this is doubletap.
-		boardToInput->deselectMinion();
-		status = gameBoard;
 	}
 
 	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours.
@@ -398,8 +391,6 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 						bool attackSuccess = boardToInput->attackMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this);
 						if (attackSuccess == 0)
 						{
-							boardToInput->cursor.selectMinionPointer->status = hasfired;
-							boardToInput->deselectMinion();
 							status = gameBoard;
 						}
 					}
@@ -415,8 +406,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 		tile* tileToCheck = &boardToInput->Board[boardToInput->cursor.selectMinionPointer->locationX][boardToInput->cursor.selectMinionPointer->locationY];
 		
 		//Must be property and must not be the current player's property (Could be neutral).
-		if ((tileToCheck->symbol == 'n' || tileToCheck->symbol == 'h' || tileToCheck->symbol == 'H' || tileToCheck->symbol == 'Q' || tileToCheck->symbol == 'm')
-			&& tileToCheck->controller != boardToInput->playerFlag)
+		if (tileToCheck->checkForProperty() && tileToCheck->controller != boardToInput->playerFlag)
 		{
 			eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer);
 			boardToInput->cursor.selectMinionPointer->status = hasfired;
@@ -435,6 +425,12 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	if (*Input == 'g')
 	{
 		scrambleMap(boardToInput, this);	//This needs to be cleaned up to deal with minions.
+	}
+
+	//Another working key for compie
+	if (*Input == 'c') 
+	{
+		computerPlayer->moveMinions(boardToInput);
 	}
 
 	//Need char for shift
@@ -464,7 +460,9 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 
 	if (*Input == 'l')
 	{
-		scenarioLoad(boardToInput, this);
+		//DEBUG- this specially load a certain compie but instead loads the same exact one.
+		std::cout << "DISABLED DISABLED DISABLED" << std::endl;
+		scenarioLoad(boardToInput, this, computerPlayer);
 		status = gameBoard;
 		//Load new map
 	}
