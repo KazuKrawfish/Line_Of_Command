@@ -12,6 +12,85 @@ int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
 
 //Above functions are "utilities" that need to find a home.
 
+//Search for the closest enemy property to capture.
+int compie::deployMove(MasterBoard* boardToUse) 
+{	
+	int distanceToObjective = 999;
+	int distanceToTargetTile = 999;
+	tileToTarget = NULL;
+	tile* objectiveTile = NULL;
+
+		//Now go through the whole board.
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			//If the current tile is an enemy property
+			if (boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag)
+			{
+				//If it is closer than what we previously had targeted, set it as the objective.
+				int rangeToProp = computeDistance(x, boardToUse->cursor.selectMinionPointer->locationX, y, boardToUse->cursor.selectMinionPointer->locationY);
+				if (rangeToProp < distanceToObjective)
+				{
+					distanceToObjective = rangeToProp;
+					objectiveTile = &(boardToUse->Board[x][y]);
+				}
+			}
+		}
+	}
+
+	//Now we set a new search box that is much smaller. 
+	//This is for actual tiles we can move to, that are closest to the enemy tile we're targeting.
+	
+	Cursor* myCursor = &(boardToUse->cursor);
+	//First set the starting point for our search (x).
+	//Then set the upper bounds for our search (maxX).
+	int minX = myCursor->selectMinionPointer->locationX - myCursor->selectMinionPointer->movementRange;
+	int maxX = myCursor->selectMinionPointer->locationX + myCursor->selectMinionPointer->movementRange;
+	if (minX < 0)
+	{
+		minX = 0;
+	}
+	if (maxX > BOARD_WIDTH)
+	{
+		maxX = 0;
+	}
+	//Same with y and maxY.
+	int minY = myCursor->selectMinionPointer->locationY - myCursor->selectMinionPointer->movementRange;
+	int maxY = myCursor->selectMinionPointer->locationY + myCursor->selectMinionPointer->movementRange;
+	if (minY < 0)
+	{
+		minY = 0;
+	}
+	if (maxY > BOARD_HEIGHT)
+	{
+		maxY = 0;
+	}
+
+	for (int x = minX; x < maxX; x++)
+	{
+		for (int y = minY; y < maxY; y++)
+
+		{
+			//Tile must be free of minions and within range
+			if (boardToUse->Board[x][y].hasMinionOnTop == false && boardToUse->Board[x][y].withinRange == true)
+			{
+				//If the ccurrent tile is closest to the objective (NOT THE MINION!).
+				int rangeToTile = computeDistance(x, objectiveTile->locationX, y, objectiveTile->locationY);
+				if (rangeToTile < distanceToTargetTile)
+				{
+					distanceToTargetTile = rangeToTile;
+					tileToTarget = &(boardToUse->Board[x][y]);
+				}
+			}
+		}	
+	}
+
+	//If the minion cannot move for some reason (Too many friendly units, etc) This should return 999
+	return distanceToTargetTile;
+
+}
+
 int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy, Cursor* myCursor, MasterBoard* boardToUse)
 {
 		//If the square to the left has a minion and that minion is enemy.
@@ -249,10 +328,16 @@ int compie::determineMinionTasks(MasterBoard* boardToUse)
 		}
 	}
 	
-	minionTasking = moveTowardsEnemy;
-	//DEBUG
-	std::cout << "Recommend move towards enemies " << std::endl;
+	distance = deployMove(boardToUse);
+	if (distance < 999) 
+	{
+		minionTasking = moveTowardsEnemy;
+		//DEBUG
+		std::cout << "Recommend move towards enemies " << std::endl;
+		return 1;
+	}
 
+	minionTasking = holdPosition;
 	return 0;
 }
 
@@ -289,11 +374,21 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 		//The move automatically deselects. Thus reselect.
 		boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
 		boardToUse->captureProperty(tileToTarget, boardToUse->cursor.selectMinionPointer);
-		boardToUse->cursor.selectMinionPointer->status = hasfired;
+	
 		boardToUse->deselectMinion();
 	}
 
 	if (minionTasking == moveTowardsEnemy) 
+	{
+		//Move cursor
+		boardToUse->cursor.XCoord = tileToTarget->locationX;
+		boardToUse->cursor.YCoord = tileToTarget->locationY;
+
+		//moveMinion needs to contain all the status elements too.
+		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+	}
+
+	if (minionTasking == holdPosition)
 	{
 		boardToUse->deselectMinion();
 	}

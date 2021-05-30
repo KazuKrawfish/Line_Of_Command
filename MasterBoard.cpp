@@ -427,6 +427,7 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion)
 		textToReturn += " CAPTURED!";
 	}
 
+	inputMinion->status = hasfired;
 	return textToReturn;
 }
 

@@ -9,13 +9,14 @@
 #include "Tile.hpp"
 #include "inputLayer.hpp"
 
-enum minionTaskingType { attackLocalMinion, captureLocalProperty, moveTowardsEnemy };
+enum minionTaskingType { attackLocalMinion, captureLocalProperty, moveTowardsEnemy, holdPosition };
 class inputLayer;
 
 
 class compie 
 {
 public:
+	int deployMove(MasterBoard* boardToUse);
 	int checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy,  Cursor* myCursor, MasterBoard* boardToUse);
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY);
 	int findEnemiesWithinLocalArea(MasterBoard* boardToUse);

@@ -409,7 +409,6 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 		if (tileToCheck->checkForProperty() && tileToCheck->controller != boardToInput->playerFlag)
 		{
 			eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer);
-			boardToInput->cursor.selectMinionPointer->status = hasfired;
 			boardToInput->deselectMinion();
 			status = gameBoard;
 		}
