@@ -35,6 +35,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		description = "Infantry";
 		movementRange = 3;
 		attackRange = 1;
+		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
 		break;
@@ -44,6 +45,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		description = "Armor";
 		movementRange = 6;
 		attackRange = 1; 
+		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
 		break;
@@ -53,6 +55,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		description = "Artillery";
 		movementRange = 5;
 		attackRange = 3;
+		visionRange = 2;
 		rangeType = rangedFire;
 		specialtyGroup = normal;
 		break;
@@ -62,6 +65,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		description = "Cavalry";
 		movementRange = 8;
 		attackRange = 1;
+		visionRange = 5;
 		rangeType = directFire;
 		specialtyGroup = infantry;
 		break; 
@@ -71,6 +75,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		description = "Rocket";
 		movementRange = 4;
 		attackRange = 5;
+		visionRange = 2;
 		rangeType = rangedFire;
 		specialtyGroup = normal;
 		break; 

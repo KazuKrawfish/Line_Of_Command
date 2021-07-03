@@ -310,6 +310,8 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* Comp
 			boardToPrint->createMinion(type, locationX, locationY, team, health, status);
 	}
 	
+	//Set vision for this player.
+	boardToPrint->setVisionField();
 
 saveGame.close();
 return 1;

@@ -29,6 +29,7 @@ class Minion
 	char type;					//Type of minion i.e. infantry, artillery, etc.
 	int movementRange;
 	int attackRange;
+	int visionRange;
 	std::string description;	//For user interface only.
 	int team;
 	double health;

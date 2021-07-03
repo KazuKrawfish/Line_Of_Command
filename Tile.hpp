@@ -26,11 +26,12 @@ public:
 		hasMinionOnTop = false;
 		minionOnTop = NULL;
 		withinRange = false;
+		withinVision = false;
 		minionOnTop = NULL;
 		controller = 0;
 		production = 0;
 		capturePoints = 20;
-
+		
 	}
 
 	int consultMovementChart(char minionType, char terrainType)
@@ -136,6 +137,7 @@ public:
 	bool hasMinionOnTop;
 	Minion* minionOnTop;
 	bool withinRange;
+	bool withinVision;
 	std::string description;
 	double defenseFactor;		//Higher is better (ie mountains are 1.4)
 	int capturePoints;
@@ -148,10 +150,12 @@ public:
 		hasMinionOnTop = false;
 		minionOnTop = NULL;
 		withinRange = false;
+		withinVision = false;
 		minionOnTop = NULL;
 		controller = 0;
 		production = 0;
 		capturePoints = 20;
+
 
 		return 0;
 	}

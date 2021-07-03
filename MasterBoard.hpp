@@ -17,9 +17,11 @@ public:
 	
 	MasterBoard();
 	
-	int treasury[NUMBEROFPLAYERS+1];	//1 extra to avoid potential error when accessing, later.
+	int treasury[NUMBEROFPLAYERS+1];	//1 extra "player" so that treasury[playerFlag] behaves as expected. (There is no player 0.)
 	int setRangeField(int inputX, int inputY, int inputRange);
+	int setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY);
 	int setAttackField(int inputX, int inputY, int inputRange);
+	int setVisionField();
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();

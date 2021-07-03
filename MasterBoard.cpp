@@ -194,7 +194,7 @@ int MasterBoard::checkWindow()
 	return 0;
 }
 
-//Somehow infantry are only getting two move, need to investigate.
+
 int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft) 
 {
 	//If an enemy minion on this square, return.
@@ -261,6 +261,112 @@ int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft)
 	return 0;
 	
 	
+}
+
+
+int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY) 
+{
+	//If we have already been here, return.
+	if (Board[inputX][inputY].withinVision == true) 
+	{
+		return 0;
+	}
+
+	//If this is the minion starting point, we can see.
+	if (inputX == minionX && inputY == minionY) 
+	{
+		Board[inputX][inputY].withinVision = true;
+	}
+
+	//As long as this tile is not a non-adjacent forest, we can see.
+	if (Board[inputX][inputY].symbol != '+' || isAdjacent(inputX, minionX, inputY, minionY))
+	{
+		Board[inputX][inputY].withinVision = true;
+	}
+
+	//If this was our last tile, we had the chance to "see it", but we won't go further.
+	if (visionLeft <= 0)
+	{
+		return 1;
+	}
+
+	int nextX = inputX;
+	int nextY = inputY;
+
+	//Each adjacent square will be called if it hasn't already been found withinVision == true. 
+	if (inputX != 0 && Board[nextX][inputY].withinVision != true) 
+	{
+		nextX = inputX - 1;
+		
+		if (visionLeft >= 1)
+		{
+			setIndividualVisionField(nextX, inputY, visionLeft - 1, minionX, minionY);
+		}
+	}
+
+	if (inputX < (BOARD_WIDTH - 1))
+	{
+		nextX = inputX + 1;
+		if (visionLeft >= 1)
+		{
+			setIndividualVisionField(nextX, inputY, visionLeft - 1, minionX, minionY);
+		}
+	}
+
+	if (inputY < (BOARD_HEIGHT - 1))
+	{
+
+		nextY = inputY + 1;
+		
+		if (visionLeft >= 1)
+		{
+			setIndividualVisionField(inputX, nextY, visionLeft-1, minionX, minionY);
+		}
+
+	}
+
+	if (inputY != 0)
+	{
+
+		nextY = inputY - 1;
+		
+		if (visionLeft >= 1)
+		{
+			setIndividualVisionField(inputX, nextY, visionLeft-1, minionX, minionY);
+		}
+
+	}
+	return 0;
+
+}
+
+//Determine vision field for all minions for a player.
+//This should be called every time the turn changes, and every time  minion moves or attacks.
+int MasterBoard::setVisionField() 
+{
+	//First set the board to no vision initially.
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			Board[x][y].withinVision = false;
+		}
+	}
+
+	//Go through the roster of minions and determine if it's player controlled.
+	//Then set vision for everything that minion can see.
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	{
+		if (minionRoster[i] != NULL)
+		{
+			if (minionRoster[i]->team == playerFlag)
+			{
+				Minion* myMinion = minionRoster[i];
+				setIndividualVisionField(myMinion->locationX, myMinion->locationY, myMinion->visionRange, myMinion->locationX, myMinion->locationY);
+			}
+		}
+	}
+	return 0;
 }
 
 //Determine attack range field.
@@ -403,6 +509,8 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
 	deselectMinion();
 
+	setVisionField();
+
 	return 0;
 }
 
@@ -493,6 +601,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	{	
 		bool printMessage = true;
 		destroyMinion(attackingMinion, printMessage, InputLayer);
+		setVisionField();
 	}
 	else 
 	{
@@ -500,6 +609,8 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		attackingMinion->status = hasfired;
 		deselectMinion();
 	}
+
+
 
 	return 0;
 
@@ -562,9 +673,8 @@ int MasterBoard::endTurn() {
 
 		}
 	}
-
 	
-
+	setVisionField();
 
 	return 0;
 
