@@ -22,14 +22,15 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 }
 
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
-//In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.
+//In order they are Infantry, Heavy Infantry, Armor, Artillery, Cavalry, and Rocket.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
-//												  i    a    r     c    R
-const double ATTACK_VALUES_MATRIX[5][5] = {		0.50, 0.05,0.10,0.10,0.25,
-												0.65,0.50,0.60,0.60,0.70,
-												0.60,0.40,0.50,0.55,0.60,
-												0.60,0.10,0.20,0.35,0.45,
-												0.80,0.60,0.65,0.70,0.80};
+//												i     s     a     r     c     R
+const double ATTACK_VALUES_MATRIX[6][6] = {		0.50, 0.50, 0.05, 0.10, 0.15, 0.25,
+												0.55, 0.55, 0.50, 0.50, 0.60, 0.70,
+												0.65, 0.65,	0.50, 0.60, 0.60, 0.70,
+												0.60, 0.60,	0.40, 0.50, 0.55, 0.60,
+												0.60, 0.60, 0.10, 0.20, 0.35, 0.45,
+												0.80, 0.80,	0.60, 0.65, 0.70, 0.80};
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Needs defaults to catch error!!!!
@@ -43,17 +44,19 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('i'):
 		x = 0;
 		break;
-	case('a'):
+	case('s'):
 		x = 1;
-		break;
-	case('r'):
+	case('a'):
 		x = 2;
 		break;
-	case('c'):
+	case('r'):
 		x = 3;
 		break;
-	case('R'):
+	case('c'):
 		x = 4;
+		break;
+	case('R'):
+		x = 5;
 		break;
 	}
 
@@ -62,17 +65,19 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('i'):
 		y = 0;
 		break;
-	case('a'):
+	case('s'):
 		y = 1;
-		break;
-	case('r'):
+	case('a'):
 		y = 2;
 		break;
-	case('c'):
+	case('r'):
 		y = 3;
 		break;
-	case('R'):
+	case('c'):
 		y = 4;
+		break;
+	case('R'):
+		y = 5;
 		break;
 	}
 
@@ -93,6 +98,9 @@ int MasterBoard::consultMinionCostChart(char minionType)
 	{
 	case('i'):
 		price = 1000;
+		break;
+	case('s'):
+		price = 3000;
 		break;
 	case('a'):
 		price = 7000;
@@ -194,7 +202,6 @@ int MasterBoard::checkWindow()
 	return 0;
 }
 
-
 int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft) 
 {
 	//If an enemy minion on this square, return.
@@ -263,15 +270,8 @@ int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft)
 	
 }
 
-
 int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY) 
 {
-	//If we have already been here, return.
-	if (Board[inputX][inputY].withinVision == true) 
-	{
-		return 0;
-	}
-
 	//If this is the minion starting point, we can see.
 	if (inputX == minionX && inputY == minionY) 
 	{
@@ -280,6 +280,11 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 
 	//As long as this tile is not a non-adjacent forest, we can see.
 	if (Board[inputX][inputY].symbol != '+' || isAdjacent(inputX, minionX, inputY, minionY))
+	{
+		Board[inputX][inputY].withinVision = true;
+	}
+
+	if (Board[inputX][inputY].controller == playerFlag) 
 	{
 		Board[inputX][inputY].withinVision = true;
 	}
@@ -294,7 +299,7 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 	int nextY = inputY;
 
 	//Each adjacent square will be called if it hasn't already been found withinVision == true. 
-	if (inputX != 0 && Board[nextX][inputY].withinVision != true) 
+	if (inputX != 0 ) 
 	{
 		nextX = inputX - 1;
 		
@@ -341,7 +346,7 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 }
 
 //Determine vision field for all minions for a player.
-//This should be called every time the turn changes, and every time  minion moves or attacks.
+//This should be called every time the turn changes, and every time  minion moves or attacks. Also any time a minion is created. 
 int MasterBoard::setVisionField() 
 {
 	//First set the board to no vision initially.
@@ -366,6 +371,7 @@ int MasterBoard::setVisionField()
 			}
 		}
 	}
+
 	return 0;
 }
 
@@ -388,6 +394,16 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 			else Board[x][y].withinRange = false;
 		}
 	}
+
+	//If it is ranged unit, cannot attack next door.
+	if (cursor.selectMinionPointer->rangeType == rangedFire)
+	{
+		Board[inputX - 1][inputY].withinRange = false;
+		Board[inputX + 1][inputY].withinRange = false;
+		Board[inputX][inputY - 1].withinRange = false;
+		Board[inputX][inputY + 1].withinRange = false;
+	}
+
 	return 0;
 
 }
@@ -406,6 +422,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 				minionRoster[i]->status = (minionStatus)status;
 				Board[inputX][inputY].minionOnTop = minionRoster[i];
 				totalNumberOfMinions++;
+				setVisionField();
 				return 0;
 			}
 		}
@@ -481,7 +498,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 		&& (cursor.selectMinionPointer->locationX == cursor.getX()
 			&& cursor.selectMinionPointer->locationY == cursor.getY()))
 	{
-		cursor.selectMinionPointer->status = hasmovedhasntfired;
+		cursor.selectMinionPointer->status = gaveupmovehasntfired;
 		deselectMinion();
 		return 0;
 	}

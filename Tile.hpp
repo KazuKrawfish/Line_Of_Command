@@ -6,10 +6,11 @@
 #include <stdio.h>
 
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
-//In order they are Infantry, Armor, Artillery, Cavalry, and Rocket.
+//In order they are Infantry, Specialist, Armor, Artillery, Cavalry, and Rocket.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //												        . + ^ M  H m n h Q =
-const int MOVE_VALUES_MATRIX[5][10] =			/*i*/  { 1,1,2,3, 1,1,1,1,1,1,
+const int MOVE_VALUES_MATRIX[6][10] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,
+												/*s*/   1,1,1,1, 1,1,1,1,1,1,
 												/*a*/	1,2,2,99,1,1,1,1,1,1,
 												/*r*/	1,2,2,99,1,1,1,1,1,1,
 												/*c*/	1,1,2,99,1,1,1,1,1,1,
@@ -45,17 +46,20 @@ public:
 		case('i'):
 			x = 0;
 			break;
-		case('a'):
+		case('s'):
 			x = 1;
 			break;
-		case('r'):
+		case('a'):
 			x = 2;
 			break;
-		case('c'):
+		case('r'):
 			x = 3;
 			break;
-		case('R'):
+		case('c'):
 			x = 4;
+			break;
+		case('R'):
+			x = 5;
 			break;
 		}
 

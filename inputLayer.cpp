@@ -205,20 +205,20 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 				std::cout << '*';
 			}
 			else
-				//Is there a minion there? Are we hiding them right now?
-				if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions)
+				//Is there a minion there? Do we have minions toggled on as visible? Is the minion within vision?
+				if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions && boardToPrint->Board[j][i].withinVision == true)
 				{
 					//Determine team and then set the color.
 					switch (boardToPrint->Board[j][i].minionOnTop->team)
 					{
 					case(0):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 						break;
 					case(1):
 						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
 						break;
 					case(2):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
+						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE );
 						break;
 					case(3):
 						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_RED);
@@ -232,7 +232,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 					std::cout << boardToPrint->Board[j][i].minionOnTop->type;
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 				}
-				//If no minion show range, unless "hide" is on.
+				//If no minion show range, unless "hide range (0)" is on.
 				else if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
 				{
 					
@@ -245,7 +245,10 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 					switch (boardToPrint->Board[j][i].controller)
 					{
 					case(0):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+						if(boardToPrint->Board[j][i].withinVision == true)
+							SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+						else
+							SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
 						break;
 					case(1):
 						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
@@ -260,6 +263,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN);
 						break;
 					}
+
 					std::cout << boardToPrint->Board[j][i].symbol;
 					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 				}

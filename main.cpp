@@ -213,7 +213,6 @@ int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 				<< boardToPrint->minionRoster[i]->locationY << " "
 				<< boardToPrint->minionRoster[i]->team << " "
 				<< boardToPrint->minionRoster[i]->seniority << " "
-				<< int(boardToPrint->minionRoster[i]->rangeType) << " "
 				<< int(boardToPrint->minionRoster[i]->status) << " "
 				<< int(boardToPrint->minionRoster[i]->health) << std::endl;
 		}
@@ -295,7 +294,7 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* Comp
 	//Then load minion data:
 	int numberOfMinions;
 	saveGame >> numberOfMinions;
-	int health, locationX, locationY, team, seniority, rangeType, status;
+	int health, locationX, locationY, team, seniority, status;
 	char type;
 	for (int y = 0; y < numberOfMinions; y++)
 	{
@@ -303,16 +302,12 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* Comp
 			>> locationX 
 			>> locationY 
 			>> team 
-			>> seniority 
-			>> rangeType 
+			>> seniority  
 			>> status 
 			>> health;
 			boardToPrint->createMinion(type, locationX, locationY, team, health, status);
 	}
 	
-	//Set vision for this player.
-	boardToPrint->setVisionField();
-
 saveGame.close();
 return 1;
 }
