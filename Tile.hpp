@@ -9,13 +9,14 @@
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, and Rocket.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //												        . + ^ M  H m n h Q =
-const int MOVE_VALUES_MATRIX[6][10] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,
+const int MOVE_VALUES_MATRIX[8][10] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,
 												/*s*/   1,1,1,1, 1,1,1,1,1,1,
 												/*a*/	1,2,2,99,1,1,1,1,1,1,
 												/*r*/	1,2,2,99,1,1,1,1,1,1,
 												/*c*/	1,1,2,99,1,1,1,1,1,1,
-												/*R*/	2,3,3,99,1,1,1,1,1,1};
-
+												/*R*/	2,3,3,99,1,1,1,1,1,1,
+												/*T*/	1,2,2,99,1,1,1,1,1,1,
+												/*A*/	1,2,2,99,1,1,1,1,1,1, };
 
 class tile 
 {

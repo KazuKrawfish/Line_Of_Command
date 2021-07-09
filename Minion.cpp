@@ -18,7 +18,7 @@ Minion::Minion()
 
 //
 //Always use this constructor, it gives the new Minion all required properties.
-//When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement and consultMinionCostChart.
+//When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement costs and consultMinionCostChart.
 //
 Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth)
 {
@@ -56,6 +56,26 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		movementRange = 6;
 		attackRange = 1; 
 		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		break;
+	}
+	case('A'):
+	{
+		description = "Anti-Air";
+		movementRange = 6;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		break;
+	}
+	case('T'):
+	{
+		description = "Heavy Armor";
+		movementRange = 5;
+		attackRange = 1;
+		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
 		break;

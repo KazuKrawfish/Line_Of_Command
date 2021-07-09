@@ -22,15 +22,17 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 }
 
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
-//In order they are Infantry, Heavy Infantry, Armor, Artillery, Cavalry, and Rocket.
-//When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
-//												i     s     a     r     c     R
-const double ATTACK_VALUES_MATRIX[6][6] = {		0.50, 0.50, 0.05, 0.10, 0.15, 0.25,
-												0.55, 0.55, 0.50, 0.50, 0.60, 0.70,
-												0.65, 0.65,	0.50, 0.60, 0.60, 0.70,
-												0.60, 0.60,	0.40, 0.50, 0.55, 0.60,
-												0.60, 0.60, 0.10, 0.20, 0.35, 0.45,
-												0.80, 0.80,	0.60, 0.65, 0.70, 0.80};
+//In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air.
+//When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
+//												i     s     a     r     c     R     T     A
+const double ATTACK_VALUES_MATRIX[8][8] = {		0.50, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05,
+												0.55, 0.55, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50,
+												0.65, 0.65,	0.50, 0.60, 0.60, 0.70, 0.35, 0.50,
+												0.60, 0.60,	0.40, 0.50, 0.55, 0.60, 0.30, 0.40,
+												0.60, 0.60, 0.10, 0.20, 0.35, 0.40, 0.05, 0.10,
+												0.80, 0.80,	0.60, 0.65, 0.70, 0.80, 0.45, 0.60,
+												0.70, 0.70, 0.70, 0.80, 0.80, 0.85, 0.50, 0.70, 	
+												0.95, 0.90, 0.15, 0.25, 0.40, 0.45, 0.05, 0.20	};
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Needs defaults to catch error!!!!
@@ -46,6 +48,7 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 		break;
 	case('s'):
 		x = 1;
+		break;
 	case('a'):
 		x = 2;
 		break;
@@ -58,6 +61,12 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('R'):
 		x = 5;
 		break;
+	case('T'):
+		x = 6;
+		break;
+	case('A'):
+		x = 7;
+		break;
 	}
 
 	switch (attackerType)
@@ -67,6 +76,7 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 		break;
 	case('s'):
 		y = 1;
+		break;
 	case('a'):
 		y = 2;
 		break;
@@ -78,6 +88,12 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 		break;
 	case('R'):
 		y = 5;
+		break;
+	case('T'):
+		y = 6;
+		break;
+	case('A'):
+		y = 7;
 		break;
 	}
 
@@ -113,6 +129,12 @@ int MasterBoard::consultMinionCostChart(char minionType)
 		break;
 	case('R'):
 		price = 15000;
+		break;
+	case('T'):
+		price = 16000;
+		break;
+	case('A'):
+		price = 8000;
 		break;
 	}
 	
