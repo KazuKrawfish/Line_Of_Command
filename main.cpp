@@ -26,6 +26,7 @@
 #include "Minion.hpp"
 #include "inputLayer.hpp"
 #include "compie.hpp"
+#include <curses.h>
 
 //Global variables need to be moved.
 
@@ -93,6 +94,9 @@ int setCharacteristics(MasterBoard* LoadBoard)
 			{
 				LoadBoard->Board[x][y].description = "Clear terrain.";
 				LoadBoard->Board[x][y].defenseFactor = 1.1;
+				LoadBoard->Board[x][y].Image = {	'.','.','.',
+													'.','.','.',
+													'.','.','.' };
 				break;
 			}
 			case('H'):
@@ -100,6 +104,9 @@ int setCharacteristics(MasterBoard* LoadBoard)
 				LoadBoard->Board[x][y].description = "City.";
 				LoadBoard->Board[x][y].defenseFactor = 1.3;
 				LoadBoard->Board[x][y].production = 2000;
+				LoadBoard->Board[x][y].Image = {	'H','H','H',
+													'H','H','H',
+													'H','H','H' };
 				break;
 			}
 			case('m'):
@@ -107,6 +114,9 @@ int setCharacteristics(MasterBoard* LoadBoard)
 				LoadBoard->Board[x][y].description = "Mine.";
 				LoadBoard->Board[x][y].defenseFactor = 1.2;
 				LoadBoard->Board[x][y].production = 3000;
+				LoadBoard->Board[x][y].Image = {	' ','_',' ',
+													'/','n','\\',
+													'.','.','.' };
 				break;
 			}
 			case('n'):
@@ -114,6 +124,9 @@ int setCharacteristics(MasterBoard* LoadBoard)
 				LoadBoard->Board[x][y].description = "Settlement.";
 				LoadBoard->Board[x][y].defenseFactor = 1.3;
 				LoadBoard->Board[x][y].production = 1000;
+				LoadBoard->Board[x][y].Image = {	'n','.','n',
+													'.','.','.',
+													'n','.','n' };
 				break;
 			}
 			case('h'):
@@ -121,6 +134,9 @@ int setCharacteristics(MasterBoard* LoadBoard)
 				LoadBoard->Board[x][y].description = "Factory.";
 				LoadBoard->Board[x][y].defenseFactor = 1.3;
 				LoadBoard->Board[x][y].production = 1000;
+				LoadBoard->Board[x][y].Image = {	'|','|','|',
+													'H','H','H',
+													'H','H','H' };
 				break;
 			}			
 			case('Q'):
@@ -128,30 +144,45 @@ int setCharacteristics(MasterBoard* LoadBoard)
 				LoadBoard->Board[x][y].description = "Headquarters.";
 				LoadBoard->Board[x][y].defenseFactor = 1.4;
 				LoadBoard->Board[x][y].production = 1000;
+				LoadBoard->Board[x][y].Image = {	'|','*','|',
+													'|','H','|',
+													'|','H','|' };
 				break;
 			}
 			case('='):
 			{
 				LoadBoard->Board[x][y].description = "Road.";
 				LoadBoard->Board[x][y].defenseFactor = 1.0;
+				LoadBoard->Board[x][y].Image = {	'=',' ','=',
+													'=',' ','=',
+													'=',' ','=' };
 				break;
 			}
 			case('^'):
 			{
 				LoadBoard->Board[x][y].description = "Hill.";	
 				LoadBoard->Board[x][y].defenseFactor = 1.1;
+				LoadBoard->Board[x][y].Image = {	'/','\\','.',
+													'.','/','\\',
+													'/','\\','.' };
 				break;
 			}
 			case('M'):
 			{
 				LoadBoard->Board[x][y].description = "Mountain.";
 				LoadBoard->Board[x][y].defenseFactor = 1.4;
+				LoadBoard->Board[x][y].Image = {	'H','M','H',
+													'/','.','\\',
+													'.','.','.' };
 				break;
 			}
 			case('+'):		//Would like to have convertible to woodlot by engineer.....maybe
 			{
 				LoadBoard->Board[x][y].description = "Forest.";
 				LoadBoard->Board[x][y].defenseFactor = 1.2;
+				LoadBoard->Board[x][y].Image = {	'^','^','^',
+													'^','^','^',
+													'|','|','|' };
 				break;
 			}
 			}
@@ -241,20 +272,20 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* Comp
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
-		std::cout << "Choose which scenario to load (Case sensitive): " << std::endl;
-		scenarioToLoad = "";
+		//std::cout << "Choose which scenario to load (Case sensitive): " << std::endl;
+		scenarioToLoad = "a";
 
-		std::cin >> scenarioToLoad;
+		//std::cin >> scenarioToLoad;
 
 		saveGame.open(scenarioToLoad + ".txt");
 		if (saveGame.is_open())
 		{
-			std::cout << "Successfully loaded!" << std::endl;
+			//std::cout << "Successfully loaded!" << std::endl;
 			loadsuccessful = true;
 		}
 		else
 		{
-			std::cout << "Could not load scenario. Please check that it exists and the right spelling was used." << std::endl;
+			//std::cout << "Could not load scenario. Please check that it exists and the right spelling was used." << std::endl;
 
 		}
 
@@ -317,6 +348,7 @@ int main()
 	MasterBoard GameBoard;
 	inputLayer InputLayer;
 	compie ComputerPlayer;
+	WINDOW* mywindow = initscr();
 	
 	scenarioLoad(&GameBoard, &InputLayer, &ComputerPlayer);
 
@@ -324,7 +356,8 @@ int main()
 	char Input = ' ';
 	while (true)		//Run as long as the user wants. Infinite while loop.
 	{
-		Input = _getch();
+		Input =  wgetch(mywindow);
+		//Input = _getch();
 		
 		if (InputLayer.status == gameBoard) 
 		{

@@ -7,6 +7,7 @@
 #include <conio.h>
 #include <windows.h>
 #include "compie.hpp"
+#include <curses.h>
 
 
 
@@ -190,6 +191,11 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 	//Need to convert windowLocation into a better two part variable.
 	int windowY = boardToPrint->windowLocation / BOARD_WIDTH;
 	int windowX = boardToPrint->windowLocation % BOARD_WIDTH;
+	
+	attrset(0);
+
+	init_pair(1, COLOR_BLACK, COLOR_RED);
+	init_pair(2, COLOR_BLACK, COLOR_GREEN);
 
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
 	for (int i = windowY; i < (windowY + WINDOW_HEIGHT); i++)
@@ -201,8 +207,10 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 			//If there is a cursor there, it takes priority for printing.
 			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX()) 									
 			{
-				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-				std::cout << '*';
+				//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+				//std::cout << '*';
+				attron(COLOR_PAIR(1));
+				mvaddch(i- windowY, j- windowX, '*');
 			}
 			else
 				//Is there a minion there? Do we have minions toggled on as visible? Is the minion within vision?
@@ -229,15 +237,20 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 
 					}
 					//Print out the minion.
-					std::cout << boardToPrint->Board[j][i].minionOnTop->type;
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+					//std::cout << boardToPrint->Board[j][i].minionOnTop->type;
+					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+					attron(COLOR_PAIR(1));
+					char toPrint = boardToPrint->Board[j][i].minionOnTop->type;
+					mvaddch(i - windowY, j - windowX, toPrint);
 				}
 				//If no minion show range, unless "hide range (0)" is on.
 				else if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
 				{
 					
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-					std::cout << ':';
+					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+					//std::cout << ':';
+					attron(COLOR_PAIR(2));
+					mvaddch(i - windowY, j - windowX, ':');
 				}
 				else
 				{
@@ -263,12 +276,14 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN);
 						break;
 					}
-
-					std::cout << boardToPrint->Board[j][i].symbol;
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
+					attron(COLOR_PAIR(2));
+					char toPrint = boardToPrint->Board[j][i].symbol;
+					mvaddch(i - windowY, j - windowX, toPrint);
+					//std::cout << boardToPrint->Board[j][i].symbol;
+					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
 				}
 		}
-		std::cout << std::endl;
+		//std::cout << std::endl;
 	}
 
 	return 0;
@@ -276,14 +291,18 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 
 int inputLayer::printScreen(MasterBoard* boardToPrint)
 {
+	//clear();
 	printUpperScreen(boardToPrint);
-
+	
+	//This portion disabled for Part 1 of PDCurses construction.
+	/*
 	printLowerScreen(boardToPrint);
 
 	//Buffer the screen to clear the old map window.
 	for (int i = 0; i < 10; i++)
 		std::cout << std::endl;
-
+	*/
+	refresh();
 	return 0;
 }
 

@@ -33,6 +33,7 @@ public:
 		controller = 0;
 		production = 0;
 		capturePoints = 20;
+		//Image already initialized
 		
 	}
 
@@ -148,6 +149,10 @@ public:
 	int capturePoints;
 	int locationX;
 	int locationY;
+	std::string Image =	{	'.','.','.',
+							'.','.','.',
+							'.','.','.' };
+
 	int clearTile() {
 		symbol = '.';
 		defenseFactor = 1.1;
