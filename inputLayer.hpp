@@ -24,6 +24,7 @@ public:
 	int menuInput(char* Input, MasterBoard* boardToInput);
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);
+	int printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber);
 	
 	std::string eventText = "";
 

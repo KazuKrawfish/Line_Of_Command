@@ -104,9 +104,9 @@ int setCharacteristics(MasterBoard* LoadBoard)
 				LoadBoard->Board[x][y].description = "City.";
 				LoadBoard->Board[x][y].defenseFactor = 1.3;
 				LoadBoard->Board[x][y].production = 2000;
-				LoadBoard->Board[x][y].Image = {	'H','H','H',
-													'H','H','H',
-													'H','H','H' };
+				LoadBoard->Board[x][y].Image = {	'H',' ','H',
+													'H',' ','H',
+													'H',' ','H' };
 				break;
 			}
 			case('m'):
@@ -171,8 +171,8 @@ int setCharacteristics(MasterBoard* LoadBoard)
 			{
 				LoadBoard->Board[x][y].description = "Mountain.";
 				LoadBoard->Board[x][y].defenseFactor = 1.4;
-				LoadBoard->Board[x][y].Image = {	'H','M','H',
-													'/','.','\\',
+				LoadBoard->Board[x][y].Image = {	' ','^',' ',
+													'/','_','\\',
 													'.','.','.' };
 				break;
 			}
@@ -264,7 +264,9 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* Comp
 	std::string line;
 	char garbage;
 	int garb1, garb2;
-	std::string scenarioToLoad = "";
+	char scenarioToLoad[100];
+	char* pointToScenarioName = scenarioToLoad;
+	
 	std::string saveName = "";
 	bool loadsuccessful = false;
 	
@@ -272,20 +274,19 @@ int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* Comp
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
-		//std::cout << "Choose which scenario to load (Case sensitive): " << std::endl;
-		scenarioToLoad = "a";
-
-		//std::cin >> scenarioToLoad;
-
-		saveGame.open(scenarioToLoad + ".txt");
+		std::cout << "Choose which scenario to load (Case sensitive): " << std::endl;
+				
+		getstr(scenarioToLoad);
+		std::string newScenario = scenarioToLoad;
+		saveGame.open(newScenario + ".txt");
 		if (saveGame.is_open())
 		{
-			//std::cout << "Successfully loaded!" << std::endl;
+			std::cout << "Successfully loaded!" << std::endl;
 			loadsuccessful = true;
 		}
 		else
 		{
-			//std::cout << "Could not load scenario. Please check that it exists and the right spelling was used." << std::endl;
+			std::cout << "Could not load scenario. Please check that it exists and the right spelling was used." << std::endl;
 
 		}
 
@@ -349,7 +350,28 @@ int main()
 	inputLayer InputLayer;
 	compie ComputerPlayer;
 	WINDOW* mywindow = initscr();
-	
+	resize_term(40, 90);
+	start_color();
+	init_pair(0, COLOR_WHITE, COLOR_BLACK);
+	init_pair(1, COLOR_GREEN, COLOR_BLACK);
+	init_pair(2, COLOR_RED, COLOR_BLACK);
+	init_pair(3, COLOR_BLUE, COLOR_BLACK);
+	init_pair(4, COLOR_CYAN, COLOR_BLACK);
+	init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(6, COLOR_YELLOW, COLOR_BLACK);
+
+	//Outside of vision, terrain - shrouded in fog.
+	init_pair(7, COLOR_GREEN, COLOR_WHITE);
+	init_pair(8, COLOR_RED, COLOR_WHITE);
+	init_pair(9, COLOR_BLUE, COLOR_WHITE);
+	init_pair(10, COLOR_CYAN, COLOR_WHITE);
+	init_pair(11, COLOR_MAGENTA, COLOR_WHITE);
+	init_pair(12, COLOR_YELLOW, COLOR_WHITE);
+
+
+
+
+
 	scenarioLoad(&GameBoard, &InputLayer, &ComputerPlayer);
 
 	InputLayer.printScreen(&GameBoard);
@@ -357,8 +379,7 @@ int main()
 	while (true)		//Run as long as the user wants. Infinite while loop.
 	{
 		Input =  wgetch(mywindow);
-		//Input = _getch();
-		
+			
 		if (InputLayer.status == gameBoard) 
 		{
 			InputLayer.gameBoardInput(&Input, &GameBoard);

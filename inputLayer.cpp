@@ -15,71 +15,108 @@ int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint);
 int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer);
 
+int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber) 
+{
+	move(inputX*3, inputY*3);
+	addch(inputString[0] + COLOR_PAIR(teamNumber));
+	addch(inputString[1] + COLOR_PAIR(teamNumber));
+	addch(inputString[2] + COLOR_PAIR(teamNumber));
+
+	move(inputX * 3 + 1, inputY * 3);
+	addch(inputString[3] + COLOR_PAIR(teamNumber));
+	addch(inputString[4] + COLOR_PAIR(teamNumber));
+	addch(inputString[5] + COLOR_PAIR(teamNumber));
+
+	move(inputX * 3 + 2, inputY * 3);
+	addch(inputString[6] + COLOR_PAIR(teamNumber));
+	addch(inputString[7] + COLOR_PAIR(teamNumber));
+	addch(inputString[8] + COLOR_PAIR(teamNumber));
+
+	return 1;
+}
 
 int inputLayer::printStatus(MasterBoard* boardToPrint)
 {
 	tile* currentTile = &boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
+
+	//Need string pointer since addstr giving grief about printing strings, and same with snprintf.
+	char pointerToPrint[100];
+	char* stringPointer = &currentTile->description[0];
 	
 	if (currentTile->controller != 0)
 	{
-		std::cout << "Player " << currentTile->controller << "'s ";
+		snprintf(pointerToPrint, 100, "Player %d's ", currentTile->controller);
+		addstr(pointerToPrint);
+		addstr(stringPointer);
 	}
-	std::cout << currentTile->description << " ";
-	
+	else
+	{
+		
+		addstr(stringPointer);
+	}
+
 	//If tile is undergoing capture, let us know.
 	if (currentTile->capturePoints != 20)
 	{
-		std::cout << "Capture Points Left: " << currentTile->capturePoints<< " ";
+		snprintf(pointerToPrint, 100, " Capture Points Left: %d ", currentTile->capturePoints);
+		addstr(pointerToPrint);
 	}
 
 	if (currentTile->hasMinionOnTop == true)
 	{
 		Minion* currentMinion = currentTile->minionOnTop;
-		std::cout << "Player " << currentMinion->team
-			<< "'s " << currentMinion->description
-			<< ": " << int(currentMinion->health) <<
-			" Health Left." << std::endl;
+	
+		//Print out basic minion status.
+		snprintf(pointerToPrint, 100, " Player %d's ", currentMinion->team);
+		stringPointer = &currentMinion->description[0];
+		addstr(pointerToPrint);
+		addstr(stringPointer);
+		snprintf(pointerToPrint, 100, ": %d Health Left. \n", int(currentMinion->health));
+		addstr(pointerToPrint);
 
 		if (currentMinion->status == gaveupmovehasntfired)
 		{
-			std::cout << "Holding position. ";
-			std::cout << "Ready to attack. " << std::endl;
+			addstr("Holding position. Ready to attack.\n");
+					
 		}
 
 		if (currentMinion->status == hasmovedhasntfired)
 		{
-			std::cout << "Has already moved this turn. ";
+			addstr("Has already moved this turn. ");
+			
 			if (currentMinion->rangeType == rangedFire)
 			{
-				std::cout << "Cannot attack after moving." << std::endl;
+				addstr("Cannot attack after moving. \n");
+				
 			}
 			if (currentMinion->rangeType == directFire)
 			{
-				std::cout << "Ready to attack." << std::endl;
+				addstr("Ready to attack.\n");
+				
 			}
 		}
 		if (currentMinion->status == hasfired)
 		{
-			std::cout << "Has already moved this turn. ";
-			std::cout << "Has attacked this turn." << std::endl;
+			addstr("Has already moved this turn. Has attacked this turn. \n");
 		}
 		if (currentMinion->status == hasntmovedorfired)
 		{
-			std::cout << "Ready to move. ";
-			std::cout << "Ready to attack." << std::endl;
+			addstr("Ready to move. Ready to attack. \n");
 		}
 	}
 	else
 	{
-		std::cout << std::endl << std::endl;
+		addstr("\n\n");
 	}
 
 	//Print current turn.
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-	std::cout << "Player " << boardToPrint->playerFlag << "'s Turn. Treasury total: " << boardToPrint->treasury[boardToPrint->playerFlag] << std::endl;
-
-	//Debug purposes- print cursor location coordinates and window coordinates.
-	std::cout << eventText<<std::endl; // << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
+	snprintf(pointerToPrint, 100, "Player %d's turn. Treasury Total: %d\n", boardToPrint->playerFlag, boardToPrint->treasury[boardToPrint->playerFlag]);
+	addstr(pointerToPrint);
+	
+	char* eventTextToPrint = &eventText[0];
+	addstr(eventTextToPrint);
+	//Need to figure out string to char *.
+	//std::cout << eventText<<std::endl; // << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
 	//std::cout << boardToPrint->windowLocation << std::endl;
 	eventText = "";
 
@@ -92,27 +129,32 @@ int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 
 	if (mystatus == hasntmovedorfired)
 	{
-		std::cout << "Move cursor(WASD) | Move minion (m)" << std::endl;
-		std::cout << "Deselect minion (t) | Capture move (c)" << std::endl;
+		addstr("Move cursor(WASD) | Move minion (m)\n");
+		addstr("Deselect minion(t) | Capture move(c)\n" );
+		//std::cout << "Move cursor(WASD) | Move minion (m)" << std::endl;
+		//std::cout << "Deselect minion (t) | Capture move (c)" << std::endl;
 	}
 
 	if (mystatus == hasmovedhasntfired || mystatus == gaveupmovehasntfired)
 	{
-		std::cout << "Move cursor(WASD) | Attack (r)" << std::endl;
-		std::cout << "Deselect minion (t) | Capture (c)" << std::endl;
+		addstr("Move cursor(WASD) | Attack (r)\n");
+		addstr("Deselect minion (t) | Capture (c)\n");
+		//std::cout << "Move cursor(WASD) | Attack (r)" << std::endl;
+		//std::cout << "Deselect minion (t) | Capture (c)" << std::endl;
 	}
 	if (mystatus == hasfired)
 	{
-		std::cout << std::endl;
-		std::cout << std::endl;
+		addstr("\n\n");
+		//std::cout << std::endl;
+		//std::cout << std::endl;
 	}
 	return 0;
 
 }
 
 int inputLayer::printBoardMenu() {
-	std::cout << "Move cursor (WASD) |s Menu (m)" << std::endl;
-	std::cout << "Select minion/property (t)" << std::endl;
+	addstr("Move cursor (WASD) | Menu (m)\n");
+	addstr( "Select minion/property (t)\n");
 	return 0;
 }
 
@@ -121,26 +163,32 @@ int	inputLayer::printPropertyMenu() {
 	//If this is not the second valid purchase input
 	if (requestedMinionToBuy == '\n')
 	{
-		std::cout << "Input Minion to Buy" << std::endl;
-		std::cout << "Deselect Property (P)" << std::endl;
-
+		addstr("Input Minion to Buy\n");
+		addstr("Deselect Property (P)\n");
+		
 	}
 	else if (requestedMinionToBuy != '\n')
 	{
 		if (requestedMinionToBuy == '!')
 		{
-			std::cout << "Can't afford, try another symbol." << std::endl;
-			std::cout << "Input Minion to Buy | Deselect Property (P)" << std::endl;
+			addstr("Can't afford, try another symbol.\n");
+			addstr("Input Minion to Buy | Deselect Property (P)\n");
 		}
 		else if (requestedMinionToBuy == '?')
 		{
-			std::cout << "Invalid input. Try another symbol." << std::endl;
-			std::cout << "Input Minion to Buy  | Deselect Property (P)" << std::endl;
+			addstr("Invalid input. Try another symbol.\n");
+			addstr("Input Minion to Buy | Deselect Property (P)\n");
+			
 		}
 		else
 		{
-			std::cout << requestedMinionToBuy << " costs: " << unitPrice << std::endl;
-			std::cout << "Confirm (C) | Cancel (P)" << std::endl;
+			char toOutput[100];
+			snprintf(toOutput, 100, "Requested unit costs: %d. \n", unitPrice);
+			
+			
+			addstr(toOutput);
+			addstr("Confirm (C) | Cancel (P)\n");
+			
 		}
 	}
 
@@ -149,12 +197,19 @@ int	inputLayer::printPropertyMenu() {
 }
 
 int inputLayer::printMenu() {
-	std::cout << "Save game (s) | Load new game (L)" << std::endl;
-	std::cout << "End turn (t) | Exit menu (m)" << std::endl;
+	addstr("Save game (s) | Load new game (L)\n");
+	addstr("End turn (t) | Exit menu (m)\n");
 	return 0;
 }
 
 int inputLayer::printLowerScreen(MasterBoard* boardToPrint) {
+
+	mvaddstr(WINDOW_HEIGHT*3 + 1, 0, "                                                 \n");
+	addstr("                                                 \n");
+	addstr("                                                 \n");
+	addstr("                                                 \n");
+	addstr("                                                 \n");
+	move(WINDOW_HEIGHT*3 + 1, 0 );
 
 	if (status == gameBoard)
 	{
@@ -192,98 +247,41 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 	int windowY = boardToPrint->windowLocation / BOARD_WIDTH;
 	int windowX = boardToPrint->windowLocation % BOARD_WIDTH;
 	
-	attrset(0);
-
-	init_pair(1, COLOR_BLACK, COLOR_RED);
-	init_pair(2, COLOR_BLACK, COLOR_GREEN);
 
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
 	for (int i = windowY; i < (windowY + WINDOW_HEIGHT); i++)
 	{
 		for (int j = windowX; j < (windowX + WINDOW_WIDTH); j++)
 		{
-			//Print whomever has priority. cursor first, then unit, then terrain.
-
-			//If there is a cursor there, it takes priority for printing.
-			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX()) 									
+			//First do lower priority set which is tiles and minions. These can be ovveridden by cursor/in range.
+			//Is there a minion there? Do we have minions toggled on as visible? Is the minion within vision?
+			if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions && boardToPrint->Board[j][i].withinVision == true)
 			{
-				//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-				//std::cout << '*';
-				attron(COLOR_PAIR(1));
-				mvaddch(i- windowY, j- windowX, '*');
+					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].minionOnTop->Image, boardToPrint->Board[j][i].minionOnTop->team + 1);
+			}
+			//If no minion print map piece.
+			else 
+			{
+				if(boardToPrint->Board[j][i].withinVision == true)
+					printSingleTile((i - windowY) , (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 1);
+				else
+					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 7);
+			}
+			
+			//Higher "priority set" is cursor vs in range, thus it goes after the "base" portion of minions and tiles.
+			//If there is a cursor there, it takes priority for printing.
+			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX())
+			{
+				mvaddch((i - windowY) * 3 + 2, (j - windowX) * 3 + 1, '*' + COLOR_PAIR(0));
 			}
 			else
-				//Is there a minion there? Do we have minions toggled on as visible? Is the minion within vision?
-				if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions && boardToPrint->Board[j][i].withinVision == true)
-				{
-					//Determine team and then set the color.
-					switch (boardToPrint->Board[j][i].minionOnTop->team)
-					{
-					case(0):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-						break;
-					case(1):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
-						break;
-					case(2):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE );
-						break;
-					case(3):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_RED);
-						break;
-					case(4):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN);
-						break;
+			if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
+			{
+				mvaddch((i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ':' + COLOR_PAIR(0));
+			}
 
-					}
-					//Print out the minion.
-					//std::cout << boardToPrint->Board[j][i].minionOnTop->type;
-					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-					attron(COLOR_PAIR(1));
-					char toPrint = boardToPrint->Board[j][i].minionOnTop->type;
-					mvaddch(i - windowY, j - windowX, toPrint);
-				}
-				//If no minion show range, unless "hide range (0)" is on.
-				else if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
-				{
-					
-					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-					//std::cout << ':';
-					attron(COLOR_PAIR(2));
-					mvaddch(i - windowY, j - windowX, ':');
-				}
-				else
-				{
-					//Otherwise put out the terrain for that square.
-					switch (boardToPrint->Board[j][i].controller)
-					{
-					case(0):
-						if(boardToPrint->Board[j][i].withinVision == true)
-							SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-						else
-							SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
-						break;
-					case(1):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED);
-						break;
-					case(2):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE);
-						break;
-					case(3):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_RED);
-						break;
-					case(4):
-						SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_BLUE | FOREGROUND_GREEN);
-						break;
-					}
-					attron(COLOR_PAIR(2));
-					char toPrint = boardToPrint->Board[j][i].symbol;
-					mvaddch(i - windowY, j - windowX, toPrint);
-					//std::cout << boardToPrint->Board[j][i].symbol;
-					//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN);
-				}
 		}
-		//std::cout << std::endl;
+		
 	}
 
 	return 0;
@@ -291,17 +289,9 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 
 int inputLayer::printScreen(MasterBoard* boardToPrint)
 {
-	//clear();
+	clear();
 	printUpperScreen(boardToPrint);
-	
-	//This portion disabled for Part 1 of PDCurses construction.
-	/*
 	printLowerScreen(boardToPrint);
-
-	//Buffer the screen to clear the old map window.
-	for (int i = 0; i < 10; i++)
-		std::cout << std::endl;
-	*/
 	refresh();
 	return 0;
 }
@@ -336,7 +326,7 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 			if (boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 			{
 				//DEBUG
-				computerPlayer->determineMinionTasks(boardToInput);
+				//computerPlayer->determineMinionTasks(boardToInput);
 				//DEBUG
 				status = minionAction;
 			}

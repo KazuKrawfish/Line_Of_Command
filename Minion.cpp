@@ -38,6 +38,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
+		Image =		  { 'i',' ','i',
+						' ','i',' ',
+						' ',' ',' ' };
 		break;
 	}
 	case('s'):
@@ -48,6 +51,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
+		Image = {				's',' ','s',
+								' ','s',' ',
+								' ',' ',' ' };
+
 		break;
 	}
 	case('a'):
@@ -58,6 +65,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
+		Image =		{	'-','n',' ',
+						'=','=','=',
+						' ',' ',' ' };
 		break;
 	}
 	case('A'):
@@ -68,6 +78,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
+		Image = {		'\\','\\','A',
+						'=','=','=',
+						' ',' ',' ' };
 		break;
 	}
 	case('T'):
@@ -78,6 +91,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
+		Image = {		'-','H',' ',
+						'=','=','=',
+						' ',' ',' ' };
 		break;
 	}
 	case('r'):
@@ -88,6 +104,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = rangedFire;
 		specialtyGroup = normal;
+		Image = {		' ','\\','A',
+						'=','=','=',
+						' ',' ',' ' };
 		break;
 	}
 	case('c'):
@@ -98,6 +117,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 5;
 		rangeType = directFire;
 		specialtyGroup = infantry;
+		Image = {		'-','n',' ',
+						'o','=','o',
+						' ',' ',' ' };
 		break; 
 	}
 	case('R'): 
@@ -108,6 +130,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = rangedFire;
 		specialtyGroup = normal;
+		Image = {			'n','\\','\\',
+							'o','=','o',
+							' ',' ',' ' };
 		break; 
 	}
 	}

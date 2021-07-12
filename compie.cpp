@@ -301,6 +301,8 @@ int compie::determinePropertyTasks()
 //Determine whether the minion will attack local enemies, capture property, or move strategically.
 int compie::determineMinionTasks(MasterBoard* boardToUse) 
 {
+
+
 	closestTileAdjacentToEnemy = NULL;
 	tileToTarget = NULL;
 	int returnX = 0;

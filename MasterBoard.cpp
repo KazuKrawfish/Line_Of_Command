@@ -376,7 +376,11 @@ int MasterBoard::setVisionField()
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
-			Board[x][y].withinVision = false;
+			//If you do control a property, it is actually visible.
+			if(Board[x][y].controller == playerFlag)
+				Board[x][y].withinVision = true;
+			else
+				Board[x][y].withinVision = false;
 		}
 	}
 
@@ -667,7 +671,7 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 	{
 	//Create event text telling player it was destroyed.
 	InputLayer->eventText += "PLAYER ";
-	InputLayer->eventText += char(playerFlag - 32);							//MUST FIX IMPLEMENTATION of Char-32 nonsense.
+	InputLayer->eventText += char(playerFlag + '0');			
 	InputLayer->eventText += "'s ";
 	InputLayer->eventText += inputMinion->description;
 	InputLayer->eventText += " DESTROYED!";
