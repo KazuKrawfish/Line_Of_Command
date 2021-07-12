@@ -45,7 +45,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	}
 	case('s'):
 	{
-		description = "Heavy Infantry";
+		description = "Specialist";
 		movementRange = 2;
 		attackRange = 1;
 		visionRange = 3;

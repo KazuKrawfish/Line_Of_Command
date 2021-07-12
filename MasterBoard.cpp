@@ -686,8 +686,10 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 	return 0;													
 }
 
-int MasterBoard::endTurn() {
+int MasterBoard::endTurn(inputLayer* InputLayer) {
 	
+	InputLayer->requestedMinionToBuy = '\n';
+
 	//Either increment playerFlag or set it to zero, thus cycling through the players.
 	if (playerFlag < NUMBEROFPLAYERS)					
 	{

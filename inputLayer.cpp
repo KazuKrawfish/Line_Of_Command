@@ -465,7 +465,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	{
 		if (boardToInput->cursor.selectMinionFlag == true)
 			boardToInput->deselectMinion();
-		boardToInput->endTurn();
+		boardToInput->endTurn(this);
 		scenarioSave("Autosave", boardToInput);
 		status = gameBoard;
 	}
