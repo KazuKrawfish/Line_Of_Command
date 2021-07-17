@@ -1,19 +1,14 @@
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
 #include "inputLayer.hpp"
+#include "mainmenu.h"
 #include <iostream>
 #include <ctype.h>
 #include <fstream>
-#include <conio.h>
+
 #include <windows.h>
 #include "compie.hpp"
-#include <curses.h>
 
-
-
-int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
-int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint);
-int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer);
 
 int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber) 
 {
@@ -198,7 +193,7 @@ int	inputLayer::printPropertyMenu() {
 
 int inputLayer::printMenu() {
 	addstr("Save game (s) | Load new game (L)\n");
-	addstr("End turn (t) | Exit menu (m)\n");
+	addstr("End turn (e) | Exit menu (m) | Go to main menu (x) \n");
 	return 0;
 }
 
@@ -436,7 +431,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	//This is a working key.
 	if (*Input == 'g')
 	{
-		scrambleMap(boardToInput, this);	//This needs to be cleaned up to deal with minions.
+		MainMenu->scrambleMap(boardToInput, this);	//This needs to be cleaned up to deal with minions.
 	}
 
 	//Another working key for compie
@@ -461,12 +456,12 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 
 	//Ends the turn and passes it to the next player.
 	//Autosave every turn.
-	if (*Input == 't')
+	if (*Input == 'e')
 	{
 		if (boardToInput->cursor.selectMinionFlag == true)
 			boardToInput->deselectMinion();
 		boardToInput->endTurn(this);
-		scenarioSave("Autosave", boardToInput);
+		MainMenu->scenarioSave("Autosave", boardToInput);
 		status = gameBoard;
 	}
 
@@ -474,7 +469,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	{
 		//DEBUG- this specially load a certain compie but instead loads the same exact one.
 		std::cout << "DISABLED DISABLED DISABLED" << std::endl;
-		scenarioLoad(boardToInput, this, computerPlayer);
+		MainMenu->scenarioLoad(boardToInput, this, computerPlayer);
 		status = gameBoard;
 		//Load new map
 	}
@@ -485,7 +480,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		std::string saveName = "";
 		std::cout << "Choose where to save your game:" << std::endl;
 		std::cin >> saveName;
-		scenarioSave(saveName, boardToInput);
+		MainMenu->scenarioSave(saveName, boardToInput);
 		status = gameBoard;
 	}
 
@@ -493,6 +488,11 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	if (*Input == 'm')
 	{
 		status = gameBoard;
+	}
+
+	if (*Input == 'x')
+	{
+		exitToMainMenu();
 	}
 
 	return 0;
@@ -573,3 +573,4 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 	return 0;
 }
 
+int inputLayer::exitToMainMenu() { return 0; }
