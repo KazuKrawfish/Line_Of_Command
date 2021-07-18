@@ -13,6 +13,7 @@ class inputLayer
 {
 public:
 
+	inputLayer(mainMenu* inputMainMenu);
 	int printStatus(MasterBoard* boardToPrint);
 	int printMinionMenu(MasterBoard* boardToPrint);
 	int printBoardMenu();

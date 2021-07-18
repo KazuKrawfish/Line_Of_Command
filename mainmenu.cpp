@@ -11,6 +11,7 @@
 class inputLayer;
 class MasterBoard;
 
+ 
 //Messes up minions!
 //Still need to add them after.
 //This lumps all the terrain at the end, need to find a way to count neighbors and based on those, distribute tiles.
@@ -172,7 +173,7 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 	return 0;
 }
 
-int mainMenu::scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
+int mainMenu::gameSave(std::string saveGameName, MasterBoard* boardToPrint)
 {
 	saveGameName += ".txt";
 	std::ofstream saveGame(saveGameName);
@@ -231,54 +232,33 @@ int mainMenu::scenarioSave(std::string saveGameName, MasterBoard* boardToPrint)
 	return 1;
 }
 
-//Load saved game and initialize the board with its contents.
-int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer) {
+//Scenario Load is for new scenarios from a non-saved game.
+//Game Load is for saved games, which already have player data.
+int mainMenu::gameLoad() {}
+
+//Load scenario game and initialize the board with its contents.
+int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame) {
 
 	//Clear board in case scenario load was called by player menu later in game.
 	boardToPrint->clearBoard(InputLayer);
 	InputLayer->computerPlayer = ComputerPlayer;
 	ComputerPlayer->InputLayer = InputLayer;
 
-	std::ifstream saveGame;
+	
 	std::string line;
 	char garbage;
 	int garb1, garb2;
-	char scenarioToLoad[100];
-	char* pointToScenarioName = scenarioToLoad;
 
-	std::string saveName = "";
-	bool loadsuccessful = false;
-
-
-	//Prompt user and load scenario
-	while (loadsuccessful == false)
-	{
-		std::cout << "Choose which scenario to load (Case sensitive): " << std::endl;
-
-		getstr(scenarioToLoad);
-		std::string newScenario = scenarioToLoad;
-		saveGame.open(newScenario + ".txt");
-		if (saveGame.is_open())
-		{
-			std::cout << "Successfully loaded!" << std::endl;
-			loadsuccessful = true;
-		}
-		else
-		{
-			std::cout << "Could not load scenario. Please check that it exists and the right spelling was used." << std::endl;
-
-		}
-
-
-	}
 
 	//First load the map size:
-	saveGame >> garb1;
-	saveGame >> garbage;
-	saveGame >> garb2;
+	//Ideally we can create new vector or whatever to have different map size:
+	*saveGame >> garb1;
+	*saveGame >> garbage;
+	*saveGame >> garb2;
 
 	//Then load player data:
-	saveGame >> boardToPrint->playerFlag;
+	//This is the current turn:
+	*saveGame >> boardToPrint->playerFlag;
 
 
 	for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -286,7 +266,7 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 
 		for (int x = 0; x < BOARD_WIDTH; x++)
 		{
-			saveGame >> boardToPrint->Board[x][y].symbol;
+			*saveGame >> boardToPrint->Board[x][y].symbol;
 		}
 	}
 	setCharacteristics(boardToPrint);
@@ -298,18 +278,18 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 
 		for (int x = 0; x < BOARD_WIDTH; x++)
 		{
-			saveGame >> inputProperties;
+			*saveGame >> inputProperties;
 			boardToPrint->Board[x][y].controller = (int(inputProperties)) - 48;
 		}
 	}
 	//Then load minion data:
 	int numberOfMinions;
-	saveGame >> numberOfMinions;
+	*saveGame >> numberOfMinions;
 	int health, locationX, locationY, team, seniority, status;
 	char type;
 	for (int y = 0; y < numberOfMinions; y++)
 	{
-		saveGame >> type
+		*saveGame >> type
 			>> locationX
 			>> locationY
 			>> team
@@ -319,43 +299,162 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 		boardToPrint->createMinion(type, locationX, locationY, team, health, status);
 	}
 
-	saveGame.close();
+	saveGame->close();
 	return 1;
 }
 
 int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
 {
-	scenarioLoad(boardToPlay, InputLayer, ComputerPlayer);
+	clear();
+	addstr("Line of Command\n");
+	addstr("Copyright 2021, Park Family Software Laboratory (ParkLab)\n");
+	addstr("Press any key to continue.");
+	refresh();
 
-	InputLayer->printScreen(boardToPlay);
 	char Input = ' ';
 
-	while (true)		//Run as long as the user wants. Infinite while loop.
+	//Run as long as the user wants. Infinite while loop.
+	while (true)		
 	{
+
 		Input = wgetch(mywindow);
 
-		if (InputLayer->status == gameBoard)
+		//If we're still on top menu, do that instead of game/inputLayer.
+		if (menuStatus == topmenu)
 		{
-			InputLayer->gameBoardInput(&Input, boardToPlay);
+			printTopMenu();
+			topMenuInput(&Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
 		}
-		else if (InputLayer->status == minionAction)
+		
+		if(menuStatus == playingMap)
 		{
-			InputLayer->minionInput(&Input, boardToPlay);
-		}
-		else if (InputLayer->status == menu)
-		{
-			InputLayer->menuInput(&Input, boardToPlay);
-		}
-		else if (InputLayer->status == propertyAction)
-		{
-			InputLayer->propertyMenuInput(&Input, boardToPlay);
-		}
 
-		boardToPlay->checkWindow();
-		InputLayer->printScreen(boardToPlay);
+			if (InputLayer->status == gameBoard)
+			{
+				InputLayer->gameBoardInput(&Input, boardToPlay);
+			}
+			else if (InputLayer->status == minionAction)
+			{
+				InputLayer->minionInput(&Input, boardToPlay);
+			}
+			else if (InputLayer->status == menu)
+			{
+				InputLayer->menuInput(&Input, boardToPlay);
+			}
+			else if (InputLayer->status == propertyAction)
+			{
+				InputLayer->propertyMenuInput(&Input, boardToPlay);
+			}
+
+			boardToPlay->checkWindow();
+			InputLayer->printScreen(boardToPlay);
+
+		}
+	}
+	return 0;
+}
+
+int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
+{
+	//If user wants to load a map.
+	//Need to deal with COUTs. the're inappropriate.
+	if (*Input == 'l') 
+	{
+		topMenuLoad(Input, boardToPlay, InputLayer, ComputerPlayer);
+		menuStatus = playingMap;
 	}
 
-	//This is where you "wait" while multiplayer has you wait for remote update.
+
+	//This is next objective: Figure out "new map", with username, etc.
+	if (*Input == 'n')
+	{
+		topMenuNew(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
+		menuStatus = playingMap;
+	}
+	
+
 	return 0;
+}
+
+int mainMenu::printTopMenu()
+{
+	clear();
+	addstr("Load saved game (l) or start new game (n). \n");
+	refresh();
+	return 0;
+}
+
+int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
+{	
+	//Determine if game is remote or local.
+	addstr("Local (l) or remote(r) game?\n");
+	while (gameType == unchosen)
+	{
+		*Input = wgetch(mywindow);
+
+		if (*Input == 'l')
+		{
+			clear();
+			addstr("Local game selected.\n");
+			refresh();
+			gameType = local;
+		}
+		else if (*Input == 'r') 
+		{
+			clear();
+			addstr("Remote game selected.\n");
+			refresh();
+			gameType = remote;
+		}
+	}
+
+	//Load the actual map
+	std::ifstream newGameMap;
+	char scenarioToLoad[100];
+	char* pointToScenarioName = &scenarioToLoad[0];
+	bool loadsuccessful = false;
+
+	//Prompt user and load scenario
+	while (loadsuccessful == false)
+	{
+		addstr("Choose which scenario to load (Case sensitive): \n");
+		getstr(pointToScenarioName);
+		std::string newScenario = scenarioToLoad;
+		newGameMap.open(newScenario + ".txt");
+		if (newGameMap.is_open())
+		{
+			addstr("Successfully loaded!\n");
+			loadsuccessful = true;
+		}
+		else
+		{
+			addstr("Could not load scenario. Please check that it exists and the right spelling was used.\n");
+
+		}
+	
+	}
+	//Actually load scenario. Initialize board, etc.
+	scenarioLoad(boardToPlay, InputLayer, ComputerPlayer, &newGameMap);
+
+	//Determine player names for number of players
+	//Currently this is 2:
+	//We added one to the array, just like treasury, for easy access.
+	char inputName[100];
+	char outputName[100];
+	for (int i = 1; i <= NUMBEROFPLAYERS ; i++) 
+	{
+		snprintf(&outputName[0], 100, "Input Player %d's name: \n", i);
+		addstr(&outputName[0]);
+		getstr(&inputName[0]);
+		playerNames[i] = inputName;
+	}
+
+	return 0;
+}
+
+int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer) 
+{ 
+	addstr("Under construction\n");
+	return 0; 
 }
 

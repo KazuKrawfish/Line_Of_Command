@@ -7,15 +7,25 @@
 #include "MasterBoard.hpp"
 #include <curses.h>
 
+enum mainMenuStatus { topmenu,  playingMap, waitingForRemotePlayer };
+enum interactionMethod {unchosen, local, remote};
 
 class mainMenu
 {
 public:
+	interactionMethod gameType = unchosen;
+	mainMenuStatus menuStatus = topmenu;
+	std::string playerNames[NUMBEROFPLAYERS+1];
+	int gameLoad();
 	int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 	int setCharacteristics(MasterBoard* LoadBoard);
-	int scenarioSave(std::string saveGameName, MasterBoard* boardToPrint);
-	int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer);
+	int gameSave(std::string saveGameName, MasterBoard* boardToPrint);
+	int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame);
 	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
+	int printTopMenu();
+	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
+	int topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
+	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
 	
 };
 

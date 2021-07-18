@@ -1,4 +1,5 @@
 //Crisis Front (Project X)
+//Or maybe call it Line of Command
 //Copyright 2021, Park Family Software Laboratory (ParkLab)
 
 
@@ -33,13 +34,13 @@
 
 int main()
 {
-	MasterBoard GameBoard;
-	inputLayer InputLayer;
-	compie ComputerPlayer;
-
-	WINDOW* mywindow = initscr();
-
 	mainMenu MainMenu;
+	MasterBoard GameBoard;
+	inputLayer InputLayer(&MainMenu);
+	compie ComputerPlayer;
+	WINDOW* mywindow = initscr();
+	
+
 	resize_term(40, 90);
 	start_color();
 

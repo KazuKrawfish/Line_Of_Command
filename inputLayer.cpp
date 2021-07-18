@@ -5,10 +5,14 @@
 #include <iostream>
 #include <ctype.h>
 #include <fstream>
-
 #include <windows.h>
 #include "compie.hpp"
 
+
+inputLayer::inputLayer(mainMenu* inputMainMenu) 
+{
+	MainMenu = inputMainMenu;
+}
 
 int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber) 
 {
@@ -110,9 +114,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 	
 	char* eventTextToPrint = &eventText[0];
 	addstr(eventTextToPrint);
-	//Need to figure out string to char *.
-	//std::cout << eventText<<std::endl; // << "Cursor Location: " << boardToPrint->cursor.getX() << boardToPrint->cursor.getY() << std::endl;
-	//std::cout << boardToPrint->windowLocation << std::endl;
 	eventText = "";
 
 	return 0;
@@ -126,22 +127,16 @@ int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 	{
 		addstr("Move cursor(WASD) | Move minion (m)\n");
 		addstr("Deselect minion(t) | Capture move(c)\n" );
-		//std::cout << "Move cursor(WASD) | Move minion (m)" << std::endl;
-		//std::cout << "Deselect minion (t) | Capture move (c)" << std::endl;
 	}
 
 	if (mystatus == hasmovedhasntfired || mystatus == gaveupmovehasntfired)
 	{
 		addstr("Move cursor(WASD) | Attack (r)\n");
 		addstr("Deselect minion (t) | Capture (c)\n");
-		//std::cout << "Move cursor(WASD) | Attack (r)" << std::endl;
-		//std::cout << "Deselect minion (t) | Capture (c)" << std::endl;
 	}
 	if (mystatus == hasfired)
 	{
 		addstr("\n\n");
-		//std::cout << std::endl;
-		//std::cout << std::endl;
 	}
 	return 0;
 
@@ -192,8 +187,8 @@ int	inputLayer::printPropertyMenu() {
 }
 
 int inputLayer::printMenu() {
-	addstr("Save game (s) | Load new game (L)\n");
-	addstr("End turn (e) | Exit menu (m) | Go to main menu (x) \n");
+	addstr("Save game (s) | Go to main menu (x) \n");
+	addstr("End turn (e) | Exit menu (m) \n");
 	return 0;
 }
 
@@ -461,26 +456,33 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		if (boardToInput->cursor.selectMinionFlag == true)
 			boardToInput->deselectMinion();
 		boardToInput->endTurn(this);
-		MainMenu->scenarioSave("Autosave", boardToInput);
+		MainMenu->gameSave("Autosave_save", boardToInput);
 		status = gameBoard;
 	}
-
+	
+	//Below disabled, you have to load via the main menu for the moment, since you have to set up a new game with players and such.
+	/*
 	if (*Input == 'l')
 	{
 		//DEBUG- this specially load a certain compie but instead loads the same exact one.
 		std::cout << "DISABLED DISABLED DISABLED" << std::endl;
-		MainMenu->scenarioLoad(boardToInput, this, computerPlayer);
+		MainMenu->scenarioLoad(boardToInput, this, computerPlayer,);
 		status = gameBoard;
 		//Load new map
-	}
+	}*/
 
-	//Prompt user and save scenario.
+	//Prompt user and save game.
 	if (*Input == 's')
 	{
+		//This is a mess but it's just using getstr instead of cin, which requires a little footwork.
+		//All save games must have _save in their name.
+		char gameToSave[100];
 		std::string saveName = "";
-		std::cout << "Choose where to save your game:" << std::endl;
-		std::cin >> saveName;
-		MainMenu->scenarioSave(saveName, boardToInput);
+		addstr("Choose where to save your game:\n");
+		getstr(&gameToSave[0]);
+		saveName += gameToSave;
+		saveName += "_save";
+		MainMenu->gameSave(saveName, boardToInput);
 		status = gameBoard;
 	}
 
@@ -573,4 +575,8 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 	return 0;
 }
 
-int inputLayer::exitToMainMenu() { return 0; }
+int inputLayer::exitToMainMenu() 
+{
+	this->MainMenu->menuStatus = topmenu;
+	return 0; 
+}
