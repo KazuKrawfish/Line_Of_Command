@@ -33,6 +33,9 @@ class Minion
 	std::string description;	//For user interface only.
 	int team;
 	double health;
+	std::string Image = { '.','.','.',
+						'.','.','.',
+						'.','.','.' };
 	MasterBoard* minionEnvironment;
 	minionStatus status;
 	rangeType rangeType;

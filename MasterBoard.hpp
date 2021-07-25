@@ -26,7 +26,7 @@ public:
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status);
-	int endTurn();
+	int endTurn(inputLayer* InputLayer);
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer);
 	int checkWindow();
@@ -42,7 +42,6 @@ public:
 
 private:
 
-//To move variables later. Not now!
 };
 
 

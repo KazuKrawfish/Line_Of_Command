@@ -4,7 +4,7 @@
 #include "Minion.hpp"
 
 //Window HAS been implemented to minimize total print size!!
-const int WINDOW_HEIGHT = 10;										
+const int WINDOW_HEIGHT = 8;										
 const int WINDOW_WIDTH = 15;
 
 //These need to move to masterboard.

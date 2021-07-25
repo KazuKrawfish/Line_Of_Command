@@ -6,12 +6,14 @@
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction };
 enum specialKey {showMinions, hideMinions};
 class compie;
+class mainMenu;
 
 
 class inputLayer
 {
 public:
 
+	inputLayer(mainMenu* inputMainMenu);
 	int printStatus(MasterBoard* boardToPrint);
 	int printMinionMenu(MasterBoard* boardToPrint);
 	int printBoardMenu();
@@ -24,6 +26,8 @@ public:
 	int menuInput(char* Input, MasterBoard* boardToInput);
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);
+	int printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber);
+	int exitToMainMenu();
 	
 	std::string eventText = "";
 
@@ -32,6 +36,7 @@ public:
 	char requestedMinionToBuy = '\n';
 	int unitPrice = -1;
 	compie* computerPlayer;
+	mainMenu* MainMenu;
 
 private:
 

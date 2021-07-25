@@ -376,7 +376,11 @@ int MasterBoard::setVisionField()
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
-			Board[x][y].withinVision = false;
+			//If you do control a property, it is actually visible.
+			if(Board[x][y].controller == playerFlag)
+				Board[x][y].withinVision = true;
+			else
+				Board[x][y].withinVision = false;
 		}
 	}
 
@@ -667,7 +671,7 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 	{
 	//Create event text telling player it was destroyed.
 	InputLayer->eventText += "PLAYER ";
-	InputLayer->eventText += char(playerFlag - 32);							//MUST FIX IMPLEMENTATION of Char-32 nonsense.
+	InputLayer->eventText += char(playerFlag + '0');			
 	InputLayer->eventText += "'s ";
 	InputLayer->eventText += inputMinion->description;
 	InputLayer->eventText += " DESTROYED!";
@@ -682,19 +686,30 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 	return 0;													
 }
 
-int MasterBoard::endTurn() {
+int MasterBoard::endTurn(inputLayer* InputLayer) {
 	
+	int gameTurnIncrement = 0;
 	//Either increment playerFlag or set it to zero, thus cycling through the players.
-	if (playerFlag < NUMBEROFPLAYERS)					
+	if (playerFlag < NUMBEROFPLAYERS)
 	{
 		playerFlag++;
+
 	}
-	else 
+	else
 		if (playerFlag >= NUMBEROFPLAYERS)
 		{
+			//We need to tell inputLayer to tell mainMenu to increment gameTurn.
+			gameTurnIncrement = 1;
 			playerFlag = 1;
 		}
 
+	//Reset vision field for the next player.
+	setVisionField();
+	
+	//Set minionToBuy to the default null value.
+	InputLayer->requestedMinionToBuy = '\n';
+
+	//Reset every minion's status.
 	for (int i = 0; minionRoster[i] != NULL; i++)
 	{
 		minionRoster[i]->status = hasntmovedorfired;
@@ -713,9 +728,8 @@ int MasterBoard::endTurn() {
 		}
 	}
 	
-	setVisionField();
 
-	return 0;
+	return gameTurnIncrement;
 
 }
 

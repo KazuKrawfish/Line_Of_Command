@@ -13,7 +13,7 @@ const int MOVE_VALUES_MATRIX[8][10] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,
 												/*s*/   1,1,1,1, 1,1,1,1,1,1,
 												/*a*/	1,2,2,99,1,1,1,1,1,1,
 												/*r*/	1,2,2,99,1,1,1,1,1,1,
-												/*c*/	1,1,2,99,1,1,1,1,1,1,
+												/*c*/	2,3,3,99,1,1,1,1,1,1,
 												/*R*/	2,3,3,99,1,1,1,1,1,1,
 												/*T*/	1,2,2,99,1,1,1,1,1,1,
 												/*A*/	1,2,2,99,1,1,1,1,1,1, };
@@ -33,6 +33,7 @@ public:
 		controller = 0;
 		production = 0;
 		capturePoints = 20;
+		//Image already initialized
 		
 	}
 
@@ -148,6 +149,10 @@ public:
 	int capturePoints;
 	int locationX;
 	int locationY;
+	std::string Image =	{	'.','.','.',
+							'.','.','.',
+							'.','.','.' };
+
 	int clearTile() {
 		symbol = '.';
 		defenseFactor = 1.1;
