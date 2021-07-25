@@ -688,19 +688,28 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 
 int MasterBoard::endTurn(inputLayer* InputLayer) {
 	
-	InputLayer->requestedMinionToBuy = '\n';
-
+	int gameTurnIncrement = 0;
 	//Either increment playerFlag or set it to zero, thus cycling through the players.
-	if (playerFlag < NUMBEROFPLAYERS)					
+	if (playerFlag < NUMBEROFPLAYERS)
 	{
 		playerFlag++;
+
 	}
-	else 
+	else
 		if (playerFlag >= NUMBEROFPLAYERS)
 		{
+			//We need to tell inputLayer to tell mainMenu to increment gameTurn.
+			gameTurnIncrement = 1;
 			playerFlag = 1;
 		}
 
+	//Reset vision field for the next player.
+	setVisionField();
+	
+	//Set minionToBuy to the default null value.
+	InputLayer->requestedMinionToBuy = '\n';
+
+	//Reset every minion's status.
 	for (int i = 0; minionRoster[i] != NULL; i++)
 	{
 		minionRoster[i]->status = hasntmovedorfired;
@@ -719,9 +728,8 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 		}
 	}
 	
-	setVisionField();
 
-	return 0;
+	return gameTurnIncrement;
 
 }
 

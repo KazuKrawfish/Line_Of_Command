@@ -13,10 +13,14 @@ enum interactionMethod {unchosen, local, remote};
 class mainMenu
 {
 public:
+	//gameTurn represents the overall turn, which increments once everyone has cycled through one player turn.
+	int gameTurn = 1;
+	//interactionMethod refers to whether this will be remote or local game.
 	interactionMethod gameType = unchosen;
+	//mainMenuStatus will indicate what interace the player is interacting with.
 	mainMenuStatus menuStatus = topmenu;
 	std::string playerNames[NUMBEROFPLAYERS+1];
-	int gameLoad();
+	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame);
 	int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int gameSave(std::string saveGameName, MasterBoard* boardToPrint);

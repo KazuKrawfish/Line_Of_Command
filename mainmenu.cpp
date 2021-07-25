@@ -175,13 +175,24 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 
 int mainMenu::gameSave(std::string saveGameName, MasterBoard* boardToPrint)
 {
-	saveGameName += ".txt";
+	saveGameName += "_save.txt";
 	std::ofstream saveGame(saveGameName);
 
-	//First save the map size:
-	saveGame << BOARD_WIDTH << "_" << BOARD_HEIGHT << std::endl;
+	//Unique to save_game vs scenario. First save number of players, and then player names (User names):
+	saveGame << NUMBEROFPLAYERS << std::endl;
+	for (int i = 1; i <= NUMBEROFPLAYERS; i++)
+	{
+		saveGame << playerNames[i] << std::endl;
+	}
+	
+	//Then save the game turn.
+	saveGame << gameTurn << std::endl;
+	
+	//Then save the map size:
+	saveGame << BOARD_WIDTH << std::endl;
+	saveGame << BOARD_HEIGHT << std::endl;
 
-	//Then save player data:
+	//Then save whos turn it is:
 	saveGame << boardToPrint->playerFlag << std::endl;
 
 	//Terrain save:
@@ -234,7 +245,29 @@ int mainMenu::gameSave(std::string saveGameName, MasterBoard* boardToPrint)
 
 //Scenario Load is for new scenarios from a non-saved game.
 //Game Load is for saved games, which already have player data.
-int mainMenu::gameLoad() {}
+int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame)
+{ 
+	//This needs to get replaced!
+	int replaceWithNumberOfPlayers = 0;
+
+	//This is the first data we will see.
+	*saveGame >> replaceWithNumberOfPlayers;
+	
+	//Unique to save_game vs scenario. Load player names (User names):
+	for (int i = 1; i <= NUMBEROFPLAYERS; i++)
+	{
+		*saveGame >> playerNames[i];
+	}
+
+	//Then load the game turn.
+	*saveGame >> gameTurn;
+
+	
+	//Although I don't love the name scenarioLoad, this is performing the same action as scenarioLoad so we're using it as good practice.
+	scenarioLoad(boardToPrint, InputLayer, ComputerPlayer, saveGame);
+	return 0; 
+
+}
 
 //Load scenario game and initialize the board with its contents.
 int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame) {
@@ -243,24 +276,19 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	boardToPrint->clearBoard(InputLayer);
 	InputLayer->computerPlayer = ComputerPlayer;
 	ComputerPlayer->InputLayer = InputLayer;
-
-	
+		
 	std::string line;
-	char garbage;
 	int garb1, garb2;
-
-
+	
 	//First load the map size:
 	//Ideally we can create new vector or whatever to have different map size:
 	*saveGame >> garb1;
-	*saveGame >> garbage;
 	*saveGame >> garb2;
 
 	//Then load player data:
-	//This is the current turn:
+	//This is the current player whos turn it is:
 	*saveGame >> boardToPrint->playerFlag;
-
-
+	
 	for (int y = 0; y < BOARD_HEIGHT; y++)
 	{
 

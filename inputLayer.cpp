@@ -455,8 +455,11 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	{
 		if (boardToInput->cursor.selectMinionFlag == true)
 			boardToInput->deselectMinion();
-		boardToInput->endTurn(this);
-		MainMenu->gameSave("Autosave_save", boardToInput);
+		int incrementGameTurn = boardToInput->endTurn(this);
+		//If we advanced a gameTurn, mainMenu will keep track of it.
+		MainMenu->gameTurn += incrementGameTurn;
+		//Have to always keep an autosave!
+		MainMenu->gameSave("Autosave", boardToInput);
 		status = gameBoard;
 	}
 	
@@ -475,13 +478,11 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	if (*Input == 's')
 	{
 		//This is a mess but it's just using getstr instead of cin, which requires a little footwork.
-		//All save games must have _save in their name.
 		char gameToSave[100];
 		std::string saveName = "";
 		addstr("Choose where to save your game:\n");
 		getstr(&gameToSave[0]);
 		saveName += gameToSave;
-		saveName += "_save";
 		MainMenu->gameSave(saveName, boardToInput);
 		status = gameBoard;
 	}
