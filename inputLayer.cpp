@@ -40,18 +40,20 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 
 	//Need string pointer since addstr giving grief about printing strings, and same with snprintf.
 	char pointerToPrint[100];
-	char* stringPointer = &currentTile->description[0];
-	
+	char* descriptionPointer = &currentTile->description[0];
+	char* playerName = &(MainMenu->playerNames[currentTile->controller])[0];
+
 	if (currentTile->controller != 0)
 	{
-		snprintf(pointerToPrint, 100, "Player %d's ", currentTile->controller);
-		addstr(pointerToPrint);
-		addstr(stringPointer);
+		addstr("Player ");
+		addstr(playerName);
+		addstr("'s ");
+		addstr(descriptionPointer);
 	}
 	else
 	{
 		
-		addstr(stringPointer);
+		addstr(descriptionPointer);
 	}
 
 	//If tile is undergoing capture, let us know.
@@ -64,12 +66,12 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 	if (currentTile->hasMinionOnTop == true)
 	{
 		Minion* currentMinion = currentTile->minionOnTop;
-	
+		
 		//Print out basic minion status.
-		snprintf(pointerToPrint, 100, " Player %d's ", currentMinion->team);
-		stringPointer = &currentMinion->description[0];
-		addstr(pointerToPrint);
-		addstr(stringPointer);
+		addstr(" Player ");
+		addstr(&(MainMenu->playerNames[currentMinion->team])[0]);
+		addstr("'s ");
+		addstr(&currentMinion->description[0]);
 		snprintf(pointerToPrint, 100, ": %d Health Left. \n", int(currentMinion->health));
 		addstr(pointerToPrint);
 
@@ -173,11 +175,11 @@ int	inputLayer::printPropertyMenu() {
 		else
 		{
 			char toOutput[100];
-			snprintf(toOutput, 100, "Requested unit costs: %d. \n", unitPrice);
+			snprintf(toOutput, 100, "Requested unit costs: %d. \n", requestedUnitPrice);
 			
 			
 			addstr(toOutput);
-			addstr("Confirm (C) | Cancel (P)\n");
+			addstr("Confirm (z) | Cancel (p)\n");
 			
 		}
 	}
@@ -187,7 +189,7 @@ int	inputLayer::printPropertyMenu() {
 }
 
 int inputLayer::printMenu() {
-	addstr("Save game (s) | Go to main menu (x) \n");
+	addstr("Save game (s) | Go to main menu (x) | Load save game (L) \n");
 	addstr("End turn (e) | Exit menu (m) \n");
 	return 0;
 }
@@ -464,15 +466,38 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	}
 	
 	//Below disabled, you have to load via the main menu for the moment, since you have to set up a new game with players and such.
-	/*
+	
 	if (*Input == 'l')
 	{
-		//DEBUG- this specially load a certain compie but instead loads the same exact one.
-		std::cout << "DISABLED DISABLED DISABLED" << std::endl;
-		MainMenu->scenarioLoad(boardToInput, this, computerPlayer,);
+		//Load the actual save game
+		std::ifstream loadGameSave;
+		char saveToLoad[100];
+		char* pointToSaveGameName = &saveToLoad[0];
+		bool loadsuccessful = false;
+
+		//Prompt user and load scenario
+		while (loadsuccessful == false)
+		{
+			addstr("Choose which save game to load (Case sensitive): \n");
+			getstr(pointToSaveGameName);
+			std::string newScenario = saveToLoad;
+			loadGameSave.open(newScenario + ".txt");
+			if (loadGameSave.is_open())
+			{
+				addstr("Save game successfully loaded!\n");
+				loadsuccessful = true;
+			}
+			else
+			{
+				addstr("Could not load save game. Please check that it exists and the right spelling was used.\n");
+
+			}
+
+		}
+		//Actually load scenario. Initialize board, etc.
+		MainMenu->gameLoad(boardToInput, this, computerPlayer, &loadGameSave);
 		status = gameBoard;
-		//Load new map
-	}*/
+	}
 
 	//Prompt user and save game.
 	if (*Input == 's')
@@ -495,6 +520,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 
 	if (*Input == 'x')
 	{
+		MainMenu->gameSave("Autosave", boardToInput);
 		exitToMainMenu();
 	}
 
@@ -517,8 +543,6 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 		return 0;
 	}
 
-	//Player treasury, cost of unit initialized to -1 to show bad inputs.
-	unitPrice = -1;
 	int treasury = boardToInput->treasury[boardToInput->playerFlag];
 
 	//If this is NOT the second valid purchase input
@@ -533,16 +557,16 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 			return 0;
 		}
 		//Consult cost table:
-		unitPrice = boardToInput->consultMinionCostChart(*Input);
+		requestedUnitPrice = boardToInput->consultMinionCostChart(*Input);
 
 		//If it is a real unit we are trying to purchase
 		//Aka unitPrica is not -1 aka non-error
-		if (unitPrice > 0)
+		if (requestedUnitPrice > 0)
 		{
 			requestedMinionToBuy = *Input;
 
 			//If we can't afford, use special ! character
-			if (unitPrice > treasury)
+			if (requestedUnitPrice > treasury)
 			{
 				//Indicates you can't afford
 				requestedMinionToBuy = '!';
@@ -563,13 +587,14 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 			//Cancel purchase
 			requestedMinionToBuy = '\n';
 		}
-		if (*Input == 'c')
+		if (*Input == 'z')
 		{
 			//Confirm purchase
 			boardToInput->createMinion(requestedMinionToBuy, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag, 100, hasfired);
-			boardToInput->treasury[boardToInput->playerFlag] -= unitPrice;
+			boardToInput->treasury[boardToInput->playerFlag] -= requestedUnitPrice;
 			status = gameBoard;
 			requestedMinionToBuy = '\n';
+			requestedUnitPrice = -1;
 		}
 	}
 
@@ -579,5 +604,7 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 int inputLayer::exitToMainMenu() 
 {
 	this->MainMenu->menuStatus = topmenu;
+	clear();
+	addstr("Press any key to continue to main menu.\n");
 	return 0; 
 }

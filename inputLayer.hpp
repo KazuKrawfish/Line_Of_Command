@@ -34,7 +34,7 @@ public:
 	gameInputLayer status = gameBoard;
 	specialKey minionVisibleStatus = showMinions;
 	char requestedMinionToBuy = '\n';
-	int unitPrice = -1;
+	int requestedUnitPrice = -1;
 	compie* computerPlayer;
 	mainMenu* MainMenu;
 

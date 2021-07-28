@@ -247,10 +247,10 @@ int mainMenu::gameSave(std::string saveGameName, MasterBoard* boardToPrint)
 //Game Load is for saved games, which already have player data.
 int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame)
 { 
-	//This needs to get replaced!
+	
 	int replaceWithNumberOfPlayers = 0;
 
-	//This is the first data we will see.
+	//This is the first data we will see. Need to figure out how to replace NUMBEROFPLAYERS.
 	*saveGame >> replaceWithNumberOfPlayers;
 	
 	//Unique to save_game vs scenario. Load player names (User names):
@@ -388,7 +388,7 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 	//Need to deal with COUTs. the're inappropriate.
 	if (*Input == 'l') 
 	{
-		topMenuLoad(Input, boardToPlay, InputLayer, ComputerPlayer);
+		topMenuLoad(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
 		menuStatus = playingMap;
 	}
 
@@ -407,6 +407,7 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 int mainMenu::printTopMenu()
 {
 	clear();
+	addstr("Main Menu\n");
 	addstr("Load saved game (l) or start new game (n). \n");
 	refresh();
 	return 0;
@@ -415,7 +416,7 @@ int mainMenu::printTopMenu()
 int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
 {	
 	//Determine if game is remote or local.
-	addstr("Local (l) or remote(r) game?\n");
+	addstr("Local (l) or remote (r) game?\n");
 	while (gameType == unchosen)
 	{
 		*Input = wgetch(mywindow);
@@ -480,9 +481,60 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	return 0;
 }
 
-int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer) 
+int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
 { 
-	addstr("Under construction\n");
-	return 0; 
+	//Determine if game is remote or local.
+	addstr("Local (l) or remote(r) game?\n");
+	while (gameType == unchosen)
+	{
+		*Input = wgetch(mywindow);
+
+		if (*Input == 'l')
+		{
+			clear();
+			addstr("Local game selected.\n");
+			refresh();
+			gameType = local;
+		}
+		else if (*Input == 'r')
+		{
+			clear();
+			addstr("Remote game selected.\n");
+			refresh();
+			gameType = remote;
+		}
+	}
+
+	//Load the actual save game
+	std::ifstream loadGameSave;
+	char saveToLoad[100];
+	char* pointToSaveGameName = &saveToLoad[0];
+	bool loadsuccessful = false;
+
+	//Prompt user and load scenario
+	while (loadsuccessful == false)
+	{
+		addstr("Choose which save game to load (Case sensitive): \n");
+		getstr(pointToSaveGameName);
+		std::string newScenario = saveToLoad;
+		loadGameSave.open(newScenario + ".txt");
+		if (loadGameSave.is_open())
+		{
+			addstr("Save game successfully loaded!\n");
+			loadsuccessful = true;
+		}
+		else
+		{
+			addstr("Could not load save game. Please check that it exists and the right spelling was used.\n");
+
+		}
+
+	}
+	//Actually load scenario. Initialize board, etc.
+	gameLoad(boardToPlay, InputLayer, ComputerPlayer, &loadGameSave);
+
+
+
+	return 0;
 }
 
