@@ -173,10 +173,9 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 	return 0;
 }
 
-int mainMenu::gameSave(std::string saveGameName, MasterBoard* boardToPrint)
+int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 {
-	saveGameName += "_save.txt";
-	std::ofstream saveGame(saveGameName);
+	std::ofstream saveGame(inputSaveGameName);
 
 	//Unique to save_game vs scenario. First save number of players, and then player names (User names):
 	saveGame << NUMBEROFPLAYERS << std::endl;
@@ -251,6 +250,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie
 	int replaceWithNumberOfPlayers = 0;
 
 	//This is the first data we will see. Need to figure out how to replace NUMBEROFPLAYERS.
+	//As of right now this value will not be used.
 	*saveGame >> replaceWithNumberOfPlayers;
 	
 	//Unique to save_game vs scenario. Load player names (User names):
@@ -344,7 +344,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 	//Run as long as the user wants. Infinite while loop.
 	while (true)		
 	{
-
+	
 		Input = wgetch(mywindow);
 
 		//If we're still on top menu, do that instead of game/inputLayer.
@@ -352,6 +352,13 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 		{
 			printTopMenu();
 			topMenuInput(&Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
+		}
+
+		//If we are waiting for remote, do that instead of game/inputLayer.
+		if (menuStatus == waitingForRemotePlayer)
+		{
+			printWaitingScreen();
+			waitForRemotePlayer(boardToPlay, InputLayer, ComputerPlayer);
 		}
 		
 		if(menuStatus == playingMap)
@@ -389,7 +396,6 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 	if (*Input == 'l') 
 	{
 		topMenuLoad(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
-		menuStatus = playingMap;
 	}
 
 
@@ -397,9 +403,13 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 	if (*Input == 'n')
 	{
 		topMenuNew(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
-		menuStatus = playingMap;
 	}
 	
+	//Join a remote game
+	if (*Input == 'j')
+	{
+		topMenuJoin(boardToPlay, InputLayer, ComputerPlayer, mywindow);
+	}
 
 	return 0;
 }
@@ -408,7 +418,15 @@ int mainMenu::printTopMenu()
 {
 	clear();
 	addstr("Main Menu\n");
-	addstr("Load saved game (l) or start new game (n). \n");
+	addstr("Load saved game (l) | Start new game (n) | Join remote game (j) \n");
+	refresh();
+	return 0;
+}
+
+int mainMenu::printWaitingScreen() 
+{
+	clear();
+	addstr("Waiting for other player(s) \n");
 	refresh();
 	return 0;
 }
@@ -417,6 +435,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 {	
 	//Determine if game is remote or local.
 	addstr("Local (l) or remote (r) game?\n");
+	gameType = unchosen;
 	while (gameType == unchosen)
 	{
 		*Input = wgetch(mywindow);
@@ -449,7 +468,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		addstr("Choose which scenario to load (Case sensitive): \n");
 		getstr(pointToScenarioName);
 		std::string newScenario = scenarioToLoad;
-		newGameMap.open(newScenario + ".txt");
+		newGameMap.open(".\\scenarios\\"+ newScenario + ".txt");
 		if (newGameMap.is_open())
 		{
 			addstr("Successfully loaded!\n");
@@ -478,6 +497,15 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		playerNames[i] = inputName;
 	}
 
+	//Get session name:
+	char inputSessionName[100];
+	addstr("Input session name:\n");
+	getstr(&inputSessionName[0]);
+	sessionName = inputSessionName;
+	
+
+
+	menuStatus = playingMap;
 	return 0;
 }
 
@@ -485,6 +513,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 { 
 	//Determine if game is remote or local.
 	addstr("Local (l) or remote(r) game?\n");
+	gameType = unchosen;
 	while (gameType == unchosen)
 	{
 		*Input = wgetch(mywindow);
@@ -506,18 +535,21 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	}
 
 	//Load the actual save game
+	//This garbage is necessary because for some reason, getstr will not play with strings, even if you provide & and [0]
 	std::ifstream loadGameSave;
-	char saveToLoad[100];
-	char* pointToSaveGameName = &saveToLoad[0];
+	std::string saveToLoad;
+	char scenarioToLoad[100];
+	char* pointToSaveName = &scenarioToLoad[0];
 	bool loadsuccessful = false;
 
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
-		addstr("Choose which save game to load (Case sensitive): \n");
-		getstr(pointToSaveGameName);
-		std::string newScenario = saveToLoad;
-		loadGameSave.open(newScenario + ".txt");
+		addstr("Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n");
+		getstr(&pointToSaveName[0]);
+		saveToLoad = scenarioToLoad;
+		saveToLoad += "_save.txt";
+		loadGameSave.open(".\\savegames\\" + saveToLoad);
 		if (loadGameSave.is_open())
 		{
 			addstr("Save game successfully loaded!\n");
@@ -533,8 +565,106 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	//Actually load scenario. Initialize board, etc.
 	gameLoad(boardToPlay, InputLayer, ComputerPlayer, &loadGameSave);
 
+	//Get session name:
+	char inputSessionName[100];
+	addstr("Input session name:\n");
+	getstr(&inputSessionName[0]);
+	sessionName = inputSessionName;
 
+
+
+	menuStatus = playingMap;
+	return 0;
+}
+
+int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow) 
+{
+	//Set flags to remote and waiting for first turn.
+	gameType = remote;
+	joiningFirstTurn = true;
+
+	//Get session name:
+	char inputSessionName[100];
+	addstr("Input session name:\n");
+	getstr(&inputSessionName[0]);
+	sessionName = inputSessionName;
+
+	waitForRemotePlayer(boardToPlay, InputLayer, ComputerPlayer);
 
 	return 0;
 }
 
+int mainMenu::multiplayerPushSaveGame(MasterBoard* boardToSave)
+{
+	//Should save the current game into the multiplayer folder, and then call the bat file to push to remote.
+	//Ensure game is saved into the right directory.
+	//This is different from local saves. Thus must handle save names before passing to saveGame.
+	std::string saveGameName = ".\\multiplayer\\lineOfCommandMultiplayer\\";
+	saveGameName += sessionName;
+	saveGameName += "_save.txt";
+	gameSave(saveGameName, boardToSave);
+
+	//Call .bat to push.
+	std::string batchPushCommand = "pushSaveToServer.bat";
+	system(&batchPushCommand[0]);
+
+	return 0;
+
+}
+
+int mainMenu::multiplayerPullSaveGame() 
+{
+	//Should attempt to pull and then compare the pulled filename against some previous quantity, for now, gameturn and playerturn.
+
+	//Call pullSaveFromServer.bat to pull.
+	std::string batchPullCommand = "pullSaveFromServer.bat";
+	system(&batchPullCommand[0]);
+	return 0;
+}
+
+int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer)
+{
+
+	int oldFilePlayerTurn = 0;
+	int oldFileGameTurn  = 0;
+
+	//We are waiting for updated save game.
+	bool receivedUpdate = false;
+
+	if (joiningFirstTurn == false)
+	{
+		//First save the "old" values, to compare against whatever we load.
+		int oldFilePlayerTurn = boardToSave->playerFlag;
+		int oldFileGameTurn = gameTurn;
+
+	}
+
+
+	while (receivedUpdate == false)
+	{
+		//The batch file will wait 5 real world seconds.
+		multiplayerPullSaveGame();
+
+		//Then load game and see if it's changed at all.
+		std::ifstream loadGameSave;
+		loadGameSave.open(".\\multiplayer\\lineOfCommandMultiplayer\\" + sessionName + "_save.txt");
+		
+		//Have to successfully open the game file before we can examine it!
+		if (loadGameSave.is_open() == true) 
+		{
+			gameLoad(boardToSave, InputLayer, ComputerPlayer, &loadGameSave);
+			//If either have changed we have successfully gotten a different file.
+			if (joiningFirstTurn == true || oldFilePlayerTurn != boardToSave->playerFlag || oldFileGameTurn == gameTurn)
+			{
+				joiningFirstTurn = false;
+				receivedUpdate = true;
+			}
+		}
+
+
+
+	}
+
+	menuStatus = playingMap;
+	return 0;
+}

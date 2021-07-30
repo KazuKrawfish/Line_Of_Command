@@ -461,8 +461,17 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		//If we advanced a gameTurn, mainMenu will keep track of it.
 		MainMenu->gameTurn += incrementGameTurn;
 		//Have to always keep an autosave!
-		MainMenu->gameSave("Autosave", boardToInput);
+		MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
 		status = gameBoard;
+
+		//If multiplayer, push to remote server and queue "waiting"
+		//mainmenu's playGame will keep the player waiting.
+		if (MainMenu->gameType == remote)
+		{
+			MainMenu->multiplayerPushSaveGame(boardToInput);
+			MainMenu->menuStatus = waitingForRemotePlayer;
+		}
+
 	}
 	
 	//Below disabled, you have to load via the main menu for the moment, since you have to set up a new game with players and such.
@@ -471,17 +480,18 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	{
 		//Load the actual save game
 		std::ifstream loadGameSave;
-		char saveToLoad[100];
-		char* pointToSaveGameName = &saveToLoad[0];
 		bool loadsuccessful = false;
 
 		//Prompt user and load scenario
 		while (loadsuccessful == false)
 		{
 			addstr("Choose which save game to load (Case sensitive): \n");
-			getstr(pointToSaveGameName);
-			std::string newScenario = saveToLoad;
-			loadGameSave.open(newScenario + ".txt");
+			std::string gameToLoad;
+			char inputChars[100];
+			getstr(&inputChars[0]);
+			gameToLoad = inputChars;
+
+			loadGameSave.open(".\\savegames\\" + gameToLoad + ".txt");
 			if (loadGameSave.is_open())
 			{
 				addstr("Save game successfully loaded!\n");
@@ -504,10 +514,16 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	{
 		//This is a mess but it's just using getstr instead of cin, which requires a little footwork.
 		char gameToSave[100];
-		std::string saveName = "";
-		addstr("Choose where to save your game:\n");
+
+		//Ensure game is saved into the right directory.
+		std::string saveName = ".\\savegames\\";
+
+		addstr("Choose file name to save your game:\n");
 		getstr(&gameToSave[0]);
 		saveName += gameToSave;
+		saveName += "_save.txt";
+
+
 		MainMenu->gameSave(saveName, boardToInput);
 		status = gameBoard;
 	}
@@ -518,9 +534,10 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		status = gameBoard;
 	}
 
+	//Exit to main menu
 	if (*Input == 'x')
 	{
-		MainMenu->gameSave("Autosave", boardToInput);
+		MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
 		exitToMainMenu();
 	}
 
@@ -604,7 +621,8 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 int inputLayer::exitToMainMenu() 
 {
 	this->MainMenu->menuStatus = topmenu;
-	clear();
+	//clear();
+	//This isn't working properly.
 	addstr("Press any key to continue to main menu.\n");
 	return 0; 
 }
