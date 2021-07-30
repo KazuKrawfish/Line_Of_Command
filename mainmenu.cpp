@@ -624,9 +624,9 @@ int mainMenu::multiplayerPullSaveGame()
 
 int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer)
 {
+	addstr("waitForRemotePlayer \n");
 
 	int oldFilePlayerTurn = 0;
-	int oldFileGameTurn  = 0;
 
 	//We are waiting for updated save game.
 	bool receivedUpdate = false;
@@ -634,14 +634,15 @@ int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLay
 	if (joiningFirstTurn == false)
 	{
 		//First save the "old" values, to compare against whatever we load.
-		int oldFilePlayerTurn = boardToSave->playerFlag;
-		int oldFileGameTurn = gameTurn;
+		oldFilePlayerTurn = boardToSave->playerFlag;
+
 
 	}
 
 
 	while (receivedUpdate == false)
 	{
+
 		//The batch file will wait 5 real world seconds.
 		multiplayerPullSaveGame();
 
@@ -654,7 +655,7 @@ int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLay
 		{
 			gameLoad(boardToSave, InputLayer, ComputerPlayer, &loadGameSave);
 			//If either have changed we have successfully gotten a different file.
-			if (joiningFirstTurn == true || oldFilePlayerTurn != boardToSave->playerFlag || oldFileGameTurn == gameTurn)
+			if ( oldFilePlayerTurn != boardToSave->playerFlag)
 			{
 				joiningFirstTurn = false;
 				receivedUpdate = true;
