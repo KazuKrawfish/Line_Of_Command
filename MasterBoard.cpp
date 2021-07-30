@@ -197,11 +197,7 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 		}
 	}
 
-	//Reset treasury
-	for (int i = 0; i < NUMBEROFPLAYERS + 1; i++)
-	{
-		treasury[i] = 0;
-	}
+
 
 	return 0;
 }

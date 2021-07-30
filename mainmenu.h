@@ -27,7 +27,7 @@ public:
 	int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint);
-	int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame);
+	int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame, bool isSaveGame);
 	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
 	int printTopMenu();
 	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);

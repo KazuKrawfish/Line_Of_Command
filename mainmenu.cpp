@@ -182,6 +182,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	for (int i = 1; i <= NUMBEROFPLAYERS; i++)
 	{
 		saveGame << playerNames[i] << std::endl;
+		saveGame << boardToPrint->treasury[i] << std::endl;
 	}
 	
 	//Then save the game turn.
@@ -257,6 +258,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie
 	for (int i = 1; i <= NUMBEROFPLAYERS; i++)
 	{
 		*saveGame >> playerNames[i];
+		*saveGame >> boardToPrint->treasury[i];
 	}
 
 	//Then load the game turn.
@@ -264,18 +266,30 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie
 
 	
 	//Although I don't love the name scenarioLoad, this is performing the same action as scenarioLoad so we're using it as good practice.
-	scenarioLoad(boardToPrint, InputLayer, ComputerPlayer, saveGame);
+	scenarioLoad(boardToPrint, InputLayer, ComputerPlayer, saveGame,  true);
 	return 0; 
 
 }
 
 //Load scenario game and initialize the board with its contents.
-int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame) {
+int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame, bool isSaveGame) {
 
 	//Clear board in case scenario load was called by player menu later in game.
 	boardToPrint->clearBoard(InputLayer);
 	InputLayer->computerPlayer = ComputerPlayer;
 	ComputerPlayer->InputLayer = InputLayer;
+
+	//If this is a new game, clear the treasury.
+	//Otherwise leave the values from the loadGame portion.
+	if (isSaveGame == false) 
+	{
+		//Reset treasury
+		for (int i = 0; i < NUMBEROFPLAYERS + 1; i++)
+		{
+			boardToPrint->treasury[i] = 0;
+		}
+	}
+
 		
 	std::string line;
 	int garb1, garb2;
@@ -482,7 +496,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	
 	}
 	//Actually load scenario. Initialize board, etc.
-	scenarioLoad(boardToPlay, InputLayer, ComputerPlayer, &newGameMap);
+	scenarioLoad(boardToPlay, InputLayer, ComputerPlayer, &newGameMap, false);
 
 	//Determine player names for number of players
 	//Currently this is 2:
