@@ -11,6 +11,12 @@
 class inputLayer;
 class MasterBoard;
 
+
+//Gameplay note:
+//As currently constructed, host for a new scenario must be player 1. Anyone join will play the turn assigned based on their player name.
+//Thus host never says "his" player name, because that is the first one inputted!
+//Similarly, if you host for a loaded game, you are playing as whose turn it was, so you should only host for whose turn was current when saved.
+//Finally, for host, you currently must start with a unique session name, and they will be cleared every day to start.
  
 //Messes up minions!
 //Still need to add them after.
@@ -353,13 +359,27 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 	addstr("Press any key to continue.");
 	refresh();
 
-	char Input = ' ';
+	char Input = '~';
 
 	//Run as long as the user wants. Infinite while loop.
 	while (true)		
 	{
-	
-		Input = wgetch(mywindow);
+		if (skipOneInput == true) 
+		{
+			skipOneInput = false;
+		}
+		else 
+		{
+			Input = wgetch(mywindow);
+		}
+
+
+		//My attempt to test escape character.
+		if (Input == 27) 
+		{
+			addstr("BSLALIJASLDJ");
+		}
+
 
 		//If we're still on top menu, do that instead of game/inputLayer.
 		if (menuStatus == topmenu)
@@ -497,6 +517,37 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	}
 	//Actually load scenario. Initialize board, etc.
 	scenarioLoad(boardToPlay, InputLayer, ComputerPlayer, &newGameMap, false);
+	newGameMap.close();
+
+	std::ifstream loadSession;
+	bool sessionCreationSuccessful = false;
+	//Prompt user for session name and ensure it is unique:
+	//IF IT IS REMOTE
+	while (gameType == remote && sessionCreationSuccessful == false)
+	{
+		//Get attempted session name:
+		addstr("Input session name:\n");
+		char inputSessionName[100];
+		getstr(&inputSessionName[0]);
+		sessionName = inputSessionName;
+
+		//Now append filepath and atempt to open. If open succeeds, this session already exists!
+		loadSession.open(".\\multiplayer\\lineOfCommandMultiplayer\\" + sessionName + "_save.txt");
+
+		if (loadSession.is_open())
+		{
+			addstr("This session already exists. Enter a different session name. \n");
+
+		}
+		else
+		{
+			addstr("This session is unique.\n");
+			sessionCreationSuccessful = true;
+		}
+
+	}
+
+
 
 	//Determine player names for number of players
 	//Currently this is 2:
@@ -511,12 +562,17 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		playerNames[i] = inputName;
 	}
 
+/*	if (gameType == remote) 
+	{
 	//Get session name:
 	char inputSessionName[100];
 	addstr("Input session name:\n");
 	getstr(&inputSessionName[0]);
 	sessionName = inputSessionName;
-	
+	}*/
+
+	//Host is always player one for a new game.
+	myPlayerName = playerNames[1];
 
 
 	menuStatus = playingMap;
@@ -578,13 +634,39 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	}
 	//Actually load scenario. Initialize board, etc.
 	gameLoad(boardToPlay, InputLayer, ComputerPlayer, &loadGameSave);
+	loadGameSave.close();
 
-	//Get session name:
-	char inputSessionName[100];
-	addstr("Input session name:\n");
-	getstr(&inputSessionName[0]);
-	sessionName = inputSessionName;
+	std::ifstream loadSession;
+	bool sessionCreationSuccessful = false;
+	//Prompt user for session name and ensure it is unique:
+	//IF IT IS REMOTE
+	while (gameType == remote && sessionCreationSuccessful == false)
+	{
+		//Get attempted session name:
+		addstr("Input session name:\n");
+		char inputSessionName[100];
+		getstr(&inputSessionName[0]);
+		sessionName = inputSessionName;
 
+		//Now append filepath and atempt to open. If open succeeds, this session already exists!
+		sessionName += "_save.txt";
+		loadSession.open(".\\multiplayer\\lineOfCommandMultiplayer\\" + sessionName);
+
+		if (loadSession.is_open())
+		{
+			addstr("This session already exists. Enter a different session name. \n");
+			
+		}
+		else
+		{
+			addstr("This session is unique.\n");
+			sessionCreationSuccessful = true;
+		}
+
+	}
+
+	//Host will play as whoever's turn it is.
+	myPlayerName = playerNames[boardToPlay->playerFlag];
 
 
 	menuStatus = playingMap;
@@ -593,15 +675,20 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow) 
 {
-	//Set flags to remote and waiting for first turn.
+	//Set flags to remote and waiting for first turn for the session.
 	gameType = remote;
-	joiningFirstTurn = true;
+	awaitingFirstTurnThisSession = true;
 
 	//Get session name:
 	char inputSessionName[100];
-	addstr("Input session name:\n");
+	addstr("Input session name: (Case sensitive)\n");
 	getstr(&inputSessionName[0]);
 	sessionName = inputSessionName;
+
+	char inputPlayerName[100];
+	addstr("Input your player name: (Case sensitive)\n");
+	getstr(&inputPlayerName[0]);
+	myPlayerName = inputPlayerName;
 
 	waitForRemotePlayer(boardToPlay, InputLayer, ComputerPlayer);
 
@@ -639,24 +726,12 @@ int mainMenu::multiplayerPullSaveGame()
 int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer)
 {
 	addstr("waitForRemotePlayer \n");
-
-	int oldFilePlayerTurn = 0;
-
+	
 	//We are waiting for updated save game.
-	bool receivedUpdate = false;
-
-	if (joiningFirstTurn == false)
+	bool isItMyTurnYet = false;
+	   
+	while (isItMyTurnYet == false)
 	{
-		//First save the "old" values, to compare against whatever we load.
-		oldFilePlayerTurn = boardToSave->playerFlag;
-
-
-	}
-
-
-	while (receivedUpdate == false)
-	{
-
 		//The batch file will wait 5 real world seconds.
 		multiplayerPullSaveGame();
 
@@ -664,19 +739,19 @@ int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLay
 		std::ifstream loadGameSave;
 		loadGameSave.open(".\\multiplayer\\lineOfCommandMultiplayer\\" + sessionName + "_save.txt");
 		
+		//Current rule is you should not be attempting to join a session that already exists but was abandoned.
+		//The host must always start with a unique session name, so someone waiting to join just waits to open that particular file.
 		//Have to successfully open the game file before we can examine it!
 		if (loadGameSave.is_open() == true) 
 		{
 			gameLoad(boardToSave, InputLayer, ComputerPlayer, &loadGameSave);
-			//If either have changed we have successfully gotten a different file.
-			if ( oldFilePlayerTurn != boardToSave->playerFlag)
+			
+			//If it is "my turn" then we are good to go.
+			if ( myPlayerName == playerNames[boardToSave->playerFlag] )
 			{
-				joiningFirstTurn = false;
-				receivedUpdate = true;
+				isItMyTurnYet = true;
 			}
 		}
-
-
 
 	}
 

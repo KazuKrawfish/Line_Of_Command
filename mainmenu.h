@@ -16,13 +16,16 @@ public:
 	//gameTurn represents the overall turn, which increments once everyone has cycled through one player turn.
 	int gameTurn = 1;
 	//Initialized to false because only if we select join is this true, and that will be dealt with in that function..
-	bool joiningFirstTurn = false;
+	bool awaitingFirstTurnThisSession = false;
+	//skipOneInput indicates that we skip on player input, in order to print the next screen. (Back to main menu, etc.)
+	bool skipOneInput = false;
 	//interactionMethod refers to whether this will be remote or local game.
 	interactionMethod gameType = unchosen;
 	//mainMenuStatus will indicate what interace the player is interacting with.
 	mainMenuStatus menuStatus = topmenu;
 	std::string playerNames[NUMBEROFPLAYERS+1];
-	std::string sessionName;
+	std::string sessionName = "localsession";
+	std::string myPlayerName = "~";
 	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame);
 	int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 	int setCharacteristics(MasterBoard* LoadBoard);
@@ -36,6 +39,7 @@ public:
 	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
 	int printWaitingScreen();
 	int waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer);
+	
 	
 	//Multiplayer specific functions
 	//The below pushes the saved game to the remote server, and should be used at end of player turn.

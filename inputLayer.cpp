@@ -468,6 +468,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		//mainmenu's playGame will keep the player waiting.
 		if (MainMenu->gameType == remote)
 		{
+			MainMenu->skipOneInput = true;
 			MainMenu->multiplayerPushSaveGame(boardToInput);
 			MainMenu->menuStatus = waitingForRemotePlayer;
 		}
@@ -571,6 +572,7 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 		{
 			//Deselect
 			status = gameBoard;
+			requestedMinionToBuy = '\n';
 			return 0;
 		}
 		//Consult cost table:
@@ -621,8 +623,6 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 int inputLayer::exitToMainMenu() 
 {
 	this->MainMenu->menuStatus = topmenu;
-	//clear();
-	//This isn't working properly.
-	addstr("Press any key to continue to main menu.\n");
+	MainMenu->skipOneInput = true;
 	return 0; 
 }
