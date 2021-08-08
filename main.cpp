@@ -30,6 +30,8 @@
 #include <curses.h>
 #include "mainmenu.h"
 
+
+
 //Global variables need to be moved.
 
 int main()
@@ -40,26 +42,46 @@ int main()
 	compie ComputerPlayer;
 	WINDOW* mywindow = initscr();
 	
-
 	resize_term(40, 90);
 	start_color();
 
 	//Terrain we can see - black background.
-	init_pair(0, COLOR_WHITE, COLOR_BLACK);
-	init_pair(1, COLOR_GREEN, COLOR_BLACK);
-	init_pair(2, COLOR_RED, COLOR_BLACK);
-	init_pair(3, COLOR_BLUE, COLOR_BLACK);
-	init_pair(4, COLOR_CYAN, COLOR_BLACK);
-	init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
-	init_pair(6, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(landTile, COLOR_BLACK, COLOR_GREEN);
+	init_pair(waterTile, COLOR_GREEN, COLOR_BLUE);
+	
+	//Player minion colors
+	init_pair(player1Minion, COLOR_RED, COLOR_YELLOW);
+	init_pair(player2Minion, COLOR_BLUE, COLOR_CYAN);
+	init_pair(player3Minion, COLOR_CYAN, COLOR_BLACK);
+	init_pair(player4Minion, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(player5Minion, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(player6Minion, COLOR_GREEN, COLOR_BLACK);
+		
+	
+	//Player tile colors
+	init_pair(player1Tile, COLOR_RED, COLOR_GREEN);
+	init_pair(player2Tile, COLOR_BLUE, COLOR_GREEN);
+	init_pair(player3Tile, COLOR_CYAN, COLOR_GREEN);
+	init_pair(player4Tile, COLOR_MAGENTA, COLOR_GREEN);
+	init_pair(player5Tile, COLOR_YELLOW, COLOR_GREEN);
+	init_pair(player6Tile, COLOR_GREEN, COLOR_BLACK);
+	init_pair(neutralTile, COLOR_WHITE, COLOR_GREEN);
 
 	//Outside of vision, terrain - shrouded in fog.
-	init_pair(7, COLOR_GREEN, COLOR_WHITE);
-	init_pair(8, COLOR_RED, COLOR_WHITE);
-	init_pair(9, COLOR_BLUE, COLOR_WHITE);
-	init_pair(10, COLOR_CYAN, COLOR_WHITE);
-	init_pair(11, COLOR_MAGENTA, COLOR_WHITE);
-	init_pair(12, COLOR_YELLOW, COLOR_WHITE);
+	init_pair(fogLandTile, COLOR_BLACK, COLOR_WHITE);
+	init_pair(fogWaterTile, COLOR_BLUE, COLOR_WHITE);
+	init_pair(fogPlayer1Tile, COLOR_RED, COLOR_WHITE);
+	init_pair(fogPlayer2Tile, COLOR_BLUE, COLOR_WHITE);
+	init_pair(fogPlayer3Tile, COLOR_CYAN, COLOR_WHITE);
+	init_pair(fogPlayer4Tile, COLOR_MAGENTA, COLOR_WHITE);
+	init_pair(fogPlayer5Tile, COLOR_YELLOW, COLOR_WHITE);
+	init_pair(fogPlayer6Tile, COLOR_GREEN, COLOR_WHITE);
+	init_pair(fogNeutralTile, COLOR_BLACK, COLOR_WHITE);
+
+	//Utility colors
+	init_pair(cursorSymbol, COLOR_BLACK, COLOR_WHITE);
+	init_pair(attackRangeSymbol, COLOR_BLACK, COLOR_RED);
+	init_pair(moveRangeSymbol, COLOR_BLACK, COLOR_RED);
 
 	MainMenu.playGame(&GameBoard, &InputLayer, &ComputerPlayer, mywindow);
 	

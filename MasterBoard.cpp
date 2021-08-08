@@ -144,9 +144,19 @@ int MasterBoard::consultMinionCostChart(char minionType)
 //Currently this is not doing what it should be doing- only partial initialization.
 MasterBoard::MasterBoard()
 {
+	//Not sure why we have to do an extra row, whatever! (Tried with one less and it caused out of bounds..... i am insane?!?!)
+	//First resize board to meet savegame specifications.
+	Board.resize(BOARD_WIDTH+1);
+	for (int i = 0; i < BOARD_WIDTH; i++)
+	{
+		Board[i].resize(BOARD_HEIGHT);
+	}
 
+	//Initialize cursor.
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
+	cursor.boardToPlay = this;
+
 	totalNumberOfMinions = 0;
 
 	//Initialize MinionRoster to NULL.
@@ -155,6 +165,7 @@ MasterBoard::MasterBoard()
 		minionRoster[i] = NULL;
 	}
 
+	treasury.resize(NUMBEROFPLAYERS + 1);
 	for (int i = 0; i < NUMBEROFPLAYERS+1; i++)
 	{
 		treasury[i] = 0;
@@ -621,9 +632,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	double defenderDefenseFactor = Board[inputX][inputY].defenseFactor;
 	defendingMinion->health -= attackerFirePower * attackingMinion->health / defenderDefenseFactor;				
 
-	if (defendingMinion->health <= 0)
+	if (defendingMinion->health <= 10.0)
 	{
-		//If defender falls below 0, it dies.
+		//If defender falls below 10, it dies.
 		bool printMessage = true;
 		destroyMinion(defendingMinion, printMessage, InputLayer);
 	}
@@ -636,7 +647,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 			attackingMinion->health -= defenderFirePower * defendingMinion->health / attackerDefenseFactor;
 		}	
 
-	if (attackingMinion->health <= 0)			//The attacker can be destroyed too!
+	if (attackingMinion->health <= 10.0)			//The attacker can be destroyed too!
 	{	
 		bool printMessage = true;
 		destroyMinion(attackingMinion, printMessage, InputLayer);

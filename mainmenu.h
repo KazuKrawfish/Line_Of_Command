@@ -23,7 +23,7 @@ public:
 	interactionMethod gameType = unchosen;
 	//mainMenuStatus will indicate what interace the player is interacting with.
 	mainMenuStatus menuStatus = topmenu;
-	std::string playerNames[NUMBEROFPLAYERS+1];
+	std::vector<std::string> playerNames;
 	std::string sessionName = "localsession";
 	std::string myPlayerName = "~";
 	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame);
@@ -40,7 +40,7 @@ public:
 	int printWaitingScreen();
 	int waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer);
 	
-	
+	mainMenu();
 	//Multiplayer specific functions
 	//The below pushes the saved game to the remote server, and should be used at end of player turn.
 	int multiplayerPushSaveGame(MasterBoard* boardToSave);

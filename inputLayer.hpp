@@ -5,6 +5,17 @@
 
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction };
 enum specialKey {showMinions, hideMinions};
+enum colorCode {
+	unused, fogLandTile, waterTile, fogWaterTile, player1Minion,
+	player2Minion, player3Minion, player4Minion, player5Minion, player6Minion,
+	player1Tile, player2Tile, player3Tile, player4Tile, player5Tile, player6Tile,
+	fogPlayer1Tile, fogPlayer2Tile, fogPlayer3Tile, fogPlayer4Tile,
+	fogPlayer5Tile, fogPlayer6Tile, neutralTile, fogNeutralTile, landTile, cursorSymbol,
+	attackRangeSymbol, moveRangeSymbol
+};
+
+
+//Fwd dec
 class compie;
 class mainMenu;
 
@@ -26,7 +37,7 @@ public:
 	int menuInput(char* Input, MasterBoard* boardToInput);
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);
-	int printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber);
+	int printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber, Minion* minionToPrint);
 	int exitToMainMenu();
 	
 	std::string eventText = "";

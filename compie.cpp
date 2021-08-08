@@ -21,9 +21,9 @@ int compie::deployMove(MasterBoard* boardToUse)
 	tile* objectiveTile = NULL;
 
 		//Now go through the whole board.
-	for (int x = 0; x < BOARD_WIDTH; x++)
+	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
 	{
-		for (int y = 0; y < BOARD_HEIGHT; y++)
+		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
 			//If the current tile is an enemy property
 			if (boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag)
@@ -39,6 +39,12 @@ int compie::deployMove(MasterBoard* boardToUse)
 		}
 	}
 
+	if (objectiveTile == NULL) 
+	{
+		return -1;
+	}
+
+
 	//Now we set a new search box that is much smaller. 
 	//This is for actual tiles we can move to, that are closest to the enemy tile we're targeting.
 	
@@ -51,7 +57,7 @@ int compie::deployMove(MasterBoard* boardToUse)
 	{
 		minX = 0;
 	}
-	if (maxX > BOARD_WIDTH)
+	if (maxX > boardToUse->BOARD_WIDTH)
 	{
 		maxX = 0;
 	}
@@ -62,7 +68,7 @@ int compie::deployMove(MasterBoard* boardToUse)
 	{
 		minY = 0;
 	}
-	if (maxY > BOARD_HEIGHT)
+	if (maxY > boardToUse->BOARD_HEIGHT)
 	{
 		maxY = 0;
 	}
@@ -116,7 +122,7 @@ int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distan
 
 		//If the square to the right has a minion and that minion is enemy.
 		//Important to note that the x+1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
-		if (currentX < BOARD_WIDTH-1 && boardToUse->Board[currentX + 1][currentY].hasMinionOnTop && boardToUse->Board[currentX + 1][currentY].minionOnTop->team != boardToUse->playerFlag)
+		if (currentX < boardToUse->BOARD_WIDTH-1 && boardToUse->Board[currentX + 1][currentY].hasMinionOnTop && boardToUse->Board[currentX + 1][currentY].minionOnTop->team != boardToUse->playerFlag)
 		{
 			//If the current tile is within actual range of our minion (Not just local search area)
 			if (boardToUse->Board[currentX][currentY].withinRange == true)
@@ -137,7 +143,7 @@ int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distan
 
 		//If the square below has a minion and that minion is enemy.
 		//Important to note that the x+1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
-		if (currentY < BOARD_HEIGHT-1 && boardToUse->Board[currentX][currentY+1].hasMinionOnTop && boardToUse->Board[currentX][currentY+1].minionOnTop->team != boardToUse->playerFlag)
+		if (currentY < boardToUse->BOARD_HEIGHT-1 && boardToUse->Board[currentX][currentY+1].hasMinionOnTop && boardToUse->Board[currentX][currentY+1].minionOnTop->team != boardToUse->playerFlag)
 		{
 			//If the current tile is within actual range of our minion (Not just local search area)
 			if (boardToUse->Board[currentX][currentY].withinRange == true)
@@ -196,7 +202,7 @@ int compie::findEnemiesWithinLocalArea(MasterBoard* boardToUse)
 	{
 		minX = 0;
 	}
-	if (maxX > BOARD_WIDTH) 
+	if (maxX > boardToUse->BOARD_WIDTH)
 	{
 		maxX = 0;
 	}
@@ -207,7 +213,7 @@ int compie::findEnemiesWithinLocalArea(MasterBoard* boardToUse)
 	{
 		minY = 0;
 	}
-	if (maxY > BOARD_HEIGHT)
+	if (maxY > boardToUse->BOARD_HEIGHT)
 	{
 		maxY = 0;
 	}
@@ -245,7 +251,7 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 	{
 		minX = 0;
 	}
-	if (maxX > BOARD_WIDTH)
+	if (maxX > boardToUse->BOARD_WIDTH)
 	{
 		maxX = 0;
 	}
@@ -256,7 +262,7 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 	{
 		minY = 0;
 	}
-	if (maxY > BOARD_HEIGHT)
+	if (maxY > boardToUse->BOARD_HEIGHT)
 	{
 		maxY = 0;
 	}

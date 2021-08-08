@@ -3,7 +3,6 @@
 
 #include "Minion.hpp"
 #include <string>
-#include "Cursor.hpp"
 #include "MasterBoard.hpp"
 #include "Cursor.hpp"
 #include "Tile.hpp"
@@ -11,6 +10,7 @@
 
 enum minionTaskingType { attackLocalMinion, captureLocalProperty, moveTowardsEnemy, holdPosition };
 class inputLayer;
+class Cursor;
 
 
 class compie 

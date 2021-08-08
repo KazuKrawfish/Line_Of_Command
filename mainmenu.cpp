@@ -11,7 +11,11 @@
 class inputLayer;
 class MasterBoard;
 
+mainMenu::mainMenu() 
+{
+	playerNames.resize(5); //May be more but for now it works
 
+}
 //Gameplay note:
 //As currently constructed, host for a new scenario must be player 1. Anyone join will play the turn assigned based on their player name.
 //Thus host never says "his" player name, because that is the first one inputted!
@@ -23,6 +27,7 @@ class MasterBoard;
 //This lumps all the terrain at the end, need to find a way to count neighbors and based on those, distribute tiles.
 int mainMenu::scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer)
 {
+	int BOARD_SIZE = LoadBoard->BOARD_WIDTH * LoadBoard->BOARD_HEIGHT;
 	LoadBoard->clearBoard(InputLayer);
 
 	int numberOfHillsAndMountains = BOARD_SIZE / 10;	//Actual amount you want to see.
@@ -31,9 +36,9 @@ int mainMenu::scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer)
 	int forestWeight = numberOfForests;
 	int plainsWeight = BOARD_SIZE - numberOfHillsAndMountains - numberOfForests;
 
-	for (int x = 0; x < BOARD_WIDTH; x++)
+	for (int x = 0; x < LoadBoard->BOARD_WIDTH; x++)
 	{
-		for (int y = 0; y < BOARD_HEIGHT; y++)
+		for (int y = 0; y < LoadBoard->BOARD_HEIGHT; y++)
 		{
 			LoadBoard->Board[x][y].clearTile();
 			int mountainChance = (rand() % 100) * mountainWeight;
@@ -70,9 +75,9 @@ int mainMenu::scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer)
 
 int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 {
-	for (int x = 0; x < BOARD_WIDTH; x++)
+	for (int x = 0; x < LoadBoard->BOARD_WIDTH; x++)
 	{
-		for (int y = 0; y < BOARD_HEIGHT; y++)
+		for (int y = 0; y < LoadBoard->BOARD_HEIGHT; y++)
 		{
 			switch (LoadBoard->Board[x][y].symbol)
 			{
@@ -184,30 +189,37 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	std::ofstream saveGame(inputSaveGameName);
 
 	//Unique to save_game vs scenario. First save number of players, and then player names (User names):
-	saveGame << NUMBEROFPLAYERS << std::endl;
-	for (int i = 1; i <= NUMBEROFPLAYERS; i++)
+	saveGame << "Number_of_players_below:" << std::endl;
+	saveGame << boardToPrint->NUMBEROFPLAYERS << std::endl;
+	saveGame << "Names_and_treasury_totals_below:" << std::endl;
+	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
 		saveGame << playerNames[i] << std::endl;
 		saveGame << boardToPrint->treasury[i] << std::endl;
 	}
 	
 	//Then save the game turn.
+	saveGame << "Game_turn_below:" << std::endl;
 	saveGame << gameTurn << std::endl;
 	
 	//Then save the map size:
-	saveGame << BOARD_WIDTH << std::endl;
-	saveGame << BOARD_HEIGHT << std::endl;
+	saveGame << "Map_width_below:" << std::endl;
+	saveGame << boardToPrint->BOARD_WIDTH << std::endl;
+	saveGame << "Map_height_below:" << std::endl;
+	saveGame << boardToPrint->BOARD_HEIGHT << std::endl;
 
 	//Then save whos turn it is:
+	saveGame << "Player_whose_turn_it_is_below:" << std::endl;
 	saveGame << boardToPrint->playerFlag << std::endl;
 
 	//Terrain save:
 	//Iterate through board and save the exact symbol.
 	//Saving symbol and controller separately for ease of edit and viewing.
 	//Only pain point is do mass control-edits, but viewability is protected.
-	for (int y = 0; y < BOARD_HEIGHT; y++)
+	saveGame << "Map_terrain_below:" << std::endl;
+	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
-		for (int x = 0; x < BOARD_WIDTH; x++)
+		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
 			saveGame << boardToPrint->Board[x][y].symbol;
 		}
@@ -215,9 +227,10 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	}
 
 	//Iterate through board and save the controller.
-	for (int y = 0; y < BOARD_HEIGHT; y++)
+	saveGame << "Property_controller_number_below:" << std::endl;
+	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
-		for (int x = 0; x < BOARD_WIDTH; x++)
+		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
 			saveGame << boardToPrint->Board[x][y].controller;
 
@@ -226,12 +239,14 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	}
 
 	//Note the number of minions:
+	saveGame << "Total_minions_below:" << std::endl;
 	saveGame << boardToPrint->totalNumberOfMinions << std::endl;
 
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
 	//Need to ensure correctness.
 	//FIX FIX FIX - need to not just check for initial NULL, there may be minions beyond that first NULL if a guy was killed and not replaced on
 	//The array.
+	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health):" << std::endl;
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		if (boardToPrint->minionRoster[i] != NULL)
@@ -253,24 +268,27 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 //Game Load is for saved games, which already have player data.
 int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame)
 { 
-	
-	int replaceWithNumberOfPlayers = 0;
+	std::string ThrowawayString;
 
-	//This is the first data we will see. Need to figure out how to replace NUMBEROFPLAYERS.
-	//As of right now this value will not be used.
-	*saveGame >> replaceWithNumberOfPlayers;
-	
+	//First load number of players from save
+	//Remember to have one exta for ease of access (Player "0" is blank)
+	*saveGame >> ThrowawayString;
+	*saveGame >> boardToPrint->NUMBEROFPLAYERS;
+	playerNames.resize(boardToPrint->NUMBEROFPLAYERS+1);
+	boardToPrint->treasury.resize(boardToPrint->NUMBEROFPLAYERS + 1);
+
 	//Unique to save_game vs scenario. Load player names (User names):
-	for (int i = 1; i <= NUMBEROFPLAYERS; i++)
+	*saveGame >> ThrowawayString;
+	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
 		*saveGame >> playerNames[i];
 		*saveGame >> boardToPrint->treasury[i];
 	}
 
 	//Then load the game turn.
+	*saveGame >> ThrowawayString;
 	*saveGame >> gameTurn;
-
-	
+		
 	//Although I don't love the name scenarioLoad, this is performing the same action as scenarioLoad so we're using it as good practice.
 	scenarioLoad(boardToPrint, InputLayer, ComputerPlayer, saveGame,  true);
 	return 0; 
@@ -290,29 +308,39 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	if (isSaveGame == false) 
 	{
 		//Reset treasury
-		for (int i = 0; i < NUMBEROFPLAYERS + 1; i++)
+		for (int i = 0; i < boardToPrint->NUMBEROFPLAYERS + 1; i++)
 		{
 			boardToPrint->treasury[i] = 0;
 		}
 	}
 
-		
-	std::string line;
-	int garb1, garb2;
-	
+	std::string ThrowawayString;
 	//First load the map size:
 	//Ideally we can create new vector or whatever to have different map size:
-	*saveGame >> garb1;
-	*saveGame >> garb2;
+	*saveGame >> ThrowawayString;
+	*saveGame >> boardToPrint->BOARD_WIDTH;
+	*saveGame >> ThrowawayString;
+	*saveGame >> boardToPrint->BOARD_HEIGHT;
+
+	//Resize the map based on new data.
+	//Not sure why we have to give an additional line but it segfaulted otherwise
+	boardToPrint->Board.resize(boardToPrint->BOARD_WIDTH + 1);
+	for (int i = 0; i < boardToPrint->BOARD_WIDTH; i++)
+	{
+		boardToPrint->Board[i].resize(boardToPrint->BOARD_HEIGHT);
+	}
 
 	//Then load player data:
 	//This is the current player whos turn it is:
+	*saveGame >> ThrowawayString;
 	*saveGame >> boardToPrint->playerFlag;
-	
-	for (int y = 0; y < BOARD_HEIGHT; y++)
+
+	//Then load map
+	*saveGame >> ThrowawayString;
+	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
 
-		for (int x = 0; x < BOARD_WIDTH; x++)
+		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
 			*saveGame >> boardToPrint->Board[x][y].symbol;
 		}
@@ -321,20 +349,23 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 
 	//This is for properties.
 	char inputProperties;
-	for (int y = 0; y < BOARD_HEIGHT; y++)
+	*saveGame >> ThrowawayString;
+	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
 
-		for (int x = 0; x < BOARD_WIDTH; x++)
+		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
 			*saveGame >> inputProperties;
 			boardToPrint->Board[x][y].controller = (int(inputProperties)) - 48;
 		}
 	}
 	//Then load minion data:
+	*saveGame >> ThrowawayString;
 	int numberOfMinions;
 	*saveGame >> numberOfMinions;
 	int health, locationX, locationY, team, seniority, status;
 	char type;
+	*saveGame >> ThrowawayString;
 	for (int y = 0; y < numberOfMinions; y++)
 	{
 		*saveGame >> type
@@ -554,7 +585,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	//We added one to the array, just like treasury, for easy access.
 	char inputName[100];
 	char outputName[100];
-	for (int i = 1; i <= NUMBEROFPLAYERS ; i++) 
+	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS ; i++)
 	{
 		snprintf(&outputName[0], 100, "Input Player %d's name: \n", i);
 		addstr(&outputName[0]);

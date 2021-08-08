@@ -3,61 +3,28 @@
 
 #include "Minion.hpp"
 
+
 //Window HAS been implemented to minimize total print size!!
-const int WINDOW_HEIGHT = 8;										
+const int WINDOW_HEIGHT = 10;										
 const int WINDOW_WIDTH = 15;
 
-//These need to move to masterboard.
-const int BOARD_WIDTH = 15;  
-const int BOARD_HEIGHT = 20;
+class MasterBoard;
 
 class Cursor 
 {	public:
 
 	//Obviously this needs to move to cursor.cpp but I can't get the thing to work yet.
-	int move(char * Input) {
-		int didItMove =1 ;
-
-		//Take user input and move cursor around.
-
-		if (*Input == 'a')
-			if (getX() != 0)
-			{
-				XCoord--;
-				didItMove = 0;
-			}
-
-		if (*Input == 'd')
-			if (getX() != BOARD_WIDTH - 1)
-			{
-				XCoord++;
-				didItMove = 0;
-			}
-
-		if (*Input == 's')
-			if (getY() < BOARD_HEIGHT - 1)
-			{
-				YCoord++;
-				didItMove = 0;
-			}
-
-		if (*Input == 'w')
-			if (getY() > 0)
-			{
-				YCoord--;
-				didItMove = 0;
-			}
-		return didItMove;
-	}
+	int move(char* Input);
 
 
 	bool selectMinionFlag = false;
 	Minion*  selectMinionPointer;
-	//int Location;
+	MasterBoard* boardToPlay;
+	
 	int XCoord;
 	int YCoord;
-	int getX() { return XCoord; }				// { return Location % BOARD_WIDTH; }
-	int getY() { return YCoord; }				// (return Location	 / BOARD_WIDTH; }
+	int getX() { return XCoord; }				
+	int getY() { return YCoord; }				
 };
 
 #endif /* CURSOR_HPP__ */

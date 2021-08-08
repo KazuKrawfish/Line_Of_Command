@@ -1,14 +1,13 @@
 #ifndef MASTERBOARD_HPP__
 #define MASTERBOARD_HPP__
 
+#include "Cursor.hpp"
 #include "Minion.hpp"
 #include "Tile.hpp"
-#include "Cursor.hpp"
 #include "inputLayer.hpp"
+#include <vector>
 
-
-const int BOARD_SIZE		= BOARD_WIDTH * BOARD_HEIGHT;
-const int NUMBEROFPLAYERS	= 2;
+class Cursor;
 const int GLOBALSUPPLYCAP	= 100;		//Global variables declarations
 
 class MasterBoard
@@ -16,8 +15,13 @@ class MasterBoard
 public:
 	
 	MasterBoard();
-	
-	int treasury[NUMBEROFPLAYERS+1];	//1 extra "player" so that treasury[playerFlag] behaves as expected. (There is no player 0.)
+	int NUMBEROFPLAYERS = 2;
+	int BOARD_WIDTH = 15;
+	int BOARD_HEIGHT = 20;
+
+
+
+	std::vector<int> treasury;	//1 extra "player" so that treasury[playerFlag] behaves as expected. (There is no player 0.)
 	int setRangeField(int inputX, int inputY, int inputRange);
 	int setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY);
 	int setAttackField(int inputX, int inputY, int inputRange);
@@ -34,8 +38,8 @@ public:
 	int consultMinionCostChart(char minionType);
 	std::string captureProperty(tile* inputTile, Minion* inputMinion);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
-	tile  Board[BOARD_WIDTH][BOARD_HEIGHT];
 	Cursor cursor;
+	std::vector<std::vector<tile>>  Board;
 	int windowLocation;
 	int playerFlag;
 	int totalNumberOfMinions;

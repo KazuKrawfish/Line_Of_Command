@@ -14,7 +14,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu)
 	MainMenu = inputMainMenu;
 }
 
-int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber) 
+int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber, Minion* minionToPrint)
 {
 	move(inputX*3, inputY*3);
 	addch(inputString[0] + COLOR_PAIR(teamNumber));
@@ -24,12 +24,26 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	move(inputX * 3 + 1, inputY * 3);
 	addch(inputString[3] + COLOR_PAIR(teamNumber));
 	addch(inputString[4] + COLOR_PAIR(teamNumber));
-	addch(inputString[5] + COLOR_PAIR(teamNumber));
 
+	//Print single tile needs access to board, it's not working currently
+	/*if (minionToPrint != NULL && minionToPrint->minionEnvironment->Board[inputY][inputX].capturePoints < 20)
+	{ 
+		addch('c' + COLOR_PAIR(teamNumber));
+	}
+	else*/ addch(inputString[5] + COLOR_PAIR(teamNumber));
+	
 	move(inputX * 3 + 2, inputY * 3);
 	addch(inputString[6] + COLOR_PAIR(teamNumber));
 	addch(inputString[7] + COLOR_PAIR(teamNumber));
-	addch(inputString[8] + COLOR_PAIR(teamNumber));
+
+	//If minion is damaged indicate the health level on bottom right, otherwise print symbol
+	if (minionToPrint != NULL && minionToPrint->health < 90)
+	{
+		addch( char (int(minionToPrint->health /10) + 48) + COLOR_PAIR(teamNumber));
+	}
+	else addch(inputString[8] + COLOR_PAIR(teamNumber));
+
+
 
 	return 1;
 }
@@ -72,7 +86,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 		addstr(&(MainMenu->playerNames[currentMinion->team])[0]);
 		addstr("'s ");
 		addstr(&currentMinion->description[0]);
-		snprintf(pointerToPrint, 100, ": %d Health Left. \n", int(currentMinion->health));
+		snprintf(pointerToPrint, 100, ": %d Health Left. \n", int(currentMinion->health/10));
 		addstr(pointerToPrint);
 
 		if (currentMinion->status == gaveupmovehasntfired)
@@ -155,7 +169,7 @@ int	inputLayer::printPropertyMenu() {
 	//If this is not the second valid purchase input
 	if (requestedMinionToBuy == '\n')
 	{
-		addstr("Input Minion to Buy\n");
+		addstr("Input Minion to Buy(i,s,a,r,c,R,T,A):\n");
 		addstr("Deselect Property (P)\n");
 		
 	}
@@ -236,8 +250,8 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 	//windowLocation is a single scalar representing x and y.
 	//We do some basic math to break it into the two values for the function.
 	//Need to convert windowLocation into a better two part variable.
-	int windowY = boardToPrint->windowLocation / BOARD_WIDTH;
-	int windowX = boardToPrint->windowLocation % BOARD_WIDTH;
+	int windowY = boardToPrint->windowLocation / boardToPrint->BOARD_WIDTH;
+	int windowX = boardToPrint->windowLocation % boardToPrint->BOARD_WIDTH;
 	
 
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
@@ -249,27 +263,57 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 			//Is there a minion there? Do we have minions toggled on as visible? Is the minion within vision?
 			if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions && boardToPrint->Board[j][i].withinVision == true)
 			{
-					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].minionOnTop->Image, boardToPrint->Board[j][i].minionOnTop->team + 1);
+					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].minionOnTop->Image, boardToPrint->Board[j][i].minionOnTop->team + 3, boardToPrint->Board[j][i].minionOnTop);
 			}
 			//If no minion print map piece.
 			else 
 			{
-				if(boardToPrint->Board[j][i].withinVision == true)
-					printSingleTile((i - windowY) , (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 1);
-				else
-					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 7);
+				if (boardToPrint->Board[j][i].withinVision == true) 
+				{
+					//If it is player controlled, within vision
+					if (boardToPrint->Board[j][i].controller != 0) 
+					{
+						printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 9, NULL);
+					}
+					else //If non-player controlled
+					{
+						if (boardToPrint->Board[j][i].checkForProperty() == true)
+						{
+							printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, neutralTile, NULL);
+						}
+						else
+						printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, landTile, NULL);
+					}
+				}
+				else //Outside vision
+				{
+					//If player controlled and outside vision
+					if (boardToPrint->Board[j][i].controller != 0)
+					{
+						printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 15, NULL);
+					}
+					else //Iif non player controlled
+					{
+						if (boardToPrint->Board[j][i].checkForProperty() == true) 
+						{
+							printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogNeutralTile, NULL);
+						}
+						else 
+						printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogLandTile, NULL);
+					}
+				}			
 			}
 			
 			//Higher "priority set" is cursor vs in range, thus it goes after the "base" portion of minions and tiles.
 			//If there is a cursor there, it takes priority for printing.
 			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX())
 			{
-				mvaddch((i - windowY) * 3 + 2, (j - windowX) * 3 + 1, '*' + COLOR_PAIR(0));
+				mvaddch((i - windowY) * 3 + 2, (j - windowX) * 3 + 1, 'X' + COLOR_PAIR(cursorSymbol));
 			}
 			else
 			if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
 			{
-				mvaddch((i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ':' + COLOR_PAIR(0));
+				mvaddch((i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ' ' + COLOR_PAIR(moveRangeSymbol));
 			}
 
 		}
