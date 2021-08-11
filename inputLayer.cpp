@@ -37,7 +37,7 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	addch(inputString[7] + COLOR_PAIR(teamNumber));
 
 	//If minion is damaged indicate the health level on bottom right, otherwise print symbol
-	if (minionToPrint != NULL && minionToPrint->health < 90)
+	if (minionToPrint != NULL && minionToPrint->health <= 90)
 	{
 		addch( char (int(minionToPrint->health /10) + 48) + COLOR_PAIR(teamNumber));
 	}
@@ -268,42 +268,60 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 			//If no minion print map piece.
 			else 
 			{
-				if (boardToPrint->Board[j][i].withinVision == true) 
+				//If player controlled (Must be property), must always be visible
+				if (boardToPrint->Board[j][i].controller == boardToPrint->playerFlag)
 				{
-					//If it is player controlled, within vision
-					if (boardToPrint->Board[j][i].controller != 0) 
+					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 9, NULL);
+				}
+				//Not player controlled, either neutral/enemy property, or non-property
+				else
+				{
+					//If it's property
+					if (boardToPrint->Board[j][i].checkForProperty() == true)
 					{
-						printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 9, NULL);
-					}
-					else //If non-player controlled
-					{
-						if (boardToPrint->Board[j][i].checkForProperty() == true)
+						//Within vision
+						if (boardToPrint->Board[j][i].withinVision == true)
 						{
-							printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, neutralTile, NULL);
+							//If neutral property
+							if (boardToPrint->Board[j][i].controller == 0)
+							{
+								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, neutralTile, NULL);
+							}
+							else
+							{	//Player controlled inside vision
+								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 9, NULL);
+							}
 						}
+						//Outside vision
 						else
-						printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, landTile, NULL);
+						{
+							//If neutral property
+							if (boardToPrint->Board[j][i].controller == 0)
+							{
+								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogNeutralTile, NULL);
+							}
+							else
+							{	//Player controlled outside vision
+								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 15, NULL);
+							}
+						}
+					}
+					//It's not property
+					else
+					{
+						//Within vision
+						if (boardToPrint->Board[j][i].withinVision == true)
+						{
+							printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, landTile, NULL);
+						}
+						//Outside vision
+						else
+						{
+							printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogLandTile, NULL);
+						}
 					}
 				}
-				else //Outside vision
-				{
-					//If player controlled and outside vision
-					if (boardToPrint->Board[j][i].controller != 0)
-					{
-						printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 15, NULL);
-					}
-					else //Iif non player controlled
-					{
-						if (boardToPrint->Board[j][i].checkForProperty() == true) 
-						{
-							printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogNeutralTile, NULL);
-						}
-						else 
-						printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogLandTile, NULL);
-					}
-				}			
 			}
-			
 			//Higher "priority set" is cursor vs in range, thus it goes after the "base" portion of minions and tiles.
 			//If there is a cursor there, it takes priority for printing.
 			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX())

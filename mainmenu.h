@@ -23,6 +23,7 @@ public:
 	interactionMethod gameType = unchosen;
 	//mainMenuStatus will indicate what interace the player is interacting with.
 	mainMenuStatus menuStatus = topmenu;
+	bool veryFirstTurn = true;
 	std::vector<std::string> playerNames;
 	std::string sessionName = "localsession";
 	std::string myPlayerName = "~";

@@ -95,9 +95,9 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 				LoadBoard->Board[x][y].description = "City.";
 				LoadBoard->Board[x][y].defenseFactor = 1.3;
 				LoadBoard->Board[x][y].production = 2000;
-				LoadBoard->Board[x][y].Image = { 'H',' ','H',
-													'H',' ','H',
-													'H',' ','H' };
+				LoadBoard->Board[x][y].Image = { 'H','=','H',
+													'H','=','H',
+													'H','=','H' };
 				break;
 			}
 			case('m'):
@@ -144,9 +144,9 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 			{
 				LoadBoard->Board[x][y].description = "Road.";
 				LoadBoard->Board[x][y].defenseFactor = 1.0;
-				LoadBoard->Board[x][y].Image = { '=',' ','=',
-													'=',' ','=',
-													'=',' ','=' };
+				LoadBoard->Board[x][y].Image = { '=','_','=',
+													'=','_','=',
+													'=','_','=' };
 				break;
 			}
 			case('^'):
@@ -269,6 +269,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame)
 { 
 	std::string ThrowawayString;
+	
 
 	//First load number of players from save
 	//Remember to have one exta for ease of access (Player "0" is blank)
@@ -297,6 +298,8 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie
 
 //Load scenario game and initialize the board with its contents.
 int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame, bool isSaveGame) {
+
+	veryFirstTurn = true;
 
 	//Clear board in case scenario load was called by player menu later in game.
 	boardToPrint->clearBoard(InputLayer);
@@ -395,6 +398,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 	//Run as long as the user wants. Infinite while loop.
 	while (true)		
 	{
+		//This is a utility function to prevent "hanging" screens
 		if (skipOneInput == true) 
 		{
 			skipOneInput = false;
@@ -406,10 +410,10 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 
 
 		//My attempt to test escape character.
-		if (Input == 27) 
+		/*if (Input == 27) 
 		{
 			addstr("BSLALIJASLDJ");
-		}
+		}*/
 
 
 		//If we're still on top menu, do that instead of game/inputLayer.
@@ -426,8 +430,14 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 			waitForRemotePlayer(boardToPlay, InputLayer, ComputerPlayer);
 		}
 		
-		if(menuStatus == playingMap)
+		if (menuStatus == playingMap)
 		{
+			//Always call upkeep once before play commences.
+			if (veryFirstTurn == true)
+			{		
+				boardToPlay->upkeep(InputLayer);
+				veryFirstTurn = false;
+			}
 
 			if (InputLayer->status == gameBoard)
 			{

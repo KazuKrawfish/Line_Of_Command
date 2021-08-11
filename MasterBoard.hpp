@@ -22,6 +22,7 @@ public:
 
 
 	std::vector<int> treasury;	//1 extra "player" so that treasury[playerFlag] behaves as expected. (There is no player 0.)
+	
 	int setRangeField(int inputX, int inputY, int inputRange);
 	int setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY);
 	int setAttackField(int inputX, int inputY, int inputRange);
@@ -31,6 +32,7 @@ public:
 	int deselectMinion();
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status);
 	int endTurn(inputLayer* InputLayer);
+	int upkeep(inputLayer* InputLayer);
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer);
 	int checkWindow();

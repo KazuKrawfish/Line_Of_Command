@@ -668,6 +668,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 
 int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer)
 {
+
+	deselectMinion();
+
 	//Tell the board it has no minions associated in the location where the Minion was alive.
 	//Reset capture points for the property.
 	Board[inputMinion->locationX][inputMinion->locationY].hasMinionOnTop = false;
@@ -709,9 +712,6 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 			gameTurnIncrement = 1;
 			playerFlag = 1;
 		}
-
-	//Reset vision field for the next player.
-	setVisionField();
 	
 	//Set minionToBuy to the default null value.
 	InputLayer->requestedMinionToBuy = '\n';
@@ -722,21 +722,31 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 		minionRoster[i]->status = hasntmovedorfired;
 	}
 	
-	//Provide income for the next player based on properties he controls.
+	upkeep(InputLayer);
+
+	return gameTurnIncrement;
+
+}
+
+//Upkeep
+int MasterBoard::upkeep(inputLayer* InputLayer) 
+{
+	//Set vision field for current player
+	setVisionField(); 
+
+	//Provide income for the current player based on properties he controls.
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
-			if (this->Board[x][y].controller == playerFlag) 
+			if (this->Board[x][y].controller == playerFlag)
 			{
 				this->treasury[playerFlag] += Board[x][y].production;
 			}
 
 		}
 	}
-	
-
-	return gameTurnIncrement;
-
+	//Repair minions
+	//Move cursor to HQ
+	return 0;
 }
-
