@@ -568,7 +568,7 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion)
 {
 	std::string textToReturn = "";
 	//Subtract capturing minion's health
-	int pointsToTake = int((inputMinion->health) / 10);
+	int pointsToTake = int(round(inputMinion->health / 10));
 	inputTile->capturePoints -= pointsToTake;
 	
 	//
@@ -632,9 +632,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	double defenderDefenseFactor = Board[inputX][inputY].defenseFactor;
 	defendingMinion->health -= attackerFirePower * attackingMinion->health / defenderDefenseFactor;				
 
-	if (defendingMinion->health <= 10.0)
+	if (defendingMinion->health <= 4)
 	{
-		//If defender falls below 10, it dies.
+		//If defender falls below 4, it dies.
 		bool printMessage = true;
 		destroyMinion(defendingMinion, printMessage, InputLayer);
 	}
@@ -647,7 +647,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 			attackingMinion->health -= defenderFirePower * defendingMinion->health / attackerDefenseFactor;
 		}	
 
-	if (attackingMinion->health <= 10.0)			//The attacker can be destroyed too!
+	if (attackingMinion->health <= 4)			//The attacker can be destroyed too!
 	{	
 		bool printMessage = true;
 		destroyMinion(attackingMinion, printMessage, InputLayer);

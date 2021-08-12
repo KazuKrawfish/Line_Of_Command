@@ -37,9 +37,9 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	addch(inputString[7] + COLOR_PAIR(teamNumber));
 
 	//If minion is damaged indicate the health level on bottom right, otherwise print symbol
-	if (minionToPrint != NULL && minionToPrint->health <= 90)
+	if (minionToPrint != NULL && minionToPrint->health <= 94)
 	{
-		addch( char (int(minionToPrint->health /10) + 48) + COLOR_PAIR(teamNumber));
+		addch( char (int(round(minionToPrint->health /10)) + 48) + COLOR_PAIR(teamNumber));
 	}
 	else addch(inputString[8] + COLOR_PAIR(teamNumber));
 
@@ -86,7 +86,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 		addstr(&(MainMenu->playerNames[currentMinion->team])[0]);
 		addstr("'s ");
 		addstr(&currentMinion->description[0]);
-		snprintf(pointerToPrint, 100, ": %d Health Left. \n", int(currentMinion->health/10));
+		snprintf(pointerToPrint, 100, ": %d Health Left. \n", int(currentMinion->health));		//int(round(currentMinion->health/10)));
 		addstr(pointerToPrint);
 
 		if (currentMinion->status == gaveupmovehasntfired)
@@ -312,12 +312,18 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 						//Within vision
 						if (boardToPrint->Board[j][i].withinVision == true)
 						{
-							printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, landTile, NULL);
+							if (boardToPrint->Board[j][i].symbol == '~' || boardToPrint->Board[j][i].symbol == '-')
+								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, waterTile, NULL);
+							else
+								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, landTile, NULL);
 						}
 						//Outside vision
 						else
 						{
-							printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogLandTile, NULL);
+							if (boardToPrint->Board[j][i].symbol == '~' || boardToPrint->Board[j][i].symbol == '-')
+								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogWaterTile, NULL);
+							else
+								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogLandTile, NULL);
 						}
 					}
 				}

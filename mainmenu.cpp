@@ -144,9 +144,9 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 			{
 				LoadBoard->Board[x][y].description = "Road.";
 				LoadBoard->Board[x][y].defenseFactor = 1.0;
-				LoadBoard->Board[x][y].Image = { '=','_','=',
-													'=','_','=',
-													'=','_','=' };
+				LoadBoard->Board[x][y].Image = { '=',' ','=',
+													'=',' ','=',
+													'=',' ','=' };
 				break;
 			}
 			case('^'):
@@ -174,6 +174,25 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 				LoadBoard->Board[x][y].Image = { '^','^','^',
 													'^','^','^',
 													'|','|','|' };
+				break;
+			}
+			case('~'):
+			{
+				LoadBoard->Board[x][y].description = "High seas.";
+				LoadBoard->Board[x][y].defenseFactor = 1.0;
+				LoadBoard->Board[x][y].Image = { '~','~','~',
+												'~','~','~',
+												'~','~','~' };
+				break;
+			}
+
+			case('-'):
+			{
+				LoadBoard->Board[x][y].description = "River.";
+				LoadBoard->Board[x][y].defenseFactor = 1.0;
+				LoadBoard->Board[x][y].Image = { '~',' ','~',
+												' ','~',' ',
+												'~',' ','~' };
 				break;
 			}
 			}

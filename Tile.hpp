@@ -8,15 +8,15 @@
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, and Rocket.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
-//												        . + ^ M  H m n h Q =
-const int MOVE_VALUES_MATRIX[8][10] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,
-												/*s*/   1,1,1,1, 1,1,1,1,1,1,
-												/*a*/	1,2,2,99,1,1,1,1,1,1,
-												/*r*/	1,2,2,99,1,1,1,1,1,1,
-												/*c*/	2,3,3,99,1,1,1,1,1,1,
-												/*R*/	2,3,3,99,1,1,1,1,1,1,
-												/*T*/	1,2,2,99,1,1,1,1,1,1,
-												/*A*/	1,2,2,99,1,1,1,1,1,1, };
+//												        . + ^ M  H m n h Q = ~  -
+const int MOVE_VALUES_MATRIX[8][12] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,
+												/*s*/   1,1,1,1, 1,1,1,1,1,1,99,1,
+												/*a*/	1,2,2,99,1,1,1,1,1,1,99,99,
+												/*r*/	1,2,2,99,1,1,1,1,1,1,99,99,
+												/*c*/	2,3,3,99,1,1,1,1,1,1,99,99,
+												/*R*/	2,3,3,99,1,1,1,1,1,1,99,99,
+												/*T*/	1,2,2,99,1,1,1,1,1,1,99,99,
+												/*A*/	1,2,2,99,1,1,1,1,1,1,99,99};
 
 class tile 
 {
@@ -63,9 +63,15 @@ public:
 		case('R'):
 			x = 5;
 			break;
+		case('T'):
+			x = 6;
+			break;
+		case('A'):
+			x = 7;
+			break;
 		}
 
-		//   . + ^ M  H m n h Q =
+		//   . + ^ M  H m n h Q = ~ -
 		switch (terrainType)
 		{
 		case('.'):
@@ -98,6 +104,12 @@ public:
 		case('='):
 			y = 9;
 			break;
+		case('~'):
+			y = 10;
+			break;
+		case('-'):
+			y = 11;
+			break;
 		}
 
 		if (x == -1 || y == -1)
@@ -123,6 +135,8 @@ public:
 		case('^'):
 		case('M'):
 		case('='):
+		case('~'):
+		case('-'):
 			isProperty = false;
 			break;
 		case('H'):
