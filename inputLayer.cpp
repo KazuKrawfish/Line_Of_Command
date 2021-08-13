@@ -22,13 +22,18 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	addch(inputString[2] + COLOR_PAIR(teamNumber));
 
 	move(inputX * 3 + 1, inputY * 3);
-	addch(inputString[3] + COLOR_PAIR(teamNumber));
+	if (minionToPrint != NULL && minionToPrint->status == hasfired)
+	{
+		addch('M' + COLOR_PAIR(teamNumber));
+	}
+	else addch(inputString[3] + COLOR_PAIR(teamNumber));
+	
 	addch(inputString[4] + COLOR_PAIR(teamNumber));
 
 	//Print single tile needs access to board, it's not working currently
 	if (minionToPrint != NULL && minionToPrint->isCapturing == true)
 	{
-			addch('c' + COLOR_PAIR(teamNumber));
+		addch('C' + COLOR_PAIR(teamNumber));
 	}	
 	else addch(inputString[5] + COLOR_PAIR(teamNumber));
 	
@@ -345,12 +350,40 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 	return 0;
 }
 
+int inputLayer::printWaitingScreen(MasterBoard* boardToPrint) 
+{
+	clear();
+	char* playerName = &(MainMenu->playerNames[boardToPrint->playerFlag])[0];
+	addstr("Player ");
+	addstr(playerName);
+	addstr("'s ");
+	addstr(" Turn. Press any key to begin.  \n");
+	move(WINDOW_HEIGHT * 3 + 1, 0);
+	refresh();
+	return 0;
+
+}
+
 int inputLayer::printScreen(MasterBoard* boardToPrint)
 {
+	if (status != waitingForNextLocalPlayer) 
+	{
 	clear();
 	printUpperScreen(boardToPrint);
 	printLowerScreen(boardToPrint);
 	refresh();
+	
+	}
+	else printWaitingScreen(boardToPrint);
+
+	return 0;
+}
+
+int inputLayer::waitingScreenInput(MasterBoard* boardToInput) 
+{
+	//Only lasts one input.
+	status = gameBoard;
+
 	return 0;
 }
 
@@ -528,8 +561,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		MainMenu->gameTurn += incrementGameTurn;
 		//Have to always keep an autosave!
 		MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
-		status = gameBoard;
-
+		
 		//If multiplayer, push to remote server and queue "waiting"
 		//mainmenu's playGame will keep the player waiting.
 		if (MainMenu->gameType == remote)

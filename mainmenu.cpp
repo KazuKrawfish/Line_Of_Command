@@ -474,7 +474,12 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 			{
 				InputLayer->propertyMenuInput(&Input, boardToPlay);
 			}
+			else if (InputLayer->status == waitingForNextLocalPlayer)
+			{
+				InputLayer->waitingScreenInput(boardToPlay);
+			}
 
+			//Is this messing with remote play? Not sure.
 			boardToPlay->checkWindow();
 			InputLayer->printScreen(boardToPlay);
 

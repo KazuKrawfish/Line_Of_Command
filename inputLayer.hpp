@@ -3,7 +3,7 @@
 
 #include "compie.hpp"
 
-enum gameInputLayer { gameBoard, menu, minionAction, propertyAction };
+enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer};
 enum specialKey {showMinions, hideMinions};
 enum colorCode {
 	unused, fogLandTile, waterTile, fogWaterTile, player1Minion,
@@ -26,6 +26,7 @@ public:
 
 	inputLayer(mainMenu* inputMainMenu);
 	int printStatus(MasterBoard* boardToPrint);
+	int printWaitingScreen(MasterBoard* boardToPrint);
 	int printMinionMenu(MasterBoard* boardToPrint);
 	int printBoardMenu();
 	int	printPropertyMenu();
@@ -35,6 +36,7 @@ public:
 	int printScreen(MasterBoard* boardToPrint);
 	int gameBoardInput(char* Input, MasterBoard* boardToInput);
 	int menuInput(char* Input, MasterBoard* boardToInput);
+	int waitingScreenInput( MasterBoard* boardToInput);
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);
 	int printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber, Minion* minionToPrint);

@@ -723,6 +723,9 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 	{
 		minionRoster[i]->status = hasntmovedorfired;
 	}
+
+	//Shouldn't matter if local or not
+	InputLayer->status = waitingForNextLocalPlayer;
 	
 	upkeep(InputLayer);
 
