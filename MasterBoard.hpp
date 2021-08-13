@@ -36,6 +36,7 @@ public:
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer);
 	int checkWindow();
+	int repairMinions();
 	int clearBoard(inputLayer* InputLayer);
 	int consultMinionCostChart(char minionType);
 	std::string captureProperty(tile* inputTile, Minion* inputMinion);

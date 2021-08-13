@@ -570,12 +570,14 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion)
 	//Subtract capturing minion's health
 	int pointsToTake = int(round(inputMinion->health / 10));
 	inputTile->capturePoints -= pointsToTake;
-	
-	//
+	inputMinion->isCapturing = true;
+
 	if (inputTile->capturePoints <= 0)
 	{
 		inputTile->controller = inputMinion->team;
 		inputTile->capturePoints = 20;
+
+		inputMinion->isCapturing = false;
 		
 		//Create event text telling player property was captured.
 		textToReturn += "PLAYER ";
@@ -746,7 +748,54 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 
 		}
 	}
-	//Repair minions
+	
+	repairMinions();
+
 	//Move cursor to HQ
+	return 0;
+}
+
+int MasterBoard::repairMinions() 
+{
+	for (int i = 0; minionRoster[i] != NULL; i++)
+	{
+		//If it's a minion you own
+		if (minionRoster[i]->team == playerFlag)
+		{
+			tile* tileToExamine = &Board[minionRoster[i]->locationX][minionRoster[i]->locationY];
+			//If it is on a player controlled tile, and that tile is a "repairing" tile.
+			if (tileToExamine->controller == playerFlag && (tileToExamine->symbol == 'n' || tileToExamine->symbol == 'H' || tileToExamine->symbol == 'h' || tileToExamine->symbol == 'Q'))
+			{
+				if (minionRoster[i]->health < 100)
+				{
+				
+				//silent repair
+					if (minionRoster[i]->health > 94)
+					{
+						minionRoster[i]->health = 100;
+					}
+				//"1 health" repair
+					else if (minionRoster[i]->health <= 94 && minionRoster[i]->health > 84)
+					{
+						minionRoster[i]->health = 100;
+						treasury[playerFlag] -=  int (consultMinionCostChart( minionRoster[i]->type) / 10);
+					}
+				//"2" repair, but close enough to not just add
+					else if (minionRoster[i]->health <= 84 && minionRoster[i]->health > 80)
+					{
+						minionRoster[i]->health = 100;
+						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type) / 5);
+					}
+				//Standard "2" repair
+					else 
+					{
+						minionRoster[i]->health += 20;
+						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type) / 5);
+					}
+				}
+			}
+		}
+		
+	}
 	return 0;
 }

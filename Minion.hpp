@@ -30,6 +30,7 @@ class Minion
 	int movementRange;
 	int attackRange;
 	int visionRange;
+	bool isCapturing = false;
 	std::string description;	//For user interface only.
 	int team;
 	double health;

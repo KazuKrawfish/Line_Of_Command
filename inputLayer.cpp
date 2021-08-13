@@ -26,14 +26,10 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	addch(inputString[4] + COLOR_PAIR(teamNumber));
 
 	//Print single tile needs access to board, it's not working currently
-	if (minionToPrint != NULL)
+	if (minionToPrint != NULL && minionToPrint->isCapturing == true)
 	{
-		if (minionToPrint->minionEnvironment->Board[inputY][inputX].capturePoints < 20)
-		{
 			addch('c' + COLOR_PAIR(teamNumber));
-		}	
-		else addch(inputString[5] + COLOR_PAIR(teamNumber));
-	}
+	}	
 	else addch(inputString[5] + COLOR_PAIR(teamNumber));
 	
 	move(inputX * 3 + 2, inputY * 3);
@@ -46,9 +42,7 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 		addch( char (int(round(minionToPrint->health /10)) + 48) + COLOR_PAIR(teamNumber));
 	}
 	else addch(inputString[8] + COLOR_PAIR(teamNumber));
-
-
-
+	
 	return 1;
 }
 
