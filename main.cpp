@@ -33,6 +33,8 @@
 
 
 //Global variables need to be moved.
+WINDOW* debugWindow;
+WINDOW* mainWindow;
 
 int main()
 {
@@ -42,7 +44,25 @@ int main()
 	compie ComputerPlayer;
 	WINDOW* mywindow = initscr();
 	
-	resize_term(40, 90);
+
+	//Old window depended on 40x90.
+	//So should be good for anything after that.
+	resize_term(40, 150);
+
+
+	//Lines, columns, startY, startX
+	debugWindow = newwin(40, 20, 0, 100);
+	wclear(debugWindow);
+	winsch(debugWindow, 'a');
+	wrefresh(debugWindow);
+
+	mainWindow = newwin(40, 90, 0, 0);
+	wclear(mainWindow);
+	winsch(mainWindow, 'b');
+	wrefresh(mainWindow);
+
+
+
 	start_color();
 
 	//Terrain we can see - black background.

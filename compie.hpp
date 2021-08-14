@@ -16,6 +16,7 @@ class Cursor;
 class compie 
 {
 public:
+	compie();
 	int deployMove(MasterBoard* boardToUse);
 	int checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy,  Cursor* myCursor, MasterBoard* boardToUse);
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY);
@@ -25,7 +26,7 @@ public:
 	int executeMinionTasks(MasterBoard* boardToUse);
 	int moveMinions(MasterBoard* boardToUse);
 
-	minionTaskingType minionTasking;
+	minionTaskingType minionTasking = holdPosition;
 	tile* closestTileAdjacentToEnemy = NULL;
 	tile* tileToTarget = NULL;
 

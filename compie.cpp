@@ -2,6 +2,12 @@
 #include <iostream>
 
 
+compie::compie() 
+{
+
+
+}
+
 //Below functions are "utilities" that need to find a home.
 
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
@@ -305,15 +311,14 @@ int compie::determinePropertyTasks()
 }
 
 //Determine whether the minion will attack local enemies, capture property, or move strategically.
+//This function assumes the minion is already selected.
 int compie::determineMinionTasks(MasterBoard* boardToUse) 
 {
-
-
 	closestTileAdjacentToEnemy = NULL;
 	tileToTarget = NULL;
 	int returnX = 0;
 	int returnY = 0;
-	
+
 	//AKA if there IS an enemy within local area
 	//Should not need NULL check but doing it anyway.
 	int distance = findEnemiesWithinLocalArea(boardToUse);
@@ -324,17 +329,18 @@ int compie::determineMinionTasks(MasterBoard* boardToUse)
 			<< tileToTarget->minionOnTop->locationX << "," << tileToTarget->minionOnTop->locationY << std::endl;
 		return 1;
 	} 
-	else 
-	{
-		distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY);
-		if ( distance < 999 && tileToTarget != NULL)
+	else //If infantry, attempt to capture local properties.
+		if(boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
 		{
-			minionTasking = captureLocalProperty;
-			//DEBUG
-			std::cout << "recommend capturing " << tileToTarget->description << " at " << returnX << "," << returnY << std::endl;
-			return 1;
+			distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY);
+			if ( distance < 999 && tileToTarget != NULL)
+			{
+				minionTasking = captureLocalProperty;
+				//DEBUG
+				std::cout << "recommend capturing " << tileToTarget->description << " at " << returnX << "," << returnY << std::endl;
+				return 1;
+			}
 		}
-	}
 	
 	distance = deployMove(boardToUse);
 	if (distance < 999) 
@@ -345,6 +351,7 @@ int compie::determineMinionTasks(MasterBoard* boardToUse)
 		return 1;
 	}
 
+	std::cout << "Recommend holding position" << std::endl;
 	minionTasking = holdPosition;
 	return 0;
 }
@@ -406,6 +413,11 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 
 int compie::moveMinions(MasterBoard* boardToUse)
 {
+	//For now we re-initialize these member variables here:
+	minionTasking = holdPosition;
+	closestTileAdjacentToEnemy = NULL;
+	tileToTarget = NULL;
+
 	//Go through minion Roster.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
@@ -419,7 +431,8 @@ int compie::moveMinions(MasterBoard* boardToUse)
 			//Reminder that "selectMinion" is required to set the "withinRange" characteristic for tiles.
 			//This is used for firing and moving.
 			boardToUse->selectMinion(boardToUse->minionRoster[i]->locationX, boardToUse->minionRoster[i]->locationY);
-			
+			std::cout << "For minion " << boardToUse->cursor.selectMinionPointer->description 
+				<<" at " << boardToUse->cursor.getX() << "," << boardToUse->cursor.getY() << ": "<< std::endl;
 			determineMinionTasks(boardToUse);
 
 			executeMinionTasks(boardToUse);
