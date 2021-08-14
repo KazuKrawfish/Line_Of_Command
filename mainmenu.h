@@ -7,12 +7,15 @@
 #include "MasterBoard.hpp"
 #include <curses.h>
 
+
+
 enum mainMenuStatus { topmenu,  playingMap, waitingForRemotePlayer };
 enum interactionMethod {unchosen, local, remote};
 
 class mainMenu
 {
 public:
+
 	//gameTurn represents the overall turn, which increments once everyone has cycled through one player turn.
 	int gameTurn = 1;
 	//Initialized to false because only if we select join is this true, and that will be dealt with in that function..
@@ -32,21 +35,22 @@ public:
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint);
 	int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame, bool isSaveGame);
-	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
+	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
 	int printTopMenu();
-	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
-	int topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
-	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
-	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow);
+	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
+	int topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
+	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
+	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
 	int printWaitingScreen();
 	int waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer);
 	
-	mainMenu();
+	mainMenu(WINDOW* myWindow);
 	//Multiplayer specific functions
 	//The below pushes the saved game to the remote server, and should be used at end of player turn.
 	int multiplayerPushSaveGame(MasterBoard* boardToSave);
 	//The below pulls from remote and opens the save game if there is an update. This should be used while player is waiting for others to finish their turn.
 	int multiplayerPullSaveGame();
+	WINDOW* mywindow;
 
 
 };

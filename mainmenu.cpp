@@ -11,9 +11,10 @@
 class inputLayer;
 class MasterBoard;
 
-mainMenu::mainMenu() 
+mainMenu::mainMenu(WINDOW* myWindow)
 {
 	playerNames.resize(5); //May be more but for now it works
+	mywindow = myWindow;
 
 }
 //Gameplay note:
@@ -406,14 +407,14 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	return 1;
 }
 
-int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
+int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
 {
-	clear();
-	addstr("Line of Command\n");
-	addstr("Copyright 2021, Park Family Software Laboratory (ParkLab)\n");
-	addstr("Press any key to continue.");
-	refresh();
-
+	wclear(mywindow);
+	waddstr(mywindow,"Line of Command\n");
+	waddstr(mywindow,"Copyright 2021, Park Family Software Laboratory (ParkLab)\n");
+	waddstr(mywindow,"Press any key to continue.");
+	wrefresh(mywindow);
+	
 	char Input = '~';
 
 	//Run as long as the user wants. Infinite while loop.
@@ -434,7 +435,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 		//My attempt to test escape character.
 		/*if (Input == 27) 
 		{
-			addstr("BSLALIJASLDJ");
+			waddstr(mywindow,"BSLALIJASLDJ");
 		}*/
 
 
@@ -442,7 +443,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 		if (menuStatus == topmenu)
 		{
 			printTopMenu();
-			topMenuInput(&Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
+			topMenuInput(&Input, boardToPlay, InputLayer, ComputerPlayer);
 		}
 		else
 
@@ -493,12 +494,12 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 	return 0;
 }
 
-int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
+int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
 {
 	//If user wants to load a map.
 	if (*Input == 'l') 
 	{
-		topMenuLoad(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
+		topMenuLoad(Input, boardToPlay, InputLayer, ComputerPlayer);
 		skipOneInput = true;
 		InputLayer->status = gameBoard;
 	} 
@@ -506,7 +507,7 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 	//Newgame
 	if (*Input == 'n')
 	{
- 		topMenuNew(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
+ 		topMenuNew(Input, boardToPlay, InputLayer, ComputerPlayer);
 		skipOneInput = true;
 		InputLayer->status = gameBoard;
 	}
@@ -514,7 +515,7 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 	//Join a remote game
 	if (*Input == 'j')
 	{
-		topMenuJoin(boardToPlay, InputLayer, ComputerPlayer, mywindow);
+		topMenuJoin(boardToPlay, InputLayer, ComputerPlayer);
 		skipOneInput = true;
 		InputLayer->status = gameBoard;
 	}
@@ -524,25 +525,25 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 
 int mainMenu::printTopMenu()
 {
-	clear();
-	addstr("Main Menu\n");
-	addstr("Load saved game (l) | Start new game (n) | Join remote game (j) \n");
-	refresh();
+	wclear(mywindow);
+	waddstr(mywindow,"Main Menu\n");
+	waddstr(mywindow,"Load saved game (l) | Start new game (n) | Join remote game (j) \n");
+	wrefresh(mywindow);
 	return 0;
 }
 
 int mainMenu::printWaitingScreen() 
 {
-	clear();
-	addstr("Waiting for other player(s) \n");
-	refresh();
+	wclear(mywindow);
+	waddstr(mywindow,"Waiting for other player(s) \n");
+	wrefresh(mywindow);
 	return 0;
 }
 
-int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
+int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
 {	
 	//Determine if game is remote or local.
-	addstr("Local (l) or remote (r) game?\n");
+	waddstr(mywindow,"Local (l) or remote (r) game?\n");
 	gameType = unchosen;
 	while (gameType == unchosen)
 	{
@@ -550,16 +551,16 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 		if (*Input == 'l')
 		{
-			clear();
-			addstr("Local game selected.\n");
-			refresh();
+			wclear(mywindow);
+			waddstr(mywindow,"Local game selected.\n");
+			wrefresh(mywindow);
 			gameType = local;
 		}
 		else if (*Input == 'r') 
 		{
-			clear();
-			addstr("Remote game selected.\n");
-			refresh();
+			wclear(mywindow);
+			waddstr(mywindow,"Remote game selected.\n");
+			wrefresh(mywindow);
 			gameType = remote;
 		}
 	}
@@ -573,18 +574,18 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
-		addstr("Choose which scenario to load (Case sensitive): \n");
-		getstr(pointToScenarioName);
+		waddstr(mywindow,"Choose which scenario to load (Case sensitive): \n");
+		wgetstr( mywindow,pointToScenarioName);
 		std::string newScenario = scenarioToLoad;
 		newGameMap.open(".\\scenarios\\"+ newScenario + ".txt");
 		if (newGameMap.is_open())
 		{
-			addstr("Successfully loaded!\n");
+			waddstr(mywindow,"Successfully loaded!\n");
 			loadsuccessful = true;
 		}
 		else
 		{
-			addstr("Could not load scenario. Please check that it exists and the right spelling was used.\n");
+			waddstr(mywindow,"Could not load scenario. Please check that it exists and the right spelling was used.\n");
 
 		}
 	
@@ -600,9 +601,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	while (gameType == remote && sessionCreationSuccessful == false)
 	{
 		//Get attempted session name:
-		addstr("Input session name:\n");
+		waddstr(mywindow,"Input session name:\n");
 		char inputSessionName[100];
-		getstr(&inputSessionName[0]);
+		wgetstr( mywindow,&inputSessionName[0]);
 		sessionName = inputSessionName;
 
 		//Now append filepath and atempt to open. If open succeeds, this session already exists!
@@ -610,12 +611,12 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 		if (loadSession.is_open())
 		{
-			addstr("This session already exists. Enter a different session name. \n");
+			waddstr(mywindow,"This session already exists. Enter a different session name. \n");
 
 		}
 		else
 		{
-			addstr("This session is unique.\n");
+			waddstr(mywindow,"This session is unique.\n");
 			sessionCreationSuccessful = true;
 		}
 
@@ -631,8 +632,8 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS ; i++)
 	{
 		snprintf(&outputName[0], 100, "Input Player %d's name: \n", i);
-		addstr(&outputName[0]);
-		getstr(&inputName[0]);
+		waddstr(mywindow,&outputName[0]);
+		wgetstr( mywindow,&inputName[0]);
 		playerNames[i] = inputName;
 	}
 
@@ -645,10 +646,10 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	return 0;
 }
 
-int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
+int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
 { 
 	//Determine if game is remote or local.
-	addstr("Local (l) or remote(r) game?\n");
+	waddstr(mywindow,"Local (l) or remote(r) game?\n");
 	gameType = unchosen;
 	while (gameType == unchosen)
 	{
@@ -656,16 +657,16 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 		if (*Input == 'l')
 		{
-			clear();
-			addstr("Local game selected.\n");
-			refresh();
+			//wclear(mywindow);
+			//waddstr(mywindow,"Local game selected.\n");
+			//wrefresh(mywindow);
 			gameType = local;
 		}
 		else if (*Input == 'r')
 		{
-			clear();
-			addstr("Remote game selected.\n");
-			refresh();
+			//wclear(mywindow);
+			//waddstr(mywindow,"Remote game selected.\n");
+			//wrefresh(mywindow);
 			gameType = remote;
 		}
 	}
@@ -681,19 +682,32 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
-		addstr("Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n");
-		getstr(&pointToSaveName[0]);
+		wclear(mywindow);
+
+		if (gameType == local)
+		{
+			waddstr(mywindow, "Local game selected.\n");
+		}
+		else if (gameType == remote)
+		{
+			waddstr(mywindow, "Remote game selected.\n");
+		}
+
+		waddstr(mywindow,"Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n");
+		wrefresh(mywindow);
+
+		wgetstr( mywindow,&pointToSaveName[0]);
 		saveToLoad = scenarioToLoad;
 		saveToLoad += "_save.txt";
 		loadGameSave.open(".\\savegames\\" + saveToLoad);
 		if (loadGameSave.is_open())
 		{
-			addstr("Save game successfully loaded!\n");
+			waddstr(mywindow,"Save game successfully loaded!\n");
 			loadsuccessful = true;
 		}
 		else
 		{
-			addstr("Could not load save game. Please check that it exists and the right spelling was used.\n");
+			waddstr(mywindow,"Could not load save game. Please check that it exists and the right spelling was used.\n");
 
 		}
 
@@ -709,9 +723,9 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	while (gameType == remote && sessionCreationSuccessful == false)
 	{
 		//Get attempted session name:
-		addstr("Input session name:\n");
+		waddstr(mywindow,"Input session name:\n");
 		char inputSessionName[100];
-		getstr(&inputSessionName[0]);
+		wgetstr( mywindow,&inputSessionName[0]);
 		sessionName = inputSessionName;
 
 		//Now append filepath and atempt to open. If open succeeds, this session already exists!
@@ -720,12 +734,12 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 		if (loadSession.is_open())
 		{
-			addstr("This session already exists. Enter a different session name. \n");
+			waddstr(mywindow,"This session already exists. Enter a different session name. \n");
 			
 		}
 		else
 		{
-			addstr("This session is unique.\n");
+			waddstr(mywindow,"This session is unique.\n");
 			sessionCreationSuccessful = true;
 		}
 
@@ -739,7 +753,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	return 0;
 }
 
-int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow) 
+int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer) 
 {
 	//Set flags to remote and waiting for first turn for the session.
 	gameType = remote;
@@ -747,13 +761,13 @@ int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, comp
 
 	//Get session name:
 	char inputSessionName[100];
-	addstr("Input session name: (Case sensitive)\n");
-	getstr(&inputSessionName[0]);
+	waddstr(mywindow,"Input session name: (Case sensitive)\n");
+	wgetstr( mywindow,&inputSessionName[0]);
 	sessionName = inputSessionName;
 
 	char inputPlayerName[100];
-	addstr("Input your player name: (Case sensitive)\n");
-	getstr(&inputPlayerName[0]);
+	waddstr(mywindow,"Input your player name: (Case sensitive)\n");
+	wgetstr( mywindow,&inputPlayerName[0]);
 	myPlayerName = inputPlayerName;
 
 	waitForRemotePlayer(boardToPlay, InputLayer, ComputerPlayer);
@@ -791,7 +805,7 @@ int mainMenu::multiplayerPullSaveGame()
 
 int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer)
 {
-	addstr("waitForRemotePlayer \n");
+	waddstr(mywindow,"waitForRemotePlayer \n");
 	
 	//We are waiting for updated save game.
 	bool isItMyTurnYet = false;

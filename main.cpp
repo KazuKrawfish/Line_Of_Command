@@ -32,18 +32,10 @@
 
 
 
-//Global variables need to be moved.
-WINDOW* debugWindow;
-WINDOW* mainWindow;
-
 int main()
 {
-	mainMenu MainMenu;
-	MasterBoard GameBoard;
-	inputLayer InputLayer(&MainMenu);
-	compie ComputerPlayer;
-	WINDOW* mywindow = initscr();
-	
+	WINDOW* debugWindow;
+	WINDOW* unusedWindow = initscr();
 
 	//Old window depended on 40x90.
 	//So should be good for anything after that.
@@ -56,11 +48,15 @@ int main()
 	winsch(debugWindow, 'a');
 	wrefresh(debugWindow);
 
-	mainWindow = newwin(40, 90, 0, 0);
+	WINDOW* mainWindow = newwin(40, 90, 0, 0);
 	wclear(mainWindow);
 	winsch(mainWindow, 'b');
 	wrefresh(mainWindow);
 
+	mainMenu MainMenu(mainWindow);
+	inputLayer InputLayer(&MainMenu);
+	MasterBoard GameBoard;
+	compie ComputerPlayer;
 
 
 	start_color();
@@ -110,7 +106,7 @@ int main()
 	init_pair(attackRangeSymbol, COLOR_BLACK, COLOR_RED);
 	init_pair(moveRangeSymbol, COLOR_BLACK, COLOR_RED);
 
-	MainMenu.playGame(&GameBoard, &InputLayer, &ComputerPlayer, mywindow);
+	MainMenu.playGame(&GameBoard, &InputLayer, &ComputerPlayer);
 	
 
 }

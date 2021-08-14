@@ -3,6 +3,13 @@
 
 #include "compie.hpp"
 
+
+//Fwd dec
+class compie;
+class mainMenu;
+
+
+
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer};
 enum specialKey {showMinions, hideMinions};
 enum colorCode {
@@ -14,11 +21,6 @@ enum colorCode {
 	attackRangeSymbol, moveRangeSymbol, player1MinionInverse, player2MinionInverse,
 	player3MinionInverse, player4MinionInverse, player5MinionInverse, player6MinionInverse
 };
-
-
-//Fwd dec
-class compie;
-class mainMenu;
 
 
 class inputLayer
@@ -51,6 +53,7 @@ public:
 	int requestedUnitPrice = -1;
 	compie* computerPlayer;
 	mainMenu* MainMenu;
+
 
 private:
 
