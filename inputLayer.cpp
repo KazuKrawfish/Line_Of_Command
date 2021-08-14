@@ -22,12 +22,7 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	addch(inputString[2] + COLOR_PAIR(teamNumber));
 
 	move(inputX * 3 + 1, inputY * 3);
-	if (minionToPrint != NULL && minionToPrint->status == hasfired)
-	{
-		addch('M' + COLOR_PAIR(teamNumber));
-	}
-	else addch(inputString[3] + COLOR_PAIR(teamNumber));
-	
+	addch(inputString[3] + COLOR_PAIR(teamNumber));
 	addch(inputString[4] + COLOR_PAIR(teamNumber));
 
 	//Print single tile needs access to board, it's not working currently
@@ -37,8 +32,27 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	}	
 	else addch(inputString[5] + COLOR_PAIR(teamNumber));
 	
+	//If minion has done all possible moves, black out the bottom row.
+	if (minionToPrint != NULL && minionToPrint->status == hasfired)
+	{
+		teamNumber += 24;
+	}
+
 	move(inputX * 3 + 2, inputY * 3);
-	addch(inputString[6] + COLOR_PAIR(teamNumber));
+	//Potentially add veterancy if Level 1 - 3:
+	if (minionToPrint != NULL && minionToPrint->veterancy > 0)
+	{
+		if (minionToPrint->veterancy == 3) 
+		{
+			addch('+' + COLOR_PAIR(teamNumber));
+		}
+		else if (minionToPrint->veterancy == 2)
+		{
+			addch('=' + COLOR_PAIR(teamNumber));
+		} else  addch('-' + COLOR_PAIR(teamNumber));
+	}
+	else addch(inputString[6] + COLOR_PAIR(teamNumber));
+	
 	addch(inputString[7] + COLOR_PAIR(teamNumber));
 
 	//If minion is damaged indicate the health level on bottom right, otherwise print symbol
@@ -590,7 +604,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 			getstr(&inputChars[0]);
 			gameToLoad = inputChars;
 
-			loadGameSave.open(".\\savegames\\" + gameToLoad + ".txt");
+			loadGameSave.open(".\\savegames\\" + gameToLoad + "_save.txt");
 			if (loadGameSave.is_open())
 			{
 				addstr("Save game successfully loaded!\n");
@@ -707,7 +721,7 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 		if (*Input == 'z')
 		{
 			//Confirm purchase
-			boardToInput->createMinion(requestedMinionToBuy, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag, 100, hasfired);
+			boardToInput->createMinion(requestedMinionToBuy, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag, 100, hasfired, 0);
 			boardToInput->treasury[boardToInput->playerFlag] -= requestedUnitPrice;
 			status = gameBoard;
 			requestedMinionToBuy = '\n';

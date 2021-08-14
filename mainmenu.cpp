@@ -265,7 +265,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	//Need to ensure correctness.
 	//FIX FIX FIX - need to not just check for initial NULL, there may be minions beyond that first NULL if a guy was killed and not replaced on
 	//The array.
-	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health):" << std::endl;
+	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy):" << std::endl;
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		if (boardToPrint->minionRoster[i] != NULL)
@@ -276,7 +276,8 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 				<< boardToPrint->minionRoster[i]->team << " "
 				<< boardToPrint->minionRoster[i]->seniority << " "
 				<< int(boardToPrint->minionRoster[i]->status) << " "
-				<< int(boardToPrint->minionRoster[i]->health) << std::endl;
+				<< int(boardToPrint->minionRoster[i]->health) << " "
+				<< int (boardToPrint->minionRoster[i]->veterancy)<<std::endl;
 		}
 	}
 	saveGame.close();
@@ -385,7 +386,7 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	*saveGame >> ThrowawayString;
 	int numberOfMinions;
 	*saveGame >> numberOfMinions;
-	int health, locationX, locationY, team, seniority, status;
+	int health, locationX, locationY, team, seniority, status, veterancy;
 	char type;
 	*saveGame >> ThrowawayString;
 	for (int y = 0; y < numberOfMinions; y++)
@@ -396,8 +397,9 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 			>> team
 			>> seniority
 			>> status
-			>> health;
-		boardToPrint->createMinion(type, locationX, locationY, team, health, status);
+			>> health
+			>> veterancy;
+		boardToPrint->createMinion(type, locationX, locationY, team, health, status, veterancy);
 	}
 
 	saveGame->close();
@@ -421,6 +423,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 		if (skipOneInput == true) 
 		{
 			skipOneInput = false;
+			Input = '~';
 		}
 		else 
 		{
@@ -441,6 +444,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 			printTopMenu();
 			topMenuInput(&Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
 		}
+		else
 
 		//If we are waiting for remote, do that instead of game/inputLayer.
 		if (menuStatus == waitingForRemotePlayer)
@@ -448,6 +452,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 			printWaitingScreen();
 			waitForRemotePlayer(boardToPlay, InputLayer, ComputerPlayer);
 		}
+		else
 		
 		if (menuStatus == playingMap)
 		{
@@ -491,23 +496,27 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer, WINDOW* mywindow)
 {
 	//If user wants to load a map.
-	//Need to deal with COUTs. the're inappropriate.
 	if (*Input == 'l') 
 	{
 		topMenuLoad(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
-	}
-
-
-	//This is next objective: Figure out "new map", with username, etc.
+		skipOneInput = true;
+		InputLayer->status = gameBoard;
+	} 
+	else
+	//Newgame
 	if (*Input == 'n')
 	{
-		topMenuNew(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
+ 		topMenuNew(Input, boardToPlay, InputLayer, ComputerPlayer, mywindow);
+		skipOneInput = true;
+		InputLayer->status = gameBoard;
 	}
-	
+	else
 	//Join a remote game
 	if (*Input == 'j')
 	{
 		topMenuJoin(boardToPlay, InputLayer, ComputerPlayer, mywindow);
+		skipOneInput = true;
+		InputLayer->status = gameBoard;
 	}
 
 	return 0;
@@ -627,20 +636,12 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		playerNames[i] = inputName;
 	}
 
-/*	if (gameType == remote) 
-	{
-	//Get session name:
-	char inputSessionName[100];
-	addstr("Input session name:\n");
-	getstr(&inputSessionName[0]);
-	sessionName = inputSessionName;
-	}*/
-
 	//Host is always player one for a new game.
 	myPlayerName = playerNames[1];
 
 
 	menuStatus = playingMap;
+
 	return 0;
 }
 

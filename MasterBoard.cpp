@@ -441,7 +441,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 }
 
-int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status)
+int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -449,7 +449,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth);
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy);
 			if (minionRoster != NULL)
 			{
 				minionRoster[i]->status = (minionStatus)status;
@@ -613,6 +613,8 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	//Simplify by finding shorthand values first.
 	Minion* attackingMinion = cursor.selectMinionPointer;
 	Minion* defendingMinion = Board[inputX][inputY].minionOnTop;
+
+	bool defenderAlive = true;
 	
 	//Cannot attack twice!
 	if (attackingMinion->status == hasfired)			
@@ -629,9 +631,13 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	
 	//First find attacking fire power. 
 	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type);		
+	attackerFirePower = attackerFirePower * attackingMinion->calculateVetBonus();
 	
-	//Decrease defender's health by attack value.
+	//Calculate defense factor.
 	double defenderDefenseFactor = Board[inputX][inputY].defenseFactor;
+	defenderDefenseFactor = defenderDefenseFactor * defendingMinion->calculateVetBonus();
+
+	//Decrease defender's health by attack value.
 	defendingMinion->health -= attackerFirePower * attackingMinion->health / defenderDefenseFactor;				
 
 	if (defendingMinion->health <= 4)
@@ -639,13 +645,21 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		//If defender falls below 4, it dies.
 		bool printMessage = true;
 		destroyMinion(defendingMinion, printMessage, InputLayer);
+		defenderAlive = false;
+		if (attackingMinion->veterancy <= 3) 
+		{
+			attackingMinion->veterancy++;
+		}
 	}
 	else	//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
 		if (defendingMinion->rangeType == directFire && (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
 		{
 			//If defender still alive, then perform defensive counterfire.
+			//Same calculations as above - includes veterancy
 			double defenderFirePower = consultAttackValuesChart(defendingMinion->type, attackingMinion->type);	
+			defenderFirePower = defenderFirePower * defendingMinion->calculateVetBonus();
 			double attackerDefenseFactor = Board[cursor.selectMinionPointer->locationX][cursor.selectMinionPointer->locationY].defenseFactor;
+			attackerDefenseFactor = attackerDefenseFactor * attackingMinion->calculateVetBonus();
 			attackingMinion->health -= defenderFirePower * defendingMinion->health / attackerDefenseFactor;
 		}	
 
@@ -653,6 +667,10 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	{	
 		bool printMessage = true;
 		destroyMinion(attackingMinion, printMessage, InputLayer);
+		if (defenderAlive == true && defendingMinion->veterancy <= 3)
+		{
+			defendingMinion->veterancy++;
+		}
 		setVisionField();
 	}
 	else 
@@ -661,9 +679,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		attackingMinion->status = hasfired;
 		deselectMinion();
 	}
-
-
-
+	
 	return 0;
 
 }
@@ -719,9 +735,13 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 	InputLayer->requestedMinionToBuy = '\n';
 
 	//Reset every minion's status.
-	for (int i = 0; minionRoster[i] != NULL; i++)
+	//Got messed up by people dying
+	for (int i = 0; i < GLOBALSUPPLYCAP ; i++)
 	{
-		minionRoster[i]->status = hasntmovedorfired;
+		if (minionRoster[i] != NULL) 
+		{
+			minionRoster[i]->status = hasntmovedorfired;
+		}
 	}
 
 	//Shouldn't matter if local or not

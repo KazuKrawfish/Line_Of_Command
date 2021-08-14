@@ -20,8 +20,9 @@ Minion::Minion()
 //Always use this constructor, it gives the new Minion all required properties.
 //When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement costs and consultMinionCostChart.
 //
-Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth)
+Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy)
 {
+	veterancy = inputVeterancy;
 	seniority = inputSeniority;
 	minionEnvironment = Environment;
 	locationX = inputX;
@@ -140,6 +141,27 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	team = inputTeam;
 
 	Environment->Board[inputX][inputY].hasMinionOnTop = true;
+}
+
+double Minion::calculateVetBonus() 
+{
+	double combatBonus = 1.0;
+
+		if (veterancy == 1) 
+		{
+			combatBonus = 1.05;
+		} 
+		else if (veterancy == 2) 
+		{
+			combatBonus = 1.1;
+		}
+		else if (veterancy == 3) 
+		{
+			combatBonus = 1.2;
+		}
+
+		return combatBonus;
+
 }
 
 //

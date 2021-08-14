@@ -56,7 +56,14 @@ int main()
 	init_pair(player4Minion, COLOR_MAGENTA, COLOR_BLACK);
 	init_pair(player5Minion, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(player6Minion, COLOR_GREEN, COLOR_BLACK);
-		
+
+	//Player minion inverse colors
+	init_pair(player1MinionInverse, COLOR_YELLOW, COLOR_RED);
+	init_pair(player2MinionInverse, COLOR_CYAN, COLOR_BLUE);
+	init_pair(player3MinionInverse, COLOR_BLACK, COLOR_CYAN);
+	init_pair(player4MinionInverse, COLOR_BLACK, COLOR_MAGENTA);
+	init_pair(player5MinionInverse, COLOR_BLACK, COLOR_YELLOW);
+	init_pair(player6MinionInverse, COLOR_BLACK, COLOR_GREEN);		
 	
 	//Player tile colors
 	init_pair(player1Tile, COLOR_RED, COLOR_GREEN);

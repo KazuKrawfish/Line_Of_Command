@@ -11,7 +11,8 @@ enum colorCode {
 	player1Tile, player2Tile, player3Tile, player4Tile, player5Tile, player6Tile,
 	fogPlayer1Tile, fogPlayer2Tile, fogPlayer3Tile, fogPlayer4Tile,
 	fogPlayer5Tile, fogPlayer6Tile, neutralTile, fogNeutralTile, landTile, cursorSymbol,
-	attackRangeSymbol, moveRangeSymbol
+	attackRangeSymbol, moveRangeSymbol, player1MinionInverse, player2MinionInverse,
+	player3MinionInverse, player4MinionInverse, player5MinionInverse, player6MinionInverse
 };
 
 

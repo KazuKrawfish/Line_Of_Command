@@ -16,17 +16,17 @@ class Minion
 	public:
 	
 	//Constructors
-	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth);
+	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy);
 	Minion();
 	~Minion();
 	
 	
 	//Member variables. Should be protected with functions dealing with them!
 	
-	int seniority;				//Used to indicated where the minion resides within the minion array. Used to construct and destruct the minion.
+	int seniority;		//Used to indicated where the minion resides within the minion array. Used to construct and destruct the minion.
 	int locationX;
 	int locationY;
-	char type;					//Type of minion i.e. infantry, artillery, etc.
+	char type;			//Type of minion i.e. infantry, artillery, etc.
 	int movementRange;
 	int attackRange;
 	int visionRange;
@@ -37,6 +37,10 @@ class Minion
 	std::string Image = { '.','.','.',
 						'.','.','.',
 						'.','.','.' };
+	int veterancy = 0;
+
+	double calculateVetBonus();
+
 	MasterBoard* minionEnvironment;
 	minionStatus status;
 	rangeType rangeType;
