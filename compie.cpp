@@ -65,7 +65,7 @@ int compie::deployMove(MasterBoard* boardToUse)
 	}
 	if (maxX > boardToUse->BOARD_WIDTH)
 	{
-		maxX = 0;
+		maxX = boardToUse->BOARD_WIDTH;
 	}
 	//Same with y and maxY.
 	int minY = myCursor->selectMinionPointer->locationY - myCursor->selectMinionPointer->movementRange;
@@ -76,7 +76,7 @@ int compie::deployMove(MasterBoard* boardToUse)
 	}
 	if (maxY > boardToUse->BOARD_HEIGHT)
 	{
-		maxY = 0;
+		maxY = boardToUse->BOARD_HEIGHT;
 	}
 
 	for (int x = minX; x < maxX; x++)
@@ -319,39 +319,49 @@ int compie::determineMinionTasks(MasterBoard* boardToUse)
 	int returnX = 0;
 	int returnY = 0;
 
-	//AKA if there IS an enemy within local area
-	//Should not need NULL check but doing it anyway.
-	int distance = findEnemiesWithinLocalArea(boardToUse);
-	if (distance  < 999 && tileToTarget != NULL)
+	//If already capturing continue that regardless.
+	if (boardToUse->cursor.selectMinionPointer->isCapturing == true) 
 	{
-		minionTasking = attackLocalMinion;
-		std::cout << "recommend attacking " << tileToTarget->minionOnTop->description << " at "
-			<< tileToTarget->minionOnTop->locationX << "," << tileToTarget->minionOnTop->locationY << std::endl;
+		tileToTarget = &boardToUse->Board[boardToUse->cursor.selectMinionPointer->locationX][boardToUse->cursor.selectMinionPointer->locationY];
+		minionTasking = captureLocalProperty;
 		return 1;
-	} 
-	else //If infantry, attempt to capture local properties.
-		if(boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
+	}
+	else
+	{
+
+		//Otherwise see if there are enemies in local area within range to attack.
+		int distance = findEnemiesWithinLocalArea(boardToUse);
+		if (distance < 999 && tileToTarget != NULL)
 		{
-			distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY);
-			if ( distance < 999 && tileToTarget != NULL)
-			{
-				minionTasking = captureLocalProperty;
-				//DEBUG
-				std::cout << "recommend capturing " << tileToTarget->description << " at " << returnX << "," << returnY << std::endl;
-				return 1;
-			}
+			minionTasking = attackLocalMinion;
+			//std::cout << "recommend attacking " << tileToTarget->minionOnTop->description << " at "
+			//	<< tileToTarget->minionOnTop->locationX << "," << tileToTarget->minionOnTop->locationY << std::endl;
+			return 1;
 		}
-	
-	distance = deployMove(boardToUse);
+		else //If infantry, attempt to capture local properties.
+			if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
+			{
+				distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY);
+				if (distance < 999 && tileToTarget != NULL)
+				{
+					minionTasking = captureLocalProperty;
+					//DEBUG
+					//std::cout << "recommend capturing " << tileToTarget->description << " at " << returnX << "," << returnY << std::endl;
+					return 1;
+				}
+			}
+	}
+
+	int distance = deployMove(boardToUse);
 	if (distance < 999) 
 	{
 		minionTasking = moveTowardsEnemy;
 		//DEBUG
-		std::cout << "Recommend move towards enemies " << std::endl;
+		//std::cout << "Recommend move towards enemies " << std::endl;
 		return 1;
 	}
 
-	std::cout << "Recommend holding position" << std::endl;
+	//std::cout << "Recommend holding position" << std::endl;
 	minionTasking = holdPosition;
 	return 0;
 }
@@ -371,7 +381,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 		//The move automatically deselects. Thus reselect.
 		boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
 		boardToUse->attackMinion(tileToTarget->locationX, tileToTarget->locationY, InputLayer);
-		std::cout << "Execute" << std::endl;
+		//std::cout << "Execute" << std::endl;
 		
 		return 0;
 	}
@@ -401,13 +411,15 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 
 		//moveMinion needs to contain all the status elements too.
 		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+
 	}
 
 	if (minionTasking == holdPosition)
 	{
-		boardToUse->deselectMinion();
+		//Do nothing
 	}
 
+	boardToUse->deselectMinion();
 	return 1;
 }
 
@@ -421,8 +433,8 @@ int compie::moveMinions(MasterBoard* boardToUse)
 	//Go through minion Roster.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
-		//Must be a valid minion, and our team's minion
-		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag)
+		//Must be a valid minion, and our team's minion. Must have not moved fully yet.
+		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag && boardToUse->minionRoster[i]->status != hasfired)
 		{
 			//Move cursor, then select minion, then determine tasks, then execute tasks.
 			boardToUse->cursor.XCoord = boardToUse->minionRoster[i]->locationX;
@@ -431,8 +443,8 @@ int compie::moveMinions(MasterBoard* boardToUse)
 			//Reminder that "selectMinion" is required to set the "withinRange" characteristic for tiles.
 			//This is used for firing and moving.
 			boardToUse->selectMinion(boardToUse->minionRoster[i]->locationX, boardToUse->minionRoster[i]->locationY);
-			std::cout << "For minion " << boardToUse->cursor.selectMinionPointer->description 
-				<<" at " << boardToUse->cursor.getX() << "," << boardToUse->cursor.getY() << ": "<< std::endl;
+			//std::cout << "For minion " << boardToUse->cursor.selectMinionPointer->description 
+			//	<<" at " << boardToUse->cursor.getX() << "," << boardToUse->cursor.getY() << ": "<< std::endl;
 			determineMinionTasks(boardToUse);
 
 			executeMinionTasks(boardToUse);

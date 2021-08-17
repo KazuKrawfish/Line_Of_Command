@@ -45,7 +45,7 @@ int main()
 	//Lines, columns, startY, startX
 	debugWindow = newwin(40, 20, 0, 100);
 	wclear(debugWindow);
-	winsch(debugWindow, 'a');
+	waddstr(debugWindow, "I am debug window.");
 	wrefresh(debugWindow);
 
 	WINDOW* mainWindow = newwin(40, 90, 0, 0);
