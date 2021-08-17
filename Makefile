@@ -4,7 +4,9 @@ EXECUTABLE=AWSimulation
 #LDFLAGS=-g $(shell root-config --ldflags)
 #LDLIBS=$(shell root-config --libs)
 
-SRCS=ConsoleApplication1.cpp MasterBoard.cpp Minion.cpp
+LDLIBS=-lncurses
+
+SRCS=MasterBoard.cpp Minion.cpp compie.cpp  Cursor.cpp inputLayer.cpp main.cpp  mainmenu.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
 
 all: $(EXECUTABLE)

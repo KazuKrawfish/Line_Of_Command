@@ -5,7 +5,6 @@
 #include <iostream>
 #include <ctype.h>
 #include <fstream>
-#include <windows.h>
 #include "compie.hpp"
 
 class inputLayer;
