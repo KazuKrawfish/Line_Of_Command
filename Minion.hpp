@@ -7,7 +7,7 @@
 //Forward declaration for MasterBoard.
 class MasterBoard;
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired};
-enum rangeType {directFire, rangedFire};
+enum RangeType {directFire, rangedFire};
 enum specialtyGroupType {normal, infantry};
 
 
@@ -43,7 +43,7 @@ class Minion
 
 	MasterBoard* minionEnvironment;
 	minionStatus status;
-	rangeType rangeType;
+	RangeType rangeType;
 	specialtyGroupType specialtyGroup;
 
 };

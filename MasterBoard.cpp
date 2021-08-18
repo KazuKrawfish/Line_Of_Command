@@ -4,6 +4,7 @@
 #include <iostream>
 #include "inputLayer.hpp"
 #include "compie.hpp"
+#include <cmath>
 
 
 //If the two input coordinates are next to each other, return true. Otherwise, return false.
@@ -568,7 +569,7 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion)
 {
 	std::string textToReturn = "";
 	//Subtract capturing minion's health
-	int pointsToTake = int(round(inputMinion->health / 10));
+	int pointsToTake = int(std::round(inputMinion->health / 10));
 	inputTile->capturePoints -= pointsToTake;
 	inputMinion->isCapturing = true;
 

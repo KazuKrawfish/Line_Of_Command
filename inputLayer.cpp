@@ -5,12 +5,8 @@
 #include <iostream>
 #include <ctype.h>
 #include <fstream>
-#include <windows.h>
+#include <cmath>
 #include "compie.hpp"
-
-
-
-
 
 inputLayer::inputLayer(mainMenu* inputMainMenu) 
 {
@@ -61,7 +57,7 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	//If minion is damaged indicate the health level on bottom right, otherwise print symbol
 	if (minionToPrint != NULL && minionToPrint->health <= 94)
 	{
-		waddch(MainMenu->mywindow, char (int(round(minionToPrint->health /10)) + 48) + COLOR_PAIR(teamNumber));
+		waddch(MainMenu->mywindow, char (int(std::round(minionToPrint->health /10)) + 48) + COLOR_PAIR(teamNumber));
 	}
 	else waddch(MainMenu->mywindow, inputString[8] + COLOR_PAIR(teamNumber));
 	
