@@ -26,7 +26,7 @@ class Minion
 	int seniority;		//Used to indicated where the minion resides within the minion array. Used to construct and destruct the minion.
 	int locationX;
 	int locationY;
-	char type;			//Type of minion i.e. infantry, artillery, etc.
+	char type;			//Type of minion  -- equivalent to symbol for tiles.
 	int movementRange;
 	int attackRange;
 	int visionRange;

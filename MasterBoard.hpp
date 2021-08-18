@@ -43,7 +43,7 @@ public:
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	Cursor cursor;
 	std::vector<std::vector<tile>>  Board;
-	int windowLocation;
+	int windowLocation = 0;
 	int playerFlag;
 	int totalNumberOfMinions;
 

@@ -21,10 +21,11 @@ public:
 	int checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy,  Cursor* myCursor, MasterBoard* boardToUse);
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY);
 	int findEnemiesWithinLocalArea(MasterBoard* boardToUse);
-	int determinePropertyTasks();
+	
 	int determineMinionTasks(MasterBoard* boardToUse);
 	int executeMinionTasks(MasterBoard* boardToUse);
 	int moveMinions(MasterBoard* boardToUse);
+	int determineProduction(MasterBoard* boardToUse);
 
 	minionTaskingType minionTasking = holdPosition;
 	tile* closestTileAdjacentToEnemy = NULL;
