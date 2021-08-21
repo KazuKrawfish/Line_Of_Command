@@ -442,6 +442,19 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 }
 
+int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam) 
+{
+	if (treasury[playerFlag] >= consultMinionCostChart(inputType) && Board[inputX][inputY].hasMinionOnTop == false)
+	{
+		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0);
+		treasury[playerFlag] -= consultMinionCostChart(inputType);
+		return 0;
+	}
+	else return 1;
+
+	
+}
+
 int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.

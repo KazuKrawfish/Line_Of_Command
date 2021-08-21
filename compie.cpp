@@ -313,6 +313,11 @@ int compie::determineMinionTasks(MasterBoard* boardToUse)
 	int returnX = 0;
 	int returnY = 0;
 
+	if (boardToUse->cursor.selectMinionPointer == NULL) 
+	{
+		return 1;
+	}
+
 	//If already capturing continue that regardless.
 	if (boardToUse->cursor.selectMinionPointer->isCapturing == true) 
 	{
@@ -453,7 +458,7 @@ int compie::moveMinions(MasterBoard* boardToUse)
 //Right now this is actually buying units too.
 int compie::determineProduction(MasterBoard* boardToUse)
 {
-	int totalFactoriesLeft = 0;
+	int totalFactoriesLeft = 0;	
 	int numberOfTanks = 0;
 	int numberOfInfantry = 0;
 	int numberOfCavalry = 0;
@@ -482,7 +487,6 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			{
 			case('i'):
 			{
-
 				numberOfInfantry++;
 				break;
 			}
@@ -512,19 +516,16 @@ int compie::determineProduction(MasterBoard* boardToUse)
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			//If the current tile is our factory
-			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
+			//If the current tile is our factory and there is no one already on top
+			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
 				//First determine "surplus" treasury, which accounts for at least purchasing an infantry at every possible factory.
 				int surplusTreasuryRequired = boardToUse->treasury[boardToUse->playerFlag] + 1000 - totalFactoriesLeft * 1000;
 				//If we have a proper proportion of tanks, buy cavalry.
 				if (int(numberOfTanks / 3) > numberOfCavalry && boardToUse->consultMinionCostChart('c') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('c'))
 				{
-					//Must be able to actually afford the unit.
-				
-
-						boardToUse->createMinion('c', x, y, boardToUse->playerFlag, 100, hasfired, 0);
-						boardToUse->treasury[boardToUse->playerFlag] -= boardToUse->consultMinionCostChart('c');
+					//Must be able to actually afford the unit.				
+						boardToUse->attemptPurchaseMinion('c', x, y, boardToUse->playerFlag);
 
 
 				}
@@ -533,30 +534,26 @@ int compie::determineProduction(MasterBoard* boardToUse)
 					{
 						//Must be able to actually afford the unit.
 
-							boardToUse->createMinion('s', x, y, boardToUse->playerFlag, 100, hasfired, 0);
-							boardToUse->treasury[boardToUse->playerFlag] -= boardToUse->consultMinionCostChart('s');
+						boardToUse->attemptPurchaseMinion('s', x, y, boardToUse->playerFlag);
 
 					}
 					else
 						if (boardToUse->consultMinionCostChart('T') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('T'))
 						{
-								//Must be able to actually afford the unit.
-								boardToUse->createMinion('T', x, y, boardToUse->playerFlag, 100, hasfired, 0);
-								boardToUse->treasury[boardToUse->playerFlag] -= boardToUse->consultMinionCostChart('T');
+							//Must be able to actually afford the unit.
+							boardToUse->attemptPurchaseMinion('T', x, y, boardToUse->playerFlag);
 
 						}
 						else if (boardToUse->consultMinionCostChart('a') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('a'))
 						{
-								//Must be able to actually afford the unit.
-								boardToUse->createMinion('a', x, y, boardToUse->playerFlag, 100, hasfired, 0);
-								boardToUse->treasury[boardToUse->playerFlag] -= boardToUse->consultMinionCostChart('a');
+							//Must be able to actually afford the unit.
+							boardToUse->attemptPurchaseMinion('a', x, y, boardToUse->playerFlag);
 						}
 						else if (boardToUse->consultMinionCostChart('i') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('i'))
 						{
 	
-								//Must be able to actually afford the unit.
-								boardToUse->createMinion('i', x, y, boardToUse->playerFlag, 100, hasfired, 0);
-								boardToUse->treasury[boardToUse->playerFlag] -= boardToUse->consultMinionCostChart('i');
+							//Must be able to actually afford the unit.
+							boardToUse->attemptPurchaseMinion('i', x, y, boardToUse->playerFlag);
 						
 						}
 			}

@@ -30,6 +30,7 @@ public:
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();
+	int attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam);
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy);
 	int endTurn(inputLayer* InputLayer);
 	int upkeep(inputLayer* InputLayer);

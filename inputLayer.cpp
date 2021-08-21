@@ -93,7 +93,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 		waddstr(MainMenu->mywindow, pointerToPrint);
 	}
 
-	if (currentTile->hasMinionOnTop == true)
+	if (currentTile->hasMinionOnTop == true && currentTile->withinVision)
 	{
 		Minion* currentMinion = currentTile->minionOnTop;
 		
@@ -720,8 +720,7 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 		if (*Input == 'z')
 		{
 			//Confirm purchase
-			boardToInput->createMinion(requestedMinionToBuy, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag, 100, hasfired, 0);
-			boardToInput->treasury[boardToInput->playerFlag] -= requestedUnitPrice;
+			boardToInput->attemptPurchaseMinion(requestedMinionToBuy, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag);
 			status = gameBoard;
 			requestedMinionToBuy = '\n';
 			requestedUnitPrice = -1;
