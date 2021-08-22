@@ -117,7 +117,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 1;
 		visionRange = 5;
 		rangeType = directFire;
-		specialtyGroup = infantry;
+		specialtyGroup = normal;
 		Image = {		'-','n',' ',
 						'o','=','o',
 						' ',' ',' ' };
@@ -126,7 +126,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	case('R'): 
 	{ 
 		description = "Rocket";
-		movementRange = 4;
+		movementRange = 5;
 		attackRange = 5;
 		visionRange = 2;
 		rangeType = rangedFire;
@@ -135,6 +135,32 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 							'o','=','o',
 							' ',' ',' ' };
 		break; 
+	}
+	case('v'):
+	{
+		description = "Viper";
+		movementRange = 6;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		Image = { '-','+','-',
+				'<','=','*',
+				' ',' ',' ' };
+		break;
+	}
+	case('h'):
+	{
+		description = "Huey";
+		movementRange = 6;
+		attackRange = 0;
+		visionRange = 2;
+		rangeType = directFire;
+		specialtyGroup = transport;
+		Image = { '+',' ','+',
+				'<','=','=',
+				' ',' ',' ' };
+		break;
 	}
 	}
 

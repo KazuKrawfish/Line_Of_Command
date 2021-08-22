@@ -8,7 +8,7 @@
 class MasterBoard;
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired};
 enum RangeType {directFire, rangedFire};
-enum specialtyGroupType {normal, infantry};
+enum specialtyGroupType {normal, infantry, transport};
 
 
 class Minion

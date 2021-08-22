@@ -2,21 +2,26 @@
 #include <iostream>
 
 
-compie::compie() 
-{
-
-
-}
-
 //Below functions are "utilities" that need to find a home.
+
+int buildOptimalPath(MasterBoard* boardToCheck) 
+{
+	return 0;
+}
 
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
 {
 	return abs(inputX1 - inputX2) + abs(inputY1 - inputY2);
 
 }
-
 //Above functions are "utilities" that need to find a home.
+
+
+compie::compie()
+{
+
+
+}
 
 //Search for the closest enemy property to capture.
 int compie::deployMove(MasterBoard* boardToUse) 
@@ -522,7 +527,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				//First determine "surplus" treasury, which accounts for at least purchasing an infantry at every possible factory.
 				int surplusTreasuryRequired = boardToUse->treasury[boardToUse->playerFlag] + 1000 - totalFactoriesLeft * 1000;
 				//If we have a proper proportion of tanks, buy cavalry.
-				if (int(numberOfTanks / 3) > numberOfCavalry && boardToUse->consultMinionCostChart('c') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('c'))
+				if (int(numberOfTanks / 3) > numberOfCavalry && boardToUse->consultMinionCostChart('c', 'h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('c', 'h'))
 				{
 					//Must be able to actually afford the unit.				
 						boardToUse->attemptPurchaseMinion('c', x, y, boardToUse->playerFlag);
@@ -530,7 +535,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 
 				}
 				else		//Infantry and specialists have a similar proportion.
-					if (int(numberOfInfantry / 3) > numberOfSpecialists && boardToUse->consultMinionCostChart('s') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('s'))
+					if (int(numberOfInfantry / 3) > numberOfSpecialists && boardToUse->consultMinionCostChart('s', 'h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('s', 'h'))
 					{
 						//Must be able to actually afford the unit.
 
@@ -538,18 +543,18 @@ int compie::determineProduction(MasterBoard* boardToUse)
 
 					}
 					else
-						if (boardToUse->consultMinionCostChart('T') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('T'))
+						if (boardToUse->consultMinionCostChart('T','h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('T', 'h'))
 						{
 							//Must be able to actually afford the unit.
 							boardToUse->attemptPurchaseMinion('T', x, y, boardToUse->playerFlag);
 
 						}
-						else if (boardToUse->consultMinionCostChart('a') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('a'))
+						else if (boardToUse->consultMinionCostChart('a', 'h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('a', 'h'))
 						{
 							//Must be able to actually afford the unit.
 							boardToUse->attemptPurchaseMinion('a', x, y, boardToUse->playerFlag);
 						}
-						else if (boardToUse->consultMinionCostChart('i') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('i'))
+						else if (boardToUse->consultMinionCostChart('i', 'h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('i', 'h'))
 						{
 	
 							//Must be able to actually afford the unit.

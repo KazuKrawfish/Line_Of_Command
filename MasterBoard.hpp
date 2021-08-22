@@ -39,7 +39,7 @@ public:
 	int checkWindow();
 	int repairMinions();
 	int clearBoard(inputLayer* InputLayer);
-	int consultMinionCostChart(char minionType);
+	int consultMinionCostChart(char minionType, char propertyType);
 	std::string captureProperty(tile* inputTile, Minion* inputMinion);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	Cursor cursor;

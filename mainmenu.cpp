@@ -195,6 +195,26 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 												'~',' ','~' };
 				break;
 			}
+			case('A'):
+			{
+				LoadBoard->Board[x][y].description = "Airbase.";
+				LoadBoard->Board[x][y].defenseFactor = 1.3;
+				LoadBoard->Board[x][y].Image = { '\\','n','.',
+												'|','\\','n',
+												'|','.','\\' };
+				LoadBoard->Board[x][y].production = 1000;
+				break;
+			}
+			case('P'):
+			{
+				LoadBoard->Board[x][y].description = "Port.";
+				LoadBoard->Board[x][y].defenseFactor = 1.3;
+				LoadBoard->Board[x][y].Image = { 'n','_','_',
+												'|','~','~',
+												'|','~','~' };
+				LoadBoard->Board[x][y].production = 1000;
+				break;
+			}
 			}
 			//Other terrain types go here
 

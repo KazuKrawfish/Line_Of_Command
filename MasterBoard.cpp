@@ -25,15 +25,17 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
-//												i     s     a     r     c     R     T     A
-const double ATTACK_VALUES_MATRIX[8][8] = {		0.50, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05,
-												0.55, 0.55, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50,
-												0.65, 0.65,	0.50, 0.60, 0.60, 0.70, 0.35, 0.50,
-												0.60, 0.60,	0.40, 0.50, 0.55, 0.60, 0.30, 0.40,
-												0.60, 0.60, 0.10, 0.20, 0.35, 0.40, 0.05, 0.10,
-												0.80, 0.80,	0.60, 0.65, 0.70, 0.80, 0.45, 0.60,
-												0.70, 0.70, 0.70, 0.80, 0.80, 0.85, 0.50, 0.70, 	
-												0.95, 0.90, 0.15, 0.25, 0.40, 0.45, 0.05, 0.20	};
+//													i     s     a     r     c     R     T     A     v	  h
+const double ATTACK_VALUES_MATRIX[10][10] = {/*i*/	0.50, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10,
+											/*s*/	0.55, 0.55, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.05, 0.10,
+											/*a*/	0.65, 0.65,	0.50, 0.60, 0.60, 0.70, 0.35, 0.50, 0.10, 0.15,
+											/*r*/	0.60, 0.60,	0.40, 0.50, 0.55, 0.60, 0.30, 0.40, 0,	  0,
+											/*c*/	0.60, 0.60, 0.10, 0.20, 0.35, 0.40, 0.05, 0.10, 0.10, 0.15,
+											/*R*/	0.80, 0.80,	0.60, 0.65, 0.70, 0.80, 0.45, 0.60, 0,	  0,
+											/*T*/	0.70, 0.70, 0.70, 0.80, 0.80, 0.85, 0.50, 0.70, 0.15, 0.25,	
+											/*A*/	0.95, 0.90, 0.15, 0.25, 0.40, 0.45, 0.05, 0.20, 0.90, 0.95,
+											/*v*/	0.65, 0.65, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.55, 0.75,
+											/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  };
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Needs defaults to catch error!!!!
@@ -68,6 +70,12 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('A'):
 		x = 7;
 		break;
+	case('v'):
+		x = 8;
+		break;
+	case('h'):
+		x = 9;
+		break;
 	}
 
 	switch (attackerType)
@@ -96,11 +104,17 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('A'):
 		y = 7;
 		break;
+	case('v'):
+		y = 8;
+		break;
+	case('h'):
+		y = 9;
+		break;
 	}
 
 	if (x == -1 || y == -1)
 	{
-		std::cout << "ERROR ERROR ERROR" << std::endl;
+		std::cout << "ERROR Does not exist within attack values matrix" << std::endl;
 		return -1;
 	}
 
@@ -108,9 +122,28 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 }
 
 //Return of -1 indicates the minion requested does not exist.
-int MasterBoard::consultMinionCostChart(char minionType)
+int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 {
+	bool canItBeBoughtHere = false;
+
+	if (propertyType == 'A' && (minionType == 'v' || minionType == 'h') )
+	{
+		canItBeBoughtHere = true;
+	}
+	if ( (propertyType == 'n' || propertyType == 'H' || propertyType == 'Q' || propertyType == 'h' ) && 
+		(minionType == 'i' || minionType == 's' || minionType == 'a' || minionType == 'r' || minionType == 'R' 
+		|| minionType == 'T' || minionType == 'A' || minionType == 'c')) 
+	{
+		canItBeBoughtHere = true;
+	}
+
+	if (canItBeBoughtHere == false) 
+	{
+		return -1;
+	}
+
 	int price = -1;
+
 	switch (minionType)
 	{
 	case('i'):
@@ -123,7 +156,7 @@ int MasterBoard::consultMinionCostChart(char minionType)
 		price = 7000;
 		break;
 	case('r'):
-		price = 7000;
+		price = 6000;
 		break;
 	case('c'):
 		price = 4000;
@@ -136,6 +169,12 @@ int MasterBoard::consultMinionCostChart(char minionType)
 		break;
 	case('A'):
 		price = 8000;
+		break;
+	case('v'):
+		price = 9000;
+		break;
+	case('h'):
+		price = 5000;
 		break;
 	}
 	
@@ -415,6 +454,12 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	int distanceX = 0;
 	int distanceY = 0;
 
+	//Transport cannot attack so its attack field is 0.
+	if (cursor.selectMinionPointer->type == transport) 
+	{
+		return 1;
+	}
+
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
 		for (int y= 0; y < BOARD_HEIGHT; y++)
@@ -444,10 +489,10 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam) 
 {
-	if (treasury[playerFlag] >= consultMinionCostChart(inputType) && Board[inputX][inputY].hasMinionOnTop == false)
+	if (treasury[playerFlag] >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
 	{
 		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0);
-		treasury[playerFlag] -= consultMinionCostChart(inputType);
+		treasury[playerFlag] -= consultMinionCostChart(inputType, Board[inputX][inputY].symbol);
 		return 0;
 	}
 	else return 1;
@@ -647,14 +692,18 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type);		
 	attackerFirePower = attackerFirePower * attackingMinion->calculateVetBonus();
 	
-	//Calculate defense factor.
-	double defenderDefenseFactor = Board[inputX][inputY].defenseFactor;
+	//Calculate defense factor. If air unit it remains 1.
+	double defenderDefenseFactor = 1;
+	if (defendingMinion->type != 'h' && defendingMinion->type != 'v')
+	{
+		defenderDefenseFactor = Board[inputX][inputY].defenseFactor;
+	}
 	defenderDefenseFactor = defenderDefenseFactor * defendingMinion->calculateVetBonus();
 
 	//Decrease defender's health by attack value.
 	defendingMinion->health -= attackerFirePower * attackingMinion->health / defenderDefenseFactor;				
 
-	if (defendingMinion->health <= 4)
+	if (defendingMinion->health < 5)
 	{
 		//If defender falls below 4, it dies.
 		bool printMessage = true;
@@ -672,12 +721,18 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 			//Same calculations as above - includes veterancy
 			double defenderFirePower = consultAttackValuesChart(defendingMinion->type, attackingMinion->type);	
 			defenderFirePower = defenderFirePower * defendingMinion->calculateVetBonus();
-			double attackerDefenseFactor = Board[cursor.selectMinionPointer->locationX][cursor.selectMinionPointer->locationY].defenseFactor;
+			
+			//If attacker is air unit it doesn't get terrain bonus
+			double attackerDefenseFactor = 1;
+			if (attackingMinion->type != 'h' && attackingMinion->type != 'v')
+			{
+				attackerDefenseFactor = Board[attackingMinion->locationX][attackingMinion->locationY].defenseFactor;
+			}
 			attackerDefenseFactor = attackerDefenseFactor * attackingMinion->calculateVetBonus();
 			attackingMinion->health -= defenderFirePower * defendingMinion->health / attackerDefenseFactor;
 		}	
 
-	if (attackingMinion->health <= 4)			//The attacker can be destroyed too!
+	if (attackingMinion->health < 5)			//The attacker can be destroyed too!
 	{	
 		bool printMessage = true;
 		destroyMinion(attackingMinion, printMessage, InputLayer);
@@ -800,8 +855,8 @@ int MasterBoard::repairMinions()
 		if (minionRoster[i]->team == playerFlag)
 		{
 			tile* tileToExamine = &Board[minionRoster[i]->locationX][minionRoster[i]->locationY];
-			//If it is on a player controlled tile, and that tile is a "repairing" tile.
-			if (tileToExamine->controller == playerFlag && (tileToExamine->symbol == 'n' || tileToExamine->symbol == 'H' || tileToExamine->symbol == 'h' || tileToExamine->symbol == 'Q'))
+			//If it is on a player controlled tile, and that tile is a "repairing" tile for the given unit.
+			if (tileToExamine->controller == playerFlag && consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) != -1)	
 			{
 				if (minionRoster[i]->health < 100)
 				{
@@ -815,19 +870,19 @@ int MasterBoard::repairMinions()
 					else if (minionRoster[i]->health <= 94 && minionRoster[i]->health > 84)
 					{
 						minionRoster[i]->health = 100;
-						treasury[playerFlag] -=  int (consultMinionCostChart( minionRoster[i]->type) / 10);
+						treasury[playerFlag] -=  int (consultMinionCostChart( minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 10);
 					}
 				//"2" repair, but close enough to not just add
 					else if (minionRoster[i]->health <= 84 && minionRoster[i]->health > 80)
 					{
 						minionRoster[i]->health = 100;
-						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type) / 5);
+						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
 					}
 				//Standard "2" repair
 					else 
 					{
 						minionRoster[i]->health += 20;
-						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type) / 5);
+						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
 					}
 				}
 			}

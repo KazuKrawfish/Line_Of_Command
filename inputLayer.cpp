@@ -180,14 +180,22 @@ int inputLayer::printBoardMenu() {
 	return 0;
 }
 
-int	inputLayer::printPropertyMenu() {
+int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 
 	//If this is not the second valid purchase input
 	if (requestedMinionToBuy == '\n')
 	{
-		waddstr(MainMenu->mywindow, "Input Minion to Buy(i,s,a,r,c,R,T,A):\n");
-		waddstr(MainMenu->mywindow, "Deselect Property (P)\n");
-		
+		if (boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()].symbol == 'h')
+		{
+			waddstr(MainMenu->mywindow, "Input Minion to Buy(i,s,a,r,c,R,T,A):\n");
+			waddstr(MainMenu->mywindow, "Deselect Property (P)\n");
+		}
+		if (boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()].symbol == 'A')
+		{
+			waddstr(MainMenu->mywindow, "Input Minion to Buy(v,h):\n");
+			waddstr(MainMenu->mywindow, "Deselect Property (P)\n");
+		}
+	
 	}
 	else if (requestedMinionToBuy != '\n')
 	{
@@ -253,7 +261,7 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint) {
 
 				if (status == propertyAction)
 				{
-					printPropertyMenu();
+					printPropertyMenu(boardToPrint);
 				}
 
 	printStatus(boardToPrint);
@@ -429,14 +437,12 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 		{
 			if (boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 			{
-				//DEBUG
-				//computerPlayer->determineMinionTasks(boardToInput);
-				//DEBUG
 				status = minionAction;
 			}
 		}	//Else if empty property, select it. No minion on top, right team, must be factory to select.
 		else
-			if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'h'
+			if ((boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'h' ||
+				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'A' )
 				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].controller == boardToInput->playerFlag
 				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
 			{
@@ -497,8 +503,8 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 		}
 	}
 
-	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours.
-	if (*Input == 'r' && boardToInput->cursor.selectMinionFlag == true)
+	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
+	if (*Input == 'r' && boardToInput->cursor.selectMinionFlag == true && boardToInput->cursor.selectMinionPointer->type != transport)
 		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
 			if ((boardToInput->cursor.getX() != boardToInput->cursor.selectMinionPointer->locationX) || (boardToInput->cursor.getY() != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
 				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
@@ -687,7 +693,7 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 			return 0;
 		}
 		//Consult cost table:
-		requestedUnitPrice = boardToInput->consultMinionCostChart(*Input);
+		requestedUnitPrice = boardToInput->consultMinionCostChart(*Input, boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol);
 
 		//If it is a real unit we are trying to purchase
 		//Aka unitPrica is not -1 aka non-error

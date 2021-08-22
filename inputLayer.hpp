@@ -32,7 +32,7 @@ public:
 	int printWaitingScreen(MasterBoard* boardToPrint);
 	int printMinionMenu(MasterBoard* boardToPrint);
 	int printBoardMenu();
-	int	printPropertyMenu();
+	int	printPropertyMenu(MasterBoard* boardToPrint);
 	int printMenu();
 	int printLowerScreen(MasterBoard* boardToPrint);
 	int printUpperScreen(MasterBoard* boardToPrint);

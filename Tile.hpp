@@ -4,19 +4,23 @@
 #include "Minion.hpp"
 #include <string>
 #include <stdio.h>
+#include <iostream>
 
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, and Rocket.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
-//												        . + ^ M  H m n h Q = ~  -
-const int MOVE_VALUES_MATRIX[8][12] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,
-												/*s*/   1,1,1,1, 1,1,1,1,1,1,99,1,
-												/*a*/	1,2,2,99,1,1,1,1,1,1,99,99,
-												/*r*/	1,2,2,99,1,1,1,1,1,1,99,99,
-												/*c*/	2,3,3,99,1,1,1,1,1,1,99,99,
-												/*R*/	2,3,3,99,1,1,1,1,1,1,99,99,
-												/*T*/	1,2,2,99,1,1,1,1,1,1,99,99,
-												/*A*/	1,2,2,99,1,1,1,1,1,1,99,99};
+//When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
+//												        . + ^ M  H m n h Q = ~  - A  P
+const int MOVE_VALUES_MATRIX[10][14] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1, 1,
+												/*s*/   1,1,1,1, 1,1,1,1,1,1,99,1,1, 1,
+												/*a*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1,
+												/*r*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1,
+												/*c*/	2,3,3,99,1,1,1,1,1,1,99,99,1,1,
+												/*R*/	2,3,3,99,1,1,1,1,1,1,99,99,1,1,
+												/*T*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1,
+												/*A*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1,
+												/*v*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,1,
+												/*h*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,1	};
 
 class tile 
 {
@@ -69,9 +73,13 @@ public:
 		case('A'):
 			x = 7;
 			break;
+		case('v'):
+			x = 8;
+		case('h'):
+			x = 9;
 		}
 
-		//   . + ^ M  H m n h Q = ~ -
+		//   . + ^ M  H m n h Q = ~ - A P
 		switch (terrainType)
 		{
 		case('.'):
@@ -110,10 +118,17 @@ public:
 		case('-'):
 			y = 11;
 			break;
+		case('A'):
+			y = 12;
+			break;
+		case('P'):
+			y = 13;
+			break;
 		}
 
 		if (x == -1 || y == -1)
 		{
+			std::cout << "Failed to find movement chart" << std::endl;
 			return -1;
 		}
 
@@ -139,6 +154,8 @@ public:
 		case('-'):
 			isProperty = false;
 			break;
+		case('A'):
+		case('P'):
 		case('H'):
 		case('m'):
 		case('n'):
