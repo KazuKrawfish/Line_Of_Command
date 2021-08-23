@@ -26,6 +26,7 @@ public:
 	int setRangeField(int inputX, int inputY, int inputRange);
 	int setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY);
 	int setAttackField(int inputX, int inputY, int inputRange);
+	int setDropField(int inputX, int inputY);
 	int setVisionField();
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
@@ -36,6 +37,8 @@ public:
 	int upkeep(inputLayer* InputLayer);
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer);
+	int pickUpMinion(int inputX, int inputY);
+	int dropOffMinion();
 	int checkWindow();
 	int repairMinions();
 	int clearBoard(inputLayer* InputLayer);

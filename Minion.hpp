@@ -34,6 +34,8 @@ class Minion
 	std::string description;	//For user interface only.
 	int team;
 	double health;
+	Minion* minionBeingTransported = NULL;
+	bool beingTransported = false;
 	std::string Image = { '.','.','.',
 						'.','.','.',
 						'.','.','.' };

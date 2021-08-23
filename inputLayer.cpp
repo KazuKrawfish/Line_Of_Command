@@ -28,7 +28,11 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	if (minionToPrint != NULL && minionToPrint->isCapturing == true)
 	{
 		waddch(MainMenu->mywindow, 'C' + COLOR_PAIR(teamNumber));
-	}	
+	}
+	else if (minionToPrint != NULL && minionToPrint->minionBeingTransported != NULL) 
+	{
+		waddch(MainMenu->mywindow, 'T' + COLOR_PAIR(teamNumber));
+	}
 	else waddch(MainMenu->mywindow, inputString[5] + COLOR_PAIR(teamNumber));
 	
 	//If minion has done all possible moves, black out the bottom row.
@@ -495,12 +499,34 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
 	{
-		if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
-		{	//Change status appropriately for successful movement.
-			//boardToInput->cursor.selectMinionPointer->status = hasmovedhasntfired;
-			//boardToInput->deselectMinion();
+		if (boardToInput->pickUpMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0) 
+		{
+			//Change status if successful pickup occurred
 			status = gameBoard;
 		}
+		else
+		if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+		{	
+			//Change status appropriately for successful movement.
+			status = gameBoard;
+		}
+	}
+
+	//O is drop
+	//Must have minion selected.
+	//Must be transport, hasn't taken second action, has a minion to drop, and tile within range, and not blocked by another minion.
+	//Also must not be impassable.
+	if (*Input == 'o' && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->cursor.selectMinionPointer->specialtyGroup == transport
+		&&	( (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || 
+		 boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+		&& boardToInput->cursor.selectMinionPointer->minionBeingTransported != NULL)
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].consultMovementChart(boardToInput->cursor.selectMinionPointer->minionBeingTransported->type, boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol) != 99)
+	{
+		if(	boardToInput->dropOffMinion() == 0)
+			status = gameBoard;
 	}
 
 	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
