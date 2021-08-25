@@ -684,42 +684,44 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
 				//First determine "surplus" treasury, which accounts for at least purchasing an infantry at every possible factory.
-				int surplusTreasuryRequired = boardToUse->treasury[boardToUse->playerFlag] + 1000 - totalFactoriesLeft * 1000;
+				int availableTreasury = boardToUse->treasury[boardToUse->playerFlag] + 1000 - totalFactoriesLeft * 1000;
 				//If we have a proper proportion of tanks, buy cavalry.
-				if (int(numberOfTanks / 3) > numberOfCavalry && boardToUse->consultMinionCostChart('c', 'h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('c', 'h'))
+				if (int(numberOfTanks / 3) > numberOfCavalry && boardToUse->consultMinionCostChart('c', 'h') <= availableTreasury && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('c', 'h'))
 				{
 					//Must be able to actually afford the unit.				
-						boardToUse->attemptPurchaseMinion('c', x, y, boardToUse->playerFlag);
-
+					boardToUse->attemptPurchaseMinion('c', x, y, boardToUse->playerFlag);
+					totalFactoriesLeft--;
 
 				}
 				else		//Infantry and specialists have a similar proportion.
-					if (int(numberOfInfantry / 3) > numberOfSpecialists && boardToUse->consultMinionCostChart('s', 'h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('s', 'h'))
+					if (int(numberOfInfantry / 3) > numberOfSpecialists && boardToUse->consultMinionCostChart('s', 'h') <= availableTreasury && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('s', 'h'))
 					{
 						//Must be able to actually afford the unit.
 
 						boardToUse->attemptPurchaseMinion('s', x, y, boardToUse->playerFlag);
-
+						totalFactoriesLeft--;
 					}
 					else
-						if (boardToUse->consultMinionCostChart('T','h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('T', 'h'))
+						if (boardToUse->consultMinionCostChart('T', 'h') <= availableTreasury && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('T', 'h'))
 						{
 							//Must be able to actually afford the unit.
 							boardToUse->attemptPurchaseMinion('T', x, y, boardToUse->playerFlag);
-
+							totalFactoriesLeft--;
 						}
-						else if (boardToUse->consultMinionCostChart('a', 'h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('a', 'h'))
+						else if (boardToUse->consultMinionCostChart('a', 'h') <= availableTreasury && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('a', 'h'))
 						{
 							//Must be able to actually afford the unit.
 							boardToUse->attemptPurchaseMinion('a', x, y, boardToUse->playerFlag);
+							totalFactoriesLeft--;
 						}
-						else if (boardToUse->consultMinionCostChart('i', 'h') < surplusTreasuryRequired && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('i', 'h'))
+						else if (boardToUse->consultMinionCostChart('i', 'h') <= availableTreasury && boardToUse->treasury[boardToUse->playerFlag] >= boardToUse->consultMinionCostChart('i', 'h'))
 						{
-	
+
 							//Must be able to actually afford the unit.
 							boardToUse->attemptPurchaseMinion('i', x, y, boardToUse->playerFlag);
-						
+							totalFactoriesLeft--;
 						}
+
 			}
 		}
 
