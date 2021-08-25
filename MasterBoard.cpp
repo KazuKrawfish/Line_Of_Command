@@ -221,6 +221,26 @@ MasterBoard::MasterBoard()
 	}
 }
 
+//Tells us how an attacker would perform against an enemy. Useful for actual attack or calculation - doesn't actually deal damage.
+//Returns a number between 0 - 100 - actual health, not percent.
+double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion)
+{
+	//First find attacking fire power. 
+	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type);
+	attackerFirePower = attackerFirePower * attackingMinion->calculateVetBonus();
+
+	//Calculate defense factor. If air unit it remains 1.
+	double defenseFactor = Board[defendingMinion->locationX][defendingMinion->locationY].defenseFactor;
+	if (defendingMinion->type != 'h' && defendingMinion->type != 'v')
+	{
+		defenseFactor = Board[defendingMinion->locationX][defendingMinion->locationY].defenseFactor;
+	}
+	defenseFactor = defenseFactor * defendingMinion->calculateVetBonus();
+
+	return attackerFirePower * attackingMinion->health / defenseFactor;
+}
+
+
 int MasterBoard::clearBoard(inputLayer* InputLayer) 
 {
 	//Need a way to clear board before loading. Using constructor doesn't do the trick.
@@ -833,21 +853,11 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		return 1;
 	}																																																			//Also, if artillery type, cannot attack if it's actually moved that turn.				
 	
-	//First find attacking fire power. 
-	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type);		
-	attackerFirePower = attackerFirePower * attackingMinion->calculateVetBonus();
 	
-	//Calculate defense factor. If air unit it remains 1.
-	double defenderDefenseFactor = 1;
-	if (defendingMinion->type != 'h' && defendingMinion->type != 'v')
-	{
-		defenderDefenseFactor = Board[inputX][inputY].defenseFactor;
-	}
-	defenderDefenseFactor = defenderDefenseFactor * defendingMinion->calculateVetBonus();
 
 	//Decrease defender's health by attack value.
-	defendingMinion->health -= attackerFirePower * attackingMinion->health / defenderDefenseFactor;				
-
+	defendingMinion->health -= calculateDamageDealt(attackingMinion, defendingMinion);
+		
 	if (defendingMinion->health < 5)
 	{
 		//If defender falls below 4, it dies.

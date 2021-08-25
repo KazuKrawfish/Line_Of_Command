@@ -20,8 +20,8 @@ public:
 	int deployMove(MasterBoard* boardToUse);
 	int checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy,  Cursor* myCursor, MasterBoard* boardToUse);
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY);
-	int findEnemiesWithinLocalArea(MasterBoard* boardToUse);
-	
+	double findEnemiesWithinLocalArea(MasterBoard* boardToUse);
+	int checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore);
 	int determineMinionTasks(MasterBoard* boardToUse);
 	int executeMinionTasks(MasterBoard* boardToUse);
 	int moveMinions(MasterBoard* boardToUse);

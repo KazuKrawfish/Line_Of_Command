@@ -28,6 +28,7 @@ public:
 	int setAttackField(int inputX, int inputY, int inputRange);
 	int setDropField(int inputX, int inputY);
 	int setVisionField();
+	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion);
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();

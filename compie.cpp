@@ -108,15 +108,14 @@ int compie::deployMove(MasterBoard* boardToUse)
 
 }
 
+//Check adjacent tiles for enemy minions. Assumes this tile is with movement range of your minion.
 int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy, Cursor* myCursor, MasterBoard* boardToUse)
 {
 		//If the square to the left has a minion and that minion is enemy.
 		//Important to note that the x-1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
 		if (currentX > 1 && boardToUse->Board[currentX - 1][currentY].hasMinionOnTop && boardToUse->Board[currentX - 1][currentY].minionOnTop->team != boardToUse->playerFlag)
 		{
-			//If the current tile is within actual range of our minion (Not just local search area)
-			if (boardToUse->Board[currentX][currentY].withinRange == true)
-			{
+			
 				//Compute distance to that tile, then compare to current distance, if it is less, swap out.
 				int newDistance = computeDistance(currentX, myCursor->selectMinionPointer->locationX, currentY, myCursor->selectMinionPointer->locationY);
 				if (newDistance < *distanceToTileAdjacentToClosestEnemy)
@@ -128,16 +127,14 @@ int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distan
 					tileToTarget = &(boardToUse->Board[currentX - 1][currentY]);
 					return 0;
 				}
-			}
+			
 		}
 
 		//If the square to the right has a minion and that minion is enemy.
 		//Important to note that the x+1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
 		if (currentX < boardToUse->BOARD_WIDTH-1 && boardToUse->Board[currentX + 1][currentY].hasMinionOnTop && boardToUse->Board[currentX + 1][currentY].minionOnTop->team != boardToUse->playerFlag)
 		{
-			//If the current tile is within actual range of our minion (Not just local search area)
-			if (boardToUse->Board[currentX][currentY].withinRange == true)
-			{
+			
 				//Compute distance to that tile, then compare to current distance, if it is less, swap out.
 				int newDistance = computeDistance(currentX, myCursor->selectMinionPointer->locationX, currentY, myCursor->selectMinionPointer->locationY);
 				if (newDistance < *distanceToTileAdjacentToClosestEnemy)
@@ -149,16 +146,14 @@ int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distan
 					tileToTarget = &(boardToUse->Board[currentX + 1][currentY]);
 					return 0;
 				}
-			}
+			
 		}
 
 		//If the square below has a minion and that minion is enemy.
 		//Important to note that the x+1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
 		if (currentY < boardToUse->BOARD_HEIGHT-1 && boardToUse->Board[currentX][currentY+1].hasMinionOnTop && boardToUse->Board[currentX][currentY+1].minionOnTop->team != boardToUse->playerFlag)
 		{
-			//If the current tile is within actual range of our minion (Not just local search area)
-			if (boardToUse->Board[currentX][currentY].withinRange == true)
-			{
+			
 				//Compute distance to that tile, then compare to current distance, if it is less, swap out.
 				int newDistance = computeDistance(currentX, myCursor->selectMinionPointer->locationX, currentY, myCursor->selectMinionPointer->locationY);
 				if (newDistance < *distanceToTileAdjacentToClosestEnemy)
@@ -170,16 +165,14 @@ int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distan
 					tileToTarget = &(boardToUse->Board[currentX][currentY+1]);
 					return 0;
 				}
-			}
+			
 		}
 
 		//If the square above has a minion and that minion is enemy.
 		//Important to note that the x+1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
 		if (currentY > 1 && boardToUse->Board[currentX][currentY - 1].hasMinionOnTop && boardToUse->Board[currentX][currentY - 1].minionOnTop->team != boardToUse->playerFlag)
 		{
-			//If the current tile is within actual range of our minion (Not just local search area)
-			if (boardToUse->Board[currentX][currentY].withinRange == true)
-			{
+			
 				//Compute distance to that tile, then compare to current distance, if it is less, swap out.
 				int newDistance = computeDistance(currentX, myCursor->selectMinionPointer->locationX, currentY, myCursor->selectMinionPointer->locationY);
 				if (newDistance < *distanceToTileAdjacentToClosestEnemy)
@@ -191,14 +184,177 @@ int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distan
 					tileToTarget = &(boardToUse->Board[currentX][currentY - 1]);
 					return 0;
 				}
-			}
+			
 		}
 
 		return 1;
 
 }
 
-int compie::findEnemiesWithinLocalArea(MasterBoard* boardToUse)
+//New code:
+//Needs to have valid minions passed, and a valid relativeSuitability score passed.
+int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore)
+{
+	double attackerDamageDealt = 0;
+	double defenderCounterAttackDamageDealt = 0;
+
+	//relativeSuitabilityScore replaces distanceToTileAdjacentToClosestEnemy
+
+	//Within each of four adjacent tiles:
+	//Calculate the damage our minion would do to them, as well as the counterattack damage:
+	
+	if (currentX > 1 && boardToUse->Board[currentX - 1][currentY].hasMinionOnTop && boardToUse->Board[currentX - 1][currentY].minionOnTop->team != boardToUse->playerFlag)
+	{
+		int attackerCost = 0;
+		int defenderCost = 0;
+		
+		//Determine minion costs based on types:
+		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
+		{
+			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');
+		}
+		else attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'h');
+
+		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
+		{
+			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX - 1][currentY].minionOnTop->type, 'A');
+		}
+		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX - 1][currentY].minionOnTop->type, 'h');
+		
+		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX - 1][currentY].minionOnTop);
+		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX - 1][currentY].minionOnTop, myCursor->selectMinionPointer) * (boardToUse->Board[currentX - 1][currentY].minionOnTop->health - attackerDamageDealt) / 100;
+		if (defenderCounterAttackDamageDealt < 0)
+			defenderCounterAttackDamageDealt = 0;
+
+		//This is the potential "value added" from combat, based on what we might lose vs gain.
+		double newRelativeSuitabilityScore = attackerDamageDealt* defenderCost - defenderCounterAttackDamageDealt* attackerCost;
+	
+		//If it's a better score, switch targets.
+		if ( newRelativeSuitabilityScore >  *relativeSuitabilityScore)
+		{
+			*relativeSuitabilityScore = newRelativeSuitabilityScore;
+			closestTileAdjacentToEnemy = &(boardToUse->Board[currentX][currentY]);
+			tileToTarget = &(boardToUse->Board[currentX - 1][currentY]);
+			//No return, we want to check all tiles
+		}
+	
+	}
+
+	if (currentX < boardToUse->BOARD_WIDTH - 1 && boardToUse->Board[currentX + 1][currentY].hasMinionOnTop && boardToUse->Board[currentX + 1][currentY].minionOnTop->team != boardToUse->playerFlag)
+	{
+		int attackerCost = 0;
+		int defenderCost = 0;
+
+		//Determine minion costs based on types:
+		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
+		{
+			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');
+		}
+		else attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'h');
+
+		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
+		{
+			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX + 1][currentY].minionOnTop->type, 'A');
+		}
+		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX + 1][currentY].minionOnTop->type, 'h');
+
+		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX + 1][currentY].minionOnTop);
+		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX + 1][currentY].minionOnTop, myCursor->selectMinionPointer) * (boardToUse->Board[currentX + 1][currentY].minionOnTop->health - attackerDamageDealt) / 100;
+		if (defenderCounterAttackDamageDealt < 0)
+			defenderCounterAttackDamageDealt = 0;
+
+		//This is the potential "value added" from combat, based on what we might lose vs gain.
+		double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
+
+		//If it's a better score, switch targets.
+		if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
+		{
+			*relativeSuitabilityScore = newRelativeSuitabilityScore;
+			closestTileAdjacentToEnemy = &(boardToUse->Board[currentX][currentY]);
+			tileToTarget = &(boardToUse->Board[currentX + 1][currentY]);
+			//No return, we want to check all tiles
+		}
+
+	}
+	
+	if (currentY < boardToUse->BOARD_HEIGHT - 1 && boardToUse->Board[currentX ][currentY + 1].hasMinionOnTop && boardToUse->Board[currentX ][currentY + 1].minionOnTop->team != boardToUse->playerFlag)
+	{
+		int attackerCost = 0;
+		int defenderCost = 0;
+
+		//Determine minion costs based on types:
+		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
+		{
+			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');
+		}
+		else attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'h');
+
+		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
+		{
+			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY + 1].minionOnTop->type, 'A');
+		}
+		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY + 1].minionOnTop->type, 'h');
+
+		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX ][currentY + 1].minionOnTop);
+		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX ][currentY + 1].minionOnTop, myCursor->selectMinionPointer) * (boardToUse->Board[currentX][currentY + 1].minionOnTop->health - attackerDamageDealt) / 100;
+		if (defenderCounterAttackDamageDealt < 0)
+			defenderCounterAttackDamageDealt = 0;
+
+		//This is the potential "value added" from combat, based on what we might lose vs gain.
+		double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
+
+		//If it's a better score, switch targets.
+		if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
+		{
+			*relativeSuitabilityScore = newRelativeSuitabilityScore;
+			closestTileAdjacentToEnemy = &(boardToUse->Board[currentX][currentY]);
+			tileToTarget = &(boardToUse->Board[currentX][currentY + 1]);
+			//No return, we want to check all tiles
+		}
+
+	}
+
+	if (currentY > 1 && boardToUse->Board[currentX][currentY - 1].hasMinionOnTop && boardToUse->Board[currentX][currentY - 1].minionOnTop->team != boardToUse->playerFlag)
+	{
+		int attackerCost = 0;
+		int defenderCost = 0;
+
+		//Determine minion costs based on types:
+		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
+		{
+			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');
+		}
+		else attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'h');
+
+		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
+		{
+			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY - 1].minionOnTop->type, 'A');
+		}
+		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY - 1].minionOnTop->type, 'h');
+
+		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX ][currentY - 1].minionOnTop);
+		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX][currentY - 1].minionOnTop, myCursor->selectMinionPointer) * (boardToUse->Board[currentX][currentY - 1].minionOnTop->health - attackerDamageDealt)/100;
+		if (defenderCounterAttackDamageDealt < 0)
+			defenderCounterAttackDamageDealt = 0;
+
+		//This is the potential "value added" from combat, based on what we might lose vs gain.
+		double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
+
+		//If it's a better score, switch targets.
+		if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
+		{
+			*relativeSuitabilityScore = newRelativeSuitabilityScore;
+			closestTileAdjacentToEnemy = &(boardToUse->Board[currentX][currentY]);
+			tileToTarget = &(boardToUse->Board[currentX][currentY - 1]);
+			//No return, we want to check all tiles
+		}
+
+	}
+		
+	return 0;
+}
+
+double compie::findEnemiesWithinLocalArea(MasterBoard* boardToUse)
 {
 	Cursor* myCursor = &(boardToUse->cursor);
 	//These variables hold the information of the closest enemy, range, and tile next door.
@@ -229,21 +385,24 @@ int compie::findEnemiesWithinLocalArea(MasterBoard* boardToUse)
 		maxY = boardToUse->BOARD_HEIGHT;
 	}
 	
+	double relativeSuitabilityScore = 0;
 	//Now go through the search area.
 	for (int x = minX ; x < maxX ;  x++)
 	{
 		for (int y = minY ; y < maxY ; y++) 
 		{	
 			//If the current tile DOES not have minion on top (IE we will be able to move there)
-			if (boardToUse->Board[x][y].hasMinionOnTop == false)
+			//Also must be within range
+			if ((boardToUse->Board[x][y].hasMinionOnTop == false  || (myCursor->selectMinionPointer->locationY == y && myCursor->selectMinionPointer->locationX == x))&& boardToUse->Board[x][y].withinRange == true)
 			{
-				checkAdjacentTilesForEnemies(x, y, &distanceToTileAdjacentToClosestEnemy,  myCursor, boardToUse );
+				//checkAdjacentTilesForEnemies(x, y, &distanceToTileAdjacentToClosestEnemy,  myCursor, boardToUse );
+				checkAdjacentTilesForBestValuedEnemy(x, y, myCursor, boardToUse, &relativeSuitabilityScore);
 				//Already checked for closeness in the function itself so no need to do anything else
 			}
 		}
 	}
 
-	return distanceToTileAdjacentToClosestEnemy;
+	return relativeSuitabilityScore;
 }
 
 int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY)
@@ -332,10 +491,10 @@ int compie::determineMinionTasks(MasterBoard* boardToUse)
 	}
 	else
 	{
-
-		//Otherwise see if there are enemies in local area within range to attack.
-		int distance = findEnemiesWithinLocalArea(boardToUse);
-		if (distance < 999 && tileToTarget != NULL)
+		
+		//Otherwise see if there are enemies in local area within range and suitable to attack.
+		double relativeSuitabilityScore = findEnemiesWithinLocalArea(boardToUse);
+		if (relativeSuitabilityScore > 0 && tileToTarget != NULL)
 		{
 			minionTasking = attackLocalMinion;
 			//std::cout << "recommend attacking " << tileToTarget->minionOnTop->description << " at "
@@ -345,7 +504,7 @@ int compie::determineMinionTasks(MasterBoard* boardToUse)
 		else //If infantry, attempt to capture local properties.
 			if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
 			{
-				distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY);
+				int distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY);
 				if (distance < 999 && tileToTarget != NULL)
 				{
 					minionTasking = captureLocalProperty;
