@@ -1008,10 +1008,11 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 
 int MasterBoard::repairMinions() 
 {
-	for (int i = 0; minionRoster[i] != NULL; i++)
+	//This was terminating "early" since it would hit a NULL spot so minions wouldn't get seen to be healed.
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		//If it's a minion you own and it's not being transported
-		if (minionRoster[i]->team == playerFlag && minionRoster[i]->beingTransported == false)
+		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->beingTransported == false)
 		{
 			tile* tileToExamine = &Board[minionRoster[i]->locationX][minionRoster[i]->locationY];
 			//If it is on a player controlled tile, and that tile is a "repairing" tile for the given unit.
