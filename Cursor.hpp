@@ -25,7 +25,8 @@ class Cursor
 	int XCoord;
 	int YCoord;
 	int getX() { return XCoord; }				
-	int getY() { return YCoord; }				
+	int getY() { return YCoord; }
+	int relocate(int inputX, int inputY);
 };
 
 #endif /* CURSOR_HPP__ */

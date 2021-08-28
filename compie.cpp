@@ -534,8 +534,11 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 	if (minionTasking == attackLocalMinion)
 	{
 		//Move cursor
-		boardToUse->cursor.XCoord = closestTileAdjacentToEnemy->locationX;
-		boardToUse->cursor.YCoord = closestTileAdjacentToEnemy->locationY;
+		if (boardToUse->cursor.relocate(closestTileAdjacentToEnemy->locationX, closestTileAdjacentToEnemy->locationY) == 1 )
+		{
+		std::cout<< "fail move"<<std::endl;
+		}
+		
 
 		//moveMinion needs to contain all the status elements too.
 		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
@@ -552,8 +555,10 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 	if (minionTasking == captureLocalProperty) 
 	{
 		//Move cursor
-		boardToUse->cursor.XCoord = tileToTarget->locationX;
-		boardToUse->cursor.YCoord = tileToTarget->locationY;
+		if (boardToUse->cursor.relocate(tileToTarget->locationX, tileToTarget->locationY) == 1) 
+		{
+			std::cout << "fail move" << std::endl;
+		}
 
 		//moveMinion needs to contain all the status elements too.
 		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
