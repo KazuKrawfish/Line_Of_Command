@@ -16,26 +16,26 @@ class Minion
 	public:
 	
 	//Constructors
-	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy);
+	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported);
 	Minion();
 	~Minion();
 	
 	
 	//Member variables. Should be protected with functions dealing with them!
 	
-	int seniority;		//Used to indicated where the minion resides within the minion array. Used to construct and destruct the minion.
-	int locationX;
-	int locationY;
-	char type;			//Type of minion  -- equivalent to symbol for tiles.
-	int movementRange;
-	int attackRange;
-	int visionRange;
+	int seniority = -1;		//Used to indicated where the minion resides within the minion array. Used to construct and destruct the minion.
+	int locationX = -1;
+	int locationY = -1;
+	char type = 'x';			//Type of minion  -- equivalent to symbol for tiles.
+	int movementRange = 0;
+	int attackRange = 0;
+	int visionRange = 0 ;
 	bool isCapturing = false;
-	std::string description;	//For user interface only.
-	int team;
-	double health;
+	std::string description = "ASDASD";	//For user interface only.
+	int team = 0;
+	double health = 0;
 	Minion* minionBeingTransported = NULL;
-	bool beingTransported = false;
+	Minion* transporter = NULL;
 	std::string Image = { '.','.','.',
 						'.','.','.',
 						'.','.','.' };
@@ -43,7 +43,7 @@ class Minion
 
 	double calculateVetBonus();
 
-	MasterBoard* minionEnvironment;
+	MasterBoard* minionEnvironment = NULL;
 	minionStatus status;
 	RangeType rangeType;
 	specialtyGroupType specialtyGroup;

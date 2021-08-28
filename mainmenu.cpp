@@ -282,22 +282,47 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << boardToPrint->totalNumberOfMinions << std::endl;
 
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
-	//Need to ensure correctness.
-	//FIX FIX FIX - need to not just check for initial NULL, there may be minions beyond that first NULL if a guy was killed and not replaced on
-	//The array.
-	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy):" << std::endl;
+	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus):" << std::endl;
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
-		if (boardToPrint->minionRoster[i] != NULL)
+		//First cycle through all non transported minions and do them
+		if (boardToPrint->minionRoster[i] != NULL && boardToPrint->minionRoster[i]->transporter == NULL)
 		{
+			int beingTransported = 0;
+
+		saveGame << boardToPrint->minionRoster[i]->type << " "
+			<< boardToPrint->minionRoster[i]->locationX << " "
+			<< boardToPrint->minionRoster[i]->locationY << " "
+			<< boardToPrint->minionRoster[i]->team << " "
+			<< boardToPrint->minionRoster[i]->seniority << " "
+			<< int(boardToPrint->minionRoster[i]->status) << " "
+			<< int(boardToPrint->minionRoster[i]->health) << " "
+			<< int(boardToPrint->minionRoster[i]->veterancy) << " "
+			<< int(boardToPrint->Board[boardToPrint->minionRoster[i]->locationX][boardToPrint->minionRoster[i]->locationY].capturePoints) <<" "
+			<< beingTransported << std::endl;
+
+		}
+	}
+
+	//Then do again for all transported minions - they have to be last or loading will  cause them to NULL dereference when they
+	//Are assigned a transport that hasn't been initialized yet.
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	{
+		//If being transported, save the location of the transporter.
+		int beingTransported = 0;
+		if (boardToPrint->minionRoster[i] != NULL && boardToPrint->minionRoster[i]->transporter != NULL)
+		{
+			beingTransported = 1;
 			saveGame << boardToPrint->minionRoster[i]->type << " "
-				<< boardToPrint->minionRoster[i]->locationX << " "
-				<< boardToPrint->minionRoster[i]->locationY << " "
+				<< boardToPrint->minionRoster[i]->transporter->locationX << " "
+				<< boardToPrint->minionRoster[i]->transporter->locationY << " "
 				<< boardToPrint->minionRoster[i]->team << " "
 				<< boardToPrint->minionRoster[i]->seniority << " "
 				<< int(boardToPrint->minionRoster[i]->status) << " "
 				<< int(boardToPrint->minionRoster[i]->health) << " "
-				<< int (boardToPrint->minionRoster[i]->veterancy)<<std::endl;
+				<< int(boardToPrint->minionRoster[i]->veterancy) << " "
+				<< 20 << " "		//Default capture points to avoid breaking
+				<< beingTransported << std::endl;
 		}
 	}
 	saveGame.close();
@@ -406,9 +431,11 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	*saveGame >> ThrowawayString;
 	int numberOfMinions;
 	*saveGame >> numberOfMinions;
-	int health, locationX, locationY, team, seniority, status, veterancy;
+	int health, locationX, locationY, team, seniority, status, veterancy, capturePoints, beingTransported;
 	char type;
 	*saveGame >> ThrowawayString;
+
+	//Initialize all minions.
 	for (int y = 0; y < numberOfMinions; y++)
 	{
 		*saveGame >> type
@@ -418,8 +445,22 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 			>> seniority
 			>> status
 			>> health
-			>> veterancy;
-		boardToPrint->createMinion(type, locationX, locationY, team, health, status, veterancy);
+			>> veterancy
+			>> capturePoints
+			>> beingTransported;
+
+		//Regardless of transport status, we pass the saved location- it either represents the minion's position
+		//Or the transport's position.
+		boardToPrint->createMinion(type, locationX, locationY, team, health, status, veterancy, beingTransported);
+	
+		//Set capture status.
+		if (capturePoints != 20)
+		{
+			boardToPrint->Board[locationX][locationY].minionOnTop->isCapturing = true;
+			boardToPrint->Board[locationX][locationY].capturePoints = capturePoints;
+		}
+
+
 	}
 
 	saveGame->close();

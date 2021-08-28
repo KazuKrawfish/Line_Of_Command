@@ -455,7 +455,7 @@ int MasterBoard::setVisionField()
 	//Then set vision for everything that minion can see.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
-		if (minionRoster[i] != NULL && minionRoster[i]->beingTransported == false)
+		if (minionRoster[i] != NULL && minionRoster[i]->transporter == NULL )
 		{
 			if (minionRoster[i]->team == playerFlag)
 			{
@@ -497,13 +497,13 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	//If it is ranged unit, cannot attack next door.
 	if (cursor.selectMinionPointer->rangeType == rangedFire)
 	{
-		if(inputX < BOARD_WIDTH )
+		if(inputX < BOARD_WIDTH -1)
 			Board[inputX + 1][inputY].withinRange = false;
 		
 		if(inputX > 0)
 			Board[inputX - 1][inputY].withinRange = false;
 
-		if(inputY < BOARD_HEIGHT)
+		if(inputY < BOARD_HEIGHT-1)
 			Board[inputX][inputY + 1].withinRange = false;
 
 		if(inputY > 0)
@@ -525,13 +525,13 @@ int MasterBoard::setDropField(int inputX, int inputY)
 	
 
 	//Check each adjacent tile, if it is not impassible or off map, put in range for transport.
-	if (inputX < BOARD_WIDTH && Board[inputX + 1][inputY].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX + 1][inputY].symbol) != 99)
+	if (inputX < BOARD_WIDTH -1 && Board[inputX + 1][inputY].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX + 1][inputY].symbol) != 99)
 		Board[inputX + 1][inputY].withinRange = true;
 
 	if (inputX > 0 && Board[inputX - 1][inputY].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX - 1][inputY].symbol) != 99)
 		Board[inputX - 1][inputY].withinRange = true;
 
-	if (inputY < BOARD_HEIGHT && Board[inputX][inputY+1].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX ][inputY+1].symbol) != 99)
+	if (inputY < BOARD_HEIGHT-1 && Board[inputX][inputY+1].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX ][inputY+1].symbol) != 99)
 		Board[inputX][inputY + 1].withinRange = true;
 
 	if (inputY > 0 && Board[inputX ][inputY -1].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX][inputY - 1].symbol) != 99)
@@ -544,7 +544,7 @@ int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, i
 {
 	if (treasury[playerFlag] >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
 	{
-		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0);
+		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0);
 		treasury[playerFlag] -= consultMinionCostChart(inputType, Board[inputX][inputY].symbol);
 		return 0;
 	}
@@ -553,7 +553,7 @@ int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, i
 	
 }
 
-int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy)
+int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -561,12 +561,15 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy);
-			if (minionRoster != NULL)
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported);
+			if (minionRoster[i] != NULL)
 			{
 				minionRoster[i]->status = (minionStatus)status;
-				Board[inputX][inputY].minionOnTop = minionRoster[i];
 				totalNumberOfMinions++;
+				if (beingTransported == 0) //Only access the board if minion has legit location
+				{ 
+					Board[inputX][inputY].minionOnTop = minionRoster[i]; 
+				}
 				setVisionField();
 				return 0;
 			}
@@ -715,7 +718,7 @@ int MasterBoard::pickUpMinion(int inputX, int inputY)
 			{
 				//Put the minion in the transport.
 				Board[cursor.getX()][cursor.getY()].minionOnTop->minionBeingTransported = selectedMinion;
-				selectedMinion->beingTransported = true;
+				selectedMinion->transporter = Board[cursor.getX()][cursor.getY()].minionOnTop;
 
 				//Find old address of the minion
 				int oldX = selectedMinion->locationX;
@@ -773,7 +776,7 @@ int MasterBoard::dropOffMinion()
 	Board[cursor.getX()][cursor.getY()].minionOnTop = cursor.selectMinionPointer->minionBeingTransported;
 	
 	cursor.selectMinionPointer->minionBeingTransported = NULL;
-	Board[cursor.getX()][cursor.getY()].minionOnTop->beingTransported = false;
+	Board[cursor.getX()][cursor.getY()].minionOnTop->transporter = NULL;
 	Board[cursor.getX()][cursor.getY()].minionOnTop->status = hasfired;
 
 	//"Move" the minion to the new location.
@@ -790,6 +793,12 @@ int MasterBoard::dropOffMinion()
 
 std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion) 
 {
+	//Check for actual property before we capture
+	if (inputTile->checkForProperty() != true) 
+	{
+		return "Not a property";
+	}
+
 	std::string textToReturn = "";
 	//Subtract capturing minion's health
 	int pointsToTake = int(std::round(inputMinion->health / 10));
@@ -910,18 +919,21 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 
 int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer)
 {
+	//If carrying a guy, kill that guy too.
 	if (inputMinion->minionBeingTransported != NULL) 
 	{
 		destroyMinion(inputMinion->minionBeingTransported, printMessage, InputLayer);
 	}
 
+	//If minion is being transported, then do not attmept to deselect or talk to its location.
+	if (inputMinion->transporter == NULL) 
+	{
 	deselectMinion();
-
 	//Tell the board it has no minions associated in the location where the Minion was alive.
 	//Reset capture points for the property.
 	Board[inputMinion->locationX][inputMinion->locationY].hasMinionOnTop = false;
 	Board[inputMinion->locationX][inputMinion->locationY].capturePoints = 20;
-
+	}
 
 	if (printMessage == true) 
 	{
@@ -1012,7 +1024,7 @@ int MasterBoard::repairMinions()
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		//If it's a minion you own and it's not being transported
-		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->beingTransported == false)
+		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->transporter == NULL)
 		{
 			tile* tileToExamine = &Board[minionRoster[i]->locationX][minionRoster[i]->locationY];
 			//If it is on a player controlled tile, and that tile is a "repairing" tile for the given unit.

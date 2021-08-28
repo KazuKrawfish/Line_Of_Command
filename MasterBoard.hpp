@@ -33,7 +33,7 @@ public:
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();
 	int attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam);
-	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy);
+	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported);
 	int endTurn(inputLayer* InputLayer);
 	int upkeep(inputLayer* InputLayer);
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);

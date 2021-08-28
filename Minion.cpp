@@ -19,16 +19,36 @@ Minion::Minion()
 //
 //Always use this constructor, it gives the new Minion all required properties.
 //When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement costs and consultMinionCostChart.
-//
-Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy)
+//This assumes that the transport already exists if the minion is being carried. Can cause NULL dereference!
+Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported)
 {
 	veterancy = inputVeterancy;
 	seniority = inputSeniority;
 	minionEnvironment = Environment;
-	locationX = inputX;
-	locationY = inputY;
 	type = inputType;
 	health = inputHealth;
+
+	//If being transported, this minion doesn't take up any space.
+	//Also, it will be transported by whomever we indicate with InputX and Y
+	if (beingTransported == 1) 
+	{
+		if (Environment->Board[inputX][inputY].hasMinionOnTop != NULL)
+		{
+			transporter = Environment->Board[inputX][inputY].minionOnTop;
+			Environment->Board[inputX][inputY].minionOnTop->minionBeingTransported = this;
+		}
+		else std::cout << "Bad transport, minion doesn't exist!!" << std::endl;
+
+		locationX = -1;
+		locationY = -1;
+	}
+	else	//If not transported, proceed as normal.
+	{
+		Environment->Board[inputX][inputY].hasMinionOnTop = true;
+		locationX = inputX;
+		locationY = inputY;
+	}
+
 	switch (inputType)
 	{
 	case('i'):
@@ -166,7 +186,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 	team = inputTeam;
 
-	Environment->Board[inputX][inputY].hasMinionOnTop = true;
+
 }
 
 double Minion::calculateVetBonus() 
