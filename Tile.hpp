@@ -6,12 +6,10 @@
 #include <stdio.h>
 #include <iostream>
 
-//Attacker vs defender matrix. Attacker determines row, while defender determines column.
-//In order they are Infantry, Specialist, Armor, Artillery, Cavalry, and Rocket.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
 //												        . + ^ M  H m n h Q = ~  - A  P
-const int MOVE_VALUES_MATRIX[10][14] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1, 1,
+const int MOVE_VALUES_MATRIX[11][14] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1, 1,
 												/*s*/   1,1,1,1, 1,1,1,1,1,1,99,1,1, 1,
 												/*a*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1,
 												/*r*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1,
@@ -20,7 +18,8 @@ const int MOVE_VALUES_MATRIX[10][14] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1, 1,
 												/*T*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1,
 												/*A*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1,
 												/*v*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,1,
-												/*h*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,1	};
+												/*h*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,1,
+												/*P*/	1,2,2,99,1,1,1,1,1,1,99,99,1,1 };
 
 class tile 
 {
@@ -77,6 +76,8 @@ public:
 			x = 8;
 		case('h'):
 			x = 9;
+		case('P'):	//APC
+			x = 10;
 		}
 
 		//   . + ^ M  H m n h Q = ~ - A P
@@ -121,7 +122,7 @@ public:
 		case('A'):
 			y = 12;
 			break;
-		case('P'):
+		case('P'):	//Remember this is PORT
 			y = 13;
 			break;
 		}

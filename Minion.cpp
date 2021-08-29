@@ -182,6 +182,19 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				' ',' ',' ' };
 		break;
 	}
+	case('P'):
+	{
+		description = "APC";
+		movementRange = 6;
+		attackRange = 0;
+		visionRange = 2;
+		rangeType = directFire;
+		specialtyGroup = transport;
+		Image = { '/','=','=',
+				'=','=','=',
+				' ',' ',' ' };
+		break;
+	}
 	}
 
 	team = inputTeam;

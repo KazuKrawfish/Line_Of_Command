@@ -25,17 +25,18 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
-//													i     s     a     r     c     R     T     A     v	  h
-const double ATTACK_VALUES_MATRIX[10][10] = {/*i*/	0.50, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10,
-											/*s*/	0.55, 0.55, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.05, 0.10,
-											/*a*/	0.65, 0.65,	0.50, 0.60, 0.60, 0.70, 0.35, 0.50, 0.10, 0.15,
-											/*r*/	0.60, 0.60,	0.40, 0.50, 0.55, 0.60, 0.30, 0.40, 0,	  0,
-											/*c*/	0.60, 0.60, 0.10, 0.20, 0.35, 0.40, 0.05, 0.10, 0.10, 0.15,
-											/*R*/	0.80, 0.80,	0.60, 0.65, 0.70, 0.80, 0.45, 0.60, 0,	  0,
-											/*T*/	0.70, 0.70, 0.70, 0.80, 0.80, 0.85, 0.50, 0.70, 0.15, 0.25,	
-											/*A*/	0.95, 0.90, 0.15, 0.25, 0.40, 0.45, 0.05, 0.20, 0.90, 0.95,
-											/*v*/	0.65, 0.65, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.55, 0.75,
-											/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  };
+//													i     s     a     r     c     R     T     A     v	  h		P
+const double ATTACK_VALUES_MATRIX[11][11] = {/*i*/	0.50, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10,
+											/*s*/	0.55, 0.55, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.05, 0.10, 0.60,
+											/*a*/	0.65, 0.65,	0.50, 0.60, 0.60, 0.70, 0.35, 0.50, 0.10, 0.15, 0.60,
+											/*r*/	0.60, 0.60,	0.40, 0.50, 0.55, 0.60, 0.30, 0.40, 0,	  0,	0.55,
+											/*c*/	0.60, 0.60, 0.10, 0.20, 0.35, 0.40, 0.05, 0.10, 0.10, 0.15,	0.35,
+											/*R*/	0.80, 0.80,	0.60, 0.65, 0.70, 0.80, 0.45, 0.60, 0,	  0,	0.65,
+											/*T*/	0.70, 0.70, 0.70, 0.80, 0.80, 0.85, 0.50, 0.70, 0.15, 0.25,	0.80,
+											/*A*/	0.95, 0.90, 0.15, 0.25, 0.40, 0.45, 0.05, 0.20, 0.90, 0.95, 0.40,
+											/*v*/	0.65, 0.65, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.55, 0.75, 0.60,
+											/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
+											/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0		};
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Needs defaults to catch error!!!!
@@ -76,6 +77,9 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('h'):
 		x = 9;
 		break;
+	case('P'):
+		x = 10;
+		break;
 	}
 
 	switch (attackerType)
@@ -110,6 +114,9 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 	case('h'):
 		y = 9;
 		break;
+	case('P'):
+		x = 10;
+		break;
 	}
 
 	if (x == -1 || y == -1)
@@ -126,13 +133,14 @@ int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 {
 	bool canItBeBoughtHere = false;
 
+	//These represent what that prop. repairs, not necessarily if you can buy units there. Only h can buy ground troops.
 	if (propertyType == 'A' && (minionType == 'v' || minionType == 'h') )
 	{
 		canItBeBoughtHere = true;
 	}
 	if ( (propertyType == 'n' || propertyType == 'H' || propertyType == 'Q' || propertyType == 'h' ) && 
 		(minionType == 'i' || minionType == 's' || minionType == 'a' || minionType == 'r' || minionType == 'R' 
-		|| minionType == 'T' || minionType == 'A' || minionType == 'c')) 
+		|| minionType == 'T' || minionType == 'A' || minionType == 'c' || minionType == 'P')) 
 	{
 		canItBeBoughtHere = true;
 	}
@@ -174,6 +182,9 @@ int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 		price = 9000;
 		break;
 	case('h'):
+		price = 5000;
+		break;
+	case('P'):
 		price = 5000;
 		break;
 	}

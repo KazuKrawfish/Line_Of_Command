@@ -7,7 +7,7 @@
 //Window HAS been implemented to minimize total print size!!
 //Needs to be anti-consted
 const int WINDOW_HEIGHT = 10;										
-const int WINDOW_WIDTH = 10;
+const int WINDOW_WIDTH = 12;
 
 class MasterBoard;
 
