@@ -278,8 +278,8 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 	//windowLocation is a single scalar representing x and y.
 	//We do some basic math to break it into the two values for the function.
 	//Need to convert windowLocation into a better two part variable.
-	int windowY = boardToPrint->windowLocation / boardToPrint->BOARD_WIDTH;
-	int windowX = boardToPrint->windowLocation % boardToPrint->BOARD_WIDTH;
+	int windowY = boardToPrint->windowLocationY;
+	int windowX = boardToPrint->windowLocationX;
 	
 
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.

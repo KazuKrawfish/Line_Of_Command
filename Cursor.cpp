@@ -41,13 +41,13 @@ return didItMove;
 
 int Cursor::relocate(int inputX, int inputY) //Returns 1 on fail
 {
-	if (inputX < boardToPlay->BOARD_WIDTH - 1 && inputX > 0)
+	if (inputX < boardToPlay->BOARD_WIDTH  && inputX >= 0)
 	{
 		XCoord = inputX;
 	}
 	else return 1;
 
-	if (inputY < boardToPlay->BOARD_HEIGHT - 1 && inputY > 0)
+	if (inputY < boardToPlay->BOARD_HEIGHT  && inputY >= 0)
 	{
 		YCoord = inputY;
 	}

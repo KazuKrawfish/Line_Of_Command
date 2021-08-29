@@ -276,17 +276,60 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 //Ensures cursor stays within the window.
 int MasterBoard::checkWindow() 
 {
-	if (cursor.getX() == (windowLocation % BOARD_WIDTH) && cursor.getX() != 0)						//If the cursor moves to the left edge of the window AND it's not at the edge of the board
-		windowLocation--;																			//Shift the window left
 
-	if (cursor.getX() == ((windowLocation % BOARD_WIDTH) + WINDOW_WIDTH - 1)   && windowLocation % BOARD_WIDTH + WINDOW_WIDTH != BOARD_WIDTH)			//If the cursor moves to the right edge of the window AND it's not at the edge of the board
-		windowLocation++;																																//Shift the window to the right
+	//Incremental moves
+	if (cursor.getX() == (windowLocationX) && cursor.getX() != 0)						//If the cursor moves to the left edge of the window AND it's not at the edge of the board
+		windowLocationX--;																			//Shift the window left
+
+	if (cursor.getX() == (windowLocationX  + WINDOW_WIDTH - 1)   && (windowLocationX + WINDOW_WIDTH != BOARD_WIDTH)	)		//If the cursor moves to the right edge of the window AND it's not at the edge of the board
+		windowLocationX++;																																//Shift the window to the right
 	
-	if (cursor.getY() == (windowLocation / BOARD_WIDTH) && cursor.getY() != 0)						//If the cursor moves to the top edge of the window AND it's not at the edge of the board
-		windowLocation -= BOARD_WIDTH;																//Shift the window up.
+	if (cursor.getY() == windowLocationY  && cursor.getY() != 0)						//If the cursor moves to the top edge of the window AND it's not at the edge of the board
+		windowLocationY--;																//Shift the window up.
 
-	if (cursor.getY() == ((windowLocation / BOARD_WIDTH) + WINDOW_HEIGHT- 1) && (windowLocation / BOARD_WIDTH + WINDOW_HEIGHT != BOARD_HEIGHT))				//If the cursor moves to the bottom of the window AND it's not at the bottom of the board
-		windowLocation += BOARD_WIDTH;																														//Shift the window down once.
+	if (cursor.getY() == (windowLocationY + WINDOW_HEIGHT- 1) && (windowLocationY + WINDOW_HEIGHT != BOARD_HEIGHT))				//If the cursor moves to the bottom of the window AND it's not at the bottom of the board
+		windowLocationY++;																														//Shift the window down once.
+	
+	
+																																				
+		//Non incremental moves. If cursor somehow got to the right of the window																																	//Attempt to center cursor on window if it got moved non-incrementally:
+	if (cursor.getX() >= windowLocationX + WINDOW_WIDTH -1 && (windowLocationX + WINDOW_WIDTH <= BOARD_WIDTH) )
+	{
+		if (cursor.getX() >= BOARD_WIDTH - WINDOW_WIDTH - 1)
+		{
+			windowLocationX = BOARD_WIDTH - WINDOW_WIDTH;
+		}
+		else 
+		{
+			windowLocationX = cursor.getX();
+		}
+		
+	}
+	//Non incremental moves. If cursor somehow got below our window
+	if (cursor.getY() >= windowLocationY + WINDOW_HEIGHT - 1 && (windowLocationY + WINDOW_HEIGHT <= BOARD_HEIGHT))
+	{
+		if (cursor.getY() >= BOARD_HEIGHT - WINDOW_HEIGHT - 1)
+		{
+			windowLocationY = BOARD_HEIGHT - WINDOW_HEIGHT;
+		}
+		else
+		{
+			windowLocationY = cursor.getY();
+		}
+	
+	}
+
+	//Non incremental moves. If cursor somehow got to the left of our window.
+	if (cursor.getX() < windowLocationX)
+	{
+		windowLocationX = cursor.getX();
+	}
+
+	//Non incremental moves. If cursor somehow got above our window.
+	if (cursor.getY() < windowLocationY )
+	{
+			windowLocationY = cursor.getY();
+	}
 
 	return 0;
 }
@@ -1000,13 +1043,18 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 	setVisionField(); 
 
 	//Provide income for the current player based on properties he controls.
+	//Move cursor to HQ if it exists
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
-			if (this->Board[x][y].controller == playerFlag)
+			if (Board[x][y].controller == playerFlag)
 			{
-				this->treasury[playerFlag] += Board[x][y].production;
+				treasury[playerFlag] += Board[x][y].production;
+				if (Board[x][y].symbol == 'Q') 
+				{
+					cursor.relocate(x, y);
+				}
 			}
 
 		}
