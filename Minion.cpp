@@ -20,7 +20,7 @@ Minion::Minion()
 //Always use this constructor, it gives the new Minion all required properties.
 //When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement costs and consultMinionCostChart.
 //This assumes that the transport already exists if the minion is being carried. Can cause NULL dereference!
-Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported)
+Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel)
 {
 	veterancy = inputVeterancy;
 	seniority = inputSeniority;
@@ -62,6 +62,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image =		  { 'i',' ','i',
 						' ','i',' ',
 						' ',' ',' ' };
+		maxFuel = 70;
 		break;
 	}
 	case('s'):
@@ -75,7 +76,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = {				's',' ','s',
 								' ','s',' ',
 								' ',' ',' ' };
-
+		maxFuel = 70;
 		break;
 	}
 	case('a'):
@@ -89,6 +90,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image =		{	'-','n',' ',
 						'=','=','=',
 						' ',' ',' ' };
+		maxFuel = 70;
 		break;
 	}
 	case('A'):
@@ -102,6 +104,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = {		'\\','\\','A',
 						'=','=','=',
 						' ',' ',' ' };
+		maxFuel = 70;
 		break;
 	}
 	case('T'):
@@ -115,6 +118,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = {		'-','H',' ',
 						'=','=','=',
 						' ',' ',' ' };
+		maxFuel = 60;
 		break;
 	}
 	case('r'):
@@ -128,6 +132,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = {		' ','\\','A',
 						'=','=','=',
 						' ',' ',' ' };
+		maxFuel = 50;
 		break;
 	}
 	case('c'):
@@ -141,6 +146,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = {		'-','n',' ',
 						'o','=','o',
 						' ',' ',' ' };
+		maxFuel = 70;
 		break; 
 	}
 	case('R'): 
@@ -154,6 +160,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = {			'n','\\','\\',
 							'o','=','o',
 							' ',' ',' ' };
+		maxFuel = 50;
 		break; 
 	}
 	case('v'):
@@ -167,6 +174,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = { '-','+','-',
 				'<','=','*',
 				' ',' ',' ' };
+		maxFuel = 80;
+		domain = air;
 		break;
 	}
 	case('h'):
@@ -180,6 +189,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = { '+',' ','+',
 				'<','=','=',
 				' ',' ',' ' };
+		maxFuel = 80;
+		domain = air;
 		break;
 	}
 	case('P'):
@@ -193,11 +204,19 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = { '/','=','=',
 				'=','=','=',
 				' ',' ',' ' };
+		maxFuel = 70;	
 		break;
 	}
 	}
 
 	team = inputTeam;
+
+	//Either minion is new (-1) or provide the input fuel from the save or wherever.
+	if (inputFuel == -1)
+	{
+		currentFuel = maxFuel;
+	}
+	else currentFuel = inputFuel;
 
 
 }

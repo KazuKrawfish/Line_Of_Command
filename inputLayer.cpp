@@ -86,8 +86,9 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 	}
 	else
 	{
-		
 		waddstr(MainMenu->mywindow, descriptionPointer);
+		snprintf(pointerToPrint, 100, "Cost %d .", boardToPrint->myPathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion);
+		waddstr(MainMenu->mywindow, pointerToPrint);
 	}
 
 	//If tile is undergoing capture, let us know.
@@ -106,7 +107,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 		waddstr(MainMenu->mywindow, &(MainMenu->playerNames[currentMinion->team])[0]);
 		waddstr(MainMenu->mywindow, "'s ");
 		waddstr(MainMenu->mywindow, &currentMinion->description[0]);
-		snprintf(pointerToPrint, 100, ": %d Health Left. \n", int(currentMinion->health));		//int(round(currentMinion->health/10)));
+		snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel Left.\n", int(currentMinion->health), currentMinion->currentFuel);		//int(round(currentMinion->health/10)));
 		waddstr(MainMenu->mywindow, pointerToPrint);
 
 		if (currentMinion->status == gaveupmovehasntfired)

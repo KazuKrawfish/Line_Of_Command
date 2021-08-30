@@ -282,7 +282,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << boardToPrint->totalNumberOfMinions << std::endl;
 
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
-	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus):" << std::endl;
+	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,CurrentFuel):" << std::endl;
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		//First cycle through all non transported minions and do them
@@ -299,7 +299,8 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 			<< int(boardToPrint->minionRoster[i]->health) << " "
 			<< int(boardToPrint->minionRoster[i]->veterancy) << " "
 			<< int(boardToPrint->Board[boardToPrint->minionRoster[i]->locationX][boardToPrint->minionRoster[i]->locationY].capturePoints) <<" "
-			<< beingTransported << std::endl;
+			<< beingTransported << " "
+			<< boardToPrint->minionRoster[i]->currentFuel <<std::endl;
 
 		}
 	}
@@ -322,7 +323,8 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 				<< int(boardToPrint->minionRoster[i]->health) << " "
 				<< int(boardToPrint->minionRoster[i]->veterancy) << " "
 				<< 20 << " "		//Default capture points to avoid breaking
-				<< beingTransported << std::endl;
+				<< beingTransported << " "
+				<< boardToPrint->minionRoster[i]->currentFuel << std::endl;
 		}
 	}
 	saveGame.close();
@@ -397,6 +399,11 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	{
 		boardToPrint->Board[i].resize(boardToPrint->BOARD_HEIGHT);
 	}
+	boardToPrint->myPathMap.resize(boardToPrint->BOARD_WIDTH + 1);
+	for (int i = 0; i < boardToPrint->BOARD_WIDTH; i++)
+	{
+		boardToPrint->myPathMap[i].resize(boardToPrint->BOARD_HEIGHT);
+	}
 
 	//Then load player data:
 	//This is the current player whos turn it is:
@@ -431,7 +438,7 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	*saveGame >> ThrowawayString;
 	int numberOfMinions;
 	*saveGame >> numberOfMinions;
-	int health, locationX, locationY, team, seniority, status, veterancy, capturePoints, beingTransported;
+	int health, locationX, locationY, team, seniority, status, veterancy, capturePoints, beingTransported, inputFuel;
 	char type;
 	*saveGame >> ThrowawayString;
 
@@ -447,11 +454,12 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 			>> health
 			>> veterancy
 			>> capturePoints
-			>> beingTransported;
+			>> beingTransported
+			>> inputFuel;
 
 		//Regardless of transport status, we pass the saved location- it either represents the minion's position
 		//Or the transport's position.
-		boardToPrint->createMinion(type, locationX, locationY, team, health, status, veterancy, beingTransported);
+		boardToPrint->createMinion(type, locationX, locationY, team, health, status, veterancy, beingTransported, inputFuel);
 	
 		//Set capture status.
 		if (capturePoints != 20)

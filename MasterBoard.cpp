@@ -26,14 +26,14 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
 //													i     s     a     r     c     R     T     A     v	  h		P
-const double ATTACK_VALUES_MATRIX[11][11] = {/*i*/	0.50, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10,
-											/*s*/	0.55, 0.55, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.05, 0.10, 0.60,
-											/*a*/	0.65, 0.65,	0.50, 0.60, 0.60, 0.70, 0.35, 0.50, 0.10, 0.15, 0.60,
-											/*r*/	0.60, 0.60,	0.40, 0.50, 0.55, 0.60, 0.30, 0.40, 0,	  0,	0.55,
-											/*c*/	0.60, 0.60, 0.10, 0.20, 0.35, 0.40, 0.05, 0.10, 0.10, 0.15,	0.35,
-											/*R*/	0.80, 0.80,	0.60, 0.65, 0.70, 0.80, 0.45, 0.60, 0,	  0,	0.65,
-											/*T*/	0.70, 0.70, 0.70, 0.80, 0.80, 0.85, 0.50, 0.70, 0.15, 0.25,	0.80,
-											/*A*/	0.95, 0.90, 0.15, 0.25, 0.40, 0.45, 0.05, 0.20, 0.90, 0.95, 0.40,
+const double ATTACK_VALUES_MATRIX[11][11] = {/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10,
+											/*s*/	0.60, 0.55, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.05, 0.10, 0.70,
+											/*a*/	0.70, 0.65,	0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.10, 0.35, 0.70,
+											/*r*/	0.90, 0.85,	0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70,
+											/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15,	0.35,
+											/*R*/	0.95, 0.90,	0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80,
+											/*T*/	0.85, 0.80, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.15, 0.25,	0.90,
+											/*A*/	1.0, 0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40,
 											/*v*/	0.65, 0.65, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.55, 0.75, 0.60,
 											/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
 											/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0		};
@@ -197,11 +197,18 @@ MasterBoard::MasterBoard()
 {
 	//Not sure why we have to do an extra row, whatever! (Tried with one less and it caused out of bounds..... i am insane?!?!)
 	//First resize board to meet savegame specifications.
+	//Also resize mypathMap.
 	Board.resize(BOARD_WIDTH+1);
 	for (int i = 0; i < BOARD_WIDTH; i++)
 	{
 		Board[i].resize(BOARD_HEIGHT);
 	}
+	myPathMap.resize(BOARD_WIDTH + 1);
+	for (int i = 0; i < BOARD_WIDTH; i++)
+	{
+		myPathMap[i].resize(BOARD_HEIGHT);
+	}
+
 
 	//Initialize cursor.
 	cursor.XCoord = 1;
@@ -232,6 +239,119 @@ MasterBoard::MasterBoard()
 	}
 }
 
+int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType) 
+{
+
+	//If this is first call, reset myPathMap
+	if (isItInitialCall == true)
+	{
+		//Clear myPathMap
+		for (int i = 0; i < BOARD_WIDTH; i++)
+		{
+			for (int j = 0; j < BOARD_HEIGHT ; j++)
+			{
+				myPathMap[i][j].distanceFromMinion = -1;
+				myPathMap[i][j].wasVisited = false;
+			}
+		}
+	}
+
+	if (Board[x][y].consultMovementChart(minionType, Board[x][y].symbol) == 99)
+		return 0;
+
+	//Check each neighbor to find lowest path FROM minion to this square, from among them.
+	int lowestNeighboringPath = 99999;
+	if (x - 1 >= 0 && myPathMap[x - 1][y].wasVisited == true)
+	{
+		if (myPathMap[x - 1][y].distanceFromMinion != -1 && myPathMap[x - 1][y].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = myPathMap[x - 1][y].distanceFromMinion;
+
+		}
+	}
+	if (y - 1 >= 0 && myPathMap[x][y - 1].wasVisited == true)
+	{
+		if (myPathMap[x][y - 1].distanceFromMinion != -1 && myPathMap[x][y - 1].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = myPathMap[x][y - 1].distanceFromMinion;
+
+		}
+	}
+	if (x + 1 < BOARD_WIDTH && myPathMap[x + 1][y].wasVisited == true)
+	{
+		if (myPathMap[x + 1][y].distanceFromMinion != -1 && myPathMap[x + 1][y].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = myPathMap[x + 1][y].distanceFromMinion;
+		}
+	}
+	if (y + 1 < BOARD_HEIGHT && myPathMap[x][y + 1].wasVisited == true)
+	{
+		if (myPathMap[x][y + 1].distanceFromMinion != -1 && myPathMap[x][y + 1].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = myPathMap[x][y + 1].distanceFromMinion;
+
+		}
+	}
+
+	//We now have lowest path to objective from visited neighbors.
+	//If no visited neighbors, lowestNeighboringPath should be 99999. This means we can't get here from minion.
+	if (isItInitialCall == true)
+	{
+		//Initialize start point
+		//Cost to get to here from here 0.
+		myPathMap[x][y].distanceFromMinion = 0;
+	}
+	else if (lowestNeighboringPath == 99999)
+	{   //It's physically impossible to get here from minion
+		myPathMap[x][y].distanceFromMinion = -1;
+	}
+	else
+	{
+		myPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(minionType, Board[x][y].symbol);
+	}
+
+	myPathMap[x][y].wasVisited = true;
+
+
+	//Now call the function for eaching neighbor that is passable (not 99 move cost or off board), and hasn't been visited, or
+	//is passable,  (And has been visited) and has a higher (path score - that place's cost):
+	//This is to either do a first look or to update a square that has a higher current score than ours
+	if (x - 1 >= 0)
+	{
+		if ((Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol) != 99 && myPathMap[x - 1][y].wasVisited != true) || (Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol) != 99 && (myPathMap[x - 1][y].distanceFromMinion - Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
+		{
+			buildPath(false, x - 1, y, minionType);
+		}
+	}
+
+	if (y - 1 >= 0)
+	{
+		if ((Board[x][y-1].consultMovementChart(minionType, Board[x][y-1].symbol) != 99 && myPathMap[x][y - 1].wasVisited != true) || (Board[x][y-1].consultMovementChart(minionType, Board[x][y-1].symbol) != 99 && (myPathMap[x][y - 1].distanceFromMinion - Board[x][y-1].consultMovementChart(minionType, Board[x][y-1].symbol)) > myPathMap[x][y].distanceFromMinion))
+		{
+			buildPath(false, x, y - 1, minionType);
+		}
+	}
+
+	if (x + 1 < BOARD_WIDTH)
+	{
+		if ((Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && myPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && (myPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
+		{
+			buildPath(false, x + 1, y, minionType);
+		}
+	}
+
+	if (y + 1 < BOARD_HEIGHT)
+	{
+		if ((Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && myPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && (myPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol)) > myPathMap[x][y].distanceFromMinion))
+		{
+			buildPath(false, x, y + 1, minionType);
+		}
+	}
+
+
+	return 1;
+}
+
 //Tells us how an attacker would perform against an enemy. Useful for actual attack or calculation - doesn't actually deal damage.
 //Returns a number between 0 - 100 - actual health, not percent.
 double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion)
@@ -242,7 +362,7 @@ double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defend
 
 	//Calculate defense factor. If air unit it remains 1.
 	double defenseFactor = Board[defendingMinion->locationX][defendingMinion->locationY].defenseFactor;
-	if (defendingMinion->type != 'h' && defendingMinion->type != 'v')
+	if (defendingMinion->domain != air)
 	{
 		defenseFactor = Board[defendingMinion->locationX][defendingMinion->locationY].defenseFactor;
 	}
@@ -250,7 +370,6 @@ double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defend
 
 	return attackerFirePower * attackingMinion->health / defenseFactor;
 }
-
 
 int MasterBoard::clearBoard(inputLayer* InputLayer) 
 {
@@ -345,9 +464,36 @@ int MasterBoard::checkWindow()
 	return 0;
 }
 
-int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft) 
+int MasterBoard::setRangeField(int inputX, int inputY) 
 {
-	//If an enemy minion on this square, return.
+	//Build a path map for this particular minion.
+	buildPath(true, inputX, inputY, cursor.selectMinionPointer->type);
+
+	//Set the minion's tile to within Range, always.
+	Board[inputX][inputY].withinRange = true;
+	   
+	//Go thru entire board and set withinRange or not
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			//If the current tile DOES not have minion on top (IE we will be able to move there)
+			//Also must be within range
+			//Also must have enough fuel
+		 if(myPathMap[x][y].distanceFromMinion != -1 && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
+			 if (Board[x][y].hasMinionOnTop != true ||  Board[x][y].minionOnTop->team != playerFlag)
+			 {
+				 Board[x][y].withinRange = true;
+
+			 }
+		}
+	}
+	
+
+
+
+
+/*	//If an enemy minion on this square, return.
 	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team != playerFlag)
 	{
 		return 0;
@@ -371,7 +517,7 @@ int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft)
 		int costToMoveHere = Board[nextX][inputY].consultMovementChart(this->cursor.selectMinionPointer->type, Board[nextX][inputY].symbol);
 		if (costToMoveHere <= moveLeft)
 		{
-			setRangeField(nextX, inputY, moveLeft-costToMoveHere);
+			setRangeField(nextX, inputY, moveLeft-costToMoveHere, false);
 		}
 	}
 
@@ -382,7 +528,7 @@ int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft)
 		int costToMoveHere = Board[nextX][inputY].consultMovementChart(this->cursor.selectMinionPointer->type, Board[nextX][inputY].symbol);
 		if (costToMoveHere <= moveLeft)
 		{
-			setRangeField(nextX, inputY, moveLeft - costToMoveHere);
+			setRangeField(nextX, inputY, moveLeft - costToMoveHere , false);
 		}
 	}
 
@@ -393,7 +539,7 @@ int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft)
 		int costToMoveHere = Board[inputX][nextY].consultMovementChart(this->cursor.selectMinionPointer->type, Board[inputX][nextY].symbol);
 		if (costToMoveHere <= moveLeft)
 		{
-			setRangeField(inputX, nextY, moveLeft - costToMoveHere);
+			setRangeField(inputX, nextY, moveLeft - costToMoveHere , false);
 		}
 		
 	}
@@ -404,10 +550,13 @@ int MasterBoard::setRangeField(int inputX, int inputY, int moveLeft)
 		int costToMoveHere = Board[inputX][nextY].consultMovementChart(this->cursor.selectMinionPointer->type, Board[inputX][nextY].symbol);
 		if (costToMoveHere <= moveLeft)
 		{
-			setRangeField(inputX, nextY, moveLeft - costToMoveHere);
+			setRangeField(inputX, nextY, moveLeft - costToMoveHere , false);
 		}
 
 	}
+
+
+	*/
 	return 0;
 	
 	
@@ -598,7 +747,7 @@ int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, i
 {
 	if (treasury[playerFlag] >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
 	{
-		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0);
+		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0, -1);
 		treasury[playerFlag] -= consultMinionCostChart(inputType, Board[inputX][inputY].symbol);
 		return 0;
 	}
@@ -607,7 +756,7 @@ int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, i
 	
 }
 
-int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported)
+int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -615,7 +764,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported);
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel);
 			if (minionRoster[i] != NULL)
 			{
 				minionRoster[i]->status = (minionStatus)status;
@@ -649,7 +798,7 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 		//If minion hasn't moved or fired yet, display its movement range.
 		if (cursor.selectMinionPointer->status == hasntmovedorfired)		
 		{
-			setRangeField(inputX, inputY, cursor.selectMinionPointer->movementRange);
+			setRangeField(inputX, inputY);
 			return 0;
 		}
 		else //If minion has moved but hasn't fired, and is direct combat, display attack range.
@@ -731,6 +880,8 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	//"Move" the minion to the new location.
 	selectedMinion->locationX = inputX;
 	selectedMinion->locationY = inputY;
+
+	cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
 
 	cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
 	deselectMinion();
@@ -942,7 +1093,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 			
 			//If attacker is air unit it doesn't get terrain bonus
 			double attackerDefenseFactor = 1;
-			if (attackingMinion->type != 'h' && attackingMinion->type != 'v')
+			if (attackingMinion->domain != air)
 			{
 				attackerDefenseFactor = Board[attackingMinion->locationX][attackingMinion->locationY].defenseFactor;
 			}
@@ -1072,6 +1223,24 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 	}
 	
 	repairMinions();
+	
+	resupplyMinions();
+
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	{
+		//If it's a minion you own and it's not being transported
+		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->transporter == NULL)
+		{
+			if (minionRoster[i]->domain == air) 
+			{
+				minionRoster[i]->currentFuel -= 2;
+				if (minionRoster[i]->currentFuel <= 0) 
+				{
+					destroyMinion(minionRoster[i], "No fuel", InputLayer);
+				}
+			}
+		}
+	}
 
 	//Move cursor to HQ
 	return 0;
@@ -1120,5 +1289,27 @@ int MasterBoard::repairMinions()
 		}
 		
 	}
+	return 0;
+}
+
+int MasterBoard::resupplyMinions()
+{
+
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	{
+		//If it's a minion you own and it's not being transported
+		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->transporter == NULL)
+		{
+			tile* tileToExamine = &Board[minionRoster[i]->locationX][minionRoster[i]->locationY];
+			//If it is on a player controlled tile, and that tile is a "repairing/resupplying" tile for the given unit.
+			if (tileToExamine->controller == playerFlag && consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) != -1)
+			{
+				minionRoster[i]->currentFuel = minionRoster[i]->maxFuel;
+			}
+		}
+	}
+
+	//Need to add APC in too
+
 	return 0;
 }

@@ -9,6 +9,7 @@ class MasterBoard;
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired};
 enum RangeType {directFire, rangedFire};
 enum specialtyGroupType {normal, infantry, transport};
+enum domainType {land, air, sea};
 
 
 class Minion
@@ -16,7 +17,7 @@ class Minion
 	public:
 	
 	//Constructors
-	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported);
+	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel);
 	Minion();
 	~Minion();
 	
@@ -31,6 +32,8 @@ class Minion
 	int attackRange = 0;
 	int visionRange = 0 ;
 	bool isCapturing = false;
+	int maxFuel = 0;
+	int currentFuel = 0;
 	std::string description = "ASDASD";	//For user interface only.
 	int team = 0;
 	double health = 0;
@@ -47,6 +50,7 @@ class Minion
 	minionStatus status;
 	RangeType rangeType;
 	specialtyGroupType specialtyGroup;
+	domainType domain = land;
 
 };
 
