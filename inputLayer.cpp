@@ -42,7 +42,13 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	}
 
 	wmove(MainMenu->mywindow, inputX * 3 + 2, inputY * 3);
+	//Potentially add low fuel if appropriate. If not,
 	//Potentially add veterancy if Level 1 - 3:
+	if (minionToPrint != NULL && (  minionToPrint->currentFuel == 0 || (minionToPrint->maxFuel / minionToPrint->currentFuel) > 3) )
+	{
+		waddch(MainMenu->mywindow, 'e' + COLOR_PAIR(teamNumber));
+	}
+	else
 	if (minionToPrint != NULL && minionToPrint->veterancy > 0)
 	{
 		if (minionToPrint->veterancy == 3) 
@@ -364,10 +370,15 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 				mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, 'X' + COLOR_PAIR(cursorSymbol));
 			}
 			else
-			if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
-			{
-				mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ' ' + COLOR_PAIR(moveRangeSymbol));
-			}
+				if (boardToPrint->Board[j][i].withinCursorPath == true && minionVisibleStatus == showMinions) 
+				{
+					mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, '*' + COLOR_PAIR(moveRangeSymbol));
+				}
+				else 
+					if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
+					{
+						mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ' ' + COLOR_PAIR(moveRangeSymbol));
+					}
 
 		}
 		

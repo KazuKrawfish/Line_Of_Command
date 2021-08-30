@@ -35,6 +35,9 @@ if (getY() > 0)
 	YCoord--;
 	didItMove = 0;
 }
+
+boardToPlay->setCursorPath(true, XCoord, YCoord);
+
 return didItMove;
 	
 }
@@ -52,6 +55,8 @@ int Cursor::relocate(int inputX, int inputY) //Returns 1 on fail
 		YCoord = inputY;
 	}
 	else return 1;
+
+	boardToPlay->setCursorPath(true, XCoord, YCoord);
 
 	return 0;
 }

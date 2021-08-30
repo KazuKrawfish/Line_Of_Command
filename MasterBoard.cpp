@@ -259,6 +259,8 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 	if (Board[x][y].consultMovementChart(minionType, Board[x][y].symbol) == 99)
 		return 0;
 
+
+
 	//Check each neighbor to find lowest path FROM minion to this square, from among them.
 	int lowestNeighboringPath = 99999;
 	if (x - 1 >= 0 && myPathMap[x - 1][y].wasVisited == true)
@@ -316,9 +318,12 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 	//Now call the function for eaching neighbor that is passable (not 99 move cost or off board), and hasn't been visited, or
 	//is passable,  (And has been visited) and has a higher (path score - that place's cost):
 	//This is to either do a first look or to update a square that has a higher current score than ours
+	//Also no enemies can be here
 	if (x - 1 >= 0)
 	{
-		if ((Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol) != 99 && myPathMap[x - 1][y].wasVisited != true) || (Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol) != 99 && (myPathMap[x - 1][y].distanceFromMinion - Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
+		if ( (Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol) != 99 && myPathMap[x - 1][y].wasVisited != true) || 
+			(Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol) != 99 && (myPathMap[x - 1][y].distanceFromMinion - Board[x-1][y].consultMovementChart(minionType, Board[x-1][y].symbol)) > myPathMap[x][y].distanceFromMinion)) 
+		if( Board[x-1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team)
 		{
 			buildPath(false, x - 1, y, minionType);
 		}
@@ -327,6 +332,7 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 	if (y - 1 >= 0)
 	{
 		if ((Board[x][y-1].consultMovementChart(minionType, Board[x][y-1].symbol) != 99 && myPathMap[x][y - 1].wasVisited != true) || (Board[x][y-1].consultMovementChart(minionType, Board[x][y-1].symbol) != 99 && (myPathMap[x][y - 1].distanceFromMinion - Board[x][y-1].consultMovementChart(minionType, Board[x][y-1].symbol)) > myPathMap[x][y].distanceFromMinion))
+			if (Board[x ][y-1].hasMinionOnTop != true || Board[x ][y-1].minionOnTop->team == cursor.selectMinionPointer->team)
 		{
 			buildPath(false, x, y - 1, minionType);
 		}
@@ -335,6 +341,7 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 	if (x + 1 < BOARD_WIDTH)
 	{
 		if ((Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && myPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && (myPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
+			if (Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team)
 		{
 			buildPath(false, x + 1, y, minionType);
 		}
@@ -343,6 +350,7 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 	if (y + 1 < BOARD_HEIGHT)
 	{
 		if ((Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && myPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && (myPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol)) > myPathMap[x][y].distanceFromMinion))
+			if (Board[x ][y+1].hasMinionOnTop != true || Board[x ][y+1].minionOnTop->team == cursor.selectMinionPointer->team)
 		{
 			buildPath(false, x, y + 1, minionType);
 		}
@@ -560,6 +568,76 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 	return 0;
 	
 	
+}
+
+//First call will be cursor location
+int MasterBoard::setCursorPath(bool firstTime, int inputX, int inputY)
+{
+
+	if(firstTime == true)
+	{
+	//First clear board of paths
+	//Go thru entire board and set withinCursorPath to false
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			Board[x][y].withinCursorPath = false;
+		}
+	}
+	}
+
+	int lowestCostToSelectedMinion = myPathMap[inputX][inputY].distanceFromMinion;
+	int choice = 0;
+
+	if(Board[inputX][inputY].withinRange == true)
+		Board[inputX][inputY].withinCursorPath = true;
+
+	if (Board[inputX][inputY].withinRange == false && firstTime == true) 
+	{
+		return 1;
+	}
+
+	if (inputX > 0 && (myPathMap[inputX-1][inputY].distanceFromMinion < lowestCostToSelectedMinion && myPathMap[inputX - 1][inputY].distanceFromMinion != -1))
+	{
+		lowestCostToSelectedMinion = myPathMap[inputX - 1][inputY].distanceFromMinion;
+		choice = 1;
+	}
+	if (inputY > 0 && ( myPathMap[inputX ][inputY- 1].distanceFromMinion < lowestCostToSelectedMinion && myPathMap[inputX][inputY- 1].distanceFromMinion != -1))
+	{
+		lowestCostToSelectedMinion = myPathMap[inputX ][inputY-1].distanceFromMinion;
+		choice = 2;
+	}
+	if (inputY < BOARD_HEIGHT - 1  && ( myPathMap[inputX][inputY + 1].distanceFromMinion < lowestCostToSelectedMinion&& myPathMap[inputX][inputY + 1].distanceFromMinion != -1))
+	{
+		lowestCostToSelectedMinion = myPathMap[inputX][inputY + 1].distanceFromMinion;
+		choice = 3;
+	}
+	if (inputX < BOARD_WIDTH - 1 && ( myPathMap[inputX+ 1][inputY].distanceFromMinion < lowestCostToSelectedMinion && myPathMap[inputX + 1][inputY ].distanceFromMinion != -1))
+	{
+		lowestCostToSelectedMinion =  myPathMap[inputX+ 1][inputY ].distanceFromMinion;
+		choice = 4;
+	}
+
+	switch (choice)
+	{
+	case(1):
+		setCursorPath(false, inputX - 1, inputY);
+		break;
+	case(2):
+		setCursorPath(false, inputX, inputY - 1);
+		break;
+	case(3):
+		setCursorPath(false, inputX, inputY +1);
+		break;
+	case(4):
+		setCursorPath(false, inputX + 1, inputY);
+		break;
+	case(0):
+		return 1;
+	}
+
+	return 0;
 }
 
 int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY) 
@@ -1031,16 +1109,19 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion)
 
 int MasterBoard::deselectMinion() 
 {
-	cursor.selectMinionFlag = false;
-	cursor.selectMinionPointer = NULL;
-	
+
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
 			Board[x][y].withinRange = false;
+			Board[x][y].withinCursorPath = false;
 		}
 	}
+
+	cursor.selectMinionFlag = false;
+	cursor.selectMinionPointer = NULL;
+	
 		
 	return 0;
 }

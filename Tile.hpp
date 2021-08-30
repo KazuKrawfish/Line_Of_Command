@@ -36,6 +36,7 @@ public:
 		controller = 0;
 		production = 0;
 		capturePoints = 20;
+		withinCursorPath = false;
 		//Image already initialized
 		
 	}
@@ -74,10 +75,13 @@ public:
 			break;
 		case('v'):
 			x = 8;
+			break;
 		case('h'):
 			x = 9;
+			break;
 		case('P'):	//APC
 			x = 10;
+			break;
 		}
 
 		//   . + ^ M  H m n h Q = ~ - A P
@@ -181,6 +185,7 @@ public:
 	int capturePoints;
 	int locationX;
 	int locationY;
+	bool withinCursorPath = false;
 	std::string Image =	{	'.','.','.',
 							'.','.','.',
 							'.','.','.' };
@@ -197,6 +202,7 @@ public:
 		controller = 0;
 		production = 0;
 		capturePoints = 20;
+		withinCursorPath = false;
 
 
 		return 0;
