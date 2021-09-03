@@ -511,7 +511,9 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
 	{
-		if (boardToInput->pickUpMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0) 
+		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->minionBeingTransported == NULL	
+		&&	boardToInput->pickUpMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 		{
 			//Change status if successful pickup occurred
 			status = gameBoard;
@@ -522,6 +524,20 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 			//Change status appropriately for successful movement.
 			status = gameBoard;
 		}
+	}
+
+	//'i' is supply
+	//Must have minion selected.
+	//Must be APC, hasn't taken second action, cursor is on minion, and regardless of transport status.
+	if (*Input == 'i' && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->cursor.selectMinionPointer->type == 'P'
+		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+		&& boardToInput->cursor.getX() == boardToInput->cursor.selectMinionPointer->locationX
+		&& boardToInput->cursor.getY() == boardToInput->cursor.selectMinionPointer->locationY)
+	{
+		//May not be successful, so not necessarily return 0
+		if (boardToInput->individualResupply(boardToInput->cursor.selectMinionPointer, false) == 0)
+			status = gameBoard;
 	}
 
 	//O is drop

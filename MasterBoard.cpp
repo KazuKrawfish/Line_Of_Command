@@ -22,6 +22,43 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 	}
 }
 
+int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
+{
+
+	int x = SupplyUnit->locationX;
+	int y = SupplyUnit->locationY;
+
+	//Unit must be APC
+	if (SupplyUnit->type != 'P')
+		return 1;
+
+	//Check each surrounding tile for a ground or sea unit and resupply them.
+	if (x < BOARD_WIDTH - 1 && Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->domain != air)
+	{
+		Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
+	}
+	if (x > 0 && Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->domain != air)
+	{
+		Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
+	}
+	if (y < BOARD_HEIGHT - 1 && Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->domain != air)
+	{
+		Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
+	}
+	if (y > 0 && Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->domain != air)
+	{
+		Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
+	}
+
+	if (isItDuringUpkeep == false)
+	{
+		SupplyUnit->status = hasfired;
+		deselectMinion();
+	}
+
+	return 0;
+}
+
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
@@ -115,7 +152,7 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 		y = 9;
 		break;
 	case('P'):
-		x = 10;
+		y = 10;
 		break;
 	}
 
@@ -472,7 +509,7 @@ int MasterBoard::checkWindow()
 	return 0;
 }
 
-int MasterBoard::setRangeField(int inputX, int inputY) 
+int MasterBoard::setRangeField(int inputX, int inputY)	 
 {
 	//Build a path map for this particular minion.
 	buildPath(true, inputX, inputY, cursor.selectMinionPointer->type);
@@ -489,7 +526,7 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 			//Also must be within range
 			//Also must have enough fuel
 		 if(myPathMap[x][y].distanceFromMinion != -1 && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
-			 if (Board[x][y].hasMinionOnTop != true ||  Board[x][y].minionOnTop->team != playerFlag)
+			 if (Board[x][y].hasMinionOnTop != true ||  Board[x][y].minionOnTop->team == playerFlag)
 			 {
 				 Board[x][y].withinRange = true;
 
@@ -892,11 +929,13 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 				{
 					setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 					return 0;
-				}	//If minion is transport and has a guy embarked, show drop field.
+				}		//If transport that either moved or stood in place, we still select. But may not display drop field.
 				else if ((cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)  
-						&& cursor.selectMinionPointer->specialtyGroup == transport && cursor.selectMinionPointer->minionBeingTransported != NULL)
+						&& cursor.selectMinionPointer->specialtyGroup == transport )
 				{
-					setDropField(inputX, inputY);
+					//If minion is transport and has a guy embarked, show drop field.
+					if( cursor.selectMinionPointer->minionBeingTransported != NULL)
+							setDropField(inputX, inputY);
 					return 0;
 				}
 	}
@@ -1387,6 +1426,12 @@ int MasterBoard::resupplyMinions()
 			{
 				minionRoster[i]->currentFuel = minionRoster[i]->maxFuel;
 			}
+
+			if (minionRoster[i]->type == 'P') 
+			{
+				individualResupply(minionRoster[i], true);
+			}
+
 		}
 	}
 
