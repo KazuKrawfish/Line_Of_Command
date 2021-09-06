@@ -20,7 +20,8 @@ Minion::Minion()
 //Always use this constructor, it gives the new Minion all required properties.
 //When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement costs and consultMinionCostChart.
 //This assumes that the transport already exists if the minion is being carried. Can cause NULL dereference!
-Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel)
+Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, 
+	MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo)
 {
 	veterancy = inputVeterancy;
 	seniority = inputSeniority;
@@ -63,6 +64,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						' ','i',' ',
 						' ',' ',' ' };
 		maxFuel = 70;
+		hasSecondaryWeapon = true;
 		break;
 	}
 	case('s'):
@@ -77,6 +79,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 								' ','s',' ',
 								' ',' ',' ' };
 		maxFuel = 70;
+		maxAmmo = 3;
+		hasSecondaryWeapon = true;
 		break;
 	}
 	case('a'):
@@ -91,6 +95,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						'=','=','=',
 						' ',' ',' ' };
 		maxFuel = 70;
+		maxAmmo = 9;
+		hasSecondaryWeapon = true;
 		break;
 	}
 	case('A'):
@@ -105,6 +111,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						'=','=','=',
 						' ',' ',' ' };
 		maxFuel = 70;
+		maxAmmo = 9;
 		break;
 	}
 	case('T'):
@@ -119,6 +126,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						'=','=','=',
 						' ',' ',' ' };
 		maxFuel = 60;
+		maxAmmo = 6;
+		hasSecondaryWeapon = true;
 		break;
 	}
 	case('r'):
@@ -133,6 +142,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						'=','=','=',
 						' ',' ',' ' };
 		maxFuel = 50;
+		maxAmmo = 6;
 		break;
 	}
 	case('c'):
@@ -147,6 +157,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						'o','=','o',
 						' ',' ',' ' };
 		maxFuel = 70;
+		hasSecondaryWeapon = true;
 		break; 
 	}
 	case('R'): 
@@ -161,6 +172,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 							'o','=','o',
 							' ',' ',' ' };
 		maxFuel = 50;
+		maxAmmo = 6;
 		break; 
 	}
 	case('v'):
@@ -175,7 +187,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				'<','=','*',
 				' ',' ',' ' };
 		maxFuel = 80;
-		domain = air;
+		maxAmmo = 9;
+		domain = helo;
+		hasSecondaryWeapon = true;
 		break;
 	}
 	case('h'):
@@ -190,7 +204,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				'<','=','=',
 				' ',' ',' ' };
 		maxFuel = 80;
-		domain = air;
+		domain = helo;
 		break;
 	}
 	case('P'):
@@ -217,6 +231,12 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		currentFuel = maxFuel;
 	}
 	else currentFuel = inputFuel;
+
+	if (inputAmmo == -1)
+	{
+		currentAmmo = maxAmmo;
+	}
+	else currentAmmo = inputAmmo;
 
 
 }

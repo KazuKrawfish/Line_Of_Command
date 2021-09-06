@@ -42,25 +42,48 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	}
 
 	wmove(MainMenu->mywindow, inputX * 3 + 2, inputY * 3);
-	//Potentially add low fuel if appropriate. If not,
+	//Potentially add low fuel/ammo if appropriate. If not,
 	//Potentially add veterancy if Level 1 - 3:
-	if (minionToPrint != NULL && (  minionToPrint->currentFuel == 0 || (minionToPrint->maxFuel / minionToPrint->currentFuel) > 3) )
+	bool lowAmmo = false;
+	bool lowFuel = false;
+	//Minion exists and is below 1/3 fuel
+	if (minionToPrint != NULL && (  minionToPrint->currentFuel == 0 || (double (minionToPrint->maxFuel) / double( minionToPrint->currentFuel ) ) >= 3) )
 	{
-		waddch(MainMenu->mywindow, 'e' + COLOR_PAIR(teamNumber));
+		lowFuel = true;
+	}		//Minion exists, has a "main" gun ie. ammo, and it is below 1/3 ammo
+	if (minionToPrint != NULL &&  minionToPrint->maxAmmo != 0 &&  (minionToPrint->currentAmmo == 0 || (double(minionToPrint->maxAmmo) / double(minionToPrint->currentAmmo)) >= 3))
+	{
+		lowAmmo = true;
+	}
+	
+	//Either print a,e or @ for combos of fuel/ammo shortage
+	if (lowFuel == true && lowAmmo == true)
+	{
+		waddch(MainMenu->mywindow, '@' + COLOR_PAIR(teamNumber));
 	}
 	else
-	if (minionToPrint != NULL && minionToPrint->veterancy > 0)
-	{
-		if (minionToPrint->veterancy == 3) 
+		if (lowFuel == true) 
 		{
-			waddch(MainMenu->mywindow, '+' + COLOR_PAIR(teamNumber));
-		}
-		else if (minionToPrint->veterancy == 2)
-		{
-			waddch(MainMenu->mywindow, '=' + COLOR_PAIR(teamNumber));
-		} else  waddch(MainMenu->mywindow, '-' + COLOR_PAIR(teamNumber));
-	}
-	else waddch(MainMenu->mywindow, inputString[6] + COLOR_PAIR(teamNumber));
+			waddch(MainMenu->mywindow, 'e' + COLOR_PAIR(teamNumber));
+		} 
+		else
+			if (lowAmmo == true)
+			{
+				waddch(MainMenu->mywindow, 'a' + COLOR_PAIR(teamNumber));
+			} 
+			else	//Or print veterency status
+				if (minionToPrint != NULL && minionToPrint->veterancy > 0)
+				{
+					if (minionToPrint->veterancy == 3) 
+					{
+						waddch(MainMenu->mywindow, '+' + COLOR_PAIR(teamNumber));
+					}
+					else if (minionToPrint->veterancy == 2)
+					{
+						waddch(MainMenu->mywindow, '=' + COLOR_PAIR(teamNumber));
+					} else  waddch(MainMenu->mywindow, '-' + COLOR_PAIR(teamNumber));
+				}
+				else waddch(MainMenu->mywindow, inputString[6] + COLOR_PAIR(teamNumber));
 	
 	waddch(MainMenu->mywindow, inputString[7] + COLOR_PAIR(teamNumber));
 
@@ -113,7 +136,10 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 		waddstr(MainMenu->mywindow, &(MainMenu->playerNames[currentMinion->team])[0]);
 		waddstr(MainMenu->mywindow, "'s ");
 		waddstr(MainMenu->mywindow, &currentMinion->description[0]);
-		snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel Left.\n", int(currentMinion->health), currentMinion->currentFuel);		//int(round(currentMinion->health/10)));
+		if(currentMinion->maxAmmo != 0) 
+		{
+		snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. %d Ammo. \n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentAmmo);
+		} else snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. No main weapon. \n", int(currentMinion->health), currentMinion->currentFuel);
 		waddstr(MainMenu->mywindow, pointerToPrint);
 
 		if (currentMinion->status == gaveupmovehasntfired)

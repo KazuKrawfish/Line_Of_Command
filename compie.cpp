@@ -221,8 +221,9 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 		}
 		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX - 1][currentY].minionOnTop->type, 'h');
 		
-		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX - 1][currentY].minionOnTop);
-		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX - 1][currentY].minionOnTop, myCursor->selectMinionPointer) * (boardToUse->Board[currentX - 1][currentY].minionOnTop->health - attackerDamageDealt) / 100;
+		bool willAmmoBeUsed = false;
+		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX - 1][currentY].minionOnTop, willAmmoBeUsed);
+		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX - 1][currentY].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed) * (boardToUse->Board[currentX - 1][currentY].minionOnTop->health - attackerDamageDealt) / 100;
 		if (defenderCounterAttackDamageDealt < 0)
 			defenderCounterAttackDamageDealt = 0;
 
@@ -257,9 +258,10 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX + 1][currentY].minionOnTop->type, 'A');
 		}
 		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX + 1][currentY].minionOnTop->type, 'h');
-
-		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX + 1][currentY].minionOnTop);
-		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX + 1][currentY].minionOnTop, myCursor->selectMinionPointer) * (boardToUse->Board[currentX + 1][currentY].minionOnTop->health - attackerDamageDealt) / 100;
+		
+		bool willAmmoBeUsed = false;
+		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX + 1][currentY].minionOnTop, willAmmoBeUsed);
+		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX + 1][currentY].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed) * (boardToUse->Board[currentX + 1][currentY].minionOnTop->health - attackerDamageDealt) / 100;
 		if (defenderCounterAttackDamageDealt < 0)
 			defenderCounterAttackDamageDealt = 0;
 
@@ -295,8 +297,9 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 		}
 		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY + 1].minionOnTop->type, 'h');
 
-		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX ][currentY + 1].minionOnTop);
-		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX ][currentY + 1].minionOnTop, myCursor->selectMinionPointer) * (boardToUse->Board[currentX][currentY + 1].minionOnTop->health - attackerDamageDealt) / 100;
+		bool willAmmoBeUsed = false;
+		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX ][currentY + 1].minionOnTop, willAmmoBeUsed);
+		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX ][currentY + 1].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed) * (boardToUse->Board[currentX][currentY + 1].minionOnTop->health - attackerDamageDealt) / 100;
 		if (defenderCounterAttackDamageDealt < 0)
 			defenderCounterAttackDamageDealt = 0;
 
@@ -332,8 +335,9 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 		}
 		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY - 1].minionOnTop->type, 'h');
 
-		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX ][currentY - 1].minionOnTop);
-		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX][currentY - 1].minionOnTop, myCursor->selectMinionPointer) * (boardToUse->Board[currentX][currentY - 1].minionOnTop->health - attackerDamageDealt)/100;
+		bool willAmmoBeUsed = false;
+		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX ][currentY - 1].minionOnTop, willAmmoBeUsed);
+		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX][currentY - 1].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed) * (boardToUse->Board[currentX][currentY - 1].minionOnTop->health - attackerDamageDealt)/100;
 		if (defenderCounterAttackDamageDealt < 0)
 			defenderCounterAttackDamageDealt = 0;
 

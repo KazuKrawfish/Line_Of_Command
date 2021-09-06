@@ -33,21 +33,25 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
 		return 1;
 
 	//Check each surrounding tile for a ground or sea unit and resupply them.
-	if (x < BOARD_WIDTH - 1 && Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->domain != air)
+	if (x < BOARD_WIDTH - 1 && Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team == playerFlag && Board[x + 1][y].minionOnTop->domain != air)
 	{
 		Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
+		Board[x + 1][y].minionOnTop->currentAmmo = Board[x + 1][y].minionOnTop->maxAmmo;
 	}
-	if (x > 0 && Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->domain != air)
+	if (x > 0 && Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team == playerFlag && Board[x - 1][y].minionOnTop->domain != air)
 	{
 		Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
+		Board[x - 1][y].minionOnTop->currentAmmo = Board[x - 1][y].minionOnTop->maxAmmo;
 	}
-	if (y < BOARD_HEIGHT - 1 && Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->domain != air)
+	if (y < BOARD_HEIGHT - 1 && Board[x][y + 1].hasMinionOnTop == true && Board[x ][y + 1].minionOnTop->team == playerFlag && Board[x][y + 1].minionOnTop->domain != air)
 	{
 		Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
+		Board[x][y + 1].minionOnTop->currentAmmo = Board[x ][y+ 1].minionOnTop->maxAmmo;
 	}
-	if (y > 0 && Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->domain != air)
+	if (y > 0 && Board[x][y - 1].hasMinionOnTop == true && Board[x ][y - 1].minionOnTop->team == playerFlag && Board[x][y - 1].minionOnTop->domain != air)
 	{
 		Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
+		Board[x][y - 1].minionOnTop->currentAmmo = Board[x][y - 1].minionOnTop->maxAmmo;
 	}
 
 	if (isItDuringUpkeep == false)
@@ -62,23 +66,39 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
-//													i     s     a     r     c     R     T     A     v	  h		P
-const double ATTACK_VALUES_MATRIX[11][11] = {/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10,
-											/*s*/	0.60, 0.55, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.05, 0.10, 0.70,
-											/*a*/	0.70, 0.65,	0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.10, 0.35, 0.70,
-											/*r*/	0.90, 0.85,	0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70,
-											/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15,	0.35,
-											/*R*/	0.95, 0.90,	0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80,
-											/*T*/	0.85, 0.80, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.15, 0.25,	0.90,
-											/*A*/	1.0, 0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40,
-											/*v*/	0.65, 0.65, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.55, 0.75, 0.60,
-											/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
-											/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0		};
+//														i     s     a     r     c     R     T     A     v	  h		P
+const double ATTACK_VALUES_MATRIX[11][11] = {	/*i*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
+												/*s*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70,
+												/*a*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70,
+												/*r*/	0.90, 0.85, 0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70,
+												/*c*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
+												/*R*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80,
+												/*T*/	0.0,  0.00, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.00, 0.00, 0.90,
+												/*A*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40,
+												/*v*/	0.00, 0.00, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.00, 0.00, 0.60,
+												/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
+												/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0		};
+
+														//		i     s     a     r     c     R     T     A     v     h     P
+const double SECONDARY_ATTACK_VALUES_MATRIX[11][11] = {	/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10,
+														/*s*/	0.60, 0.55, 0.08, 0.12, 0.18, 0.30, 0.02, 0.08, 0.08, 0.12, 0.12,
+														/*a*/	0.70, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35,
+														/*r*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
+														/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35,
+														/*R*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
+														/*T*/	0.85, 0.80, 0.15, 0.25, 0.40, 0.50, 0.10, 0.20, 0.15, 0.25, 0.40,
+														/*A*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
+														/*v*/	0.65, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.55, 0.75, 0.35,
+														/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,
+														/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0			};
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Needs defaults to catch error!!!!
-double consultAttackValuesChart(char attackerType, char defenderType)			
+double consultAttackValuesChart(char attackerType, char defenderType, bool& isAmmoUsed, int AmmoAvailable)
 {
+	//Assume ammo is not used until told otherwise.
+	isAmmoUsed = false;
+
 	int x = -1;
 	int y = -1;
 
@@ -162,8 +182,25 @@ double consultAttackValuesChart(char attackerType, char defenderType)
 		return -1;
 	}
 
-	return ATTACK_VALUES_MATRIX[y][x];
+	double attackScore = 0;
+
+	//If ammo is available and the main weapon is stronger than secondary in this case, use it.
+	//Otherwise, use secondary and no ammo needed.
+	if (AmmoAvailable > 0 && ATTACK_VALUES_MATRIX[y][x] > SECONDARY_ATTACK_VALUES_MATRIX[y][x])
+	{
+		isAmmoUsed = true;
+		attackScore = ATTACK_VALUES_MATRIX[y][x];
+	}
+	else
+	{
+		isAmmoUsed = false;
+		attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+	}
+
+	return attackScore;
+
 }
+
 
 //Return of -1 indicates the minion requested does not exist.
 int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
@@ -399,15 +436,20 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 
 //Tells us how an attacker would perform against an enemy. Useful for actual attack or calculation - doesn't actually deal damage.
 //Returns a number between 0 - 100 - actual health, not percent.
-double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion)
+//Also sets wouldAmmoBeUsed so caller can use for actual damage calcs and then subtract ammo if needed
+double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool & wouldAmmoBeUsed)
 {
+	//This will be immediately reset but we'll set it anyway.
+
+	int ammoAvailable = attackingMinion->currentAmmo;
+
 	//First find attacking fire power. 
-	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type);
+	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type, wouldAmmoBeUsed, ammoAvailable);
 	attackerFirePower = attackerFirePower * attackingMinion->calculateVetBonus();
 
 	//Calculate defense factor. If air unit it remains 1.
-	double defenseFactor = Board[defendingMinion->locationX][defendingMinion->locationY].defenseFactor;
-	if (defendingMinion->domain != air)
+	double defenseFactor = 1;
+	if (defendingMinion->domain != air && defendingMinion->domain != helo)
 	{
 		defenseFactor = Board[defendingMinion->locationX][defendingMinion->locationY].defenseFactor;
 	}
@@ -793,7 +835,8 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	int distanceY = 0;
 
 	//Transport cannot attack so its attack field is 0.
-	if (cursor.selectMinionPointer->type == transport) 
+	//If out of ammo and no secondary, attack field is 0.
+	if (cursor.selectMinionPointer->type == transport || (cursor.selectMinionPointer->currentAmmo == 0 && cursor.selectMinionPointer->hasSecondaryWeapon != true))
 	{
 		return 1;
 	}
@@ -862,7 +905,7 @@ int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, i
 {
 	if (treasury[playerFlag] >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
 	{
-		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0, -1);
+		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0, -1, -1);
 		treasury[playerFlag] -= consultMinionCostChart(inputType, Board[inputX][inputY].symbol);
 		return 0;
 	}
@@ -871,7 +914,7 @@ int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, i
 	
 }
 
-int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel)
+int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputAmmo)
 {
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -879,7 +922,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel);
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel, inputAmmo);
 			if (minionRoster[i] != NULL)
 			{
 				minionRoster[i]->status = (minionStatus)status;
@@ -1188,9 +1231,14 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	}																																																			//Also, if artillery type, cannot attack if it's actually moved that turn.				
 	
 	
+	bool isAmmoUsed = false;
+	//Decrease defender's health by attack value. Decrease ammo as needed.
+	defendingMinion->health -= calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed);
+	if (isAmmoUsed == true)
+	{
+		attackingMinion->currentAmmo--;
+	}
 
-	//Decrease defender's health by attack value.
-	defendingMinion->health -= calculateDamageDealt(attackingMinion, defendingMinion);
 		
 	if (defendingMinion->health < 5)
 	{
@@ -1208,17 +1256,16 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		{
 			//If defender still alive, then perform defensive counterfire.
 			//Same calculations as above - includes veterancy
-			double defenderFirePower = consultAttackValuesChart(defendingMinion->type, attackingMinion->type);	
-			defenderFirePower = defenderFirePower * defendingMinion->calculateVetBonus();
+			bool isAmmoUsed = false;
+		
+			attackingMinion->health -= calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed);
 			
-			//If attacker is air unit it doesn't get terrain bonus
-			double attackerDefenseFactor = 1;
-			if (attackingMinion->domain != air)
+			if (isAmmoUsed == true)
 			{
-				attackerDefenseFactor = Board[attackingMinion->locationX][attackingMinion->locationY].defenseFactor;
+				defendingMinion->currentAmmo--;
 			}
-			attackerDefenseFactor = attackerDefenseFactor * attackingMinion->calculateVetBonus();
-			attackingMinion->health -= defenderFirePower * defendingMinion->health / attackerDefenseFactor;
+
+
 		}	
 
 	if (attackingMinion->health < 5)			//The attacker can be destroyed too!
@@ -1351,10 +1398,18 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 		//If it's a minion you own and it's not being transported
 		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->transporter == NULL)
 		{
-			if (minionRoster[i]->domain == air) 
+			if ( minionRoster[i]->domain == helo)
 			{
 				minionRoster[i]->currentFuel -= 2;
 				if (minionRoster[i]->currentFuel <= 0) 
+				{
+					destroyMinion(minionRoster[i], "No fuel", InputLayer);
+				}
+			}
+			if (minionRoster[i]->domain == air) 
+			{
+				minionRoster[i]->currentFuel -= 5;
+				if (minionRoster[i]->currentFuel <= 0)
 				{
 					destroyMinion(minionRoster[i], "No fuel", InputLayer);
 				}
@@ -1425,6 +1480,7 @@ int MasterBoard::resupplyMinions()
 			if (tileToExamine->controller == playerFlag && consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) != -1)
 			{
 				minionRoster[i]->currentFuel = minionRoster[i]->maxFuel;
+				minionRoster[i]->currentAmmo = minionRoster[i]->maxAmmo;
 			}
 
 			if (minionRoster[i]->type == 'P') 

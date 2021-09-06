@@ -6,10 +6,13 @@
 
 //Forward declaration for MasterBoard.
 class MasterBoard;
+
+//Status indicators are true also for transports, engineers, etc. hasfired will be true if the transport dropped a guy, for instance.
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired};
 enum RangeType {directFire, rangedFire};
 enum specialtyGroupType {normal, infantry, transport};
-enum domainType {land, air, sea};
+//Domain type is used not for terrain but everything else. Defensive bonus from terrain, fuel requirement, refuel, move through enemy units, etc.
+enum domainType {land, air, sea, helo};
 
 
 class Minion
@@ -17,7 +20,8 @@ class Minion
 	public:
 	
 	//Constructors
-	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel);
+	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment,
+		int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo);
 	Minion();
 	~Minion();
 	
@@ -32,8 +36,11 @@ class Minion
 	int attackRange = 0;
 	int visionRange = 0 ;
 	bool isCapturing = false;
+	bool hasSecondaryWeapon = false;
 	int maxFuel = 0;
 	int currentFuel = 0;
+	int currentAmmo = 0;
+	int maxAmmo = 0;
 	std::string description = "ASDASD";	//For user interface only.
 	int team = 0;
 	double health = 0;
