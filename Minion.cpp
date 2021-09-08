@@ -221,6 +221,36 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxFuel = 70;	
 		break;
 	}
+	case('f'):
+	{
+		description = "Interceptor";
+		movementRange = 10;
+		attackRange = 1;
+		visionRange = 4;
+		rangeType = directFire;
+		domain = air;
+		Image = { '\\','|','/',
+				' ','v',' ',
+				' ',' ',' ' };
+		maxFuel = 60;
+		maxAmmo = 3;
+		break;
+	}
+	case('b'):
+	{
+		description = "Bomber";
+		movementRange = 8;
+		attackRange = 1 ;
+		visionRange = 3;
+		rangeType = directFire;
+		domain = air;
+		Image = { '\\','Y','/',
+				'\'','V','\'',
+				' ',' ',' ' };
+		maxFuel = 70;
+		maxAmmo = 3;
+		break;
+	}
 	}
 
 	team = inputTeam;

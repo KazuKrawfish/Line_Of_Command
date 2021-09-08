@@ -209,6 +209,7 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 		int defenderCost = 0;
 		
 		//Determine minion costs based on types:
+		//Have to use different building inputs because consultCostChart assumes you are using a real property involved
 		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
 		{
 			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');

@@ -224,13 +224,13 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 	{
 		if (boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()].symbol == 'h')
 		{
-			waddstr(MainMenu->mywindow, "Input Minion to Buy(i,s,a,r,c,R,T,A):\n");
-			waddstr(MainMenu->mywindow, "Deselect Property (P)\n");
+			waddstr(MainMenu->mywindow, "Input Minion to Buy(i,s,a,r,c,R,T,A,P):\n");
+			waddstr(MainMenu->mywindow, "Deselect Property (p)\n");
 		}
 		if (boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()].symbol == 'A')
 		{
-			waddstr(MainMenu->mywindow, "Input Minion to Buy(v,h):\n");
-			waddstr(MainMenu->mywindow, "Deselect Property (P)\n");
+			waddstr(MainMenu->mywindow, "Input Minion to Buy(v,h,f,b):\n");
+			waddstr(MainMenu->mywindow, "Deselect Property (p)\n");
 		}
 	
 	}
@@ -239,12 +239,12 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 		if (requestedMinionToBuy == '!')
 		{
 			waddstr(MainMenu->mywindow, "Can't afford, try another symbol.\n");
-			waddstr(MainMenu->mywindow, "Input Minion to Buy | Deselect Property (P)\n");
+			waddstr(MainMenu->mywindow, "Input Minion to Buy | Deselect Property (p)\n");
 		}
 		else if (requestedMinionToBuy == '?')
 		{
 			waddstr(MainMenu->mywindow, "Invalid input. Try another symbol.\n");
-			waddstr(MainMenu->mywindow, "Input Minion to Buy | Deselect Property (P)\n");
+			waddstr(MainMenu->mywindow, "Input Minion to Buy | Deselect Property (p)\n");
 			
 		}
 		else
