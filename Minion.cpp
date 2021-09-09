@@ -103,9 +103,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	{
 		description = "Anti-Air";
 		movementRange = 6;
-		attackRange = 1;
+		attackRange = 3;
 		visionRange = 3;
-		rangeType = directFire;
+		rangeType = hybridRange;
 		specialtyGroup = normal;
 		Image = {		'\\','\\','A',
 						'=','=','=',
