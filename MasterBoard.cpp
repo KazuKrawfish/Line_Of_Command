@@ -1,3 +1,6 @@
+//Tile needs "appearsWithinRange"
+
+
 #include "MasterBoard.hpp"
 #include "Cursor.hpp"
 #include <string>
@@ -68,33 +71,33 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
 //														i     s     a     r     c     R     T     A     v	  h		P  	  f		b
 const double ATTACK_VALUES_MATRIX[13][13] = {	/*i*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,
-												/*s*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,
-												/*a*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,
-												/*r*/	0.90, 0.85, 0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70, 0,	0,
-												/*c*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,
-												/*R*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,
-												/*T*/	0.0,  0.00, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.00, 0.00, 0.90, 0,	0,
-												/*A*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	0.60, 0.70,
-												/*v*/	0.00, 0.00, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.00, 0.00, 0.60, 0,	0,
-												/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,
-												/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,
-												/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.80, 1.0,	0,	  0.60,	0.70,
-												/*b*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0 };
+/*s*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,
+/*a*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,
+/*r*/	0.90, 0.85, 0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70, 0,	0,
+/*c*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,
+/*R*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,
+/*T*/	0.0,  0.00, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.00, 0.00, 0.90, 0,	0,
+/*A*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	0.60, 0.70,
+/*v*/	0.00, 0.00, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.00, 0.00, 0.60, 0,	0,
+/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,
+/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,
+/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.80, 1.0,	0,	  0.60,	0.70,
+/*b*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0 };
 
-														//		i     s     a     r     c     R     T     A     v     h     P		f  b
+//		i     s     a     r     c     R     T     A     v     h     P		f  b
 const double SECONDARY_ATTACK_VALUES_MATRIX[13][13] = {	/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10,	0, 0,
-														/*s*/	0.60, 0.55, 0.08, 0.12, 0.18, 0.30, 0.02, 0.08, 0.08, 0.12, 0.12,	0, 0,
-														/*a*/	0.70, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35,	0, 0,
-														/*r*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0, 0,
-														/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35,	0, 0,
-														/*R*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0, 0,
-														/*T*/	0.85, 0.80, 0.15, 0.25, 0.40, 0.50, 0.10, 0.20, 0.15, 0.25, 0.40,	0, 0,
-														/*A*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40,	0, 0,
-														/*v*/	0.65, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.55, 0.75, 0.35,	0, 0,
-														/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0, 0,
-														/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0,	0,
-														/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.40, 0.5,	0,		0.30,	0.35,
-														/*b*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0,	0 };
+/*s*/	0.60, 0.55, 0.08, 0.12, 0.18, 0.30, 0.02, 0.08, 0.08, 0.12, 0.12,	0, 0,
+/*a*/	0.70, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35,	0, 0,
+/*r*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0, 0,
+/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35,	0, 0,
+/*R*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0, 0,
+/*T*/	0.85, 0.80, 0.15, 0.25, 0.40, 0.50, 0.10, 0.20, 0.15, 0.25, 0.40,	0, 0,
+/*A*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40,	0, 0,
+/*v*/	0.65, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.55, 0.75, 0.35,	0, 0,
+/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0, 0,
+/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0,	0,
+/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.40, 0.5,	0,		0.30,	0.35,
+/*b*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,		0,	0 };
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Needs defaults to catch error!!!!
@@ -219,7 +222,7 @@ double consultAttackValuesChart(char attackerType, char defenderType, bool& isAm
 	{
 		//This trusts the setAttackRange function to set possible attack range based on hybrid movement status.
 		//If hybrid and moved, used secondary chart for hybrid. Don't need ammo. This is direct attack.
-		if (inputStatus == hasmovedhasntfired)	
+		if (inputStatus == hasmovedhasntfired)
 		{
 			isAmmoUsed = false;
 
@@ -359,6 +362,135 @@ MasterBoard::MasterBoard()
 	}
 }
 
+//This service builds a parallel set of distances that ignores enemy units that you cannot see.
+//Used for doing "traps".
+int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char minionType)
+{
+
+	//If this is first call, reset myPathMap
+	if (isItInitialCall == true)
+	{
+		//Clear myPathMap
+		for (int i = 0; i < BOARD_WIDTH; i++)
+		{
+			for (int j = 0; j < BOARD_HEIGHT; j++)
+			{
+				myPathMap[i][j].distanceFromMinion = -1;
+				myPathMap[i][j].wasVisited = false;
+			}
+		}
+	}
+
+	if (Board[x][y].consultMovementChart(minionType, Board[x][y].symbol) == 99)
+		return 0;
+
+
+
+	//Check each neighbor to find lowest path FROM minion to this square, from among them.
+	int lowestNeighboringPath = 99999;
+	if (x - 1 >= 0 && myPathMap[x - 1][y].wasVisited == true)
+	{
+		if (myPathMap[x - 1][y].distanceFromMinion != -1 && myPathMap[x - 1][y].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = myPathMap[x - 1][y].distanceFromMinion;
+
+		}
+	}
+	if (y - 1 >= 0 && myPathMap[x][y - 1].wasVisited == true)
+	{
+		if (myPathMap[x][y - 1].distanceFromMinion != -1 && myPathMap[x][y - 1].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = myPathMap[x][y - 1].distanceFromMinion;
+
+		}
+	}
+	if (x + 1 < BOARD_WIDTH && myPathMap[x + 1][y].wasVisited == true)
+	{
+		if (myPathMap[x + 1][y].distanceFromMinion != -1 && myPathMap[x + 1][y].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = myPathMap[x + 1][y].distanceFromMinion;
+		}
+	}
+	if (y + 1 < BOARD_HEIGHT && myPathMap[x][y + 1].wasVisited == true)
+	{
+		if (myPathMap[x][y + 1].distanceFromMinion != -1 && myPathMap[x][y + 1].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = myPathMap[x][y + 1].distanceFromMinion;
+
+		}
+	}
+
+	//We now have lowest path to objective from visited neighbors.
+	//If no visited neighbors, lowestNeighboringPath should be 99999. This means we can't get here from minion.
+	if (isItInitialCall == true)
+	{
+		//Initialize start point
+		//Cost to get to here from here 0.
+		myPathMap[x][y].distanceFromMinion = 0;
+	}
+	else if (lowestNeighboringPath == 99999)
+	{   //It's physically impossible to get here from minion
+		myPathMap[x][y].distanceFromMinion = -1;
+	}
+	else
+	{
+		myPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(minionType, Board[x][y].symbol);
+	}
+
+	myPathMap[x][y].wasVisited = true;
+
+
+	//Now call the function for eaching neighbor that is passable (not 99 move cost or off board), and hasn't been visited, or
+	//is passable,  (And has been visited) and has a higher (path score - that place's cost):
+	//This is to either do a first look or to update a square that has a higher current score than ours
+	//Also no enemies can be here
+	//This does not include air and non-air. They can pass through each other.
+	if (x - 1 >= 0)
+	{
+		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
+		if ((Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && myPathMap[x - 1][y].wasVisited != true) ||
+			(Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && (myPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
+			if (Board[x - 1][y].withinVision == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
+			{
+				buildApparentPathMap(false, x - 1, y, minionType);
+			}
+	}
+
+	if (y - 1 >= 0)
+	{
+		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
+		if ((Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && myPathMap[x][y - 1].wasVisited != true) || (Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && (myPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol)) > myPathMap[x][y].distanceFromMinion))
+			if (Board[x][y - 1].withinVision == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
+			{
+				buildApparentPathMap(false, x, y - 1, minionType);
+			}
+	}
+
+	if (x + 1 < BOARD_WIDTH)
+	{
+		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
+		if ((Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && myPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && (myPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
+			if (Board[x + 1][y].withinVision == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
+			{
+				buildApparentPathMap(false, x + 1, y, minionType);
+			}
+	}
+
+	if (y + 1 < BOARD_HEIGHT)
+	{
+		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
+		if ((Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && myPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && (myPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol)) > myPathMap[x][y].distanceFromMinion))
+			if (Board[x][y + 1].withinVision == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
+			{
+				buildApparentPathMap(false, x, y + 1, minionType);
+			}
+	}
+
+
+	return 1;
+}
+
+
 int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 {
 
@@ -491,7 +623,7 @@ double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defend
 	int ammoAvailable = attackingMinion->currentAmmo;
 
 	//First find attacking fire power. 
-	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type, wouldAmmoBeUsed, ammoAvailable,attackingMinion->status, attackingMinion->rangeType);
+	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type, wouldAmmoBeUsed, ammoAvailable, attackingMinion->status, attackingMinion->rangeType);
 	attackerFirePower = attackerFirePower * attackingMinion->calculateVetBonus();
 
 	//Calculate defense factor. If air unit it remains 1.
@@ -624,6 +756,29 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 		}
 	}
 
+	//Then re-build the path map for apparent path.
+	buildApparentPathMap(true, inputX, inputY, cursor.selectMinionPointer->type);
+
+	//Set the minion's tile to within Range, always.
+	Board[inputX][inputY].withinApparentRange = true;
+
+	//Go thru entire board and set withinRange or not
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			//If the current tile DOES not have minion on top (IE we will be able to move there)
+			//Also must be within range
+			//Also must have enough fuel
+			//Again, here if the tile is not visible we are pretending to allow movement.
+			if (myPathMap[x][y].distanceFromMinion != -1 && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
+				if (Board[x][y].withinVision == false || Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag)
+				{
+					Board[x][y].withinApparentRange = true;
+
+				}
+		}
+	}
 
 
 
@@ -971,7 +1126,7 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 		}
 		else //If minion has moved but hasn't fired, and is direct combat, display attack range.
 			//And is not transport
-			if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire || cursor.selectMinionPointer->rangeType == hybridRange )&& cursor.selectMinionPointer->specialtyGroup != transport)
+			if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire || cursor.selectMinionPointer->rangeType == hybridRange) && cursor.selectMinionPointer->specialtyGroup != transport)
 			{
 				setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 				return 0;
@@ -995,12 +1150,179 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 	return 1;
 }
 
+
+//Must find the closest valid tile where we can move, other than inputX/inputY.
+int MasterBoard::validatePath(int inputX, int inputY)
+{
+
+	Minion* selectedMinion = cursor.selectMinionPointer;
+
+	if (cursor.getX() == inputX && cursor.getY() == inputY)
+		return 0;
+
+	//Check each adjacent space. If it is within the cursor path and doesn't have enemy minion, turn cursorPath here off, and return its validatePath value.
+	//If it does have an enemy minion, return 1.
+
+	if (inputX > 0 && Board[inputX - 1][inputY].withinCursorPath == true)
+	{
+		if (Board[inputX - 1][inputY].hasMinionOnTop == true && Board[inputX - 1][inputY].minionOnTop->team != playerFlag)
+		{
+			//Find old address of the minion
+			int oldX = selectedMinion->locationX;
+			int oldY = selectedMinion->locationY;
+
+			//Clear the old tile, set the new tile.
+			Board[oldX][oldY].hasMinionOnTop = false;
+			Board[inputX][inputY].hasMinionOnTop = true;
+
+			Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+			Board[oldX][oldY].minionOnTop = NULL;
+
+			//Reset capture points for tile.
+			Board[oldX][oldY].capturePoints = 20;
+
+			//"Move" the minion to the new location.
+			selectedMinion->locationX = inputX;
+			selectedMinion->locationY = inputY;
+
+			cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
+
+			cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
+			deselectMinion();
+
+			setVisionField();
+			return 1;
+		}
+		else
+		{
+			Board[inputX - 1][inputY].withinCursorPath = false; // Prevent infinite recursion.
+			return validatePath(inputX - 1, inputY);
+		}
+	}
+
+	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].withinCursorPath == true)
+	{
+		if (Board[inputX + 1][inputY].hasMinionOnTop == true && Board[inputX + 1][inputY].minionOnTop->team != playerFlag)
+		{
+			//Find old address of the minion
+			int oldX = selectedMinion->locationX;
+			int oldY = selectedMinion->locationY;
+
+			//Clear the old tile, set the new tile.
+			Board[oldX][oldY].hasMinionOnTop = false;
+			Board[inputX][inputY].hasMinionOnTop = true;
+
+			Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+			Board[oldX][oldY].minionOnTop = NULL;
+
+			//Reset capture points for tile.
+			Board[oldX][oldY].capturePoints = 20;
+
+			//"Move" the minion to the new location.
+			selectedMinion->locationX = inputX;
+			selectedMinion->locationY = inputY;
+
+			cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
+
+			cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
+			deselectMinion();
+
+			setVisionField();
+			return 1;
+		}
+		else
+		{
+			Board[inputX + 1][inputY].withinCursorPath = false; // Prevent infinite recursion.
+			return validatePath(inputX + 1, inputY);
+		}
+	}
+
+	if (inputY > 0 && Board[inputX][inputY - 1].withinCursorPath == true)
+	{
+		if (Board[inputX][inputY - 1].hasMinionOnTop == true && Board[inputX][inputY - 1].minionOnTop->team != playerFlag)
+		{
+			//Find old address of the minion
+			int oldX = selectedMinion->locationX;
+			int oldY = selectedMinion->locationY;
+
+			//Clear the old tile, set the new tile.
+			Board[oldX][oldY].hasMinionOnTop = false;
+			Board[inputX][inputY].hasMinionOnTop = true;
+
+			Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+			Board[oldX][oldY].minionOnTop = NULL;
+
+			//Reset capture points for tile.
+			Board[oldX][oldY].capturePoints = 20;
+
+			//"Move" the minion to the new location.
+			selectedMinion->locationX = inputX;
+			selectedMinion->locationY = inputY;
+
+			cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
+
+			cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
+			deselectMinion();
+
+			setVisionField();
+			return 1;
+		}
+		else
+		{
+			Board[inputX][inputY - 1].withinCursorPath = false; // Prevent infinite recursion.
+			return validatePath(inputX, inputY - 1);
+		}
+	}
+
+	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].withinCursorPath == true)
+	{
+		if (Board[inputX][inputY + 1].hasMinionOnTop == true && Board[inputX][inputY + 1].minionOnTop->team != playerFlag)
+		{
+			//Find old address of the minion
+			int oldX = selectedMinion->locationX;
+			int oldY = selectedMinion->locationY;
+
+			//Clear the old tile, set the new tile.
+			Board[oldX][oldY].hasMinionOnTop = false;
+			Board[inputX][inputY].hasMinionOnTop = true;
+
+			Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+			Board[oldX][oldY].minionOnTop = NULL;
+
+			//Reset capture points for tile.
+			Board[oldX][oldY].capturePoints = 20;
+
+			//"Move" the minion to the new location.
+			selectedMinion->locationX = inputX;
+			selectedMinion->locationY = inputY;
+
+			cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
+
+			cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
+			deselectMinion();
+
+			setVisionField();
+			return 1;
+		}
+		else
+		{
+			Board[inputX][inputY + 1].withinCursorPath = false; // Prevent infinite recursion.
+			return validatePath(inputX, inputY + 1);
+		}
+	}
+
+
+}
+
+
+
 int MasterBoard::moveMinion(int inputX, int inputY)
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
 
 	//First make sure the move is legal. Must be within range, must not have moved.
-	if (Board[inputX][inputY].withinRange == false)
+	//If in "apparent range" that means there's an enemy hiding there, we proceed until validatePath.
+	if (Board[inputX][inputY].withinRange == false && Board[inputX][inputY].withinApparentRange == false)
 	{
 		return 1;
 	}
@@ -1014,7 +1336,9 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	}
 
 	//If there is a minion below cursor AND it's not this exact minion, movement failure
-	if (Board[cursor.getX()][cursor.getY()].hasMinionOnTop == true
+	//Again, this is for visible tiles.
+	if (Board[inputX][inputY].hasMinionOnTop == true
+		&& Board[inputX][inputY].withinVision == true
 		&& !(cursor.selectMinionPointer->locationX == cursor.getX()
 			&& cursor.selectMinionPointer->locationY == cursor.getY()))
 	{
@@ -1030,6 +1354,13 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 		deselectMinion();
 		return 0;
 	}
+
+
+	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
+	//validatePath will actually move the minion, so we need to return afterwards.
+	if (validatePath(inputX, inputY) == 1)
+		return 0;
+
 
 	//Otherwise move.
 
@@ -1208,6 +1539,7 @@ int MasterBoard::deselectMinion()
 		{
 			Board[x][y].withinRange = false;
 			Board[x][y].withinCursorPath = false;
+			Board[x][y].withinApparentRange = false;
 		}
 	}
 
@@ -1231,7 +1563,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 
 
 	//Need to ensure we can't attack if we can't do any damage.
-	if (calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed ) <= 0)
+	if (calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed) <= 0)
 		return 1;
 
 
@@ -1278,7 +1610,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		{
 			//If defender still alive, then perform defensive counterfire.
 			//Same calculations as above - includes veterancy
-			 isAmmoUsed = false;
+			isAmmoUsed = false;
 
 			attackingMinion->health -= calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed);
 
@@ -1517,4 +1849,3 @@ int MasterBoard::resupplyMinions()
 
 	return 0;
 }
-

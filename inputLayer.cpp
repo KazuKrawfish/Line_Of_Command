@@ -401,7 +401,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 					mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, '*' + COLOR_PAIR(moveRangeSymbol));
 				}
 				else 
-					if (boardToPrint->Board[j][i].withinRange == true && minionVisibleStatus == showMinions)
+					if (boardToPrint->Board[j][i].withinApparentRange == true && minionVisibleStatus == showMinions)
 					{
 						mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ' ' + COLOR_PAIR(moveRangeSymbol));
 					}

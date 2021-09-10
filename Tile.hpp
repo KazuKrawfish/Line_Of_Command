@@ -34,6 +34,7 @@ public:
 		minionOnTop = NULL;
 		withinRange = false;
 		withinVision = false;
+		withinApparentRange = false;
 		minionOnTop = NULL;
 		controller = 0;
 		production = 0;
@@ -186,8 +187,9 @@ public:
 	char symbol;
 	bool hasMinionOnTop;
 	Minion* minionOnTop;
-	bool withinRange;
-	bool withinVision;
+	bool withinRange = false;
+	bool withinVision = false;
+	bool withinApparentRange = false;
 	std::string description;
 	double defenseFactor;		//Higher is better (ie mountains are 1.4)
 	int capturePoints;

@@ -27,6 +27,7 @@ public:
 	int BOARD_WIDTH = 15;
 	int BOARD_HEIGHT = 20;
 	int buildPath(bool isItInitialCall, int x, int y, char minionType);
+	int buildApparentPathMap(bool isItInitialCall, int x, int y, char minionType);
 
 	std::vector<int> treasury;	//1 extra "player" so that treasury[playerFlag] behaves as expected. (There is no player 0.)
 	
@@ -46,6 +47,7 @@ public:
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer);
 	int pickUpMinion(int inputX, int inputY);
+	int validatePath(int inputX, int inputY);
 	int setCursorPath(bool firstTime, int inputX, int inputY);
 	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep);
 	int dropOffMinion();
