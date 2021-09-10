@@ -1196,7 +1196,7 @@ int MasterBoard::validatePath(int inputX, int inputY)
 		}
 		else
 		{
-			Board[inputX - 1][inputY].withinCursorPath = false; // Prevent infinite recursion.
+			Board[inputX ][inputY].withinCursorPath = false; // Prevent infinite recursion.
 			return validatePath(inputX - 1, inputY);
 		}
 	}
@@ -1233,7 +1233,7 @@ int MasterBoard::validatePath(int inputX, int inputY)
 		}
 		else
 		{
-			Board[inputX + 1][inputY].withinCursorPath = false; // Prevent infinite recursion.
+			Board[inputX][inputY].withinCursorPath = false; // Prevent infinite recursion.
 			return validatePath(inputX + 1, inputY);
 		}
 	}
@@ -1270,7 +1270,7 @@ int MasterBoard::validatePath(int inputX, int inputY)
 		}
 		else
 		{
-			Board[inputX][inputY - 1].withinCursorPath = false; // Prevent infinite recursion.
+			Board[inputX][inputY ].withinCursorPath = false; // Prevent infinite recursion.
 			return validatePath(inputX, inputY - 1);
 		}
 	}
@@ -1307,7 +1307,7 @@ int MasterBoard::validatePath(int inputX, int inputY)
 		}
 		else
 		{
-			Board[inputX][inputY + 1].withinCursorPath = false; // Prevent infinite recursion.
+			Board[inputX][inputY ].withinCursorPath = false; // Prevent infinite recursion.
 			return validatePath(inputX, inputY + 1);
 		}
 	}
@@ -1566,6 +1566,12 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	//Need to ensure we can't attack if we can't do any damage.
 	if (calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed) <= 0)
 		return 1;
+
+	
+	//Can't attack if you can't see.
+	if (Board[inputX][inputY].withinVision == false)
+		return 1;
+
 
 
 	bool defenderAlive = true;
