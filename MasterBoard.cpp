@@ -809,10 +809,10 @@ int MasterBoard::setCursorPath(bool firstTime, int inputX, int inputY)
 	int lowestCostToSelectedMinion = myPathMap[inputX][inputY].distanceFromMinion;
 	int choice = 0;
 
-	if (Board[inputX][inputY].withinRange == true)
+	if (Board[inputX][inputY].withinApparentRange == true)
 		Board[inputX][inputY].withinCursorPath = true;
 
-	if (Board[inputX][inputY].withinRange == false && firstTime == true)
+	if (Board[inputX][inputY].withinApparentRange == false && firstTime == true)
 	{
 		return 1;
 	}
@@ -1157,6 +1157,7 @@ int MasterBoard::validatePath(int inputX, int inputY)
 
 	Minion* selectedMinion = cursor.selectMinionPointer;
 
+	//If we have reached the cursor, return.
 	if (cursor.getX() == inputX && cursor.getY() == inputY)
 		return 0;
 
@@ -1358,7 +1359,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 
 	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
 	//validatePath will actually move the minion, so we need to return afterwards.
-	if (validatePath(inputX, inputY) == 1)
+	if (validatePath(cursor.selectMinionPointer->locationX,cursor.selectMinionPointer->locationY) == 1)
 		return 0;
 
 
