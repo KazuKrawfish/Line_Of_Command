@@ -40,6 +40,7 @@ public:
 		production = 0;
 		capturePoints = 20;
 		withinCursorPath = false;
+		hasBeenValidated = false;
 		//Image already initialized
 		
 	}
@@ -196,6 +197,7 @@ public:
 	int locationX;
 	int locationY;
 	bool withinCursorPath = false;
+	bool hasBeenValidated = false;
 	std::string Image =	{	'.','.','.',
 							'.','.','.',
 							'.','.','.' };

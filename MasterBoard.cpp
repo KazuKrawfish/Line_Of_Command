@@ -739,16 +739,18 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 	//Set the minion's tile to within Range, always.
 	Board[inputX][inputY].withinRange = true;
 
-	//Go thru entire board and set withinRange or not
+	//Go thru entire board and set withinRange or nots
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
 			//If the current tile DOES not have minion on top (IE we will be able to move there)
+			//May also be different domain
 			//Also must be within range
 			//Also must have enough fuel
 			if (myPathMap[x][y].distanceFromMinion != -1 && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
-				if (Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag)
+				if (Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag 
+					|| (Board[x][y].minionOnTop->domain == air && cursor.selectMinionPointer->domain != air )  || (Board[x][y].minionOnTop->domain != air && cursor.selectMinionPointer->domain == air)  )
 				{
 					Board[x][y].withinRange = true;
 
@@ -809,7 +811,7 @@ int MasterBoard::setCursorPath(bool firstTime, int inputX, int inputY)
 	int lowestCostToSelectedMinion = myPathMap[inputX][inputY].distanceFromMinion;
 	int choice = 0;
 
-	if (Board[inputX][inputY].withinApparentRange == true)
+	if (Board[inputX][inputY].withinApparentRange == true || Board[inputX][inputY].withinRange == true)
 		Board[inputX][inputY].withinCursorPath = true;
 
 	if (Board[inputX][inputY].withinApparentRange == false && firstTime == true)
@@ -1152,165 +1154,169 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 
 
 //Must find the closest valid tile where we can move, other than inputX/inputY.
-int MasterBoard::validatePath(int inputX, int inputY)
+//Return 0 means successfully made it to location
+//Return 1 means we dropped prematurely at this input location.
+//Return 2 means we were blocked AND had to return without dropping at all.
+int MasterBoard::validatePath(int & inputX, int &inputY)
 {
-
+	bool madeItToTheEnd = false;
+	bool hitEnemy = false;
 	Minion* selectedMinion = cursor.selectMinionPointer;
+	
+	int currentX = inputX;
+	int currentY = inputY;
 
-	//If we have reached the cursor, return.
-	if (cursor.getX() == inputX && cursor.getY() == inputY)
-		return 0;
+	int potentialDropX = inputX;
+	int potentialDropY = inputY;
+
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			Board[x][y].hasBeenValidated = false;
+		}
+	}
+
+
+	Board[currentX][currentY].hasBeenValidated = true;
+	
+
 
 	//Check each adjacent space. If it is within the cursor path and doesn't have enemy minion, turn cursorPath here off, and return its validatePath value.
-	//If it does have an enemy minion, return 1.
+	//If a drop happens, return 1.
 
-	if (inputX > 0 && Board[inputX - 1][inputY].withinCursorPath == true)
+	while (madeItToTheEnd == false && hitEnemy == false) 
 	{
-		if (Board[inputX - 1][inputY].hasMinionOnTop == true && Board[inputX - 1][inputY].minionOnTop->team != playerFlag)
+		//If we have reached the cursor, do final evaluation.
+		//If there is a minion here, even though we reached end, we are "trapped", and we need to go back to potential drop.
+		if (cursor.getX() == currentX && cursor.getY() == currentY)
 		{
-			//Find old address of the minion
-			int oldX = selectedMinion->locationX;
-			int oldY = selectedMinion->locationY;
-
-			//Clear the old tile, set the new tile.
-			Board[oldX][oldY].hasMinionOnTop = false;
-			Board[inputX][inputY].hasMinionOnTop = true;
-
-			Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
-			Board[oldX][oldY].minionOnTop = NULL;
-
-			//Reset capture points for tile.
-			Board[oldX][oldY].capturePoints = 20;
-
-			//"Move" the minion to the new location.
-			selectedMinion->locationX = inputX;
-			selectedMinion->locationY = inputY;
-
-			cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
-
-			cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
-			deselectMinion();
-
-			setVisionField();
-			return 1;
+			if (Board[currentX][currentY].hasMinionOnTop == true)
+				hitEnemy = true;
+			else
+			madeItToTheEnd = true;
 		}
-		else
+		else	
+
+		//Keep evaluating spots along the path.
+	
+		//If a spot is on path AND has no minion. Potential drop, and now move evaluation there.
+		if (currentX > 0 && Board[currentX - 1][currentY].withinCursorPath == true && Board[currentX - 1][currentY].hasBeenValidated == false)
 		{
-			Board[inputX ][inputY].withinCursorPath = false; // Prevent infinite recursion.
-			return validatePath(inputX - 1, inputY);
+			if (Board[currentX - 1][currentY].hasMinionOnTop == false)
+			{
+				potentialDropX = currentX - 1;
+				potentialDropY = currentY;
+				Board[currentX - 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
+
+				//Now move currentX/Y to evaluate next box
+				currentX--;
+
+			}
+			else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
+				if ((Board[currentX - 1][currentY].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX - 1][currentY].minionOnTop->domain == air && selectedMinion->domain != air)
+					|| Board[currentX - 1][currentY].minionOnTop->team == playerFlag) 
+				{
+					Board[currentX - 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
+					//We can still proceed, but this is not a new potential drop point.
+					currentX--;
+				}
+				else 
+				{
+					hitEnemy = true;
+				}
+		}
+		else if (currentX < BOARD_WIDTH - 1 && Board[currentX + 1][currentY].withinCursorPath == true && Board[currentX + 1][currentY].hasBeenValidated == false)
+		{
+			if (Board[currentX + 1][currentY].hasMinionOnTop == false)
+			{
+				potentialDropX = currentX + 1;
+				potentialDropY = currentY;
+				Board[currentX + 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
+
+				//Now move currentX/Y to evaluate next box
+				currentX++;
+
+			}
+			else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
+				if ((Board[currentX + 1][currentY].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX + 1][currentY].minionOnTop->domain == air && selectedMinion->domain != air)
+					|| Board[currentX + 1][currentY].minionOnTop->team == playerFlag)
+				{
+					Board[currentX + 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
+					//We can still proceed, but this is not a new potential drop point.
+					currentX++;
+				}
+				else
+				{
+					hitEnemy = true;
+				}
+		}
+		else if (currentY < BOARD_HEIGHT - 1 && Board[currentX][currentY + 1].withinCursorPath == true && Board[currentX ][currentY + 1].hasBeenValidated == false)
+		{
+			if (Board[currentX ][currentY + 1].hasMinionOnTop == false)
+			{
+				potentialDropX = currentX ;
+				potentialDropY = currentY + 1;
+				Board[currentX][currentY + 1].hasBeenValidated = true;	//Prevent from coming back here
+
+				//Now move currentX/Y to evaluate next box
+				currentY++;
+
+			}
+			else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
+				if ((Board[currentX ][currentY + 1].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX ][currentY+ 1].minionOnTop->domain == air && selectedMinion->domain != air)
+					|| Board[currentX][currentY+ 1].minionOnTop->team == playerFlag)
+				{
+					Board[currentX][currentY+ 1].hasBeenValidated = true;	//Prevent from coming back here
+					//We can still proceed, but this is not a new potential drop point.
+					currentY++;
+				}
+				else
+				{
+					hitEnemy = true;
+				}
+		}
+		else if (currentY > 0 && Board[currentX][currentY - 1].withinCursorPath == true && Board[currentX][currentY - 1].hasBeenValidated == false)
+		{
+			if (Board[currentX][currentY - 1].hasMinionOnTop == false)
+			{
+				potentialDropX = currentX;
+				potentialDropY = currentY - 1;
+				Board[currentX][currentY - 1].hasBeenValidated = true;	//Prevent from coming back here
+
+				//Now move currentX/Y to evaluate next box
+				currentY--;
+
+			}
+			else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
+				if ((Board[currentX][currentY - 1].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX][currentY - 1].minionOnTop->domain == air && selectedMinion->domain != air)
+					|| Board[currentX][currentY - 1].minionOnTop->team == playerFlag)
+				{
+					Board[currentX][currentY - 1].hasBeenValidated = true;	//Prevent from coming back here
+					//We can still proceed, but this is not a new potential drop point.
+					currentY--;
+				}
+				else
+				{
+					hitEnemy = true;
+				}
 		}
 	}
 
-	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].withinCursorPath == true)
+	if (madeItToTheEnd == true)
 	{
-		if (Board[inputX + 1][inputY].hasMinionOnTop == true && Board[inputX + 1][inputY].minionOnTop->team != playerFlag)
-		{
-			//Find old address of the minion
-			int oldX = selectedMinion->locationX;
-			int oldY = selectedMinion->locationY;
-
-			//Clear the old tile, set the new tile.
-			Board[oldX][oldY].hasMinionOnTop = false;
-			Board[inputX][inputY].hasMinionOnTop = true;
-
-			Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
-			Board[oldX][oldY].minionOnTop = NULL;
-
-			//Reset capture points for tile.
-			Board[oldX][oldY].capturePoints = 20;
-
-			//"Move" the minion to the new location.
-			selectedMinion->locationX = inputX;
-			selectedMinion->locationY = inputY;
-
-			cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
-
-			cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
-			deselectMinion();
-
-			setVisionField();
-			return 1;
-		}
-		else
-		{
-			Board[inputX][inputY].withinCursorPath = false; // Prevent infinite recursion.
-			return validatePath(inputX + 1, inputY);
-		}
+		inputX = cursor.getX();
+		inputY = cursor.getY();
+		return 0;
+	}
+	else 
+	{
+		inputX = potentialDropX;
+		inputY = potentialDropY;
+		return 1;
 	}
 
-	if (inputY > 0 && Board[inputX][inputY - 1].withinCursorPath == true)
-	{
-		if (Board[inputX][inputY - 1].hasMinionOnTop == true && Board[inputX][inputY - 1].minionOnTop->team != playerFlag)
-		{
-			//Find old address of the minion
-			int oldX = selectedMinion->locationX;
-			int oldY = selectedMinion->locationY;
 
-			//Clear the old tile, set the new tile.
-			Board[oldX][oldY].hasMinionOnTop = false;
-			Board[inputX][inputY].hasMinionOnTop = true;
-
-			Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
-			Board[oldX][oldY].minionOnTop = NULL;
-
-			//Reset capture points for tile.
-			Board[oldX][oldY].capturePoints = 20;
-
-			//"Move" the minion to the new location.
-			selectedMinion->locationX = inputX;
-			selectedMinion->locationY = inputY;
-
-			cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
-
-			cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
-			deselectMinion();
-
-			setVisionField();
-			return 1;
-		}
-		else
-		{
-			Board[inputX][inputY ].withinCursorPath = false; // Prevent infinite recursion.
-			return validatePath(inputX, inputY - 1);
-		}
-	}
-
-	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].withinCursorPath == true)
-	{
-		if (Board[inputX][inputY + 1].hasMinionOnTop == true && Board[inputX][inputY + 1].minionOnTop->team != playerFlag)
-		{
-			//Find old address of the minion
-			int oldX = selectedMinion->locationX;
-			int oldY = selectedMinion->locationY;
-
-			//Clear the old tile, set the new tile.
-			Board[oldX][oldY].hasMinionOnTop = false;
-			Board[inputX][inputY].hasMinionOnTop = true;
-
-			Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
-			Board[oldX][oldY].minionOnTop = NULL;
-
-			//Reset capture points for tile.
-			Board[oldX][oldY].capturePoints = 20;
-
-			//"Move" the minion to the new location.
-			selectedMinion->locationX = inputX;
-			selectedMinion->locationY = inputY;
-
-			cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
-
-			cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
-			deselectMinion();
-
-			setVisionField();
-			return 1;
-		}
-		else
-		{
-			Board[inputX][inputY ].withinCursorPath = false; // Prevent infinite recursion.
-			return validatePath(inputX, inputY + 1);
-		}
-	}
 
 
 }
@@ -1356,13 +1362,22 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 		return 0;
 	}
 
+	inputX = selectedMinion->locationX;
+	inputY = selectedMinion->locationY;
 
 	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
 	//validatePath will actually move the minion, so we need to return afterwards.
-	if (validatePath(cursor.selectMinionPointer->locationX,cursor.selectMinionPointer->locationY) == 1)
+	validatePath(inputX, inputY);
+	
+	//If the inputX has not changed, that means we got trapped and have to stand in place. 
+	//Still counts as moving.
+	if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY)
+	{
+		cursor.selectMinionPointer->status = hasmovedhasntfired;
+		deselectMinion();
 		return 0;
-
-
+	}
+		
 	//Otherwise move.
 
 	//Find old address of the minion

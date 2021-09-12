@@ -401,8 +401,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 					mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, '*' + COLOR_PAIR(moveRangeSymbol));
 				}
 				else 
-					if (( (boardToPrint->cursor.selectMinionFlag == true && (boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToPrint->cursor.selectMinionPointer->status == gaveupmovehasntfired )&& boardToPrint->Board[j][i].withinRange == true)
-						|| (boardToPrint->cursor.selectMinionFlag == true && boardToPrint->cursor.selectMinionPointer->status == hasntmovedorfired && boardToPrint->Board[j][i].withinApparentRange == true) )&&
+					if ( (boardToPrint->cursor.selectMinionFlag == true && ( boardToPrint->Board[j][i].withinRange == true || boardToPrint->Board[j][i].withinApparentRange == true) ) &&
 						minionVisibleStatus == showMinions)
 					{
 						mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ' ' + COLOR_PAIR(moveRangeSymbol));

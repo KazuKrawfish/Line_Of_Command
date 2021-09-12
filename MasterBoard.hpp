@@ -47,7 +47,7 @@ public:
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer);
 	int pickUpMinion(int inputX, int inputY);
-	int validatePath(int inputX, int inputY);
+	int validatePath(int & inputX, int&  inputY);
 	int setCursorPath(bool firstTime, int inputX, int inputY);
 	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep);
 	int dropOffMinion();
