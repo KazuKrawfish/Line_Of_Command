@@ -65,6 +65,7 @@ public:
 	int windowLocationY = 0;
 	int playerFlag;
 	int totalNumberOfMinions;
+	bool isItSinglePlayerGame = false;
 
 private:
 

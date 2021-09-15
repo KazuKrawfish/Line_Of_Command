@@ -535,12 +535,6 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 				veryFirstTurn = false;
 			}
 
-			if (InputLayer->status == waitingForNextLocalPlayer && playerNames[boardToPlay->playerFlag] == "compie") 
-			{
-				ComputerPlayer->takeMyTurn(boardToPlay);
-				InputLayer->status = compieTakingTurn;
-			}
-
 			if (InputLayer->status == gameBoard)
 			{
 				InputLayer->gameBoardInput(&Input, boardToPlay);
@@ -562,6 +556,13 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 				InputLayer->waitingScreenInput(boardToPlay);
 			}
 
+			//Computer takes turn if it is his turn to do so.
+			//Note that this doesn't deal with "status".
+			if (playerNames[boardToPlay->playerFlag] == "compie")
+			{
+				ComputerPlayer->takeMyTurn(boardToPlay);
+				
+			}
 
 			//This prints the screen AFTER the latest input has taken effect.
 			//Is this messing with remote play? Not sure.
@@ -722,7 +723,10 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	//Determines if they print or not.
 	if (playerNames[2] == "compie")
+	{
 		ComputerPlayer->gameType = singlePlayer;
+		boardToPlay->isItSinglePlayerGame = true;
+	}
 	else ComputerPlayer->gameType = multiPlayer;
 
 	menuStatus = playingMap;
@@ -831,6 +835,15 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 	//Host will play as whoever's turn it is.
 	myPlayerName = playerNames[boardToPlay->playerFlag];
+
+	//Determines if they print or not.
+	if (playerNames[2] == "compie")
+	{
+		ComputerPlayer->gameType = singlePlayer;
+		boardToPlay->isItSinglePlayerGame = true;
+	}
+	else ComputerPlayer->gameType = multiPlayer;
+
 
 
 	menuStatus = playingMap;
