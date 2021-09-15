@@ -1,4 +1,5 @@
 #include "compie.hpp"
+#include <thread>
 #include <iostream>
 
 
@@ -579,8 +580,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 	if (minionTasking == moveTowardsEnemy) 
 	{
 		//Move cursor
-		boardToUse->cursor.XCoord = tileToTarget->locationX;
-		boardToUse->cursor.YCoord = tileToTarget->locationY;
+		boardToUse->cursor.relocate(tileToTarget->locationX, tileToTarget->locationY);
 
 		//moveMinion needs to contain all the status elements too.
 		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
@@ -606,9 +606,11 @@ int compie::moveMinions(MasterBoard* boardToUse)
 	//Go through minion Roster.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
+		
 		//Must be a valid minion, and our team's minion. Must have not moved fully yet.
 		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag && boardToUse->minionRoster[i]->status != hasfired)
 		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 			//Move cursor, then select minion, then determine tasks, then execute tasks.
 			boardToUse->cursor.XCoord = boardToUse->minionRoster[i]->locationX;
 			boardToUse->cursor.YCoord = boardToUse->minionRoster[i]->locationY;
