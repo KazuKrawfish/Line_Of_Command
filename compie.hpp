@@ -9,6 +9,7 @@
 #include "inputLayer.hpp"
 
 enum minionTaskingType { attackLocalMinion, captureLocalProperty, moveTowardsEnemy, holdPosition };
+enum typeOfGame {singlePlayer, multiPlayer};
 class inputLayer;
 class Cursor;
 
@@ -24,9 +25,10 @@ public:
 	int checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore);
 	int determineMinionTasks(MasterBoard* boardToUse);
 	int executeMinionTasks(MasterBoard* boardToUse);
-	int moveMinions(MasterBoard* boardToUse);
+	int takeMyTurn(MasterBoard* boardToUse);
 	int determineProduction(MasterBoard* boardToUse);
 
+	typeOfGame gameType = singlePlayer;
 	minionTaskingType minionTasking = holdPosition;
 	tile* closestTileAdjacentToEnemy = NULL;
 	tile* tileToTarget = NULL;

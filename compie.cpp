@@ -596,7 +596,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 	return 1;
 }
 
-int compie::moveMinions(MasterBoard* boardToUse)
+int compie::takeMyTurn(MasterBoard* boardToUse)
 {
 	//For now we re-initialize these member variables here:
 	minionTasking = holdPosition;
@@ -610,7 +610,10 @@ int compie::moveMinions(MasterBoard* boardToUse)
 		//Must be a valid minion, and our team's minion. Must have not moved fully yet.
 		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag && boardToUse->minionRoster[i]->status != hasfired)
 		{
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+			//Pauses before moving each minion for single player purposes.
+			if(gameType == singlePlayer)
+				std::this_thread::sleep_for(std::chrono::milliseconds(300));
+			
 			//Move cursor, then select minion, then determine tasks, then execute tasks.
 			boardToUse->cursor.XCoord = boardToUse->minionRoster[i]->locationX;
 			boardToUse->cursor.YCoord = boardToUse->minionRoster[i]->locationY;
@@ -623,10 +626,17 @@ int compie::moveMinions(MasterBoard* boardToUse)
 			determineMinionTasks(boardToUse);
 
 			executeMinionTasks(boardToUse);
+
+			if(gameType == singlePlayer)
+				InputLayer->printScreen(boardToUse);
 		}
 	}
 
 	determineProduction(boardToUse);
+
+	//End turn at end
+	InputLayer->status = waitingForNextLocalPlayer;
+	boardToUse->endTurn(InputLayer);
 
 	return 1;
 }

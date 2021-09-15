@@ -10,7 +10,7 @@ class mainMenu;
 
 
 
-enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer};
+enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer, compieTakingTurn};
 enum specialKey {showMinions, hideMinions};
 enum colorCode {
 	unused, fogLandTile, waterTile, fogWaterTile, player1Minion,

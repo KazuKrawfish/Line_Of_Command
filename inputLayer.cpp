@@ -633,7 +633,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	//Another working key for compie
 	if (*Input == 'c') 
 	{
-		computerPlayer->moveMinions(boardToInput);
+		computerPlayer->takeMyTurn(boardToInput);
 	}
 
 	//Need char for shift

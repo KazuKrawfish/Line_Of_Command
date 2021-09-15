@@ -1736,7 +1736,7 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 	InputLayer->status = waitingForNextLocalPlayer;
 
 	upkeep(InputLayer);
-
+	   
 	return gameTurnIncrement;
 
 }
