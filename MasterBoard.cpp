@@ -1,4 +1,5 @@
-//Tile needs "appearsWithinRange"
+//Needs masterboard to contain a new pathMap called targetingPathMap, to use for compie.
+//Tile also needs to update withinVision[playerFlag][] to an array, to handle vision changes for all units.
 
 
 #include "MasterBoard.hpp"
@@ -327,12 +328,13 @@ MasterBoard::MasterBoard()
 		Board[i].resize(BOARD_HEIGHT);
 	}
 	myPathMap.resize(BOARD_WIDTH + 1);
+	compiePathMap.resize(BOARD_WIDTH + 1);
 	for (int i = 0; i < BOARD_WIDTH; i++)
 	{
 		myPathMap[i].resize(BOARD_HEIGHT);
+		compiePathMap[i].resize(BOARD_HEIGHT);
 	}
-
-
+	
 	//Initialize cursor.
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
@@ -352,14 +354,21 @@ MasterBoard::MasterBoard()
 		treasury[i] = 0;
 	}
 
+
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
 			Board[x][y].locationX = x;
 			Board[x][y].locationY = y;
+			Board[x][y].withinVision.resize(NUMBEROFPLAYERS + 1);
+			for (int n = 0; n < NUMBEROFPLAYERS + 1; n++)
+				Board[x][y].withinVision[n] = false;
 		}
 	}
+
+
+	return;
 }
 
 //This service builds a parallel set of distances that ignores enemy units that you cannot see.
@@ -450,7 +459,7 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char m
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && myPathMap[x - 1][y].wasVisited != true) ||
 			(Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && (myPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
-			if (Board[x - 1][y].withinVision == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
+			if (Board[x - 1][y].withinVision[playerFlag] == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
 			{
 				buildApparentPathMap(false, x - 1, y, minionType);
 			}
@@ -460,7 +469,7 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char m
 	{
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && myPathMap[x][y - 1].wasVisited != true) || (Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && (myPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol)) > myPathMap[x][y].distanceFromMinion))
-			if (Board[x][y - 1].withinVision == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
+			if (Board[x][y - 1].withinVision[playerFlag] == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
 			{
 				buildApparentPathMap(false, x, y - 1, minionType);
 			}
@@ -470,7 +479,7 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char m
 	{
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && myPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && (myPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
-			if (Board[x + 1][y].withinVision == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
+			if (Board[x + 1][y].withinVision[playerFlag] == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
 			{
 				buildApparentPathMap(false, x + 1, y, minionType);
 			}
@@ -480,7 +489,7 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char m
 	{
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && myPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && (myPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol)) > myPathMap[x][y].distanceFromMinion))
-			if (Board[x][y + 1].withinVision == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
+			if (Board[x][y + 1].withinVision[playerFlag] == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
 			{
 				buildApparentPathMap(false, x, y + 1, minionType);
 			}
@@ -491,7 +500,7 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char m
 }
 
 
-int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
+int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType, std::vector<std::vector<pathSquare>> & pathMapPointer)
 {
 
 	//If this is first call, reset myPathMap
@@ -502,8 +511,8 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 		{
 			for (int j = 0; j < BOARD_HEIGHT; j++)
 			{
-				myPathMap[i][j].distanceFromMinion = -1;
-				myPathMap[i][j].wasVisited = false;
+				pathMapPointer[i][j].distanceFromMinion = -1;
+				pathMapPointer[i][j].wasVisited = false;
 			}
 		}
 	}
@@ -515,34 +524,34 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 
 	//Check each neighbor to find lowest path FROM minion to this square, from among them.
 	int lowestNeighboringPath = 99999;
-	if (x - 1 >= 0 && myPathMap[x - 1][y].wasVisited == true)
+	if (x - 1 >= 0 && pathMapPointer[x - 1][y].wasVisited == true)
 	{
-		if (myPathMap[x - 1][y].distanceFromMinion != -1 && myPathMap[x - 1][y].distanceFromMinion < lowestNeighboringPath)
+		if (pathMapPointer[x - 1][y].distanceFromMinion != -1 && pathMapPointer[x - 1][y].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = myPathMap[x - 1][y].distanceFromMinion;
+			lowestNeighboringPath = pathMapPointer[x - 1][y].distanceFromMinion;
 
 		}
 	}
-	if (y - 1 >= 0 && myPathMap[x][y - 1].wasVisited == true)
+	if (y - 1 >= 0 && pathMapPointer[x][y - 1].wasVisited == true)
 	{
-		if (myPathMap[x][y - 1].distanceFromMinion != -1 && myPathMap[x][y - 1].distanceFromMinion < lowestNeighboringPath)
+		if (pathMapPointer[x][y - 1].distanceFromMinion != -1 && pathMapPointer[x][y - 1].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = myPathMap[x][y - 1].distanceFromMinion;
+			lowestNeighboringPath = pathMapPointer[x][y - 1].distanceFromMinion;
 
 		}
 	}
-	if (x + 1 < BOARD_WIDTH && myPathMap[x + 1][y].wasVisited == true)
+	if (x + 1 < BOARD_WIDTH && pathMapPointer[x + 1][y].wasVisited == true)
 	{
-		if (myPathMap[x + 1][y].distanceFromMinion != -1 && myPathMap[x + 1][y].distanceFromMinion < lowestNeighboringPath)
+		if (pathMapPointer[x + 1][y].distanceFromMinion != -1 && pathMapPointer[x + 1][y].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = myPathMap[x + 1][y].distanceFromMinion;
+			lowestNeighboringPath = pathMapPointer[x + 1][y].distanceFromMinion;
 		}
 	}
-	if (y + 1 < BOARD_HEIGHT && myPathMap[x][y + 1].wasVisited == true)
+	if (y + 1 < BOARD_HEIGHT && pathMapPointer[x][y + 1].wasVisited == true)
 	{
-		if (myPathMap[x][y + 1].distanceFromMinion != -1 && myPathMap[x][y + 1].distanceFromMinion < lowestNeighboringPath)
+		if (pathMapPointer[x][y + 1].distanceFromMinion != -1 && pathMapPointer[x][y + 1].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = myPathMap[x][y + 1].distanceFromMinion;
+			lowestNeighboringPath = pathMapPointer[x][y + 1].distanceFromMinion;
 
 		}
 	}
@@ -553,18 +562,18 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 	{
 		//Initialize start point
 		//Cost to get to here from here 0.
-		myPathMap[x][y].distanceFromMinion = 0;
+		pathMapPointer[x][y].distanceFromMinion = 0;
 	}
 	else if (lowestNeighboringPath == 99999)
 	{   //It's physically impossible to get here from minion
-		myPathMap[x][y].distanceFromMinion = -1;
+		pathMapPointer[x][y].distanceFromMinion = -1;
 	}
 	else
 	{
-		myPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(minionType, Board[x][y].symbol);
+		pathMapPointer[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(minionType, Board[x][y].symbol);
 	}
 
-	myPathMap[x][y].wasVisited = true;
+	pathMapPointer[x][y].wasVisited = true;
 
 
 	//Now call the function for eaching neighbor that is passable (not 99 move cost or off board), and hasn't been visited, or
@@ -574,38 +583,38 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType)
 	//This does not include air and non-air. They can pass through each other.
 	if (x - 1 >= 0)
 	{
-		if ((Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && myPathMap[x - 1][y].wasVisited != true) ||
-			(Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && (myPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
+		if ((Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && pathMapPointer[x - 1][y].wasVisited != true) ||
+			(Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && (pathMapPointer[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol)) > pathMapPointer[x][y].distanceFromMinion))
 			if (Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
 			{
-				buildPath(false, x - 1, y, minionType);
+				buildPath(false, x - 1, y, minionType, pathMapPointer);
 			}
 	}
 
 	if (y - 1 >= 0)
 	{
-		if ((Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && myPathMap[x][y - 1].wasVisited != true) || (Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && (myPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol)) > myPathMap[x][y].distanceFromMinion))
+		if ((Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && pathMapPointer[x][y - 1].wasVisited != true) || (Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && (pathMapPointer[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol)) > pathMapPointer[x][y].distanceFromMinion))
 			if (Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
 			{
-				buildPath(false, x, y - 1, minionType);
+				buildPath(false, x, y - 1, minionType, pathMapPointer);
 			}
 	}
 
 	if (x + 1 < BOARD_WIDTH)
 	{
-		if ((Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && myPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && (myPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
+		if ((Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && pathMapPointer[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && (pathMapPointer[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol)) > pathMapPointer[x][y].distanceFromMinion))
 			if (Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
 			{
-				buildPath(false, x + 1, y, minionType);
+				buildPath(false, x + 1, y, minionType, pathMapPointer);
 			}
 	}
 
 	if (y + 1 < BOARD_HEIGHT)
 	{
-		if ((Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && myPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && (myPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol)) > myPathMap[x][y].distanceFromMinion))
+		if ((Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && pathMapPointer[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && (pathMapPointer[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol)) > pathMapPointer[x][y].distanceFromMinion))
 			if (Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
 			{
-				buildPath(false, x, y + 1, minionType);
+				buildPath(false, x, y + 1, minionType, pathMapPointer);
 			}
 	}
 
@@ -734,7 +743,7 @@ int MasterBoard::checkWindow()
 int MasterBoard::setRangeField(int inputX, int inputY)
 {
 	//Build a path map for this particular minion.
-	buildPath(true, inputX, inputY, cursor.selectMinionPointer->type);
+	buildPath(true, inputX, inputY, cursor.selectMinionPointer->type, myPathMap);
 
 	//Set the minion's tile to within Range, always.
 	Board[inputX][inputY].withinRange = true;
@@ -749,8 +758,8 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 			//Also must be within range
 			//Also must have enough fuel
 			if (myPathMap[x][y].distanceFromMinion != -1 && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
-				if (Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag 
-					|| (Board[x][y].minionOnTop->domain == air && cursor.selectMinionPointer->domain != air )  || (Board[x][y].minionOnTop->domain != air && cursor.selectMinionPointer->domain == air)  )
+				if (Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag
+					|| (Board[x][y].minionOnTop->domain == air && cursor.selectMinionPointer->domain != air) || (Board[x][y].minionOnTop->domain != air && cursor.selectMinionPointer->domain == air))
 				{
 					Board[x][y].withinRange = true;
 
@@ -774,7 +783,7 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 			//Also must have enough fuel
 			//Again, here if the tile is not visible we are pretending to allow movement.
 			if (myPathMap[x][y].distanceFromMinion != -1 && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
-				if (Board[x][y].withinVision == false || Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag)
+				if (Board[x][y].withinVision[playerFlag] == false || Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag)
 				{
 					Board[x][y].withinApparentRange = true;
 
@@ -861,23 +870,25 @@ int MasterBoard::setCursorPath(bool firstTime, int inputX, int inputY)
 	return 0;
 }
 
-int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY)
+int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY, int playerToSee)
 {
 	//If this is the minion starting point, we can see.
 	if (inputX == minionX && inputY == minionY)
 	{
-		Board[inputX][inputY].withinVision = true;
+		Board[inputX][inputY].withinVision[playerToSee] = true;
+
+
 	}
 
 	//As long as this tile is not a non-adjacent forest, we can see.
 	if (Board[inputX][inputY].symbol != '+' || isAdjacent(inputX, minionX, inputY, minionY))
 	{
-		Board[inputX][inputY].withinVision = true;
+		Board[inputX][inputY].withinVision[playerToSee] = true;
 	}
 
 	if (Board[inputX][inputY].controller == playerFlag)
 	{
-		Board[inputX][inputY].withinVision = true;
+		Board[inputX][inputY].withinVision[playerToSee] = true;
 	}
 
 	//If this was our last tile, we had the chance to "see it", but we won't go further.
@@ -896,7 +907,7 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 
 		if (visionLeft >= 1)
 		{
-			setIndividualVisionField(nextX, inputY, visionLeft - 1, minionX, minionY);
+			setIndividualVisionField(nextX, inputY, visionLeft - 1, minionX, minionY, playerToSee);
 		}
 	}
 
@@ -905,7 +916,7 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 		nextX = inputX + 1;
 		if (visionLeft >= 1)
 		{
-			setIndividualVisionField(nextX, inputY, visionLeft - 1, minionX, minionY);
+			setIndividualVisionField(nextX, inputY, visionLeft - 1, minionX, minionY, playerToSee);
 		}
 	}
 
@@ -916,7 +927,7 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 
 		if (visionLeft >= 1)
 		{
-			setIndividualVisionField(inputX, nextY, visionLeft - 1, minionX, minionY);
+			setIndividualVisionField(inputX, nextY, visionLeft - 1, minionX, minionY, playerToSee);
 		}
 
 	}
@@ -928,7 +939,7 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 
 		if (visionLeft >= 1)
 		{
-			setIndividualVisionField(inputX, nextY, visionLeft - 1, minionX, minionY);
+			setIndividualVisionField(inputX, nextY, visionLeft - 1, minionX, minionY, playerToSee);
 		}
 
 	}
@@ -938,7 +949,9 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 
 //Determine vision field for all minions for a player.
 //This should be called every time the turn changes, and every time  minion moves or attacks. Also any time a minion is created. 
-int MasterBoard::setVisionField()
+//Update uses observerNumber to determine who gets vision update. If another function moves a minion, it should call setVisionField
+//For that team.
+int MasterBoard::setVisionField(int observerNumber)
 {
 	//First set the board to no vision initially.
 	for (int x = 0; x < BOARD_WIDTH; x++)
@@ -946,10 +959,10 @@ int MasterBoard::setVisionField()
 		for (int y = 0; y < BOARD_HEIGHT; y++)
 		{
 			//If you do control a property, it is actually visible.
-			if (Board[x][y].controller == playerFlag)
-				Board[x][y].withinVision = true;
+			if (Board[x][y].controller == observerNumber)
+				Board[x][y].withinVision[observerNumber] = true;
 			else
-				Board[x][y].withinVision = false;
+				Board[x][y].withinVision[observerNumber] = false;
 		}
 	}
 
@@ -959,10 +972,13 @@ int MasterBoard::setVisionField()
 	{
 		if (minionRoster[i] != NULL && minionRoster[i]->transporter == NULL)
 		{
-			if (minionRoster[i]->team == playerFlag)
+			if (minionRoster[i]->team == observerNumber)
 			{
 				Minion* myMinion = minionRoster[i];
-				setIndividualVisionField(myMinion->locationX, myMinion->locationY, myMinion->visionRange, myMinion->locationX, myMinion->locationY);
+				//If minion is on mountain, add 2 to vision.
+				if (Board[myMinion->locationX][myMinion->locationY].symbol == 'M')
+					setIndividualVisionField(myMinion->locationX, myMinion->locationY, myMinion->visionRange +2, myMinion->locationX, myMinion->locationY, observerNumber);
+				else setIndividualVisionField(myMinion->locationX, myMinion->locationY, myMinion->visionRange, myMinion->locationX, myMinion->locationY, observerNumber);
 			}
 		}
 	}
@@ -1052,17 +1068,24 @@ int MasterBoard::setDropField(int inputX, int inputY)
 	}
 
 
+	//Must have a dude onboard
+	if (cursor.selectMinionPointer->minionBeingTransported == NULL) 
+	{
+		return 1;
+	}
+
+
 	//Check each adjacent tile, if it is not impassible or off map, put in range for transport.
-	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX + 1][inputY].symbol) != 99)
+	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].consultMovementChart(cursor.selectMinionPointer->minionBeingTransported->type, Board[inputX + 1][inputY].symbol) != 99)
 		Board[inputX + 1][inputY].withinRange = true;
 
-	if (inputX > 0 && Board[inputX - 1][inputY].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX - 1][inputY].symbol) != 99)
+	if (inputX > 0 && Board[inputX - 1][inputY].consultMovementChart(cursor.selectMinionPointer->minionBeingTransported->type, Board[inputX - 1][inputY].symbol) != 99)
 		Board[inputX - 1][inputY].withinRange = true;
 
-	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX][inputY + 1].symbol) != 99)
+	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].consultMovementChart(cursor.selectMinionPointer->minionBeingTransported->type, Board[inputX][inputY + 1].symbol) != 99)
 		Board[inputX][inputY + 1].withinRange = true;
 
-	if (inputY > 0 && Board[inputX][inputY - 1].consultMovementChart(cursor.selectMinionPointer->type, Board[inputX][inputY - 1].symbol) != 99)
+	if (inputY > 0 && Board[inputX][inputY - 1].consultMovementChart(cursor.selectMinionPointer->minionBeingTransported->type, Board[inputX][inputY - 1].symbol) != 99)
 		Board[inputX][inputY - 1].withinRange = true;
 
 	return 0;
@@ -1098,7 +1121,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 				{
 					Board[inputX][inputY].minionOnTop = minionRoster[i];
 				}
-				setVisionField();
+				setVisionField(playerFlag);
 				return 0;
 			}
 		}
@@ -1157,12 +1180,12 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 //Return 0 means successfully made it to location
 //Return 1 means we dropped prematurely at this input location.
 //Return 2 means we were blocked AND had to return without dropping at all.
-int MasterBoard::validatePath(int & inputX, int &inputY)
+int MasterBoard::validatePath(int& inputX, int& inputY)
 {
 	bool madeItToTheEnd = false;
 	bool hitEnemy = false;
 	Minion* selectedMinion = cursor.selectMinionPointer;
-	
+
 	int currentX = inputX;
 	int currentY = inputY;
 
@@ -1179,13 +1202,13 @@ int MasterBoard::validatePath(int & inputX, int &inputY)
 
 
 	Board[currentX][currentY].hasBeenValidated = true;
-	
+
 
 
 	//Check each adjacent space. If it is within the cursor path and doesn't have enemy minion, turn cursorPath here off, and return its validatePath value.
 	//If a drop happens, return 1.
 
-	while (madeItToTheEnd == false && hitEnemy == false) 
+	while (madeItToTheEnd == false && hitEnemy == false)
 	{
 		//If we have reached the cursor, do final evaluation.
 		//If there is a minion here, even though we reached end, we are "trapped", and we need to go back to potential drop.
@@ -1194,113 +1217,113 @@ int MasterBoard::validatePath(int & inputX, int &inputY)
 			if (Board[currentX][currentY].hasMinionOnTop == true)
 				hitEnemy = true;
 			else
-			madeItToTheEnd = true;
+				madeItToTheEnd = true;
 		}
-		else	
+		else
 
-		//Keep evaluating spots along the path.
-	
-		//If a spot is on path AND has no minion. Potential drop, and now move evaluation there.
-		if (currentX > 0 && Board[currentX - 1][currentY].withinCursorPath == true && Board[currentX - 1][currentY].hasBeenValidated == false)
-		{
-			if (Board[currentX - 1][currentY].hasMinionOnTop == false)
+			//Keep evaluating spots along the path.
+
+			//If a spot is on path AND has no minion. Potential drop, and now move evaluation there.
+			if (currentX > 0 && Board[currentX - 1][currentY].withinCursorPath == true && Board[currentX - 1][currentY].hasBeenValidated == false)
 			{
-				potentialDropX = currentX - 1;
-				potentialDropY = currentY;
-				Board[currentX - 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
-
-				//Now move currentX/Y to evaluate next box
-				currentX--;
-
-			}
-			else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
-				if ((Board[currentX - 1][currentY].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX - 1][currentY].minionOnTop->domain == air && selectedMinion->domain != air)
-					|| Board[currentX - 1][currentY].minionOnTop->team == playerFlag) 
+				if (Board[currentX - 1][currentY].hasMinionOnTop == false)
 				{
+					potentialDropX = currentX - 1;
+					potentialDropY = currentY;
 					Board[currentX - 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
-					//We can still proceed, but this is not a new potential drop point.
+
+					//Now move currentX/Y to evaluate next box
 					currentX--;
-				}
-				else 
-				{
-					hitEnemy = true;
-				}
-		}
-		else if (currentX < BOARD_WIDTH - 1 && Board[currentX + 1][currentY].withinCursorPath == true && Board[currentX + 1][currentY].hasBeenValidated == false)
-		{
-			if (Board[currentX + 1][currentY].hasMinionOnTop == false)
-			{
-				potentialDropX = currentX + 1;
-				potentialDropY = currentY;
-				Board[currentX + 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
 
-				//Now move currentX/Y to evaluate next box
-				currentX++;
-
+				}
+				else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
+					if ((Board[currentX - 1][currentY].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX - 1][currentY].minionOnTop->domain == air && selectedMinion->domain != air)
+						|| Board[currentX - 1][currentY].minionOnTop->team == playerFlag)
+					{
+						Board[currentX - 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
+						//We can still proceed, but this is not a new potential drop point.
+						currentX--;
+					}
+					else
+					{
+						hitEnemy = true;
+					}
 			}
-			else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
-				if ((Board[currentX + 1][currentY].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX + 1][currentY].minionOnTop->domain == air && selectedMinion->domain != air)
-					|| Board[currentX + 1][currentY].minionOnTop->team == playerFlag)
+			else if (currentX < BOARD_WIDTH - 1 && Board[currentX + 1][currentY].withinCursorPath == true && Board[currentX + 1][currentY].hasBeenValidated == false)
+			{
+				if (Board[currentX + 1][currentY].hasMinionOnTop == false)
 				{
+					potentialDropX = currentX + 1;
+					potentialDropY = currentY;
 					Board[currentX + 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
-					//We can still proceed, but this is not a new potential drop point.
+
+					//Now move currentX/Y to evaluate next box
 					currentX++;
-				}
-				else
-				{
-					hitEnemy = true;
-				}
-		}
-		else if (currentY < BOARD_HEIGHT - 1 && Board[currentX][currentY + 1].withinCursorPath == true && Board[currentX ][currentY + 1].hasBeenValidated == false)
-		{
-			if (Board[currentX ][currentY + 1].hasMinionOnTop == false)
-			{
-				potentialDropX = currentX ;
-				potentialDropY = currentY + 1;
-				Board[currentX][currentY + 1].hasBeenValidated = true;	//Prevent from coming back here
 
-				//Now move currentX/Y to evaluate next box
-				currentY++;
-
+				}
+				else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
+					if ((Board[currentX + 1][currentY].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX + 1][currentY].minionOnTop->domain == air && selectedMinion->domain != air)
+						|| Board[currentX + 1][currentY].minionOnTop->team == playerFlag)
+					{
+						Board[currentX + 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
+						//We can still proceed, but this is not a new potential drop point.
+						currentX++;
+					}
+					else
+					{
+						hitEnemy = true;
+					}
 			}
-			else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
-				if ((Board[currentX ][currentY + 1].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX ][currentY+ 1].minionOnTop->domain == air && selectedMinion->domain != air)
-					|| Board[currentX][currentY+ 1].minionOnTop->team == playerFlag)
+			else if (currentY < BOARD_HEIGHT - 1 && Board[currentX][currentY + 1].withinCursorPath == true && Board[currentX][currentY + 1].hasBeenValidated == false)
+			{
+				if (Board[currentX][currentY + 1].hasMinionOnTop == false)
 				{
-					Board[currentX][currentY+ 1].hasBeenValidated = true;	//Prevent from coming back here
-					//We can still proceed, but this is not a new potential drop point.
+					potentialDropX = currentX;
+					potentialDropY = currentY + 1;
+					Board[currentX][currentY + 1].hasBeenValidated = true;	//Prevent from coming back here
+
+					//Now move currentX/Y to evaluate next box
 					currentY++;
-				}
-				else
-				{
-					hitEnemy = true;
-				}
-		}
-		else if (currentY > 0 && Board[currentX][currentY - 1].withinCursorPath == true && Board[currentX][currentY - 1].hasBeenValidated == false)
-		{
-			if (Board[currentX][currentY - 1].hasMinionOnTop == false)
-			{
-				potentialDropX = currentX;
-				potentialDropY = currentY - 1;
-				Board[currentX][currentY - 1].hasBeenValidated = true;	//Prevent from coming back here
 
-				//Now move currentX/Y to evaluate next box
-				currentY--;
-
+				}
+				else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
+					if ((Board[currentX][currentY + 1].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX][currentY + 1].minionOnTop->domain == air && selectedMinion->domain != air)
+						|| Board[currentX][currentY + 1].minionOnTop->team == playerFlag)
+					{
+						Board[currentX][currentY + 1].hasBeenValidated = true;	//Prevent from coming back here
+						//We can still proceed, but this is not a new potential drop point.
+						currentY++;
+					}
+					else
+					{
+						hitEnemy = true;
+					}
 			}
-			else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
-				if ((Board[currentX][currentY - 1].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX][currentY - 1].minionOnTop->domain == air && selectedMinion->domain != air)
-					|| Board[currentX][currentY - 1].minionOnTop->team == playerFlag)
+			else if (currentY > 0 && Board[currentX][currentY - 1].withinCursorPath == true && Board[currentX][currentY - 1].hasBeenValidated == false)
+			{
+				if (Board[currentX][currentY - 1].hasMinionOnTop == false)
 				{
+					potentialDropX = currentX;
+					potentialDropY = currentY - 1;
 					Board[currentX][currentY - 1].hasBeenValidated = true;	//Prevent from coming back here
-					//We can still proceed, but this is not a new potential drop point.
+
+					//Now move currentX/Y to evaluate next box
 					currentY--;
+
 				}
-				else
-				{
-					hitEnemy = true;
-				}
-		}
+				else //If there is a minion here, but it's 1. not enemy or 2. not our domain, we can pass THROUGH here.
+					if ((Board[currentX][currentY - 1].minionOnTop->domain != air && selectedMinion->domain == air) || (Board[currentX][currentY - 1].minionOnTop->domain == air && selectedMinion->domain != air)
+						|| Board[currentX][currentY - 1].minionOnTop->team == playerFlag)
+					{
+						Board[currentX][currentY - 1].hasBeenValidated = true;	//Prevent from coming back here
+						//We can still proceed, but this is not a new potential drop point.
+						currentY--;
+					}
+					else
+					{
+						hitEnemy = true;
+					}
+			}
 	}
 
 	if (madeItToTheEnd == true)
@@ -1309,7 +1332,7 @@ int MasterBoard::validatePath(int & inputX, int &inputY)
 		inputY = cursor.getY();
 		return 0;
 	}
-	else 
+	else
 	{
 		inputX = potentialDropX;
 		inputY = potentialDropY;
@@ -1345,7 +1368,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	//If there is a minion below cursor AND it's not this exact minion, movement failure
 	//Again, this is for visible tiles.
 	if (Board[inputX][inputY].hasMinionOnTop == true
-		&& Board[inputX][inputY].withinVision == true
+		&& Board[inputX][inputY].withinVision[playerFlag] == true
 		&& !(cursor.selectMinionPointer->locationX == cursor.getX()
 			&& cursor.selectMinionPointer->locationY == cursor.getY()))
 	{
@@ -1368,7 +1391,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
 	//validatePath will actually move the minion, so we need to return afterwards.
 	validatePath(inputX, inputY);
-	
+
 	//If the inputX has not changed, that means we got trapped and have to stand in place. 
 	//Still counts as moving.
 	if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY)
@@ -1377,7 +1400,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 		deselectMinion();
 		return 0;
 	}
-		
+
 	//Otherwise move.
 
 	//Find old address of the minion
@@ -1403,7 +1426,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
 	deselectMinion();
 
-	setVisionField();
+	setVisionField(playerFlag);
 
 	return 0;
 }
@@ -1461,7 +1484,7 @@ int MasterBoard::pickUpMinion(int inputX, int inputY)
 				cursor.selectMinionPointer->status = hasmovedhasntfired;
 				deselectMinion();
 
-				setVisionField();
+				setVisionField(playerFlag);
 			}
 
 
@@ -1509,7 +1532,7 @@ int MasterBoard::dropOffMinion()
 	cursor.selectMinionPointer->status = hasfired;
 	deselectMinion();
 
-	setVisionField();
+	setVisionField(playerFlag);
 	return 0;
 }
 
@@ -1582,9 +1605,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	if (calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed) <= 0)
 		return 1;
 
-	
+
 	//Can't attack if you can't see.
-	if (Board[inputX][inputY].withinVision == false)
+	if (Board[inputX][inputY].withinVision[playerFlag] == false)
 		return 1;
 
 
@@ -1620,12 +1643,14 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	{
 		//If defender falls below 4, it dies.
 		bool printMessage = true;
+		int defendingPlayer = defendingMinion->team;
 		destroyMinion(defendingMinion, printMessage, InputLayer);
 		defenderAlive = false;
 		if (attackingMinion->veterancy <= 3)
 		{
 			attackingMinion->veterancy++;
 		}
+		setVisionField(defendingPlayer);	//Change vision field to account for dead minion.
 	}
 	else	//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
 		if ((defendingMinion->rangeType == directFire || defendingMinion->rangeType == hybridRange) && (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
@@ -1652,7 +1677,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		{
 			defendingMinion->veterancy++;
 		}
-		setVisionField();
+		setVisionField(playerFlag);
 	}
 	else
 	{
@@ -1736,11 +1761,11 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 	//If it is singleplayer we want to remain in map mode.
 	if (isItSinglePlayerGame == false)
 		InputLayer->status = waitingForNextLocalPlayer;
-	
+
 
 
 	upkeep(InputLayer);
-	   
+
 	return gameTurnIncrement;
 
 }
@@ -1749,7 +1774,7 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 int MasterBoard::upkeep(inputLayer* InputLayer)
 {
 	//Set vision field for current player
-	setVisionField();
+	setVisionField(playerFlag);
 
 	//Provide income for the current player based on properties he controls.
 	//Move cursor to HQ if it exists

@@ -8,16 +8,18 @@
 #include "Tile.hpp"
 #include "inputLayer.hpp"
 
+
 enum minionTaskingType { attackLocalMinion, captureLocalProperty, moveTowardsEnemy, holdPosition };
-enum typeOfGame {singlePlayer, multiPlayer};
+
 class inputLayer;
 class Cursor;
+class mainMenu;
 
 
 class compie 
 {
 public:
-	compie();
+	compie(mainMenu* inputMenu);
 	int deployMove(MasterBoard* boardToUse);
 	int checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy,  Cursor* myCursor, MasterBoard* boardToUse);
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY);
@@ -28,10 +30,11 @@ public:
 	int takeMyTurn(MasterBoard* boardToUse);
 	int determineProduction(MasterBoard* boardToUse);
 
-	typeOfGame gameType = singlePlayer;
+	
 	minionTaskingType minionTasking = holdPosition;
 	tile* closestTileAdjacentToEnemy = NULL;
 	tile* tileToTarget = NULL;
+	mainMenu* menuPointer = NULL;
 
 	inputLayer* InputLayer = NULL;
 

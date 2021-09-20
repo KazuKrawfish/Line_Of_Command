@@ -28,15 +28,15 @@ class inputLayer
 public:
 
 	inputLayer(mainMenu* inputMainMenu);
-	int printStatus(MasterBoard* boardToPrint);
+	int printStatus(MasterBoard* boardToPrint, int observerNumber);
 	int printWaitingScreen(MasterBoard* boardToPrint);
 	int printMinionMenu(MasterBoard* boardToPrint);
 	int printBoardMenu();
 	int	printPropertyMenu(MasterBoard* boardToPrint);
 	int printMenu();
-	int printLowerScreen(MasterBoard* boardToPrint);
-	int printUpperScreen(MasterBoard* boardToPrint);
-	int printScreen(MasterBoard* boardToPrint);
+	int printLowerScreen(MasterBoard* boardToPrint, int observerNumber);
+	int printUpperScreen(MasterBoard* boardToPrint, int observerNumber);
+	int printScreen(MasterBoard* boardToPrint, int observerNumber);
 	int gameBoardInput(char* Input, MasterBoard* boardToInput);
 	int menuInput(char* Input, MasterBoard* boardToInput);
 	int waitingScreenInput( MasterBoard* boardToInput);

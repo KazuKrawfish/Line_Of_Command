@@ -26,16 +26,16 @@ public:
 	int NUMBEROFPLAYERS = 2;
 	int BOARD_WIDTH = 15;
 	int BOARD_HEIGHT = 20;
-	int buildPath(bool isItInitialCall, int x, int y, char minionType);
+	int buildPath(bool isItInitialCall, int x, int y, char minionType, std::vector<std::vector<pathSquare>> & pathMapPointer);
 	int buildApparentPathMap(bool isItInitialCall, int x, int y, char minionType);
 
 	std::vector<int> treasury;	//1 extra "player" so that treasury[playerFlag] behaves as expected. (There is no player 0.)
 	
 	int setRangeField(int inputX, int inputY);
-	int setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY);
+	int setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY, int playerToSee);
 	int setAttackField(int inputX, int inputY, int inputRange);
 	int setDropField(int inputX, int inputY);
-	int setVisionField();
+	int setVisionField(int observerNumber);
 	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool & wouldAmmoBeUsed);
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
@@ -60,6 +60,7 @@ public:
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	Cursor cursor;
 	std::vector<std::vector<pathSquare>> myPathMap;
+	std::vector<std::vector<pathSquare>> compiePathMap;
 	std::vector<std::vector<tile>>  Board;
 	int windowLocationX = 0;
 	int windowLocationY = 0;

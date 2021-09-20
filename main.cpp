@@ -56,7 +56,7 @@ int main()
 	mainMenu MainMenu(mainWindow);
 	inputLayer InputLayer(&MainMenu);
 	MasterBoard GameBoard;
-	compie ComputerPlayer;
+	compie ComputerPlayer( &MainMenu);
 
 
 	start_color();

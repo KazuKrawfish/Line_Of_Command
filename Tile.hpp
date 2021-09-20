@@ -5,6 +5,7 @@
 #include <string>
 #include <stdio.h>
 #include <iostream>
+#include <vector>
 
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
@@ -33,7 +34,10 @@ public:
 		hasMinionOnTop = false;
 		minionOnTop = NULL;
 		withinRange = false;
-		withinVision = false;
+		withinVision.resize(3);
+		withinVision[0] = false;
+		withinVision[1] = false;
+		withinVision[2] = false;
 		withinApparentRange = false;
 		minionOnTop = NULL;
 		controller = 0;
@@ -189,7 +193,7 @@ public:
 	bool hasMinionOnTop;
 	Minion* minionOnTop;
 	bool withinRange = false;
-	bool withinVision = false;
+	std::vector<bool> withinVision;
 	bool withinApparentRange = false;
 	std::string description;
 	double defenseFactor;		//Higher is better (ie mountains are 1.4)
@@ -209,7 +213,13 @@ public:
 		hasMinionOnTop = false;
 		minionOnTop = NULL;
 		withinRange = false;
-		withinVision = false;
+
+		//Assume 2 player map
+		withinVision.resize(3);
+		withinVision[0] = false;
+		withinVision[1] = false;
+		withinVision[2] = false;
+
 		minionOnTop = NULL;
 		controller = 0;
 		production = 0;

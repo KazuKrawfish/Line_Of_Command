@@ -79,6 +79,9 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 	{
 		for (int y = 0; y < LoadBoard->BOARD_HEIGHT; y++)
 		{
+			LoadBoard->Board[x][y].locationX = x;
+			LoadBoard->Board[x][y].locationY = y;
+
 			switch (LoadBoard->Board[x][y].symbol)
 			{
 			case('.'):
@@ -401,10 +404,13 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	{
 		boardToPrint->Board[i].resize(boardToPrint->BOARD_HEIGHT);
 	}
+
 	boardToPrint->myPathMap.resize(boardToPrint->BOARD_WIDTH + 1);
+	boardToPrint->compiePathMap.resize(boardToPrint->BOARD_WIDTH + 1);
 	for (int i = 0; i < boardToPrint->BOARD_WIDTH; i++)
 	{
 		boardToPrint->myPathMap[i].resize(boardToPrint->BOARD_HEIGHT);
+		boardToPrint->compiePathMap[i].resize(boardToPrint->BOARD_HEIGHT);
 	}
 
 	//Then load player data:
@@ -420,6 +426,12 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
 			*saveGame >> boardToPrint->Board[x][y].symbol;
+
+			//Also resize for withinVision
+			boardToPrint->Board[x][y].withinVision.resize(boardToPrint->NUMBEROFPLAYERS + 1);
+			for (int n = 0; n < boardToPrint->NUMBEROFPLAYERS + 1; n++)
+				boardToPrint->Board[x][y].withinVision[n] = false;
+
 		}
 	}
 	setCharacteristics(boardToPrint);
@@ -567,7 +579,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 			//This prints the screen AFTER the latest input has taken effect.
 			//Is this messing with remote play? Not sure.
 			boardToPlay->checkWindow();
-			InputLayer->printScreen(boardToPlay);
+			InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag);
 
 		}
 	}
@@ -576,6 +588,8 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 
 int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
 {
+	*Input = wgetch(mywindow);
+
 	//If user wants to load a map.
 	if (*Input == 'l') 
 	{
@@ -724,10 +738,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	//Determines if they print or not.
 	if (playerNames[2] == "compie")
 	{
-		ComputerPlayer->gameType = singlePlayer;
 		boardToPlay->isItSinglePlayerGame = true;
 	}
-	else ComputerPlayer->gameType = multiPlayer;
+	else boardToPlay->isItSinglePlayerGame = false;
 
 	menuStatus = playingMap;
 
@@ -839,10 +852,9 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	//Determines if they print or not.
 	if (playerNames[2] == "compie")
 	{
-		ComputerPlayer->gameType = singlePlayer;
 		boardToPlay->isItSinglePlayerGame = true;
 	}
-	else ComputerPlayer->gameType = multiPlayer;
+	else boardToPlay->isItSinglePlayerGame = false;
 
 
 

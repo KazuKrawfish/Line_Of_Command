@@ -97,7 +97,7 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	return 1;
 }
 
-int inputLayer::printStatus(MasterBoard* boardToPrint)
+int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 {
 	tile* currentTile = &boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
 
@@ -106,6 +106,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 	char* descriptionPointer = &currentTile->description[0];
 	char* playerName = &(MainMenu->playerNames[currentTile->controller])[0];
 
+	if(boardToPrint->Board[boardToPrint->cursor.XCoord][boardToPrint->cursor.YCoord].withinVision[observerNumber] == true || observerNumber == boardToPrint->playerFlag)
+	{
 	if (currentTile->controller != 0)
 	{
 		waddstr(MainMenu->mywindow, "Player ");
@@ -127,40 +129,41 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 		waddstr(MainMenu->mywindow, pointerToPrint);
 	}
 
-	if (currentTile->hasMinionOnTop == true && currentTile->withinVision)
+	if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber])
 	{
 		Minion* currentMinion = currentTile->minionOnTop;
-		
+
 		//Print out basic minion status.
 		waddstr(MainMenu->mywindow, " Player ");
 		waddstr(MainMenu->mywindow, &(MainMenu->playerNames[currentMinion->team])[0]);
 		waddstr(MainMenu->mywindow, "'s ");
 		waddstr(MainMenu->mywindow, &currentMinion->description[0]);
-		if(currentMinion->maxAmmo != 0) 
+		if (currentMinion->maxAmmo != 0)
 		{
-		snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. %d Ammo. \n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentAmmo);
-		} else snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. No main weapon. \n", int(currentMinion->health), currentMinion->currentFuel);
+			snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. %d Ammo. \n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentAmmo);
+		}
+		else snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. No main weapon. \n", int(currentMinion->health), currentMinion->currentFuel);
 		waddstr(MainMenu->mywindow, pointerToPrint);
 
 		if (currentMinion->status == gaveupmovehasntfired)
 		{
 			waddstr(MainMenu->mywindow, "Holding position. Ready to attack.\n");
-					
+
 		}
 
 		if (currentMinion->status == hasmovedhasntfired)
 		{
 			waddstr(MainMenu->mywindow, "Has already moved this turn. ");
-			
+
 			if (currentMinion->rangeType == rangedFire)
 			{
 				waddstr(MainMenu->mywindow, "Cannot attack after moving. \n");
-				
+
 			}
 			if (currentMinion->rangeType == directFire)
 			{
 				waddstr(MainMenu->mywindow, "Ready to attack.\n");
-				
+
 			}
 		}
 		if (currentMinion->status == hasfired)
@@ -176,6 +179,14 @@ int inputLayer::printStatus(MasterBoard* boardToPrint)
 	{
 		waddstr(MainMenu->mywindow, "\n\n");
 	}
+
+}
+	else
+	{
+		waddstr(MainMenu->mywindow, "\n\n");
+	}
+
+
 
 	//Print current turn.
 	snprintf(pointerToPrint, 100, "Player %d's turn. Treasury Total: %d\n", boardToPrint->playerFlag, boardToPrint->treasury[boardToPrint->playerFlag]);
@@ -269,7 +280,7 @@ int inputLayer::printMenu() {
 	return 0;
 }
 
-int inputLayer::printLowerScreen(MasterBoard* boardToPrint) {
+int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) {
 
 	mvwaddstr(MainMenu->mywindow, WINDOW_HEIGHT*3 + 1, 0, "                                                 \n");
 	waddstr(MainMenu->mywindow, "                                                 \n");
@@ -301,13 +312,13 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint) {
 					printPropertyMenu(boardToPrint);
 				}
 
-	printStatus(boardToPrint);
+	printStatus(boardToPrint, observerNumber);
 
 	return 0;
 
 }
 
-int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
+int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) {
 	//windowLocation is a single scalar representing x and y.
 	//We do some basic math to break it into the two values for the function.
 	//Need to convert windowLocation into a better two part variable.
@@ -322,7 +333,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 		{
 			//First do lower priority set which is tiles and minions. These can be ovveridden by cursor/in range.
 			//Is there a minion there? Do we have minions toggled on as visible? Is the minion within vision?
-			if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions && boardToPrint->Board[j][i].withinVision == true)
+			if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions && boardToPrint->Board[j][i].withinVision[observerNumber] == true )
 			{
 					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].minionOnTop->Image, boardToPrint->Board[j][i].minionOnTop->team + 3, boardToPrint->Board[j][i].minionOnTop);
 			}
@@ -330,7 +341,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 			else 
 			{
 				//If player controlled (Must be property), must always be visible
-				if (boardToPrint->Board[j][i].controller == boardToPrint->playerFlag)
+				if (boardToPrint->Board[j][i].controller == observerNumber)
 				{
 					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 9, NULL);
 				}
@@ -341,7 +352,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 					if (boardToPrint->Board[j][i].checkForProperty() == true)
 					{
 						//Within vision
-						if (boardToPrint->Board[j][i].withinVision == true)
+						if (boardToPrint->Board[j][i].withinVision[observerNumber] == true)
 						{
 							//If neutral property
 							if (boardToPrint->Board[j][i].controller == 0)
@@ -371,7 +382,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 					else
 					{
 						//Within vision
-						if (boardToPrint->Board[j][i].withinVision == true)
+						if (boardToPrint->Board[j][i].withinVision[observerNumber]== true)
 						{
 							if (boardToPrint->Board[j][i].symbol == '~' || boardToPrint->Board[j][i].symbol == '-')
 								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, waterTile, NULL);
@@ -391,7 +402,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint) {
 			}
 			//Higher "priority set" is cursor vs in range, thus it goes after the "base" portion of minions and tiles.
 			//If there is a cursor there, it takes priority for printing.
-			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX())
+			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX() && (boardToPrint->Board[j][i].withinVision[observerNumber] == true   ||   observerNumber == boardToPrint->playerFlag))
 			{
 				mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, 'X' + COLOR_PAIR(cursorSymbol));
 			}
@@ -428,13 +439,13 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 
 }
 
-int inputLayer::printScreen(MasterBoard* boardToPrint)
+int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber)
 {
 	if (status != waitingForNextLocalPlayer) 
 	{
 	wclear(MainMenu->mywindow);
-	printUpperScreen(boardToPrint);
-	printLowerScreen(boardToPrint);
+	printUpperScreen(boardToPrint, observerNumber);
+	printLowerScreen(boardToPrint, observerNumber);
 	wrefresh(MainMenu->mywindow);
 	
 	}
