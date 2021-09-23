@@ -250,18 +250,10 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 		int defenderCost = 0;
 
 		//Determine minion costs based on types:
-		//Have to use different building inputs because consultCostChart assumes you are using a real property involved
-		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
-		{
-			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');
-		}
-		else attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'h');
+		//Uses ~ which gets cost regardless of base below us.
+		attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
 
-		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
-		{
-			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX - 1][currentY].minionOnTop->type, 'A');
-		}
-		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX - 1][currentY].minionOnTop->type, 'h');
+		defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX - 1][currentY].minionOnTop->type, '~');
 
 		bool willAmmoBeUsed = false;
 		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX - 1][currentY].minionOnTop, willAmmoBeUsed);
@@ -289,17 +281,9 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 		int defenderCost = 0;
 
 		//Determine minion costs based on types:
-		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
-		{
-			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');
-		}
-		else attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'h');
-
-		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
-		{
-			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX + 1][currentY].minionOnTop->type, 'A');
-		}
-		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX + 1][currentY].minionOnTop->type, 'h');
+		attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
+	
+		defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX + 1][currentY].minionOnTop->type, '~');
 
 		bool willAmmoBeUsed = false;
 		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX + 1][currentY].minionOnTop, willAmmoBeUsed);
@@ -327,17 +311,9 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 		int defenderCost = 0;
 
 		//Determine minion costs based on types:
-		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
-		{
-			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');
-		}
-		else attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'h');
+		attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
 
-		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
-		{
-			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY + 1].minionOnTop->type, 'A');
-		}
-		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY + 1].minionOnTop->type, 'h');
+		defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY + 1].minionOnTop->type, '~');
 
 		bool willAmmoBeUsed = false;
 		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX][currentY + 1].minionOnTop, willAmmoBeUsed);
@@ -365,17 +341,9 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 		int defenderCost = 0;
 
 		//Determine minion costs based on types:
-		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
-		{
-			attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'A');
-		}
-		else attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, 'h');
+		 attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
 
-		if (myCursor->selectMinionPointer->type == 'h' || myCursor->selectMinionPointer->type == 'v')
-		{
-			defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY - 1].minionOnTop->type, 'A');
-		}
-		else defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY - 1].minionOnTop->type, 'h');
+		defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY - 1].minionOnTop->type, '~');
 
 		bool willAmmoBeUsed = false;
 		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX][currentY - 1].minionOnTop, willAmmoBeUsed);
@@ -651,7 +619,8 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag && boardToUse->minionRoster[i]->status != hasfired)
 		{
 			//Pauses before moving each minion for single player purposes.
-			if (boardToUse->isItSinglePlayerGame == true)
+			//Or if in debug mode, compie shows moves
+			if (boardToUse->isItSinglePlayerGame == true || menuPointer->debugMode == true)
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 				//Move cursor, then select minion, then determine tasks, then execute tasks.
@@ -667,12 +636,24 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 			executeMinionTasks(boardToUse);
 
-			//If single player make sure player 1 can see, and print for them.
-			if (boardToUse->isItSinglePlayerGame == true)
+			//If we're in debug mode, give player vision over everything.
+			if ( menuPointer->debugMode == true)
 			{
-				boardToUse->setVisionField(1); 	//Validate that this is correct.... player might be 0 or 1.
+				boardToUse->setVisionField(0);
 				boardToUse->checkWindow();
-				InputLayer->printScreen(boardToUse, 1);
+				InputLayer->printScreen(boardToUse, 0);
+
+			}
+			else 
+			{
+				//If single player make sure player 1 can see, and print for them.
+				if (boardToUse->isItSinglePlayerGame == true)
+				{
+					boardToUse->setVisionField(1);
+					boardToUse->checkWindow();
+					InputLayer->printScreen(boardToUse, 1);
+
+				}
 			}
 		}
 	}

@@ -567,6 +567,10 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 			{
 				InputLayer->waitingScreenInput(boardToPlay);
 			}
+			else if (InputLayer->status == insertAction)
+			{
+				InputLayer->insertActionInput(&Input, boardToPlay);
+			}
 
 			//Computer takes turn if it is his turn to do so.
 			//Note that this doesn't deal with "status".
@@ -612,6 +616,14 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 		topMenuJoin(boardToPlay, InputLayer, ComputerPlayer);
 		skipOneInput = true;
 		InputLayer->status = gameBoard;
+	}else
+	//Toggle debug mode.
+	if (*Input == '~')
+	{
+		if (debugMode == false)
+			debugMode = true;
+		else if (debugMode == true)
+			debugMode = false;
 	}
 
 	return 0;
@@ -622,6 +634,11 @@ int mainMenu::printTopMenu()
 	wclear(mywindow);
 	waddstr(mywindow,"Main Menu\n");
 	waddstr(mywindow,"Load saved game (l) | Start new game (n) | Join remote game (j) \n");
+	
+	if(debugMode == false)
+		waddstr(mywindow,"To enter debug mode, press '~' \n");
+	else waddstr(mywindow, "In debug mode. To leave debug mode, press '~' \n");
+	
 	wrefresh(mywindow);
 	return 0;
 }

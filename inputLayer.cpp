@@ -118,7 +118,14 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	else
 	{
 		waddstr(MainMenu->mywindow, descriptionPointer);
-		snprintf(pointerToPrint, 100, "Cost %d .", boardToPrint->myPathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion);
+	}
+	if (MainMenu->debugMode == true) 
+	{
+		snprintf(pointerToPrint, 100, " Movement cost: %d \nCursor X/Y: %d/%d\n"	, 
+			boardToPrint->myPathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion,
+			boardToPrint->cursor.XCoord,
+			boardToPrint->cursor.YCoord);
+		
 		waddstr(MainMenu->mywindow, pointerToPrint);
 	}
 
@@ -311,9 +318,22 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) 
 				{
 					printPropertyMenu(boardToPrint);
 				}
+				else 
+					if (status == insertAction)
+					{
+					printInsertAction();
+					}
 
 	printStatus(boardToPrint, observerNumber);
 
+	return 0;
+
+}
+
+int inputLayer::printInsertAction() 
+{
+	waddstr(MainMenu->mywindow, "Insert a minion by typing its symbol\n");
+	waddstr(MainMenu->mywindow, "Exit insert menu (x) \n");
 	return 0;
 
 }
@@ -341,7 +361,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) 
 			else 
 			{
 				//If player controlled (Must be property), must always be visible
-				if (boardToPrint->Board[j][i].controller == observerNumber)
+				if (boardToPrint->Board[j][i].controller == observerNumber && observerNumber != 0)
 				{
 					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 9, NULL);
 				}
@@ -462,11 +482,47 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 	return 0;
 }
 
+int inputLayer::insertActionInput(char* Input, MasterBoard* boardToInput)
+{
+	Cursor * myCursor = & boardToInput->cursor;
+	tile* myTile = & boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
+
+
+	//Return to gameBoard if player presses 'x'.
+	if (*Input == 'x' )
+	{
+		status = gameBoard;
+		return 1;
+	}
+
+	//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
+	if (myTile->hasMinionOnTop == true 	|| myTile->consultMovementChart(*Input, myTile->symbol) == 99)
+		return 1;
+												
+	requestedUnitPrice = boardToInput->consultMinionCostChart(*Input, '~');
+
+	//If it is real minion, then price > 0
+	if (requestedUnitPrice > 0)
+	{
+		boardToInput->createMinion(*Input, myCursor->getX(), myCursor->getY(), 1, 100, 0, 0, 0, -1, -1);
+		status = gameBoard;
+		return 0;
+	}
+
+	return 1;
+
+}
+
 int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 {
 	if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
 	{
 		boardToInput->cursor.move(Input);
+	}
+
+	if (*Input == 'x' && MainMenu->debugMode == true)
+	{
+		status = insertAction;
 	}
 
 	//Need char for shift
@@ -636,13 +692,13 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 
 	//This is a working key.
-	if (*Input == 'g')
+	if (*Input == 'g' && MainMenu->debugMode == true)
 	{
 		MainMenu->scrambleMap(boardToInput, this);	//This needs to be cleaned up to deal with minions.
 	}
 
 	//Another working key for compie
-	if (*Input == 'c') 
+	if (*Input == 'c' && MainMenu->debugMode == true)
 	{
 		computerPlayer->takeMyTurn(boardToInput);
 	}
@@ -684,8 +740,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 
 	}
 	
-	//Below disabled, you have to load via the main menu for the moment, since you have to set up a new game with players and such.
-	
+		
 	if (*Input == 'l')
 	{
 		//Load the actual save game

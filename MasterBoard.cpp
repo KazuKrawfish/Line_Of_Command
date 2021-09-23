@@ -247,9 +247,15 @@ double consultAttackValuesChart(char attackerType, char defenderType, bool& isAm
 
 
 //Return of -1 indicates the minion requested does not exist.
+//New functionality: Input of '~' for propertyType indicates informational-only use of this function,
+//For instance, to determine if a unit even exists.
 int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 {
 	bool canItBeBoughtHere = false;
+
+	//Allows non-base inputs for information only.
+	if (propertyType == '~')
+		canItBeBoughtHere = true;
 
 	//These represent what that property repairs, not necessarily if you can buy units there. Only h can buy ground troops.
 	if (propertyType == 'A' && (minionType == 'v' || minionType == 'h' || minionType == 'f' || minionType == 'b'))
@@ -953,6 +959,21 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 //For that team.
 int MasterBoard::setVisionField(int observerNumber)
 {
+	//If observer is "neutral", they can see the whole map.
+	if (observerNumber == 0) 
+	{
+		for (int x = 0; x < BOARD_WIDTH; x++)
+		{
+			for (int y = 0; y < BOARD_HEIGHT; y++)
+			{
+				Board[x][y].withinVision[observerNumber] = true;
+
+			}
+		}
+		
+		return 0;
+	}
+
 	//First set the board to no vision initially.
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
@@ -1093,19 +1114,26 @@ int MasterBoard::setDropField(int inputX, int inputY)
 
 int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam)
 {
+	int attemptResult = 1;
 	if (treasury[playerFlag] >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
 	{
-		createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0, -1, -1);
-		treasury[playerFlag] -= consultMinionCostChart(inputType, Board[inputX][inputY].symbol);
-		return 0;
+		attemptResult = createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0, -1, -1);
+		if(attemptResult == 0 )
+			treasury[playerFlag] -= consultMinionCostChart(inputType, Board[inputX][inputY].symbol);
+		
 	}
-	else return 1;
+	
+	return attemptResult;
 
 
 }
 
 int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputAmmo)
 {
+	//Cannot create minion illegally (On top of another, or in bad location)
+	if (Board[inputX][inputY].hasMinionOnTop == true || Board[inputX][inputY].consultMovementChart(inputType, Board[inputX][inputY].symbol) == 99)
+		return 1;
+
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
@@ -1129,7 +1157,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 
 	//No room found, print error message and return 0.
 	std::cout << "ERROR, no more supply cap for new minion!" << std::endl;
-	return 0;
+	return 1;
 
 }
 
