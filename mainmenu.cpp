@@ -82,145 +82,7 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 			LoadBoard->Board[x][y].locationX = x;
 			LoadBoard->Board[x][y].locationY = y;
 
-			switch (LoadBoard->Board[x][y].symbol)
-			{
-			case('.'):
-			{
-				LoadBoard->Board[x][y].description = "Clear terrain.";
-				LoadBoard->Board[x][y].defenseFactor = 1.1;
-				LoadBoard->Board[x][y].Image = { '.','.','.',
-													'.','.','.',
-													'.','.','.' };
-				break;
-			}
-			case('H'):
-			{
-				LoadBoard->Board[x][y].description = "City.";
-				LoadBoard->Board[x][y].defenseFactor = 1.3;
-				LoadBoard->Board[x][y].production = 2000;
-				LoadBoard->Board[x][y].Image = { 'H','=','H',
-													'H','=','H',
-													'H','=','H' };
-				break;
-			}
-			case('m'):
-			{
-				LoadBoard->Board[x][y].description = "Mine.";
-				LoadBoard->Board[x][y].defenseFactor = 1.2;
-				LoadBoard->Board[x][y].production = 3000;
-				LoadBoard->Board[x][y].Image = { ' ','_',' ',
-													'/','n','\\',
-													'.','.','.' };
-				break;
-			}
-			case('n'):
-			{
-				LoadBoard->Board[x][y].description = "Settlement.";
-				LoadBoard->Board[x][y].defenseFactor = 1.3;
-				LoadBoard->Board[x][y].production = 1000;
-				LoadBoard->Board[x][y].Image = { 'n','.','n',
-													'.','.','.',
-													'n','.','n' };
-				break;
-			}
-			case('h'):
-			{
-				LoadBoard->Board[x][y].description = "Factory.";
-				LoadBoard->Board[x][y].defenseFactor = 1.3;
-				LoadBoard->Board[x][y].production = 1000;
-				LoadBoard->Board[x][y].Image = { '|','|','|',
-													'H','H','H',
-													'H','H','H' };
-				break;
-			}
-			case('Q'):
-			{
-				LoadBoard->Board[x][y].description = "Headquarters.";
-				LoadBoard->Board[x][y].defenseFactor = 1.4;
-				LoadBoard->Board[x][y].production = 1000;
-				LoadBoard->Board[x][y].Image = { '|','*','|',
-													'|','H','|',
-													'|','H','|' };
-				break;
-			}
-			case('='):
-			{
-				LoadBoard->Board[x][y].description = "Road.";
-				LoadBoard->Board[x][y].defenseFactor = 1.0;
-				LoadBoard->Board[x][y].Image = { '=',' ','=',
-													'=',' ','=',
-													'=',' ','=' };
-				break;
-			}
-			case('^'):
-			{
-				LoadBoard->Board[x][y].description = "Hill.";
-				LoadBoard->Board[x][y].defenseFactor = 1.1;
-				LoadBoard->Board[x][y].Image = { '/','\\','.',
-													'.','/','\\',
-													'/','\\','.' };
-				break;
-			}
-			case('M'):
-			{
-				LoadBoard->Board[x][y].description = "Mountain.";
-				LoadBoard->Board[x][y].defenseFactor = 1.4;
-				LoadBoard->Board[x][y].Image = { ' ','^',' ',
-													'/','_','\\',
-													'.','.','.' };
-				break;
-			}
-			case('+'):		//Would like to have convertible to woodlot by engineer.....maybe
-			{
-				LoadBoard->Board[x][y].description = "Forest.";
-				LoadBoard->Board[x][y].defenseFactor = 1.2;
-				LoadBoard->Board[x][y].Image = { '^','^','^',
-													'^','^','^',
-													'|','|','|' };
-				break;
-			}
-			case('~'):
-			{
-				LoadBoard->Board[x][y].description = "High seas.";
-				LoadBoard->Board[x][y].defenseFactor = 1.0;
-				LoadBoard->Board[x][y].Image = { '~','~','~',
-												'~','~','~',
-												'~','~','~' };
-				break;
-			}
-
-			case('-'):
-			{
-				LoadBoard->Board[x][y].description = "River.";
-				LoadBoard->Board[x][y].defenseFactor = 1.0;
-				LoadBoard->Board[x][y].Image = { '~',' ','~',
-												' ','~',' ',
-												'~',' ','~' };
-				break;
-			}
-			case('A'):
-			{
-				LoadBoard->Board[x][y].description = "Airbase.";
-				LoadBoard->Board[x][y].defenseFactor = 1.3;
-				LoadBoard->Board[x][y].Image = { '\\','n','.',
-												'|','\\','n',
-												'|','.','\\' };
-				LoadBoard->Board[x][y].production = 1000;
-				break;
-			}
-			case('P'):
-			{
-				LoadBoard->Board[x][y].description = "Port.";
-				LoadBoard->Board[x][y].defenseFactor = 1.3;
-				LoadBoard->Board[x][y].Image = { 'n','_','_',
-												'|','~','~',
-												'|','~','~' };
-				LoadBoard->Board[x][y].production = 1000;
-				break;
-			}
-			}
-			//Other terrain types go here
-
+			LoadBoard->Board[x][y].setCharacterstics();
 		}
 	}
 	return 0;
@@ -567,9 +429,13 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 			{
 				InputLayer->waitingScreenInput(boardToPlay);
 			}
-			else if (InputLayer->status == insertAction)
+			else if (InputLayer->status == insertMinion)
 			{
-				InputLayer->insertActionInput(&Input, boardToPlay);
+				InputLayer->insertMinionInput(&Input, boardToPlay);
+			}
+			else if (InputLayer->status == insertTile)
+			{
+				InputLayer->insertTileInput(&Input, boardToPlay);
 			}
 
 			//Computer takes turn if it is his turn to do so.

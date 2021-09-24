@@ -319,10 +319,15 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) 
 					printPropertyMenu(boardToPrint);
 				}
 				else 
-					if (status == insertAction)
+					if (status == insertMinion)
 					{
-					printInsertAction();
+					printInsertMinion();
 					}
+					else
+						if (status == insertTile)
+						{
+							printInsertTile();
+						}
 
 	printStatus(boardToPrint, observerNumber);
 
@@ -330,10 +335,18 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) 
 
 }
 
-int inputLayer::printInsertAction() 
+int inputLayer::printInsertMinion() 
 {
 	waddstr(MainMenu->mywindow, "Insert a minion by typing its symbol\n");
 	waddstr(MainMenu->mywindow, "Exit insert menu (x) \n");
+	return 0;
+
+}
+
+int inputLayer::printInsertTile()
+{
+	waddstr(MainMenu->mywindow, "Insert a tile by typing its symbol\n");
+	waddstr(MainMenu->mywindow, "Exit insert menu (q) \n");
 	return 0;
 
 }
@@ -482,7 +495,7 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 	return 0;
 }
 
-int inputLayer::insertActionInput(char* Input, MasterBoard* boardToInput)
+int inputLayer::insertMinionInput(char* Input, MasterBoard* boardToInput)
 {
 	Cursor * myCursor = & boardToInput->cursor;
 	tile* myTile = & boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
@@ -513,6 +526,47 @@ int inputLayer::insertActionInput(char* Input, MasterBoard* boardToInput)
 
 }
 
+int inputLayer::insertTileInput(char* Input, MasterBoard* boardToInput) 
+{
+	Cursor* myCursor = &boardToInput->cursor;
+	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
+	
+	//Return to gameBoard if player presses 'q'.
+	if (*Input == 'q')
+	{
+		status = gameBoard;
+		return 1;
+	}
+
+	//If input tile symbol is invalid, return 1.
+	if (myTile->consultMovementChart('i', *Input) == -1)
+		return 1;
+
+	//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
+	if (myTile->hasMinionOnTop == true && myTile->consultMovementChart(myTile->minionOnTop->type ,  *Input ) == 99)
+		return 1;
+
+	//If it is real tile, change the underlying tile.
+	//May break things....
+	myTile->capturePoints = 20;
+	myTile->symbol = *Input;
+	
+	if (myTile->checkForProperty() == true)
+	{
+		myTile->controller = boardToInput->playerFlag;
+	}
+	else 
+	{
+		myTile->controller = 0;
+	}
+
+	myTile->setCharacterstics();
+	   	 
+	status = gameBoard;
+	return 0;
+
+}
+
 int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 {
 	if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
@@ -522,7 +576,12 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 
 	if (*Input == 'x' && MainMenu->debugMode == true)
 	{
-		status = insertAction;
+		status = insertMinion;
+	}	
+	
+	if (*Input == 'q' && MainMenu->debugMode == true)
+	{
+		status = insertTile;
 	}
 
 	//Need char for shift

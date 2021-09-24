@@ -10,7 +10,7 @@ class mainMenu;
 
 
 
-enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer, compieTakingTurn, insertAction};
+enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer, compieTakingTurn, insertMinion, insertTile};
 enum specialKey {showMinions, hideMinions};
 enum colorCode {
 	unused, fogLandTile, waterTile, fogWaterTile, player1Minion,
@@ -34,11 +34,13 @@ public:
 	int printBoardMenu();
 	int	printPropertyMenu(MasterBoard* boardToPrint);
 	int printMenu();
-	int printInsertAction();
+	int printInsertMinion();
+	int printInsertTile();
 	int printLowerScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printUpperScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printScreen(MasterBoard* boardToPrint, int observerNumber);
-	int insertActionInput(char* Input, MasterBoard* boardToInput);
+	int insertMinionInput(char* Input, MasterBoard* boardToInput);
+	int insertTileInput(char* Input, MasterBoard* boardToInput);
 	int gameBoardInput(char* Input, MasterBoard* boardToInput);
 	int menuInput(char* Input, MasterBoard* boardToInput);
 	int waitingScreenInput( MasterBoard* boardToInput);

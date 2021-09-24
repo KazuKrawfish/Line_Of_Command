@@ -147,7 +147,7 @@ public:
 
 		if (x == -1 || y == -1)
 		{
-			std::cout << "Failed to find movement chart" << std::endl;
+			//std::cout << "Failed to find movement chart" << std::endl;
 			return -1;
 		}
 
@@ -213,13 +213,6 @@ public:
 		hasMinionOnTop = false;
 		minionOnTop = NULL;
 		withinRange = false;
-
-		//Assume 2 player map
-		withinVision.resize(3);
-		withinVision[0] = false;
-		withinVision[1] = false;
-		withinVision[2] = false;
-
 		minionOnTop = NULL;
 		controller = 0;
 		production = 0;
@@ -227,6 +220,155 @@ public:
 		withinCursorPath = false;
 
 
+		return 0;
+	}
+
+	int setCharacterstics() 
+	{
+
+		switch (symbol)
+		{
+		case('.'):
+		{
+			description = "Clear terrain.";
+			defenseFactor = 1.1;
+			Image = { '.','.','.',
+												'.','.','.',
+												'.','.','.' };
+			break;
+		}
+		case('H'):
+		{
+			description = "City.";
+			defenseFactor = 1.3;
+			production = 2000;
+			Image = { 'H','=','H',
+												'H','=','H',
+												'H','=','H' };
+			break;
+		}
+		case('m'):
+		{
+			description = "Mine.";
+			defenseFactor = 1.2;
+			production = 3000;
+			Image = { ' ','_',' ',
+												'/','n','\\',
+												'.','.','.' };
+			break;
+		}
+		case('n'):
+		{
+			description = "Settlement.";
+			defenseFactor = 1.3;
+			production = 1000;
+			Image = { 'n','.','n',
+												'.','.','.',
+												'n','.','n' };
+			break;
+		}
+		case('h'):
+		{
+			description = "Factory.";
+			defenseFactor = 1.3;
+			production = 1000;
+			Image = { '|','|','|',
+												'H','H','H',
+												'H','H','H' };
+			break;
+		}
+		case('Q'):
+		{
+			description = "Headquarters.";
+			defenseFactor = 1.4;
+			production = 1000;
+			Image = { '|','*','|',
+												'|','H','|',
+												'|','H','|' };
+			break;
+		}
+		case('='):
+		{
+			description = "Road.";
+			defenseFactor = 1.0;
+			Image = { '=',' ','=',
+												'=',' ','=',
+												'=',' ','=' };
+			break;
+		}
+		case('^'):
+		{
+			description = "Hill.";
+			defenseFactor = 1.1;
+			Image = { '/','\\','.',
+												'.','/','\\',
+												'/','\\','.' };
+			break;
+		}
+		case('M'):
+		{
+			description = "Mountain.";
+			defenseFactor = 1.4;
+			Image = { ' ','^',' ',
+												'/','_','\\',
+												'.','.','.' };
+			break;
+		}
+		case('+'):		//Would like to have convertible to woodlot by engineer.....maybe
+		{
+			description = "Forest.";
+			defenseFactor = 1.2;
+			Image = { '^','^','^',
+												'^','^','^',
+												'|','|','|' };
+			break;
+		}
+		case('~'):
+		{
+			description = "High seas.";
+			defenseFactor = 1.0;
+			Image = { '~','~','~',
+											'~','~','~',
+											'~','~','~' };
+			break;
+		}
+
+		case('-'):
+		{
+			description = "River.";
+			defenseFactor = 1.0;
+			Image = { '~',' ','~',
+											' ','~',' ',
+											'~',' ','~' };
+			break;
+		}
+		case('A'):
+		{
+			description = "Airbase.";
+			defenseFactor = 1.3;
+			Image = { '\\','n','.',
+											'|','\\','n',
+											'|','.','\\' };
+			production = 1000;
+			break;
+		}
+		case('P'):
+		{
+			description = "Port.";
+			defenseFactor = 1.3;
+			Image = { 'n','_','_',
+											'|','~','~',
+											'|','~','~' };
+			production = 1000;
+			break;
+		}
+		}
+		//Other terrain types go here
+	
+	
+	
+	
+	
 		return 0;
 	}
 
