@@ -1913,6 +1913,14 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 					destroyMinion(minionRoster[i], "No fuel", InputLayer);
 				}
 			}
+			if (minionRoster[i]->domain == sea && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol == 'P')
+			{
+				minionRoster[i]->currentFuel -= 2;
+				if (minionRoster[i]->currentFuel <= 0)
+				{
+					destroyMinion(minionRoster[i], "No fuel", InputLayer);
+				}
+			}
 		}
 	}
 

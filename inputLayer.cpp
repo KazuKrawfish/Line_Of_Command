@@ -250,6 +250,11 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 			waddstr(MainMenu->mywindow, "Input Minion to Buy(v,h,f,b):\n");
 			waddstr(MainMenu->mywindow, "Deselect Property (p)\n");
 		}
+		if (boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()].symbol == 'P')
+		{
+			waddstr(MainMenu->mywindow, "Input Minion to Buy(B,G,C,V,U,L):\n");
+			waddstr(MainMenu->mywindow, "Deselect Property (p)\n");
+		}
 	
 	}
 	else if (requestedMinionToBuy != '\n')
@@ -611,7 +616,8 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 		}	//Else if empty property, select it. No minion on top, right team, must be factory to select.
 		else
 			if ((boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'h' ||
-				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'A' )
+				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'A' ||
+				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'P')
 				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].controller == boardToInput->playerFlag
 				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
 			{
