@@ -12,7 +12,7 @@ Minion::Minion()
 	team = 0;						//Team 0 is the neutral team.
 	status = hasntmovedorfired;
 	health = 100;
-
+	
 	
 }
 
@@ -249,6 +249,99 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				' ',' ',' ' };
 		maxFuel = 70;
 		maxAmmo = 3;
+		break;
+	}
+	case('B'):
+	{
+		description = "Battleship";
+		movementRange = 5;
+		attackRange = 6;
+		visionRange = 2;
+		rangeType = rangedFire;
+		domain = sea;
+		Image = { 'A','/','_',
+				'_','_','/',
+				' ',' ',' ' };
+		maxFuel = 80;
+		maxAmmo = 6;
+		break;
+	}
+	case('C'):
+	{
+		description = "Cruiser";
+		movementRange = 7;
+		attackRange = 1;
+		visionRange = 4;
+		rangeType = hybridRange;
+		domain = sea;
+		Image = { 'n','-','_',
+				'_','_','/',
+				' ',' ',' ' };
+		maxFuel = 80;
+		maxAmmo = 6;
+		break;
+	}
+	case('G'):
+	{
+		description = "Gunboat";
+		movementRange = 7;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		domain = sea;
+		Image = { '_','n','-',
+				'=','=','/',
+				' ',' ',' ' };
+		maxFuel = 70;
+		maxAmmo = 1;
+		break;
+	}
+	case('L'):
+	{
+		description = "Lander";
+		movementRange = 6;
+		attackRange = 0;
+		visionRange = 2;
+		rangeType = directFire;
+		specialtyGroup = transport;
+		domain = sea;
+		Image = { 'n','_','_',
+				'_','_','/',
+				' ',' ',' ' };
+		maxFuel = 80;
+		maxAmmo = 0;
+		break;
+	}
+	case('U'):
+	{
+		description = "Submarine";
+		movementRange = 6;
+		attackRange = 0;
+		visionRange = 2;
+		rangeType = directFire;
+		specialtyGroup = stealth;
+		domain = sea;
+		Image = { ' ','|',' ',
+				'=','=','=',
+				' ',' ',' ' };
+		maxFuel = 80;
+		maxAmmo = 6;
+		break;
+	}
+	case('V'):
+	{
+		description = "Aircraft Carrier";
+		movementRange = 7;
+		attackRange = 0;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = transport;
+		domain = sea;
+		Image = { 'H','_','_',
+				'_','_','/',
+				' ',' ',' ' };
+		maxFuel = 80;
+		maxAmmo = 6;
 		break;
 	}
 	}

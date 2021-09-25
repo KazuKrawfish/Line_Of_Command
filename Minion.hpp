@@ -10,7 +10,7 @@ class MasterBoard;
 //Status indicators are true also for transports, engineers, etc. hasfired will be true if the transport dropped a guy, for instance.
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired};
 enum RangeType {directFire, rangedFire, hybridRange};
-enum specialtyGroupType {normal, infantry, transport};
+enum specialtyGroupType {normal, infantry, transport, stealth};
 //Domain type is used not for terrain but everything else. Defensive bonus from terrain, fuel requirement, refuel, move through enemy units, etc.
 enum domainType {land, air, sea, helo};
 
