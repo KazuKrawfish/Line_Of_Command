@@ -34,9 +34,10 @@ class Minion
 	char type = 'x';			//Type of minion  -- equivalent to symbol for tiles.
 	int movementRange = 0;
 	int attackRange = 0;
+	int minAttackRange = 0;	//Only matters for ranged attacks (Whether Hybrid or rangedFire)
 	int visionRange = 0 ;
 	bool isCapturing = false;
-	bool hasSecondaryWeapon = false;
+	bool secondWeaponIsMG = false;	//This indicates if secondary weapon is MG (And doesn't need ammo)
 	int maxFuel = 0;
 	int currentFuel = 0;
 	int currentAmmo = 0;
@@ -54,9 +55,9 @@ class Minion
 	double calculateVetBonus();
 
 	MasterBoard* minionEnvironment = NULL;
-	minionStatus status;
-	RangeType rangeType;
-	specialtyGroupType specialtyGroup;
+	minionStatus status = hasntmovedorfired;
+	RangeType rangeType= directFire;
+	specialtyGroupType specialtyGroup = normal;
 	domainType domain = land;
 
 };

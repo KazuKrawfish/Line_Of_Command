@@ -115,7 +115,7 @@ const double SECONDARY_ATTACK_VALUES_MATRIX[19][19] = {	/*i*/	0.55, 0.50, 0.05, 
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Needs defaults to catch error!!!!
-double consultAttackValuesChart(char attackerType, char defenderType, bool& isAmmoUsed, int AmmoAvailable, minionStatus inputStatus, RangeType minionRangeType)
+double consultAttackValuesChart(Minion & attackingMinion, char defenderType, bool& isAmmoUsed )
 {
 	//Assume ammo is not used until told otherwise.
 	isAmmoUsed = false;
@@ -184,7 +184,7 @@ double consultAttackValuesChart(char attackerType, char defenderType, bool& isAm
 		break;
 	}
 
-	switch (attackerType)
+	switch (attackingMinion.type)
 	{
 	case('i'):
 		y = 0;
@@ -253,37 +253,54 @@ double consultAttackValuesChart(char attackerType, char defenderType, bool& isAm
 
 	double attackScore = 0;
 
-	if (minionRangeType != hybridRange)//If minion is not hybrid do attack like normal.
+
+	if(attackingMinion.rangeType == hybridRange)		//If minion is hybrid	
+	{
+		//This trusts the setAttackRange function to set possible attack range based on hybrid movement status.
+		//If hybrid and moved, used secondary chart for hybrid. This is direct attack.
+		if (attackingMinion.status == hasmovedhasntfired && attackingMinion.currentAmmo > 0)
+		{
+			isAmmoUsed = true;
+			attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+		}
+		else
+			//If hybrid and didn't move, use primary. Still need ammo. This is "range attack"
+			if (attackingMinion.status == gaveupmovehasntfired && attackingMinion.currentAmmo > 0)
+			{
+				isAmmoUsed = true;
+				attackScore = ATTACK_VALUES_MATRIX[y][x];
+			}
+			else if (attackingMinion.secondWeaponIsMG == true)	//If hybrid and moved and have secondary MG, use that.
+				{
+				isAmmoUsed = false;
+				attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+				}
+	}
+	else
+	//If minion is not hybrid do attack like normal.
 	{
 		//If ammo is available and the main weapon is stronger than secondary in this case, use it.
-		//Otherwise, use secondary and no ammo needed.
-		if (AmmoAvailable > 0 && ATTACK_VALUES_MATRIX[y][x] > SECONDARY_ATTACK_VALUES_MATRIX[y][x])
+		//Otherwise, use secondary and ammo may or may not be used
+		//This is for units like cruiser/AA that use ammo regardless of secondary vs primary
+		if (attackingMinion.currentAmmo > 0 && ATTACK_VALUES_MATRIX[y][x] > SECONDARY_ATTACK_VALUES_MATRIX[y][x])
 		{
 			isAmmoUsed = true;
 			attackScore = ATTACK_VALUES_MATRIX[y][x];
 		}
 		else
-		{
-			isAmmoUsed = false;
-			attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
-		}
+			if( attackingMinion.currentAmmo > 0)
+			{
+				isAmmoUsed = true;
+				attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+			} 
+			else 
+				if (attackingMinion.secondWeaponIsMG == true) 
+				{
+					isAmmoUsed = false;
+					attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+				}
 	}
-	else	//If minion is hybrid	
-	{
-		//This trusts the setAttackRange function to set possible attack range based on hybrid movement status.
-		//If hybrid and moved, used secondary chart for hybrid. Don't need ammo. This is direct attack.
-		if (inputStatus == hasmovedhasntfired && AmmoAvailable > 0)
-		{
-			isAmmoUsed = true;
-			attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
-		}
-		//If hybrid and didn't move, use primary. Still need ammo. This is "range attack"
-		if (inputStatus == gaveupmovehasntfired && AmmoAvailable > 0)
-		{
-			isAmmoUsed = true;
-			attackScore = ATTACK_VALUES_MATRIX[y][x];
-		}
-	}
+
 
 	return attackScore;
 
@@ -701,10 +718,9 @@ double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defend
 {
 	//This will be immediately reset but we'll set it anyway.
 
-	int ammoAvailable = attackingMinion->currentAmmo;
 
 	//First find attacking fire power. 
-	double attackerFirePower = consultAttackValuesChart(attackingMinion->type, defendingMinion->type, wouldAmmoBeUsed, ammoAvailable, attackingMinion->status, attackingMinion->rangeType);
+	double attackerFirePower = consultAttackValuesChart(*attackingMinion, defendingMinion->type, wouldAmmoBeUsed);
 	attackerFirePower = attackerFirePower * attackingMinion->calculateVetBonus();
 
 	//Calculate defense factor. If air unit it remains 1.
@@ -1077,19 +1093,20 @@ int MasterBoard::setVisionField(int observerNumber)
 int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Primary difference between move and attack is attack range goes over all units, ignoring them.
 {
 
-
 	int distanceX = 0;
 	int distanceY = 0;
 
 	//Transport cannot attack so its attack field is 0.
-	//If out of ammo and no secondary, attack field is 0.
-	if (cursor.selectMinionPointer->type == transport || (cursor.selectMinionPointer->currentAmmo == 0 && cursor.selectMinionPointer->hasSecondaryWeapon != true))
+	//If out of ammo and no secondary MG, attack field is 0.
+	if (cursor.selectMinionPointer->type == transport || (cursor.selectMinionPointer->currentAmmo == 0 && cursor.selectMinionPointer->secondWeaponIsMG != true))
 	{
 		return 1;
 	}
 
-	//Hybrid unit can shoot direct fire after moving.
-	if (cursor.selectMinionPointer->rangeType == hybridRange && cursor.selectMinionPointer->status == hasmovedhasntfired)
+	//These are all cases where direct fire can occur:
+	if ( (cursor.selectMinionPointer->rangeType == hybridRange  && cursor.selectMinionPointer->status == hasmovedhasntfired )
+		|| (cursor.selectMinionPointer->rangeType == directFire && 
+		(cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired) ) )
 	{
 		if (inputX < BOARD_WIDTH - 1)
 			Board[inputX + 1][inputY].withinRange = true;
@@ -1104,7 +1121,9 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 			Board[inputX][inputY - 1].withinRange = true;
 
 	}
-	else	//If any other type of unit.
+	else	//If not a direct fire scenario, it's a ranged scenario:
+	if ((cursor.selectMinionPointer->rangeType == hybridRange || cursor.selectMinionPointer->rangeType == rangedFire) &&
+		(cursor.selectMinionPointer->status == gaveupmovehasntfired)  )
 	{
 
 		for (int x = 0; x < BOARD_WIDTH; x++)
@@ -1114,34 +1133,23 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 				distanceX = abs(inputX - x);
 				distanceY = abs(inputY - y);
-
-				if ((distanceX + distanceY) <= Board[inputX][inputY].minionOnTop->attackRange)
+				
+				//Must be within range and also outside minimum range 
+				if ((distanceX + distanceY) <= Board[inputX][inputY].minionOnTop->attackRange &&
+					(distanceX + distanceY) > cursor.selectMinionPointer->minAttackRange)
+				{
 					Board[x][y].withinRange = true;
-				else Board[x][y].withinRange = false;
+				}
+				else 
+				{ 
+					Board[x][y].withinRange = false; 
+				}
 			}
 		}
-
-		//If it is ranged unit, cannot attack next door.
-		//Hybrid fire unit also acts like "ranged" if hasn't moved that turn.
-		if (cursor.selectMinionPointer->rangeType == rangedFire || (cursor.selectMinionPointer->rangeType == hybridRange && cursor.selectMinionPointer->status == gaveupmovehasntfired))
-		{
-			if (inputX < BOARD_WIDTH - 1)
-				Board[inputX + 1][inputY].withinRange = false;
-
-			if (inputX > 0)
-				Board[inputX - 1][inputY].withinRange = false;
-
-			if (inputY < BOARD_HEIGHT - 1)
-				Board[inputX][inputY + 1].withinRange = false;
-
-			if (inputY > 0)
-				Board[inputX][inputY - 1].withinRange = false;
-		}
-
-
-
 	}
 
+	//Minion's tile should not have red indicator
+	Board[inputX][inputY].withinRange = false;
 	return 0;
 }
 
@@ -1230,9 +1238,13 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 //First check ensures if minion has moved and shot, you can't select. Also if it's ranged and moved, you can't.
 int MasterBoard::selectMinion(int inputX, int inputY)
 {
+	//Friendly minion
+	//Has either not moved at all, or moved but not fired and isn't ranged
+	//Or gave up move, hasn't fired
 	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == playerFlag
-		&& Board[inputX][inputY].minionOnTop->status != hasfired &&
-		(Board[inputX][inputY].minionOnTop->rangeType == directFire || Board[inputX][inputY].minionOnTop->rangeType == hybridRange || Board[inputX][inputY].minionOnTop->status != hasmovedhasntfired))
+		&& 	(Board[inputX][inputY].minionOnTop->status == hasntmovedorfired || 
+			(Board[inputX][inputY].minionOnTop->status != hasmovedhasntfired && Board[inputX][inputY].minionOnTop->rangeType != rangedFire)||
+			Board[inputX][inputY].minionOnTop->status == gaveupmovehasntfired ) )
 	{
 		cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
 		cursor.selectMinionFlag = true;

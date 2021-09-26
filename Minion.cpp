@@ -64,7 +64,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						' ','i',' ',
 						' ',' ',' ' };
 		maxFuel = 70;
-		hasSecondaryWeapon = true;
+		secondWeaponIsMG = true;
 		break;
 	}
 	case('s'):
@@ -80,7 +80,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 								' ',' ',' ' };
 		maxFuel = 70;
 		maxAmmo = 3;
-		hasSecondaryWeapon = true;
+		secondWeaponIsMG = true;
 		break;
 	}
 	case('a'):
@@ -96,7 +96,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						' ',' ',' ' };
 		maxFuel = 70;
 		maxAmmo = 9;
-		hasSecondaryWeapon = true;
+		secondWeaponIsMG = true;
 		break;
 	}
 	case('A'):
@@ -107,6 +107,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = hybridRange;
 		specialtyGroup = normal;
+		minAttackRange = 1;
 		Image = {		'\\','\\','A',
 						'=','=','=',
 						' ',' ',' ' };
@@ -127,7 +128,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						' ',' ',' ' };
 		maxFuel = 60;
 		maxAmmo = 6;
-		hasSecondaryWeapon = true;
+		secondWeaponIsMG = true;
 		break;
 	}
 	case('r'):
@@ -138,6 +139,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = rangedFire;
 		specialtyGroup = normal;
+		minAttackRange = 1;
 		Image = {		' ','\\','A',
 						'=','=','=',
 						' ',' ',' ' };
@@ -157,16 +159,17 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 						'o','=','o',
 						' ',' ',' ' };
 		maxFuel = 70;
-		hasSecondaryWeapon = true;
+		secondWeaponIsMG = true;
 		break; 
 	}
 	case('R'): 
 	{ 
 		description = "Rocket";
 		movementRange = 5;
-		attackRange = 5;
+		attackRange = 4;
 		visionRange = 2;
 		rangeType = rangedFire;
+		minAttackRange = 2;
 		specialtyGroup = normal;
 		Image = {			'n','\\','\\',
 							'o','=','o',
@@ -189,7 +192,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxFuel = 80;
 		maxAmmo = 9;
 		domain = helo;
-		hasSecondaryWeapon = true;
+		secondWeaponIsMG = true;
 		break;
 	}
 	case('h'):
@@ -228,6 +231,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 1;
 		visionRange = 4;
 		rangeType = directFire;
+		specialtyGroup = normal;
 		domain = air;
 		Image = { '\\','|','/',
 				' ','v',' ',
@@ -243,6 +247,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 1 ;
 		visionRange = 3;
 		rangeType = directFire;
+		specialtyGroup = normal;
 		domain = air;
 		Image = { '\\','Y','/',
 				'\'','V','\'',
@@ -259,6 +264,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = rangedFire;
 		domain = sea;
+		 minAttackRange = 1;
+		specialtyGroup = normal;
 		Image = { 'A','/','_',
 				'_','_','/',
 				' ',' ',' ' };
@@ -270,9 +277,11 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	{
 		description = "Cruiser";
 		movementRange = 7;
-		attackRange = 1;
+		attackRange = 3;
 		visionRange = 4;
 		rangeType = hybridRange;
+		 minAttackRange = 1;
+		specialtyGroup = normal;
 		domain = sea;
 		Image = { 'n','-','_',
 				'_','_','/',
@@ -288,6 +297,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 1;
 		visionRange = 3;
 		rangeType = directFire;
+		specialtyGroup = normal;
 		domain = sea;
 		Image = { '_','n','-',
 				'=','=','/',

@@ -444,14 +444,15 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) 
 			{
 				mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, 'X' + COLOR_PAIR(cursorSymbol));
 			}
-			else
-				if (boardToPrint->Board[j][i].withinCursorPath == true && minionVisibleStatus == showMinions) 
+			else   //Don't want to print "range" indicator for selected minion. Just looks goofy.
+				if (boardToPrint->Board[j][i].withinCursorPath == true && minionVisibleStatus == showMinions &&
+					(boardToPrint->Board[j][i].hasMinionOnTop != true || boardToPrint->Board[j][i].minionOnTop != boardToPrint->cursor.selectMinionPointer )  )
 				{
 					mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, '*' + COLOR_PAIR(moveRangeSymbol));
 				}
-				else 
+				else  //Don't want to print "range" indicator for selected minion. Just looks goofy.
 					if ( (boardToPrint->cursor.selectMinionFlag == true && ( boardToPrint->Board[j][i].withinRange == true || boardToPrint->Board[j][i].withinApparentRange == true) ) &&
-						minionVisibleStatus == showMinions)
+						minionVisibleStatus == showMinions && (boardToPrint->Board[j][i].hasMinionOnTop != true || boardToPrint->Board[j][i].minionOnTop != boardToPrint->cursor.selectMinionPointer))
 					{
 						mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ' ' + COLOR_PAIR(moveRangeSymbol));
 					}
@@ -522,7 +523,7 @@ int inputLayer::insertMinionInput(char* Input, MasterBoard* boardToInput)
 	//If it is real minion, then price > 0
 	if (requestedUnitPrice > 0)
 	{
-		boardToInput->createMinion(*Input, myCursor->getX(), myCursor->getY(), 1, 100, 0, 0, 0, -1, -1);
+		boardToInput->createMinion(*Input, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1);
 		status = gameBoard;
 		return 0;
 	}
