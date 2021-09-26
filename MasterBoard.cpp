@@ -1243,7 +1243,7 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 	//Or gave up move, hasn't fired
 	if (Board[inputX][inputY].hasMinionOnTop == true && Board[inputX][inputY].minionOnTop->team == playerFlag
 		&& 	(Board[inputX][inputY].minionOnTop->status == hasntmovedorfired || 
-			(Board[inputX][inputY].minionOnTop->status != hasmovedhasntfired && Board[inputX][inputY].minionOnTop->rangeType != rangedFire)||
+			(Board[inputX][inputY].minionOnTop->status == hasmovedhasntfired && Board[inputX][inputY].minionOnTop->rangeType != rangedFire)||
 			Board[inputX][inputY].minionOnTop->status == gaveupmovehasntfired ) )
 	{
 		cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
