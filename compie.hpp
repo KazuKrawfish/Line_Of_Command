@@ -7,9 +7,10 @@
 #include "Cursor.hpp"
 #include "Tile.hpp"
 #include "inputLayer.hpp"
+#include "compieMinionRecord.hpp"
 
 
-enum minionTaskingType { attackLocalMinion, captureLocalProperty, moveTowardsEnemy, holdPosition };
+
 
 class inputLayer;
 class Cursor;
@@ -20,18 +21,22 @@ class compie
 {
 public:
 	compie(mainMenu* inputMenu);
-	int deployMove(MasterBoard* boardToUse);
-	int checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy,  Cursor* myCursor, MasterBoard* boardToUse);
+	int strategicAdvance(MasterBoard* boardToUse);	//Does a long-term move for either attack or capture
+	int strategicWithdraw(MasterBoard* boardToUse); //Does a long term move for either refuel or repair
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY);
-	double findEnemiesWithinLocalArea(MasterBoard* boardToUse);
+	double findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse);
 	int checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore);
-	int determineMinionTasks(MasterBoard* boardToUse);
+	int determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int executeMinionTasks(MasterBoard* boardToUse);
 	int takeMyTurn(MasterBoard* boardToUse);
 	int determineProduction(MasterBoard* boardToUse);
 
+
+	//New functions for new compie 2_0
+	int buildCompieMinionRoster(MasterBoard* boardToUse);
 	
-	minionTaskingType minionTasking = holdPosition;
+
+	std::vector< compieMinionRecord*> compieMinionRoster;
 	tile* closestTileAdjacentToEnemy = NULL;
 	tile* tileToTarget = NULL;
 	mainMenu* menuPointer = NULL;

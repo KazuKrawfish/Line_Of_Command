@@ -26,9 +26,10 @@ compie::compie(mainMenu* inputMenu)
 
 }
 
-//Search for the closest enemy property to capture.
+//Depends on minion health. If <5, looks for repair location.
+//Otherwise, searches the map, first checking for an enemy minion to attack, and then checking for enemy property to capture, if infantry type.
 //Now assumes a pathMap was built for this- ie minion was selected.
-int compie::deployMove(MasterBoard* boardToUse)
+int compie::strategicAdvance(MasterBoard* boardToUse)
 {
 	int distanceMinionToObjective = 999;
 	int bestDistanceTileToObjective = 999;
@@ -38,39 +39,44 @@ int compie::deployMove(MasterBoard* boardToUse)
 	if (boardToUse->cursor.selectMinionPointer == NULL)
 		return -1;
 
+	Minion* myMinion = boardToUse->cursor.selectMinionPointer;
+
 	//Now go through the whole board.
 	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			bool throwaway = false;
-			//If the current tile is a non-friendly minion this minion can attack them (damagedealt > 0)
-			//This allows us to bypass air units, for instance.
-			if (boardToUse->Board[x][y].hasMinionOnTop == true && boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag
-				&& boardToUse->calculateDamageDealt(boardToUse->cursor.selectMinionPointer, boardToUse->Board[x][y].minionOnTop, throwaway) > 0  )
-			{
-				//If it is closer than what we previously had targeted, set it as the objective.
-				//Must also be valid, ie. not -1. Can actually get there!
-				int rangeToEnemy = boardToUse->myPathMap[x][y].distanceFromMinion;
-				if (rangeToEnemy != -1 && rangeToEnemy < distanceMinionToObjective)
+			
+			
+				bool throwaway = false;
+				//If the current tile contains a non-friendly minion this minion can attack them (damagedealt > 0)
+				//This allows us to bypass air units, for instance.
+				if (boardToUse->Board[x][y].hasMinionOnTop == true && boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag
+					&& boardToUse->calculateDamageDealt(boardToUse->cursor.selectMinionPointer, boardToUse->Board[x][y].minionOnTop, throwaway) > 0)
 				{
-					distanceMinionToObjective = rangeToEnemy;
-					objectiveTile = &(boardToUse->Board[x][y]);
-				}
-			}
-			else
-				//Other option is it's a property tile, not ours, and not being capped by our units (No one friendly on top).
-				//Also, we must be infantry for this option.
-				if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry &&  boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
-					&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag))
-				{
-					int rangeToProp = boardToUse->myPathMap[x][y].distanceFromMinion;
-					if (rangeToProp != -1 && rangeToProp < distanceMinionToObjective)
+					//If it is closer than what we previously had targeted, set it as the objective.
+					//Must also be valid, ie. not -1. Can actually get there!
+					int rangeToEnemy = boardToUse->myPathMap[x][y].distanceFromMinion;
+					if (rangeToEnemy != -1 && rangeToEnemy < distanceMinionToObjective)
 					{
-						distanceMinionToObjective = rangeToProp;
+						distanceMinionToObjective = rangeToEnemy;
 						objectiveTile = &(boardToUse->Board[x][y]);
 					}
 				}
+				else
+					//Other option is it's a property tile, not ours, and not being capped by our units (No one friendly on top).
+					//Also, we must be infantry for this option.
+					if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry && boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
+						&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag))
+					{
+						int rangeToProp = boardToUse->myPathMap[x][y].distanceFromMinion;
+						if (rangeToProp != -1 && rangeToProp < distanceMinionToObjective)
+						{
+							distanceMinionToObjective = rangeToProp;
+							objectiveTile = &(boardToUse->Board[x][y]);
+						}
+					}
+			
 		}
 	}
 	
@@ -149,87 +155,47 @@ int compie::deployMove(MasterBoard* boardToUse)
 
 }
 
-//Check adjacent tiles for enemy minions. Assumes this tile is with movement range of your minion.
-int compie::checkAdjacentTilesForEnemies(int currentX, int currentY, int* distanceToTileAdjacentToClosestEnemy, Cursor* myCursor, MasterBoard* boardToUse)
+//If minion is damaged or air and needs fuel, looks for friendly property capable of supporting, and either moves onto it, or moving towards it.
+int compie::strategicWithdraw(MasterBoard* boardToUse)
 {
-	//If the square to the left has a minion and that minion is enemy.
-	//Important to note that the x-1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
-	if (currentX > 1 && boardToUse->Board[currentX - 1][currentY].hasMinionOnTop && boardToUse->Board[currentX - 1][currentY].minionOnTop->team != boardToUse->playerFlag)
+	int distanceMinionToObjective = 999;
+	int bestDistanceTileToObjective = 999;
+	tileToTarget = NULL;
+	tile* objectiveTile = NULL;
+
+	if (boardToUse->cursor.selectMinionPointer == NULL)
+		return -1;
+
+	Minion* myMinion = boardToUse->cursor.selectMinionPointer;
+
+	//Now go through the whole board.
+	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
 	{
-
-		//Compute distance to that tile, then compare to current distance, if it is less, swap out.
-		int newDistance = computeDistance(currentX, myCursor->selectMinionPointer->locationX, currentY, myCursor->selectMinionPointer->locationY);
-		if (newDistance < *distanceToTileAdjacentToClosestEnemy)
+		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			//Now the closest tile adjacent to an enemy is updated, as well as its distance.
-			//Then return, avoid doing this for 3 more tiles.
-			closestTileAdjacentToEnemy = &(boardToUse->Board[currentX][currentY]);
-			*distanceToTileAdjacentToClosestEnemy = newDistance;
-			tileToTarget = &(boardToUse->Board[currentX - 1][currentY]);
-			return 0;
+				//If this is friendly controlled property capable of repairing//supplying our unit
+				if (boardToUse->Board[x][y].controller == boardToUse->playerFlag 
+					&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[x][y].symbol == true)	)
+				{	//If this is the closest objective so far, set as objective.
+					int rangeBetweenMinionAndTile = boardToUse->compiePathMap[x][y].distanceFromMinion;
+						if (rangeBetweenMinionAndTile != -1 && distanceMinionToObjective > rangeBetweenMinionAndTile)
+						{
+							objectiveTile = &boardToUse->Board[x][y];
+							distanceMinionToObjective = rangeBetweenMinionAndTile;
+						}
+				}
+			
 		}
-
 	}
 
-	//If the square to the right has a minion and that minion is enemy.
-	//Important to note that the x+1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
-	if (currentX < boardToUse->BOARD_WIDTH - 1 && boardToUse->Board[currentX + 1][currentY].hasMinionOnTop && boardToUse->Board[currentX + 1][currentY].minionOnTop->team != boardToUse->playerFlag)
-	{
+	//If we can move there this turn, do it.
+if (objectiveTile != NULL && objectiveTile->hasMinionOnTop == false && objectiveTile->withinRange == true)
+{
+	tileToTarget = objectiveTile;
+}
 
-		//Compute distance to that tile, then compare to current distance, if it is less, swap out.
-		int newDistance = computeDistance(currentX, myCursor->selectMinionPointer->locationX, currentY, myCursor->selectMinionPointer->locationY);
-		if (newDistance < *distanceToTileAdjacentToClosestEnemy)
-		{
-			//Now the closest tile adjacent to an enemy is updated, as well as its distance.
-			//Then return, avoid doing this for 3 more tiles.
-			closestTileAdjacentToEnemy = &(boardToUse->Board[currentX][currentY]);
-			*distanceToTileAdjacentToClosestEnemy = newDistance;
-			tileToTarget = &(boardToUse->Board[currentX + 1][currentY]);
-			return 0;
-		}
 
-	}
-
-	//If the square below has a minion and that minion is enemy.
-	//Important to note that the x+1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
-	if (currentY < boardToUse->BOARD_HEIGHT - 1 && boardToUse->Board[currentX][currentY + 1].hasMinionOnTop && boardToUse->Board[currentX][currentY + 1].minionOnTop->team != boardToUse->playerFlag)
-	{
-
-		//Compute distance to that tile, then compare to current distance, if it is less, swap out.
-		int newDistance = computeDistance(currentX, myCursor->selectMinionPointer->locationX, currentY, myCursor->selectMinionPointer->locationY);
-		if (newDistance < *distanceToTileAdjacentToClosestEnemy)
-		{
-			//Now the closest tile adjacent to an enemy is updated, as well as its distance.
-			//Then return, avoid doing this for 3 more tiles.
-			closestTileAdjacentToEnemy = &(boardToUse->Board[currentX][currentY]);
-			*distanceToTileAdjacentToClosestEnemy = newDistance;
-			tileToTarget = &(boardToUse->Board[currentX][currentY + 1]);
-			return 0;
-		}
-
-	}
-
-	//If the square above has a minion and that minion is enemy.
-	//Important to note that the x+1 shenanigens a.k.a. the tile next door, is only used for seeing if there is a minion there.
-	if (currentY > 1 && boardToUse->Board[currentX][currentY - 1].hasMinionOnTop && boardToUse->Board[currentX][currentY - 1].minionOnTop->team != boardToUse->playerFlag)
-	{
-
-		//Compute distance to that tile, then compare to current distance, if it is less, swap out.
-		int newDistance = computeDistance(currentX, myCursor->selectMinionPointer->locationX, currentY, myCursor->selectMinionPointer->locationY);
-		if (newDistance < *distanceToTileAdjacentToClosestEnemy)
-		{
-			//Now the closest tile adjacent to an enemy is updated, as well as its distance.
-			//Then return, avoid doing this for 3 more tiles.
-			closestTileAdjacentToEnemy = &(boardToUse->Board[currentX][currentY]);
-			*distanceToTileAdjacentToClosestEnemy = newDistance;
-			tileToTarget = &(boardToUse->Board[currentX][currentY - 1]);
-			return 0;
-		}
-
-	}
-
-	return 1;
-
+	return -1;
 }
 
 //New code:
@@ -368,12 +334,9 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 	return 0;
 }
 
-double compie::findEnemiesWithinLocalArea(MasterBoard* boardToUse)
+double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse)
 {
 	Cursor* myCursor = &(boardToUse->cursor);
-	//These variables hold the information of the closest enemy, range, and tile next door.
-	int distanceToTileAdjacentToClosestEnemy = 999;
-
 
 	//First set the starting point for our search (x).
 	//Then set the upper bounds for our search (maxX).
@@ -409,7 +372,6 @@ double compie::findEnemiesWithinLocalArea(MasterBoard* boardToUse)
 			//Also must be within range
 			if ((boardToUse->Board[x][y].hasMinionOnTop == false || (myCursor->selectMinionPointer->locationY == y && myCursor->selectMinionPointer->locationX == x)) && boardToUse->Board[x][y].withinRange == true)
 			{
-				//checkAdjacentTilesForEnemies(x, y, &distanceToTileAdjacentToClosestEnemy,  myCursor, boardToUse );
 				checkAdjacentTilesForBestValuedEnemy(x, y, myCursor, boardToUse, &relativeSuitabilityScore);
 				//Already checked for closeness in the function itself so no need to do anything else
 			}
@@ -484,62 +446,83 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 
 //Determine whether the minion will attack local enemies, capture property, or move strategically.
 //This function assumes the minion is already selected.
-int compie::determineMinionTasks(MasterBoard* boardToUse)
+int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord * selectedMinionRecord)
 {
 	closestTileAdjacentToEnemy = NULL;
 	tileToTarget = NULL;
 	int returnX = 0;
 	int returnY = 0;
 
+
 	if (boardToUse->cursor.selectMinionPointer == NULL)
 	{
 		return 1;
 	}
+	Minion* myMinion = boardToUse->cursor.selectMinionPointer;
 
-	//If already capturing continue that regardless.
-	if (boardToUse->cursor.selectMinionPointer->isCapturing == true)
+	//Before anything else check for air unit fuel status
+	if (myMinion->domain != air || myMinion->currentFuel >= (myMinion->maxFuel / 3)) 
 	{
-		tileToTarget = &boardToUse->Board[boardToUse->cursor.selectMinionPointer->locationX][boardToUse->cursor.selectMinionPointer->locationY];
-		minionTasking = captureLocalProperty;
-		return 1;
-	}
-	else
-	{
-
-		//Otherwise see if there are enemies in local area within range and suitable to attack.
-		double relativeSuitabilityScore = findEnemiesWithinLocalArea(boardToUse);
-		if (relativeSuitabilityScore > 0 && tileToTarget != NULL)
+		//If already capturing continue that regardless.
+		if (myMinion->isCapturing == true)
 		{
-			minionTasking = attackLocalMinion;
-			//std::cout << "recommend attacking " << tileToTarget->minionOnTop->description << " at "
-			//	<< tileToTarget->minionOnTop->locationX << "," << tileToTarget->minionOnTop->locationY << std::endl;
+			tileToTarget = &boardToUse->Board[myMinion->locationX][myMinion->locationY];
+			selectedMinionRecord->tasking = captureLocalProperty;
+			selectedMinionRecord->taskingStatus = immediateExecute;
 			return 1;
 		}
-		else //If infantry, attempt to capture local properties.
-			if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
+		else
+		{
+
+			//Otherwise see if there are enemies in local area within range and suitable to attack.
+			double relativeSuitabilityScore = findBestValuedEnemyWithinLocalArea(boardToUse);
+			if (relativeSuitabilityScore > 0 && tileToTarget != NULL)
 			{
-				int distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY);
-				if (distance < 999 && tileToTarget != NULL)
-				{
-					minionTasking = captureLocalProperty;
-					//DEBUG
-					//std::cout << "recommend capturing " << tileToTarget->description << " at " << returnX << "," << returnY << std::endl;
-					return 1;
-				}
+				selectedMinionRecord->tasking = attackLocalMinion;
+				selectedMinionRecord->taskingStatus = immediateExecute;
+				return 1;
 			}
+			else //If infantry, attempt to capture local properties.
+				if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
+				{
+					int distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY);
+					if (distance < 999 && tileToTarget != NULL)
+					{
+						selectedMinionRecord->tasking = captureLocalProperty;
+						selectedMinionRecord->taskingStatus = immediateExecute;
+						return 1;
+					}
+				}
+		}
 	}
+	
+	//If highly damaged or Air and low on fuel
+	if (myMinion->health < 50 ||
+		(myMinion->domain == air && myMinion->currentFuel < (myMinion->maxFuel / 3)	)	) 
+		{
+		int distance = strategicWithdraw(boardToUse);
+		if (distance < 999 && distance >= 0)	//Error code is -1
+		{
+			selectedMinionRecord->tasking = withdraw;
+			selectedMinionRecord->taskingStatus = immediateExecute;
 
-	int distance = deployMove(boardToUse);
-	if (distance < 999)
-	{
-		minionTasking = moveTowardsEnemy;
-		//DEBUG
-		//std::cout << "Recommend move towards enemies " << std::endl;
-		return 1;
-	}
+			return 1;
+		}
+		}
+	else
+		{
+		int distance = strategicAdvance(boardToUse);
+		if (distance < 999 && distance >= 0)	//Error code is -1
+		{
+			selectedMinionRecord->tasking = advance;
+			selectedMinionRecord->taskingStatus = immediateExecute;
+			return 1;
+		}
+		}
 
-	//std::cout << "Recommend holding position" << std::endl;
-	minionTasking = holdPosition;
+	//If we somehow got here, just sit still.
+	selectedMinionRecord->tasking = holdPosition;
+	selectedMinionRecord->taskingStatus = immediateExecute;
 	return 0;
 }
 
@@ -555,14 +538,17 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 
 
 		//moveMinion needs to contain all the status elements too.
-		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+		int moveResult = boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
 
+		if (moveResult == 0)
+		{
+			//The move automatically deselects. Thus reselect.
+			boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
+			boardToUse->attackMinion(tileToTarget->locationX, tileToTarget->locationY, InputLayer);
+			//std::cout << "Execute" << std::endl;
+		}
 
-		//The move automatically deselects. Thus reselect.
-		boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
-		boardToUse->attackMinion(tileToTarget->locationX, tileToTarget->locationY, InputLayer);
-		//std::cout << "Execute" << std::endl;
-
+		boardToUse->deselectMinion();
 		return 0;
 	}
 
@@ -575,17 +561,22 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 		}
 
 		//moveMinion needs to contain all the status elements too.
-		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+		int moveResult = boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
 
 		//Capture enemy property
 		//The move automatically deselects. Thus reselect.
-		boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
-		boardToUse->captureProperty(tileToTarget, boardToUse->cursor.selectMinionPointer);
+		if (moveResult == 0) 
+		{
+			boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
+			boardToUse->captureProperty(tileToTarget, boardToUse->cursor.selectMinionPointer);
+
+		}
+
 
 		boardToUse->deselectMinion();
 	}
 
-	if (minionTasking == moveTowardsEnemy)
+	if (minionTasking == advance)
 	{
 		//Move cursor
 		boardToUse->cursor.relocate(tileToTarget->locationX, tileToTarget->locationY);
@@ -606,15 +597,51 @@ int compie::executeMinionTasks(MasterBoard* boardToUse)
 
 int compie::takeMyTurn(MasterBoard* boardToUse)
 {
+	bool allMinionsHaveMoved = false;
+
+
+	//Go through minionRecord and determine tasking.
+	while (allMinionsHaveMoved == false)
+	{
+		//For a single iterationa assume all minions moved until proven otherwise
+		allMinionsHaveMoved = true;
+
+		for (int i = 0; i < compieMinionRoster.size(); i++)
+		{
+
+			//If awaitingTasking, determine tasking.
+			if (compieMinionRoster[i]->taskingStatus == (awaitingTasking)) 
+			{
+			//Move cursor, then select minion, then determine tasks
+			boardToUse->cursor.relocate(compieMinionRoster[i]->recordedMinion->locationX, compieMinionRoster[i]->recordedMinion->locationY);
+
+			boardToUse->selectMinion(boardToUse->minionRoster[i]->locationX, boardToUse->minionRoster[i]->locationY);
+
+			determinePotentialMinionTasking(boardToUse, compieMinionRoster[i]);
+			}
+
+			//If tasking is immediateExecute, do it now.
+			//Should already be selected
+			if (compieMinionRoster[i]->taskingStatus == (immediateExecute)) 
+			{
+				executeMinionTasks(boardToUse);
+			}
+
+			//If a single minion has not finished its tasking, set to false
+			if (compieMinionRoster[i]->taskingStatus != taskingExecuted)
+				allMinionsHaveMoved = false;
+
+		}
+
+	}
+	
 	//For now we re-initialize these member variables here:
-	minionTasking = holdPosition;
 	closestTileAdjacentToEnemy = NULL;
 	tileToTarget = NULL;
 
 	//Go through minion Roster.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
-
 		//Must be a valid minion, and our team's minion. Must have not moved fully yet.
 		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag && boardToUse->minionRoster[i]->status != hasfired)
 		{
@@ -622,17 +649,6 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 			//Or if in debug mode, compie shows moves
 			if (boardToUse->isItSinglePlayerGame == true || menuPointer->debugMode == true)
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-				//Move cursor, then select minion, then determine tasks, then execute tasks.
-				boardToUse->cursor.XCoord = boardToUse->minionRoster[i]->locationX;
-				boardToUse->cursor.YCoord = boardToUse->minionRoster[i]->locationY;
-
-				//Reminder that "selectMinion" is required to set the "withinRange" characteristic for tiles.
-				//This is used for firing and moving.
-				boardToUse->selectMinion(boardToUse->minionRoster[i]->locationX, boardToUse->minionRoster[i]->locationY);
-				//std::cout << "For minion " << boardToUse->cursor.selectMinionPointer->description 
-				//	<<" at " << boardToUse->cursor.getX() << "," << boardToUse->cursor.getY() << ": "<< std::endl;
-				determineMinionTasks(boardToUse);
 
 			executeMinionTasks(boardToUse);
 
@@ -660,14 +676,14 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 	determineProduction(boardToUse);
 
-		//End turn at end
-		InputLayer->status = waitingForNextLocalPlayer;
+	//End turn at end
+	InputLayer->status = waitingForNextLocalPlayer;
 
-		int incrementGameTurn = boardToUse->endTurn(InputLayer);
-		//If we advanced a gameTurn, mainMenu will keep track of it.
-		menuPointer->gameTurn += incrementGameTurn;
-		//Have to always keep an autosave!
-		menuPointer->gameSave(".\\savegames\\Auto_save.txt", boardToUse);
+	int incrementGameTurn = boardToUse->endTurn(InputLayer);
+	//If we advanced a gameTurn, mainMenu will keep track of it.
+	menuPointer->gameTurn += incrementGameTurn;
+	//Have to always keep an autosave!
+	menuPointer->gameSave(".\\savegames\\Auto_save.txt", boardToUse);
 	
 
 	return 1;
@@ -780,5 +796,23 @@ int compie::determineProduction(MasterBoard* boardToUse)
 		}
 
 	}
+	return 0;
+}
+
+int compie::buildCompieMinionRoster(MasterBoard* boardToUse) 
+{
+	//Go through minion Roster.
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	{
+		//Must be a valid minion, and compie's minion. 
+		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag)
+		{
+			compieMinionRecord* newRecord =  new compieMinionRecord(boardToUse->minionRoster[i]);
+			compieMinionRoster.push_back(newRecord);
+		}
+	}
+
+
+
 	return 0;
 }
