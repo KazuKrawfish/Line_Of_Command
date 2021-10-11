@@ -4,9 +4,6 @@
 
 compieMinionRecord::compieMinionRecord(Minion* inputMinion)
 {
-	recordedMinion = &inputMinion;
-
-
-
+	recordedMinion = inputMinion;
 	return ;
 }
