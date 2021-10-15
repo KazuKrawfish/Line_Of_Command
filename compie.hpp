@@ -15,6 +15,7 @@
 class inputLayer;
 class Cursor;
 class mainMenu;
+class compieMinionRecord;
 
 
 class compie 

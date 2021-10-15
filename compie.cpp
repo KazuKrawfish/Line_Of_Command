@@ -174,7 +174,7 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 				//If this is friendly controlled property capable of repairing//supplying our unit
 				//We do care if occupied currently
 				if (boardToUse->Board[x][y].controller == boardToUse->playerFlag 
-					&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[x][y].symbol == true)
+					&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[x][y].symbol)  != -1
 					&& boardToUse->Board[x][y].hasMinionOnTop == true)
 				{	//If this is the closest objective so far, set as objective.
 					int rangeBetweenMinionAndTile = boardToUse->compiePathMap[x][y].distanceFromMinion;

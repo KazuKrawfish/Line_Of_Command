@@ -50,8 +50,9 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	if (minionToPrint != NULL && (  minionToPrint->currentFuel == 0 || (double (minionToPrint->maxFuel) / double( minionToPrint->currentFuel ) ) >= 3) )
 	{
 		lowFuel = true;
-	}		//Minion exists, has a "main" gun ie. ammo, and it is below 1/3 ammo
-	if (minionToPrint != NULL &&  minionToPrint->maxAmmo != 0 &&  (minionToPrint->currentAmmo == 0 || (double(minionToPrint->maxAmmo) / double(minionToPrint->currentAmmo)) >= 3))
+	}		//Minion exists, has a gun (Max != -1), and it is below 1/3 ammo AND isn't infinite ammo (Max != 0)
+	if( (minionToPrint != NULL &&  minionToPrint->maxPriAmmo != 0 && minionToPrint->maxPriAmmo != -1 &&  (minionToPrint->currentPriAmmo == 0 || (double(minionToPrint->maxPriAmmo) / double(minionToPrint->currentPriAmmo)) >= 3)) &&
+		(minionToPrint != NULL && minionToPrint->maxSecAmmo != 0 && minionToPrint->maxSecAmmo != -1  && (minionToPrint->currentSecAmmo == 0 || (double(minionToPrint->maxSecAmmo) / double(minionToPrint->currentSecAmmo)) >= 3))   )
 	{
 		lowAmmo = true;
 	}
@@ -145,9 +146,9 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		waddstr(MainMenu->mywindow, &(MainMenu->playerNames[currentMinion->team])[0]);
 		waddstr(MainMenu->mywindow, "'s ");
 		waddstr(MainMenu->mywindow, &currentMinion->description[0]);
-		if (currentMinion->maxAmmo != 0)
+		if (currentMinion->maxPriAmmo > 0 )
 		{
-			snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. %d Ammo. \n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentAmmo);
+			snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. %d Primary Ammo. \n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentPriAmmo);
 		}
 		else snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. No main weapon. \n", int(currentMinion->health), currentMinion->currentFuel);
 		waddstr(MainMenu->mywindow, pointerToPrint);
@@ -523,7 +524,7 @@ int inputLayer::insertMinionInput(char* Input, MasterBoard* boardToInput)
 	//If it is real minion, then price > 0
 	if (requestedUnitPrice > 0)
 	{
-		boardToInput->createMinion(*Input, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1);
+		boardToInput->createMinion(*Input, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1, -1);
 		status = gameBoard;
 		return 0;
 	}

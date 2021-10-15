@@ -354,7 +354,7 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 
 	if (attackingMinion.rangeType == directFire)
 	{
-		if (attackingMinion.status == (gaveupmovehasntfired || hasmovedhasntfired))
+		if (attackingMinion.status == gaveupmovehasntfired ||  attackingMinion.status == hasmovedhasntfired )
 		{
 
 			if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
