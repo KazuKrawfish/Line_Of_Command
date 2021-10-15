@@ -36,12 +36,12 @@ public:
 	int setAttackField(int inputX, int inputY, int inputRange);
 	int setDropField(int inputX, int inputY);
 	int setVisionField(int observerNumber);
-	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool & wouldAmmoBeUsed);
+	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool & wouldAmmoBeUsed, int & weaponUsed, bool ignoreLimitations);
 	int selectMinion(int inputX, int inputY);
 	int moveMinion(int inputX, int inputY);
 	int deselectMinion();
 	int attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam);
-	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputAmmo);
+	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
 	int endTurn(inputLayer* InputLayer);
 	int upkeep(inputLayer* InputLayer);
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);

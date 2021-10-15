@@ -12,16 +12,16 @@ Minion::Minion()
 	team = 0;						//Team 0 is the neutral team.
 	status = hasntmovedorfired;
 	health = 100;
-	
-	
+
+
 }
 
 //
 //Always use this constructor, it gives the new Minion all required properties.
 //When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement costs and consultMinionCostChart.
 //This assumes that the transport already exists if the minion is being carried. Can cause NULL dereference!
-Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, 
-	MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo)
+Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam,
+	MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo)
 {
 	veterancy = inputVeterancy;
 	seniority = inputSeniority;
@@ -31,7 +31,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 	//If being transported, this minion doesn't take up any space.
 	//Also, it will be transported by whomever we indicate with InputX and Y
-	if (beingTransported == 1) 
+	if (beingTransported == 1)
 	{
 		if (Environment->Board[inputX][inputY].hasMinionOnTop != NULL)
 		{
@@ -53,18 +53,19 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	switch (inputType)
 	{
 	case('i'):
-	{		
+	{
 		description = "Infantry";
 		movementRange = 3;
 		attackRange = 1;
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		Image =		  { 'i',' ','i',
+		Image = { 'i',' ','i',
 						' ','i',' ',
 						' ',' ',' ' };
 		maxFuel = 70;
-		secondWeaponIsMG = true;
+		maxPriAmmo = -1;
+		maxSecAmmo = 0;
 		break;
 	}
 	case('s'):
@@ -75,28 +76,28 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		Image = {				's',' ','s',
+		Image = { 's',' ','s',
 								' ','s',' ',
 								' ',' ',' ' };
 		maxFuel = 70;
-		maxAmmo = 3;
-		secondWeaponIsMG = true;
+		maxPriAmmo = 3;
+		maxSecAmmo = 0;
 		break;
 	}
 	case('a'):
 	{
 		description = "Armor";
 		movementRange = 6;
-		attackRange = 1; 
+		attackRange = 1;
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		Image =		{	'-','n',' ',
+		Image = { '-','n',' ',
 						'=','=','=',
 						' ',' ',' ' };
 		maxFuel = 70;
-		maxAmmo = 9;
-		secondWeaponIsMG = true;
+		maxPriAmmo = 9;
+		maxSecAmmo = 0;
 		break;
 	}
 	case('A'):
@@ -108,11 +109,12 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = hybridRange;
 		specialtyGroup = normal;
 		minAttackRange = 1;
-		Image = {		'\\','\\','A',
+		Image = { '\\','\\','A',
 						'=','=','=',
 						' ',' ',' ' };
 		maxFuel = 70;
-		maxAmmo = 9;
+		maxPriAmmo = 6;
+		maxSecAmmo = 6;
 		break;
 	}
 	case('T'):
@@ -123,12 +125,12 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		Image = {		'-','H',' ',
+		Image = { '-','H',' ',
 						'=','=','=',
 						' ',' ',' ' };
 		maxFuel = 60;
-		maxAmmo = 6;
-		secondWeaponIsMG = true;
+		maxPriAmmo = 6;
+		maxSecAmmo = 0;
 		break;
 	}
 	case('r'):
@@ -140,11 +142,12 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = rangedFire;
 		specialtyGroup = normal;
 		minAttackRange = 1;
-		Image = {		' ','\\','A',
+		Image = { ' ','\\','A',
 						'=','=','=',
 						' ',' ',' ' };
 		maxFuel = 50;
-		maxAmmo = 6;
+		maxPriAmmo = 6;
+		maxSecAmmo = -1;
 		break;
 	}
 	case('c'):
@@ -155,15 +158,16 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 5;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		Image = {		'-','n',' ',
+		Image = { '-','n',' ',
 						'o','=','o',
 						' ',' ',' ' };
 		maxFuel = 70;
-		secondWeaponIsMG = true;
-		break; 
+		maxPriAmmo = -1;
+		maxSecAmmo = 0;
+		break;
 	}
-	case('R'): 
-	{ 
+	case('R'):
+	{
 		description = "Rocket";
 		movementRange = 5;
 		attackRange = 4;
@@ -171,12 +175,13 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = rangedFire;
 		minAttackRange = 2;
 		specialtyGroup = normal;
-		Image = {			'n','\\','\\',
+		Image = { 'n','\\','\\',
 							'o','=','o',
 							' ',' ',' ' };
 		maxFuel = 50;
-		maxAmmo = 6;
-		break; 
+		maxPriAmmo = 6;
+		maxSecAmmo = -1;
+		break;
 	}
 	case('v'):
 	{
@@ -190,9 +195,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				'<','=','*',
 				' ',' ',' ' };
 		maxFuel = 80;
-		maxAmmo = 9;
 		domain = helo;
-		secondWeaponIsMG = true;
+		maxPriAmmo = 9;
+		maxSecAmmo = 0;
 		break;
 	}
 	case('h'):
@@ -221,7 +226,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		Image = { '/','=','=',
 				'=','=','=',
 				' ',' ',' ' };
-		maxFuel = 70;	
+		maxFuel = 70;
 		break;
 	}
 	case('f'):
@@ -237,14 +242,15 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				' ','v',' ',
 				' ',' ',' ' };
 		maxFuel = 60;
-		maxAmmo = 3;
+		maxPriAmmo = 3;
+		maxSecAmmo = -1;
 		break;
 	}
 	case('b'):
 	{
 		description = "Bomber";
 		movementRange = 8;
-		attackRange = 1 ;
+		attackRange = 1;
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
@@ -253,7 +259,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				'\'','V','\'',
 				' ',' ',' ' };
 		maxFuel = 70;
-		maxAmmo = 3;
+		maxPriAmmo = 3;
 		break;
 	}
 	case('B'):
@@ -264,13 +270,13 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = rangedFire;
 		domain = sea;
-		 minAttackRange = 1;
+		minAttackRange = 1;
 		specialtyGroup = normal;
 		Image = { 'A','/','_',
 				'_','_','/',
 				' ',' ',' ' };
 		maxFuel = 80;
-		maxAmmo = 6;
+		maxPriAmmo = 6;
 		break;
 	}
 	case('C'):
@@ -280,14 +286,15 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 3;
 		visionRange = 4;
 		rangeType = hybridRange;
-		 minAttackRange = 1;
+		minAttackRange = 1;
 		specialtyGroup = normal;
 		domain = sea;
 		Image = { 'n','-','_',
 				'_','_','/',
 				' ',' ',' ' };
 		maxFuel = 80;
-		maxAmmo = 6;
+		maxPriAmmo = 6;
+		maxSecAmmo = 6;
 		break;
 	}
 	case('G'):
@@ -303,7 +310,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				'=','=','/',
 				' ',' ',' ' };
 		maxFuel = 70;
-		maxAmmo = 1;
+		maxPriAmmo = 1;
 		break;
 	}
 	case('L'):
@@ -319,7 +326,6 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				'_','_','/',
 				' ',' ',' ' };
 		maxFuel = 80;
-		maxAmmo = 0;
 		break;
 	}
 	case('U'):
@@ -335,7 +341,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				'=','=','=',
 				' ',' ',' ' };
 		maxFuel = 80;
-		maxAmmo = 6;
+		maxPriAmmo = 6;
 		break;
 	}
 	case('V'):
@@ -351,7 +357,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 				'_','_','/',
 				' ',' ',' ' };
 		maxFuel = 80;
-		maxAmmo = 6;
+		maxPriAmmo = 6;
 		break;
 	}
 	}
@@ -365,33 +371,40 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	}
 	else currentFuel = inputFuel;
 
-	if (inputAmmo == -1)
+	if (inputPriAmmo == -1)
 	{
-		currentAmmo = maxAmmo;
+		currentPriAmmo = maxPriAmmo;
 	}
-	else currentAmmo = inputAmmo;
+	else currentPriAmmo = inputPriAmmo;
+
+	if (inputSecAmmo == -1)
+	{
+		currentSecAmmo = maxSecAmmo;
+	}
+	else currentSecAmmo = inputSecAmmo;
+
 
 
 }
 
-double Minion::calculateVetBonus() 
+double Minion::calculateVetBonus()
 {
 	double combatBonus = 1.0;
 
-		if (veterancy == 1) 
-		{
-			combatBonus = 1.05;
-		} 
-		else if (veterancy == 2) 
-		{
-			combatBonus = 1.1;
-		}
-		else if (veterancy == 3) 
-		{
-			combatBonus = 1.2;
-		}
+	if (veterancy == 1)
+	{
+		combatBonus = 1.05;
+	}
+	else if (veterancy == 2)
+	{
+		combatBonus = 1.1;
+	}
+	else if (veterancy == 3)
+	{
+		combatBonus = 1.2;
+	}
 
-		return combatBonus;
+	return combatBonus;
 
 }
 

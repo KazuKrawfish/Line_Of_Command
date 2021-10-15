@@ -166,7 +166,9 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 			<< int(boardToPrint->Board[boardToPrint->minionRoster[i]->locationX][boardToPrint->minionRoster[i]->locationY].capturePoints) <<" "
 			<< beingTransported << " "
 			<< boardToPrint->minionRoster[i]->currentFuel << " "
-			<< boardToPrint->minionRoster[i]->currentAmmo << std::endl;
+			<< boardToPrint->minionRoster[i]->currentPriAmmo << " "
+			<< boardToPrint->minionRoster[i]->currentSecAmmo << " "
+			<< std::endl;
 
 		}
 	}
@@ -191,7 +193,9 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 				<< 20 << " "		//Default capture points to avoid breaking
 				<< beingTransported << " "
 				<< boardToPrint->minionRoster[i]->currentFuel << " " 
-				<< boardToPrint->minionRoster[i]->currentAmmo << std::endl;
+				<< boardToPrint->minionRoster[i]->currentPriAmmo << " "
+				<< boardToPrint->minionRoster[i]->currentSecAmmo << 
+				std::endl;
 		}
 	}
 	saveGame.close();
@@ -314,7 +318,7 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	*saveGame >> ThrowawayString;
 	int numberOfMinions;
 	*saveGame >> numberOfMinions;
-	int health, locationX, locationY, team, seniority, status, veterancy, capturePoints, beingTransported, inputFuel, inputAmmo;
+	int health, locationX, locationY, team, seniority, status, veterancy, capturePoints, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo;
 	char type;
 	*saveGame >> ThrowawayString;
 
@@ -332,11 +336,12 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 			>> capturePoints
 			>> beingTransported
 			>> inputFuel
-			>> inputAmmo;
+			>> inputPriAmmo
+			>> inputSecAmmo;
 
 		//Regardless of transport status, we pass the saved location- it either represents the minion's position
 		//Or the transport's position.
-		boardToPrint->createMinion(type, locationX, locationY, team, health, status, veterancy, beingTransported, inputFuel, inputAmmo);
+		boardToPrint->createMinion(type, locationX, locationY, team, health, status, veterancy, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo);
 	
 		//Set capture status.
 		if (capturePoints != 20)
