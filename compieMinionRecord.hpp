@@ -12,7 +12,7 @@ class inputLayer;
 class Cursor;
 class mainMenu;
 
-enum minionTaskingType { attackLocalMinion, captureLocalProperty, advance, holdPosition, withdraw };
+enum minionTaskingType { attackLocalMinion, captureLocalProperty, advance, holdPosition, withdraw, defendHQ };
 enum minionTaskingStatus { awaitingTasking, pendingConfirmation, taskingExecuted, immediateExecute };
 
 
@@ -21,6 +21,10 @@ class compieMinionRecord
 	
 public:
 	compieMinionRecord(Minion *inputMinion);
+	compieMinionRecord() { return; };
+
+
+	int initializeRecord(Minion* inputMinion);
 	
 	minionTaskingType tasking = holdPosition;
 	minionTaskingStatus taskingStatus = awaitingTasking;

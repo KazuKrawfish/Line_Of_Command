@@ -12,6 +12,7 @@
 enum mainMenuStatus { topmenu,  playingMap, waitingForRemotePlayer };
 enum interactionMethod {unchosen, local, remote};
 
+
 class mainMenu
 {
 public:
@@ -28,22 +29,21 @@ public:
 	mainMenuStatus menuStatus = topmenu;
 	bool veryFirstTurn = true;
 	bool debugMode = false;
-	std::vector<std::string> playerNames;
 	std::string sessionName = "localsession";
 	std::string myPlayerName = "~";
-	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame);
+	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame);
 	int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint);
-	int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame, bool isSaveGame);
-	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
+	int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame, bool isSaveGame);
+	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int printTopMenu();
-	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
-	int topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
-	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
-	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer);
+	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
+	int topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer );
+	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
+	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int printWaitingScreen();
-	int waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer);
+	int waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer);
 	
 	mainMenu(WINDOW* myWindow);
 	//Multiplayer specific functions
@@ -52,6 +52,8 @@ public:
 	//The below pulls from remote and opens the save game if there is an update. This should be used while player is waiting for others to finish their turn.
 	int multiplayerPullSaveGame();
 	WINDOW* mywindow;
+
+	std::vector <compie> computerPlayerRoster;
 
 
 };

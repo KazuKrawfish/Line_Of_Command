@@ -56,7 +56,6 @@ int main()
 	mainMenu MainMenu(mainWindow);
 	inputLayer InputLayer(&MainMenu);
 	MasterBoard GameBoard;
-	compie ComputerPlayer( &MainMenu);
 
 
 	start_color();
@@ -106,7 +105,7 @@ int main()
 	init_pair(attackRangeSymbol, COLOR_BLACK, COLOR_RED);
 	init_pair(moveRangeSymbol, COLOR_BLACK, COLOR_RED);
 
-	MainMenu.playGame(&GameBoard, &InputLayer, &ComputerPlayer);
+	MainMenu.playGame(&GameBoard, &InputLayer);
 	
 
 }

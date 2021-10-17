@@ -10,6 +10,8 @@
 class Cursor;
 const int GLOBALSUPPLYCAP	= 100;		//Global variables declarations
 
+enum playerTypeKind {	humanPlayer, computerPlayer };
+
 class pathSquare
 {
 public:
@@ -17,6 +19,32 @@ public:
 	bool wasVisited = false;
 
 };
+
+class playerRosterEntry 
+{
+public:
+	playerRosterEntry() 
+	{
+		NULL;
+	}
+
+	playerRosterEntry(int inputTreasury, std::string inputName, int inputPlayerFlag)
+	{
+		treasury = inputTreasury;
+		name = inputName;
+		playerFlag = inputPlayerFlag;
+		
+	};
+
+	int treasury = 0;
+	playerTypeKind playerType = humanPlayer;
+	std::string name;
+	int playerFlag = -1;
+	bool stillAlive = true;
+	int numberOfMinions = 0;
+};
+
+
 
 class MasterBoard
 {
@@ -29,8 +57,6 @@ public:
 	int buildPath(bool isItInitialCall, int x, int y, char minionType, std::vector<std::vector<pathSquare>> & pathMapPointer);
 	int buildApparentPathMap(bool isItInitialCall, int x, int y, char minionType);
 
-	std::vector<int> treasury;	//1 extra "player" so that treasury[playerFlag] behaves as expected. (There is no player 0.)
-	
 	int setRangeField(int inputX, int inputY);
 	int setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY, int playerToSee);
 	int setAttackField(int inputX, int inputY, int inputRange);
@@ -62,6 +88,9 @@ public:
 	std::vector<std::vector<pathSquare>> myPathMap;
 	std::vector<std::vector<pathSquare>> compiePathMap;
 	std::vector<std::vector<tile>>  Board;
+
+	std::vector<playerRosterEntry> playerRoster;
+
 	int windowLocationX = 0;
 	int windowLocationY = 0;
 	int playerFlag;

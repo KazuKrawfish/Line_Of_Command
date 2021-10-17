@@ -105,7 +105,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	//Need string pointer since addstr giving grief about printing strings, and same with snprintf.
 	char pointerToPrint[100];
 	char* descriptionPointer = &currentTile->description[0];
-	char* playerName = &(MainMenu->playerNames[currentTile->controller])[0];
+	char* playerName = &(boardToPrint->playerRoster[currentTile->controller].name[0]);
 
 	if(boardToPrint->Board[boardToPrint->cursor.XCoord][boardToPrint->cursor.YCoord].withinVision[observerNumber] == true || observerNumber == boardToPrint->playerFlag)
 	{
@@ -143,7 +143,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 		//Print out basic minion status.
 		waddstr(MainMenu->mywindow, " Player ");
-		waddstr(MainMenu->mywindow, &(MainMenu->playerNames[currentMinion->team])[0]);
+		waddstr(MainMenu->mywindow, &(boardToPrint->playerRoster[currentMinion->team].name[0])	);
 		waddstr(MainMenu->mywindow, "'s ");
 		waddstr(MainMenu->mywindow, &currentMinion->description[0]);
 		if (currentMinion->maxPriAmmo > 0 )
@@ -197,7 +197,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 
 	//Print current turn.
-	snprintf(pointerToPrint, 100, "Player %d's turn. Treasury Total: %d\n", boardToPrint->playerFlag, boardToPrint->treasury[boardToPrint->playerFlag]);
+	snprintf(pointerToPrint, 100, "Player %d's turn. Treasury Total: %d\n", boardToPrint->playerFlag, boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	waddstr(MainMenu->mywindow, pointerToPrint);
 	
 	char* eventTextToPrint = &eventText[0];
@@ -468,7 +468,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) 
 int inputLayer::printWaitingScreen(MasterBoard* boardToPrint) 
 {
 	wclear(MainMenu->mywindow);
-	char* playerName = &(MainMenu->playerNames[boardToPrint->playerFlag])[0];
+	char* playerName = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
 	waddstr(MainMenu->mywindow, "Player ");
 	waddstr(MainMenu->mywindow, playerName);
 	waddstr(MainMenu->mywindow, "'s ");
@@ -767,7 +767,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	//Another working key for compie
 	if (*Input == 'c' && MainMenu->debugMode == true)
 	{
-		computerPlayer->takeMyTurn(boardToInput);
+		MainMenu->computerPlayerRoster[boardToInput->playerFlag].takeMyTurn(boardToInput);
 	}
 
 	//Need char for shift
@@ -837,7 +837,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 
 		}
 		//Actually load scenario. Initialize board, etc.
-		MainMenu->gameLoad(boardToInput, this, computerPlayer, &loadGameSave);
+		MainMenu->gameLoad(boardToInput, this, &loadGameSave);
 		status = gameBoard;
 	}
 
@@ -892,7 +892,7 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 		return 0;
 	}
 
-	int treasury = boardToInput->treasury[boardToInput->playerFlag];
+	int treasury = boardToInput->playerRoster[boardToInput->playerFlag].treasury;
 
 	//If this is NOT the second valid purchase input
 	//IE we have not yet gotten any valid input for propertyLayer.

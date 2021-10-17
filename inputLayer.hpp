@@ -55,7 +55,6 @@ public:
 	specialKey minionVisibleStatus = showMinions;
 	char requestedMinionToBuy = '\n';
 	int requestedUnitPrice = -1;
-	compie* computerPlayer;
 	mainMenu* MainMenu;
 
 

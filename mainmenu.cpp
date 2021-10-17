@@ -10,11 +10,11 @@
 class inputLayer;
 class MasterBoard;
 
+
 mainMenu::mainMenu(WINDOW* myWindow)
 {
-	playerNames.resize(5); //May be more but for now it works
 	mywindow = myWindow;
-
+	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
 }
 //Gameplay note:
 //As currently constructed, host for a new scenario must be player 1. Anyone join will play the turn assigned based on their player name.
@@ -95,11 +95,13 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	//Unique to save_game vs scenario. First save number of players, and then player names (User names):
 	saveGame << "Number_of_players_below:" << std::endl;
 	saveGame << boardToPrint->NUMBEROFPLAYERS << std::endl;
-	saveGame << "Names_and_treasury_totals_below:" << std::endl;
+	saveGame << "Player_Data:_Name_PlayerType_StillAlive_Treasury" << std::endl;
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
-		saveGame << playerNames[i] << std::endl;
-		saveGame << boardToPrint->treasury[i] << std::endl;
+		saveGame << boardToPrint->playerRoster[i].name << std::endl;
+		saveGame << int(boardToPrint->playerRoster[i].playerType) << std::endl;
+		saveGame << int(boardToPrint->playerRoster[i].stillAlive) << std::endl;
+		saveGame << boardToPrint->playerRoster[i].treasury << std::endl;
 	}
 	
 	//Then save the game turn.
@@ -204,7 +206,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 
 //Scenario Load is for new scenarios from a non-saved game.
 //Game Load is for saved games, which already have player data.
-int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame)
+int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer,  std::ifstream* saveGame)
 { 
 	std::string ThrowawayString;
 	
@@ -213,15 +215,23 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie
 	//Remember to have one exta for ease of access (Player "0" is blank)
 	*saveGame >> ThrowawayString;
 	*saveGame >> boardToPrint->NUMBEROFPLAYERS;
-	playerNames.resize(boardToPrint->NUMBEROFPLAYERS+1);
-	boardToPrint->treasury.resize(boardToPrint->NUMBEROFPLAYERS + 1);
+	boardToPrint->playerRoster.resize(boardToPrint->NUMBEROFPLAYERS + 1);
 
 	//Unique to save_game vs scenario. Load player names (User names):
 	*saveGame >> ThrowawayString;
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
-		*saveGame >> playerNames[i];
-		*saveGame >> boardToPrint->treasury[i];
+		int playerType = 0;
+
+		*saveGame >> boardToPrint->playerRoster[i].name;
+		*saveGame >> playerType;
+		*saveGame >> boardToPrint->playerRoster[i].stillAlive;
+		*saveGame >> boardToPrint->playerRoster[i].treasury;
+	
+		if(playerType == 0)
+			boardToPrint->playerRoster[i].playerType = humanPlayer;
+		else boardToPrint->playerRoster[i].playerType = computerPlayer;
+	
 	}
 
 	//Then load the game turn.
@@ -229,29 +239,29 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie
 	*saveGame >> gameTurn;
 		
 	//Although I don't love the name scenarioLoad, this is performing the same action as scenarioLoad so we're using it as good practice.
-	scenarioLoad(boardToPrint, InputLayer, ComputerPlayer, saveGame,  true);
+	scenarioLoad(boardToPrint, InputLayer, saveGame,  true);
 	return 0; 
 
 }
 
 //Load scenario game and initialize the board with its contents.
-int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, compie* ComputerPlayer, std::ifstream* saveGame, bool isSaveGame) {
+int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame, bool isSaveGame) {
 
 	veryFirstTurn = true;
 
 	//Clear board in case scenario load was called by player menu later in game.
 	boardToPrint->clearBoard(InputLayer);
-	InputLayer->computerPlayer = ComputerPlayer;
-	ComputerPlayer->InputLayer = InputLayer;
+	
 
 	//If this is a new game, clear the treasury.
+	//(If going from a game in middle of play, to new game).
 	//Otherwise leave the values from the loadGame portion.
 	if (isSaveGame == false) 
 	{
 		//Reset treasury
 		for (int i = 0; i < boardToPrint->NUMBEROFPLAYERS + 1; i++)
 		{
-			boardToPrint->treasury[i] = 0;
+			boardToPrint->playerRoster[i].treasury = 0;
 		}
 	}
 
@@ -357,14 +367,14 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, co
 	return 1;
 }
 
-int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
+int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 	wclear(mywindow);
 	waddstr(mywindow,"Line of Command\n");
 	waddstr(mywindow,"Copyright 2021, Park Family Software Laboratory (ParkLab)\n");
 	waddstr(mywindow,"Press any key to continue.");
 	wrefresh(mywindow);
-	
+
 	char Input = '~';
 
 	//Run as long as the user wants. Infinite while loop.
@@ -381,19 +391,11 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 			Input = wgetch(mywindow);
 		}
 
-
-		//My attempt to test escape character.
-		/*if (Input == 27) 
-		{
-			waddstr(mywindow,"BSLALIJASLDJ");
-		}*/
-
-
 		//If we're still on top menu, do that instead of game/inputLayer.
 		if (menuStatus == topmenu)
 		{
 			printTopMenu();
-			topMenuInput(&Input, boardToPlay, InputLayer, ComputerPlayer);
+			topMenuInput(&Input, boardToPlay, InputLayer);
 		}
 		else
 
@@ -401,7 +403,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 		if (menuStatus == waitingForRemotePlayer)
 		{
 			printWaitingScreen();
-			waitForRemotePlayer(boardToPlay, InputLayer, ComputerPlayer);
+			waitForRemotePlayer(boardToPlay, InputLayer);
 		}
 		else
 		
@@ -445,9 +447,9 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 
 			//Computer takes turn if it is his turn to do so.
 			//Note that this doesn't deal with "status".
-			if (playerNames[boardToPlay->playerFlag] == "compie")
+			if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer)
 			{
-				ComputerPlayer->takeMyTurn(boardToPlay);
+				computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
 				
 			}
 
@@ -461,14 +463,14 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer, compie*
 	return 0;
 }
 
-int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
+int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 	*Input = wgetch(mywindow);
 
 	//If user wants to load a map.
 	if (*Input == 'l') 
 	{
-		topMenuLoad(Input, boardToPlay, InputLayer, ComputerPlayer);
+		topMenuLoad(Input, boardToPlay, InputLayer);
 		skipOneInput = true;
 		InputLayer->status = gameBoard;
 	} 
@@ -476,7 +478,7 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 	//Newgame
 	if (*Input == 'n')
 	{
- 		topMenuNew(Input, boardToPlay, InputLayer, ComputerPlayer);
+ 		topMenuNew(Input, boardToPlay, InputLayer);
 		skipOneInput = true;
 		InputLayer->status = gameBoard;
 	}
@@ -484,7 +486,7 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 	//Join a remote game
 	if (*Input == 'j')
 	{
-		topMenuJoin(boardToPlay, InputLayer, ComputerPlayer);
+		topMenuJoin(boardToPlay, InputLayer);
 		skipOneInput = true;
 		InputLayer->status = gameBoard;
 	}else
@@ -522,8 +524,14 @@ int mainMenu::printWaitingScreen()
 	return 0;
 }
 
-int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
+int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 {	
+	if(computerPlayerRoster.empty() == false)
+	{
+	computerPlayerRoster.clear();
+	}
+
+
 	//Determine if game is remote or local.
 	waddstr(mywindow,"Local (l) or remote (r) game?\n");
 	gameType = unchosen;
@@ -573,7 +581,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	
 	}
 	//Actually load scenario. Initialize board, etc.
-	scenarioLoad(boardToPlay, InputLayer, ComputerPlayer, &newGameMap, false);
+	scenarioLoad(boardToPlay, InputLayer, &newGameMap, false);
 	newGameMap.close();
 
 	std::ifstream loadSession;
@@ -607,24 +615,57 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 
 	//Determine player names for number of players
-	//Currently this is 2:
+
 	//We added one to the array, just like treasury, for easy access.
+	int numberOfCompies = 0;
 	char inputName[100];
 	char outputName[100];
+
+	//Resize computer Roster for easy access.
+	computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
+	
 	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS ; i++)
 	{
 		snprintf(&outputName[0], 100, "Input Player %d's name: \n", i);
 		waddstr(mywindow,&outputName[0]);
 		wgetstr( mywindow,&inputName[0]);
-		playerNames[i] = inputName;
+		boardToPlay->playerRoster[i].name = inputName;
+
+		bool playerTypeDecided = false;
+		while (!playerTypeDecided) 
+		{
+			char playerTypeInput = ' ';
+			snprintf(&outputName[0], 100, "Is this player human (h) or computer (c)? \n");
+			waddstr(mywindow, &outputName[0]);
+			playerTypeInput = wgetch(mywindow);
+			if ( playerTypeInput == 'c' || playerTypeInput == 'h')
+			{
+				if (playerTypeInput == 'h')
+				{
+					boardToPlay->playerRoster[i].playerType = humanPlayer;
+				}
+				else if (playerTypeInput == 'c') 
+				{
+					boardToPlay->playerRoster[i].playerType = computerPlayer;
+					computerPlayerRoster[numberOfCompies].initalizeCompie(this, i, InputLayer);
+				}
+				playerTypeDecided = true;
+			}
+		}
 	}
 
 	//Host is always player one for a new game.
-	myPlayerName = playerNames[1];
-
+	myPlayerName = boardToPlay->playerRoster[1].name;
 
 	//Determines if they print or not.
-	if (playerNames[2] == "compie")
+	int numberOfHumanPlayers = 0;
+	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
+	{
+		if (boardToPlay->playerRoster[i].playerType == humanPlayer)
+			numberOfHumanPlayers++;
+	}
+	
+	if (numberOfHumanPlayers < 2)
 	{
 		boardToPlay->isItSinglePlayerGame = true;
 	}
@@ -635,8 +676,14 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	return 0;
 }
 
-int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer)
+int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 { 
+	//Clear out the old roster. Then we can make new one.
+	if (computerPlayerRoster.empty() == false)
+	{
+		computerPlayerRoster.clear();
+	}
+
 	//Determine if game is remote or local.
 	waddstr(mywindow,"Local (l) or remote(r) game?\n");
 	gameType = unchosen;
@@ -646,16 +693,10 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 		if (*Input == 'l')
 		{
-			//wclear(mywindow);
-			//waddstr(mywindow,"Local game selected.\n");
-			//wrefresh(mywindow);
 			gameType = local;
 		}
 		else if (*Input == 'r')
 		{
-			//wclear(mywindow);
-			//waddstr(mywindow,"Remote game selected.\n");
-			//wrefresh(mywindow);
 			gameType = remote;
 		}
 	}
@@ -702,7 +743,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 	}
 	//Actually load scenario. Initialize board, etc.
-	gameLoad(boardToPlay, InputLayer, ComputerPlayer, &loadGameSave);
+	gameLoad(boardToPlay, InputLayer, &loadGameSave);
 	loadGameSave.close();
 
 	std::ifstream loadSession;
@@ -735,22 +776,35 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	}
 
 	//Host will play as whoever's turn it is.
-	myPlayerName = playerNames[boardToPlay->playerFlag];
+	myPlayerName =	boardToPlay->playerRoster[boardToPlay->playerFlag].name;
 
+	computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS+1);
 	//Determines if they print or not.
-	if (playerNames[2] == "compie")
+	int numberOfHumanPlayers = 0;
+	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
+	{
+		if (boardToPlay->playerRoster[i].playerType == humanPlayer)
+		{
+			numberOfHumanPlayers++;
+		}
+		else if (boardToPlay->playerRoster[i].playerType == computerPlayer)
+		{
+			computerPlayerRoster[i].initalizeCompie( this, i, InputLayer);
+		}
+
+	}
+
+	if (numberOfHumanPlayers < 2)
 	{
 		boardToPlay->isItSinglePlayerGame = true;
 	}
 	else boardToPlay->isItSinglePlayerGame = false;
 
-
-
 	menuStatus = playingMap;
 	return 0;
 }
 
-int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, compie* ComputerPlayer) 
+int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer) 
 {
 	//Set flags to remote and waiting for first turn for the session.
 	gameType = remote;
@@ -767,7 +821,7 @@ int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer, comp
 	wgetstr( mywindow,&inputPlayerName[0]);
 	myPlayerName = inputPlayerName;
 
-	waitForRemotePlayer(boardToPlay, InputLayer, ComputerPlayer);
+	waitForRemotePlayer(boardToPlay, InputLayer);
 
 	return 0;
 }
@@ -800,7 +854,7 @@ int mainMenu::multiplayerPullSaveGame()
 	return 0;
 }
 
-int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer, compie* ComputerPlayer)
+int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer)
 {
 	waddstr(mywindow,"waitForRemotePlayer \n");
 	
@@ -821,10 +875,10 @@ int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLay
 		//Have to successfully open the game file before we can examine it!
 		if (loadGameSave.is_open() == true) 
 		{
-			gameLoad(boardToSave, InputLayer, ComputerPlayer, &loadGameSave);
+			gameLoad(boardToSave, InputLayer, &loadGameSave);
 			
 			//If it is "my turn" then we are good to go.
-			if ( myPlayerName == playerNames[boardToSave->playerFlag] )
+			if ( myPlayerName == (boardToSave->playerRoster[boardToSave->playerFlag].name)	)
 			{
 				isItMyTurnYet = true;
 			}

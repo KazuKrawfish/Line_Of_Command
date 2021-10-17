@@ -372,17 +372,43 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 					weaponUsed = 2;
 				}
 			}
-			if (weaponUsed == 1 && attackingMinion.maxPriAmmo != 0)
+			if (weaponUsed == 1 && attackingMinion.maxPriAmmo > 0)
 			{
 				isAmmoUsed = true;
 			}
-			if (weaponUsed == 2 && attackingMinion.maxSecAmmo != 0)
+			if (weaponUsed == 2 && attackingMinion.maxSecAmmo > 0)
 			{
 				isAmmoUsed = true;
 			}
 		}
 
 	}
+
+
+	//If ignoreLimitations is on, ignore the previous value and calculate again, ignoring status, ammo, and distance.
+	if(ignoreLimitations == true)
+	{
+		if (ATTACK_VALUES_MATRIX[y][x] > SECONDARY_ATTACK_VALUES_MATRIX[y][x] )
+		{
+			attackScore = ATTACK_VALUES_MATRIX[y][x];
+			weaponUsed = 1;
+		}
+		else if (ATTACK_VALUES_MATRIX[y][x] <= SECONDARY_ATTACK_VALUES_MATRIX[y][x])
+		{
+			attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+			weaponUsed = 2;
+		}
+		if (weaponUsed == 1 && attackingMinion.maxPriAmmo > 0)
+		{
+			isAmmoUsed = true;
+		}
+		if (weaponUsed == 2 && attackingMinion.maxSecAmmo > 0)
+		{
+			isAmmoUsed = true;
+		}
+	
+	}
+
 
 	return attackScore;
 
@@ -519,10 +545,14 @@ MasterBoard::MasterBoard()
 		minionRoster[i] = NULL;
 	}
 
-	treasury.resize(NUMBEROFPLAYERS + 1);
+	playerRoster.resize(NUMBEROFPLAYERS + 1);
 	for (int i = 0; i < NUMBEROFPLAYERS + 1; i++)
 	{
-		treasury[i] = 0;
+		playerRoster[i].treasury = 0;
+		playerRoster[i].numberOfMinions = 0;
+		playerRoster[i].playerFlag = i;
+		playerRoster[i].name = "UNASSIGNED";
+		playerRoster[i].stillAlive = true;
 	}
 
 
@@ -1276,11 +1306,11 @@ int MasterBoard::setDropField(int inputX, int inputY)
 int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam)
 {
 	int attemptResult = 1;
-	if (treasury[playerFlag] >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
+	if (playerRoster[playerFlag].treasury  >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
 	{
 		attemptResult = createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0, -1, -1, -1);
 		if (attemptResult == 0)
-			treasury[playerFlag] -= consultMinionCostChart(inputType, Board[inputX][inputY].symbol);
+			playerRoster[playerFlag].treasury -= consultMinionCostChart(inputType, Board[inputX][inputY].symbol);
 
 	}
 
@@ -1985,7 +2015,7 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 		{
 			if (Board[x][y].controller == playerFlag)
 			{
-				treasury[playerFlag] += Board[x][y].production;
+				playerRoster[playerFlag].treasury += Board[x][y].production;
 				if (Board[x][y].symbol == 'Q')
 				{
 					cursor.relocate(x, y);
@@ -2059,19 +2089,19 @@ int MasterBoard::repairMinions()
 					else if (minionRoster[i]->health <= 94 && minionRoster[i]->health > 84)
 					{
 						minionRoster[i]->health = 100;
-						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 10);
+						playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 10);
 					}
 					//"2" repair, but close enough to not just add
 					else if (minionRoster[i]->health <= 84 && minionRoster[i]->health > 80)
 					{
 						minionRoster[i]->health = 100;
-						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
+						playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
 					}
 					//Standard "2" repair
 					else
 					{
 						minionRoster[i]->health += 20;
-						treasury[playerFlag] -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
+						playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
 					}
 				}
 			}
