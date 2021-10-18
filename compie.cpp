@@ -35,7 +35,7 @@ int compie::analyzeMap(MasterBoard* boardToUse)
 
 
 			//Count number of properties on map
-			if (boardToUse->Board[x][y].checkForProperty() == true)
+			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true)
 				totalPropertiesOnMap++;
 		}
 
@@ -153,7 +153,7 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 				else
 					//Other option is it's a property tile, not ours, and not being capped by our units (No one friendly on top).
 					//Also, we must be infantry for this option.
-					if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry && boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
+					if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry && boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
 						&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag))
 					{
 						int rangeToProp = boardToUse->myPathMap[x][y].distanceFromMinion;
@@ -576,8 +576,9 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 		for (int y = minY; y < maxY; y++)
 
 		{
+			//std::cout << x << " " << y <<std::endl;
 			//If the tile is property and is enemy controlled.
-			if (boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag)
+			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag)
 			{
 				//If the current tile DOES not have minion on top (IE we will be able to move there)
 				if (boardToUse->Board[x][y].hasMinionOnTop == false)
@@ -589,6 +590,7 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 					{
 						distanceToClosestEnemyProperty = rangeToProp;
 						selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
+						selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
 						*returnY = y;
 						*returnX = x;
 					}
@@ -725,7 +727,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		if (moveResult == 0) 
 		{
 			boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
-			boardToUse->captureProperty(selectedMinionRecord->objectiveTile, boardToUse->cursor.selectMinionPointer);
+			(void) boardToUse->captureProperty(selectedMinionRecord->objectiveTile, boardToUse->cursor.selectMinionPointer);
 
 		}
 
@@ -747,9 +749,34 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		//Do nothing
 	}
 
+	//If we're in debug mode, give player vision over everything.
+	if (menuPointer->debugMode == true)
+	{
+		boardToUse->setVisionField(0);
+		boardToUse->checkWindow();
+		InputLayer->printScreen(boardToUse, 0);
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+	}
+	else
+	{
+		//If single player make sure player 1 can see, and print for them.
+		if (boardToUse->isItSinglePlayerGame == true)
+		{
+			boardToUse->setVisionField(1);
+			boardToUse->checkWindow();
+			InputLayer->printScreen(boardToUse, 1);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+		}
+	}
+
 	//Regardless of the tasking, it has now been executed.
 	selectedMinionRecord->taskingStatus = taskingExecuted;
-	boardToUse->deselectMinion();
+	
+	if(boardToUse->cursor.selectMinionFlag == true)	
+		boardToUse->deselectMinion();
+
 	return 1;
 }
 

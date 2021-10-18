@@ -1762,7 +1762,7 @@ int MasterBoard::dropOffMinion()
 std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion)
 {
 	//Check for actual property before we capture
-	if (inputTile->checkForProperty() != true)
+	if (inputTile->checkForProperty(inputTile->symbol) != true)
 	{
 		return "Not a property";
 	}

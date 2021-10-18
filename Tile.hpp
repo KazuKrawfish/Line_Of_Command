@@ -174,7 +174,6 @@ public:
 
 		if (x == -1 || y == -1)
 		{
-			//std::cout << "Failed to find movement chart" << std::endl;
 			return -1;
 		}
 
@@ -184,12 +183,12 @@ public:
 	
 	}
 
-	bool checkForProperty()
+	bool checkForProperty( char terrainType)
 	{
 		bool isProperty = false;
 
 		//Non property included for clarity.
-		switch (this->symbol)
+		switch (terrainType)
 		{
 		case('.'):
 		case('+'):

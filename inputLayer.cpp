@@ -388,7 +388,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) 
 				else
 				{
 					//If it's property
-					if (boardToPrint->Board[j][i].checkForProperty() == true)
+					if (boardToPrint->Board[j][i].checkForProperty(boardToPrint->Board[j][i].symbol) == true)
 					{
 						//Within vision
 						if (boardToPrint->Board[j][i].withinVision[observerNumber] == true)
@@ -558,7 +558,7 @@ int inputLayer::insertTileInput(char* Input, MasterBoard* boardToInput)
 	myTile->capturePoints = 20;
 	myTile->symbol = *Input;
 	
-	if (myTile->checkForProperty() == true)
+	if (myTile->checkForProperty(myTile->symbol) == true)
 	{
 		myTile->controller = boardToInput->playerFlag;
 	}
@@ -744,7 +744,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 		tile* tileToCheck = &boardToInput->Board[boardToInput->cursor.selectMinionPointer->locationX][boardToInput->cursor.selectMinionPointer->locationY];
 		
 		//Must be property and must not be the current player's property (Could be neutral).
-		if (tileToCheck->checkForProperty() && tileToCheck->controller != boardToInput->playerFlag)
+		if (tileToCheck->checkForProperty(tileToCheck->symbol) && tileToCheck->controller != boardToInput->playerFlag)
 		{
 			eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer);
 			boardToInput->deselectMinion();
