@@ -647,7 +647,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				else if (playerTypeInput == 'c') 
 				{
 					boardToPlay->playerRoster[i].playerType = computerPlayer;
-					computerPlayerRoster[numberOfCompies].initalizeCompie(this, i, InputLayer);
+					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer);
 				}
 				playerTypeDecided = true;
 			}

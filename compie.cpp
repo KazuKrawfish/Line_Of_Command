@@ -749,6 +749,9 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		//Do nothing
 	}
 
+	if (boardToUse->cursor.selectMinionFlag == true)
+		boardToUse->deselectMinion();
+
 	//If we're in debug mode, give player vision over everything.
 	if (menuPointer->debugMode == true)
 	{
@@ -774,8 +777,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 	//Regardless of the tasking, it has now been executed.
 	selectedMinionRecord->taskingStatus = taskingExecuted;
 	
-	if(boardToUse->cursor.selectMinionFlag == true)	
-		boardToUse->deselectMinion();
+
 
 	return 1;
 }
