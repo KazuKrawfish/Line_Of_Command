@@ -191,8 +191,8 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			compiePathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].symbol);
-			compiePathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
+			boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].symbol);
+			boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
 		}
 	}
 
@@ -235,8 +235,8 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 			if (boardToUse->Board[x][y].hasMinionOnTop == false && boardToUse->Board[x][y].withinRange == true)
 			{
 				//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
-				int rangeBetweenTileAndObjective = compiePathMap[x][y].distanceFromMinion;
-				if (distanceFromMinionToObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
+				int rangeBetweenTileAndObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion;
+				if (rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
 				{
 					selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
 					bestDistanceTileToObjective = rangeBetweenTileAndObjective;
@@ -299,9 +299,9 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			compiePathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type, 
+			boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type,
 				boardToUse->Board[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].symbol);
-			compiePathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
+			boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
 		}
 	}
 
@@ -344,8 +344,8 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 			if (boardToUse->Board[x][y].hasMinionOnTop == false && boardToUse->Board[x][y].withinRange == true)
 			{
 				//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
-				int rangeBetweenTileAndObjective = compiePathMap[x][y].distanceFromMinion;
-				if (distancefromMinionToObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
+				int rangeBetweenTileAndObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion;
+				if (rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
 				{
 					selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
 					bestDistanceTileToObjective = rangeBetweenTileAndObjective;
@@ -393,8 +393,12 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 		return 1;
 	}
 
-	if ((&boardToUse->Board[defenderX][defenderY].hasMinionOnTop) == false ||
-		boardToUse->Board[defenderX][defenderY].minionOnTop->team == boardToUse->playerFlag)
+	if (boardToUse->Board[defenderX][defenderY].hasMinionOnTop == false )
+	{
+		return 1;
+	}
+
+	if(	boardToUse->Board[defenderX][defenderY].minionOnTop->team == boardToUse->playerFlag)
 	{
 		return 1;
 	}
