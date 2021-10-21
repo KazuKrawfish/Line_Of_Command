@@ -425,7 +425,7 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 		defenderCounterAttackDamageDealt = 0;
 
 	//This is the potential "value added" from combat, based on what we might lose vs gain.
-	double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
+	double newRelativeSuitabilityScore = ( attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost )  / 100;
 
 	//If it's a better score, switch targets.
 	if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
@@ -685,6 +685,16 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 	}
 
 	if (selectedMinionRecord->tasking == advance)
+	{
+		//Move cursor
+		boardToUse->cursor.relocate(selectedMinionRecord->potentialMoveTile->locationX, selectedMinionRecord->potentialMoveTile->locationY);
+
+		//moveMinion needs to contain all the status elements too.
+		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+
+	}
+
+	if (selectedMinionRecord->tasking == withdraw)
 	{
 		//Move cursor
 		boardToUse->cursor.relocate(selectedMinionRecord->potentialMoveTile->locationX, selectedMinionRecord->potentialMoveTile->locationY);
