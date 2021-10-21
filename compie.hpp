@@ -23,14 +23,14 @@ class compie
 public:
 	compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer);
 	compie() { return; };
-	int initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer);
-
+	int initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse);
 	int strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);	//Does a long-term move for either attack or capture
 	int strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord); //Does a long term move for either refuel or repair
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY, compieMinionRecord* selectedMinionRecord);
 	double findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore, compieMinionRecord* selectedMinionRecord);
+	int checkSingleTileForCombatValue(int attackerX, int attackerY, int defenderX, int defenderY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore, compieMinionRecord* selectedMinionRecord);
 	int determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int takeMyTurn(MasterBoard* boardToUse);
@@ -43,6 +43,7 @@ public:
 		
 
 	std::vector <compieMinionRecord> compieMinionRoster;
+	std::vector<std::vector<pathSquare>> compiePathMap;
 	mainMenu* menuPointer = NULL;
 	inputLayer* InputLayer = NULL;
 

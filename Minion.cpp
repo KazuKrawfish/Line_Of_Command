@@ -29,6 +29,16 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	type = inputType;
 	health = inputHealth;
 
+	truePathMap.resize(Environment->BOARD_WIDTH + 1);
+	apparentPathMap.resize(Environment->BOARD_WIDTH + 1);
+	terrainOnlyPathMap.resize(Environment->BOARD_WIDTH + 1);
+	for (int i = 0; i < Environment->BOARD_WIDTH; i++)
+	{
+		truePathMap[i].resize(Environment->BOARD_HEIGHT);
+		apparentPathMap[i].resize(Environment->BOARD_HEIGHT);
+		terrainOnlyPathMap[i].resize(Environment->BOARD_HEIGHT);
+	}
+
 	//If being transported, this minion doesn't take up any space.
 	//Also, it will be transported by whomever we indicate with InputX and Y
 	if (beingTransported == 1)

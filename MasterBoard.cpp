@@ -524,13 +524,6 @@ MasterBoard::MasterBoard()
 	{
 		Board[i].resize(BOARD_HEIGHT);
 	}
-	myPathMap.resize(BOARD_WIDTH + 1);
-	compiePathMap.resize(BOARD_WIDTH + 1);
-	for (int i = 0; i < BOARD_WIDTH; i++)
-	{
-		myPathMap[i].resize(BOARD_HEIGHT);
-		compiePathMap[i].resize(BOARD_HEIGHT);
-	}
 
 	//Initialize cursor.
 	cursor.XCoord = 1;
@@ -572,9 +565,8 @@ MasterBoard::MasterBoard()
 	return;
 }
 
-//This service builds a parallel set of distances that ignores enemy units that you cannot see.
-//Used for doing "traps".
-int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char minionType)
+//This servie builds another parallel set of distances that ignores all units.
+int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion) 
 {
 
 	//If this is first call, reset myPathMap
@@ -585,47 +577,46 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char m
 		{
 			for (int j = 0; j < BOARD_HEIGHT; j++)
 			{
-				myPathMap[i][j].distanceFromMinion = -1;
-				myPathMap[i][j].wasVisited = false;
+				inputMinion->terrainOnlyPathMap[i][j].distanceFromMinion = -1;
+				inputMinion->terrainOnlyPathMap[i][j].wasVisited = false;
 			}
 		}
 	}
 
-	if (Board[x][y].consultMovementChart(minionType, Board[x][y].symbol) == 99)
+	if (Board[x][y].consultMovementChart(inputMinion->type, Board[x][y].symbol) == 99)
 		return 0;
-
 
 
 	//Check each neighbor to find lowest path FROM minion to this square, from among them.
 	int lowestNeighboringPath = 99999;
-	if (x - 1 >= 0 && myPathMap[x - 1][y].wasVisited == true)
+	if (x - 1 >= 0 && inputMinion->terrainOnlyPathMap[x - 1][y].wasVisited == true)
 	{
-		if (myPathMap[x - 1][y].distanceFromMinion != -1 && myPathMap[x - 1][y].distanceFromMinion < lowestNeighboringPath)
+		if (inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion != -1 && inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = myPathMap[x - 1][y].distanceFromMinion;
+			lowestNeighboringPath = inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion;
 
 		}
 	}
-	if (y - 1 >= 0 && myPathMap[x][y - 1].wasVisited == true)
+	if (y - 1 >= 0 && inputMinion->terrainOnlyPathMap[x][y - 1].wasVisited == true)
 	{
-		if (myPathMap[x][y - 1].distanceFromMinion != -1 && myPathMap[x][y - 1].distanceFromMinion < lowestNeighboringPath)
+		if (inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion != -1 && inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = myPathMap[x][y - 1].distanceFromMinion;
+			lowestNeighboringPath = inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion;
 
 		}
 	}
-	if (x + 1 < BOARD_WIDTH && myPathMap[x + 1][y].wasVisited == true)
+	if (x + 1 < BOARD_WIDTH && inputMinion->terrainOnlyPathMap[x + 1][y].wasVisited == true)
 	{
-		if (myPathMap[x + 1][y].distanceFromMinion != -1 && myPathMap[x + 1][y].distanceFromMinion < lowestNeighboringPath)
+		if (inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion != -1 && inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = myPathMap[x + 1][y].distanceFromMinion;
+			lowestNeighboringPath = inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion;
 		}
 	}
-	if (y + 1 < BOARD_HEIGHT && myPathMap[x][y + 1].wasVisited == true)
+	if (y + 1 < BOARD_HEIGHT && inputMinion->terrainOnlyPathMap[x][y + 1].wasVisited == true)
 	{
-		if (myPathMap[x][y + 1].distanceFromMinion != -1 && myPathMap[x][y + 1].distanceFromMinion < lowestNeighboringPath)
+		if (inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion != -1 && inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = myPathMap[x][y + 1].distanceFromMinion;
+			lowestNeighboringPath = inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion;
 
 		}
 	}
@@ -636,18 +627,145 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char m
 	{
 		//Initialize start point
 		//Cost to get to here from here 0.
-		myPathMap[x][y].distanceFromMinion = 0;
+		inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion = 0;
 	}
 	else if (lowestNeighboringPath == 99999)
 	{   //It's physically impossible to get here from minion
-		myPathMap[x][y].distanceFromMinion = -1;
+		inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion = -1;
 	}
 	else
 	{
-		myPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(minionType, Board[x][y].symbol);
+		inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(inputMinion->type, Board[x][y].symbol);
 	}
 
-	myPathMap[x][y].wasVisited = true;
+	inputMinion->terrainOnlyPathMap[x][y].wasVisited = true;
+
+
+	//Now call the function for eaching neighbor that is passable (not 99 move cost or off board), and hasn't been visited, or
+	//is passable,  (And has been visited) and has a higher (path score - that place's cost):
+	//This is to either do a first look or to update a square that has a higher current score than ours
+	if (x - 1 >= 0)
+	{
+		//Terrain only path will ignore all minions.
+		if ((Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 && inputMinion->terrainOnlyPathMap[x - 1][y].wasVisited != true) ||
+			(Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 &&
+			(inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+			{
+				buildTerrainOnlyPathMap(false, x - 1, y, inputMinion);
+			}
+	}
+
+	if (y - 1 >= 0)
+	{
+		//Terrain only path will ignore all minions.
+		if ((Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && inputMinion->terrainOnlyPathMap[x][y - 1].wasVisited != true) ||
+			(Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && 0
+			(inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+			{
+			buildTerrainOnlyPathMap(false, x, y - 1, inputMinion);
+			}
+	}
+
+	if (x + 1 < BOARD_WIDTH)
+	{
+		//Terrain only path will ignore all minions.
+		if ((Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
+			&& inputMinion->terrainOnlyPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
+				&& (inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+			{
+			buildTerrainOnlyPathMap(false, x + 1, y, inputMinion);
+			}
+	}
+
+	if (y + 1 < BOARD_HEIGHT)
+	{
+		//Terrain only path will ignore all minions.
+		if ((Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 && inputMinion->terrainOnlyPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 &&
+			(inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+			{
+			buildTerrainOnlyPathMap(false, x, y + 1, inputMinion);
+			}
+	}
+
+
+	return 1;
+}
+
+//This service builds a parallel set of distances that ignores enemy units that you cannot see.
+//Used for doing "traps".
+int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion)
+{
+
+	//If this is first call, reset myPathMap
+	if (isItInitialCall == true)
+	{
+		//Clear myPathMap
+		for (int i = 0; i < BOARD_WIDTH; i++)
+		{
+			for (int j = 0; j < BOARD_HEIGHT; j++)
+			{
+				inputMinion->apparentPathMap[i][j].distanceFromMinion = -1;
+				inputMinion->apparentPathMap[i][j].wasVisited = false;
+			}
+		}
+	}
+
+	if (Board[x][y].consultMovementChart(inputMinion->type, Board[x][y].symbol) == 99)
+		return 0;
+	
+
+	//Check each neighbor to find lowest path FROM minion to this square, from among them.
+	int lowestNeighboringPath = 99999;
+	if (x - 1 >= 0 && inputMinion->apparentPathMap[x - 1][y].wasVisited == true)
+	{
+		if (inputMinion->apparentPathMap[x - 1][y].distanceFromMinion != -1 && inputMinion->apparentPathMap[x - 1][y].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = inputMinion->apparentPathMap[x - 1][y].distanceFromMinion;
+
+		}
+	}
+	if (y - 1 >= 0 && inputMinion->apparentPathMap[x][y - 1].wasVisited == true)
+	{
+		if (inputMinion->apparentPathMap[x][y - 1].distanceFromMinion != -1 && inputMinion->apparentPathMap[x][y - 1].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = inputMinion->apparentPathMap[x][y - 1].distanceFromMinion;
+
+		}
+	}
+	if (x + 1 < BOARD_WIDTH && inputMinion->apparentPathMap[x + 1][y].wasVisited == true)
+	{
+		if (inputMinion->apparentPathMap[x + 1][y].distanceFromMinion != -1 && inputMinion->apparentPathMap[x + 1][y].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = inputMinion->apparentPathMap[x + 1][y].distanceFromMinion;
+		}
+	}
+	if (y + 1 < BOARD_HEIGHT && inputMinion->apparentPathMap[x][y + 1].wasVisited == true)
+	{
+		if (inputMinion->apparentPathMap[x][y + 1].distanceFromMinion != -1 && inputMinion->apparentPathMap[x][y + 1].distanceFromMinion < lowestNeighboringPath)
+		{
+			lowestNeighboringPath = inputMinion->apparentPathMap[x][y + 1].distanceFromMinion;
+
+		}
+	}
+
+	//We now have lowest path to objective from visited neighbors.
+	//If no visited neighbors, lowestNeighboringPath should be 99999. This means we can't get here from minion.
+	if (isItInitialCall == true)
+	{
+		//Initialize start point
+		//Cost to get to here from here 0.
+		inputMinion->apparentPathMap[x][y].distanceFromMinion = 0;
+	}
+	else if (lowestNeighboringPath == 99999)
+	{   //It's physically impossible to get here from minion
+		inputMinion->apparentPathMap[x][y].distanceFromMinion = -1;
+	}
+	else
+	{
+		inputMinion->apparentPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(inputMinion->type, Board[x][y].symbol);
+	}
+
+	inputMinion->apparentPathMap[x][y].wasVisited = true;
 
 
 	//Now call the function for eaching neighbor that is passable (not 99 move cost or off board), and hasn't been visited, or
@@ -658,41 +776,52 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, char m
 	if (x - 1 >= 0)
 	{
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
-		if ((Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && myPathMap[x - 1][y].wasVisited != true) ||
-			(Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && (myPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
-			if (Board[x - 1][y].withinVision[playerFlag] == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
+		if ((Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 && inputMinion->apparentPathMap[x - 1][y].wasVisited != true) ||
+			(Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 && 
+			(inputMinion->apparentPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
+			if (Board[x - 1][y].withinVision[playerFlag] == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team
+				|| (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
 			{
-				buildApparentPathMap(false, x - 1, y, minionType);
+				buildApparentPathMap(false, x - 1, y, inputMinion);
 			}
 	}
 
 	if (y - 1 >= 0)
 	{
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
-		if ((Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && myPathMap[x][y - 1].wasVisited != true) || (Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && (myPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol)) > myPathMap[x][y].distanceFromMinion))
-			if (Board[x][y - 1].withinVision[playerFlag] == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
+		if ((Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && inputMinion->apparentPathMap[x][y - 1].wasVisited != true) || 
+			(Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 &&0 
+			(inputMinion->apparentPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
+			if (Board[x][y - 1].withinVision[playerFlag] == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team 
+				|| (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
 			{
-				buildApparentPathMap(false, x, y - 1, minionType);
+				buildApparentPathMap(false, x, y - 1, inputMinion);
 			}
 	}
 
 	if (x + 1 < BOARD_WIDTH)
 	{
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
-		if ((Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && myPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && (myPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol)) > myPathMap[x][y].distanceFromMinion))
-			if (Board[x + 1][y].withinVision[playerFlag] == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
+		if ((Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99 
+			&& inputMinion->apparentPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99 
+				&& (inputMinion->apparentPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
+			if (Board[x + 1][y].withinVision[playerFlag] == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air 
+				&& Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
 			{
-				buildApparentPathMap(false, x + 1, y, minionType);
+				buildApparentPathMap(false, x + 1, y, inputMinion);
 			}
 	}
 
 	if (y + 1 < BOARD_HEIGHT)
 	{
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
-		if ((Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && myPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && (myPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol)) > myPathMap[x][y].distanceFromMinion))
-			if (Board[x][y + 1].withinVision[playerFlag] == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
+		if ((Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 && inputMinion->apparentPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 &&
+			(inputMinion->apparentPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
+			if (Board[x][y + 1].withinVision[playerFlag] == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || 
+				(cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air) 
+				|| (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
 			{
-				buildApparentPathMap(false, x, y + 1, minionType);
+				buildApparentPathMap(false, x, y + 1, inputMinion);
 			}
 	}
 
@@ -945,8 +1074,13 @@ int MasterBoard::checkWindow()
 //This is called when selectMinion is called. It sets the visible squares the minion can move through.
 int MasterBoard::setRangeField(int inputX, int inputY)
 {
+	Minion* myMinion = cursor.selectMinionPointer;
+
+	//For debug purposes
+	buildTerrainOnlyPathMap(true, inputX, inputY,  cursor.selectMinionPointer);
+
 	//Build a path map for this particular minion.
-	buildPath(true, inputX, inputY, cursor.selectMinionPointer->type, myPathMap);
+	buildPath(true, inputX, inputY, cursor.selectMinionPointer->type, myMinion->truePathMap);
 
 	//Set the minion's tile to within Range, always.
 	Board[inputX][inputY].withinRange = true;
@@ -960,18 +1094,19 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 			//May also be different domain
 			//Also must be within range
 			//Also must have enough fuel
-			if (myPathMap[x][y].distanceFromMinion != -1 && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
+			if (myMinion->truePathMap[x][y].distanceFromMinion != -1 && myMinion->truePathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange 
+				&& myMinion->truePathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
 				if (Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag
-					|| (Board[x][y].minionOnTop->domain == air && cursor.selectMinionPointer->domain != air) || (Board[x][y].minionOnTop->domain != air && cursor.selectMinionPointer->domain == air))
+					|| (Board[x][y].minionOnTop->domain == air && cursor.selectMinionPointer->domain != air) 
+					|| (Board[x][y].minionOnTop->domain != air && cursor.selectMinionPointer->domain == air))
 				{
 					Board[x][y].withinRange = true;
-
 				}
 		}
 	}
 
 	//Then re-build the path map for apparent path.
-	buildApparentPathMap(true, inputX, inputY, cursor.selectMinionPointer->type);
+	buildApparentPathMap(true, inputX, inputY, cursor.selectMinionPointer);
 
 	//Set the minion's tile to within Range, always.
 	Board[inputX][inputY].withinApparentRange = true;
@@ -985,7 +1120,8 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 			//Also must be within range
 			//Also must have enough fuel
 			//Again, here if the tile is not visible we are pretending to allow movement.
-			if (myPathMap[x][y].distanceFromMinion != -1 && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange && myPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
+			if (myMinion->apparentPathMap[x][y].distanceFromMinion != -1 && myMinion->apparentPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange
+				&& myMinion->apparentPathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
 				if (Board[x][y].withinVision[playerFlag] == false || Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag)
 				{
 					Board[x][y].withinApparentRange = true;
@@ -1007,6 +1143,8 @@ int MasterBoard::setCursorPath(bool firstTime, int inputX, int inputY)
 	if (cursor.selectMinionFlag == false || cursor.selectMinionPointer->status != hasntmovedorfired)
 		return 1;
 
+	Minion* myMinion = cursor.selectMinionPointer;
+
 	if (firstTime == true)
 	{
 		//First clear board of paths
@@ -1020,7 +1158,7 @@ int MasterBoard::setCursorPath(bool firstTime, int inputX, int inputY)
 		}
 	}
 
-	int lowestCostToSelectedMinion = myPathMap[inputX][inputY].distanceFromMinion;
+	int lowestCostToSelectedMinion = myMinion->apparentPathMap[inputX][inputY].distanceFromMinion;
 	int choice = 0;
 
 	if (Board[inputX][inputY].withinApparentRange == true || Board[inputX][inputY].withinRange == true)
@@ -1031,24 +1169,28 @@ int MasterBoard::setCursorPath(bool firstTime, int inputX, int inputY)
 		return 1;
 	}
 
-	if (inputX > 0 && (myPathMap[inputX - 1][inputY].distanceFromMinion < lowestCostToSelectedMinion && myPathMap[inputX - 1][inputY].distanceFromMinion != -1))
+	if (inputX > 0 && (myMinion->apparentPathMap[inputX - 1][inputY].distanceFromMinion < lowestCostToSelectedMinion && 
+		myMinion->apparentPathMap[inputX - 1][inputY].distanceFromMinion != -1))
 	{
-		lowestCostToSelectedMinion = myPathMap[inputX - 1][inputY].distanceFromMinion;
+		lowestCostToSelectedMinion = myMinion->apparentPathMap[inputX - 1][inputY].distanceFromMinion;
 		choice = 1;
 	}
-	if (inputY > 0 && (myPathMap[inputX][inputY - 1].distanceFromMinion < lowestCostToSelectedMinion && myPathMap[inputX][inputY - 1].distanceFromMinion != -1))
+	if (inputY > 0 && (myMinion->apparentPathMap[inputX][inputY - 1].distanceFromMinion < lowestCostToSelectedMinion && 
+		myMinion->apparentPathMap[inputX][inputY - 1].distanceFromMinion != -1))
 	{
-		lowestCostToSelectedMinion = myPathMap[inputX][inputY - 1].distanceFromMinion;
+		lowestCostToSelectedMinion = myMinion->apparentPathMap[inputX][inputY - 1].distanceFromMinion;
 		choice = 2;
 	}
-	if (inputY < BOARD_HEIGHT - 1 && (myPathMap[inputX][inputY + 1].distanceFromMinion < lowestCostToSelectedMinion && myPathMap[inputX][inputY + 1].distanceFromMinion != -1))
+	if (inputY < BOARD_HEIGHT - 1 && (myMinion->apparentPathMap[inputX][inputY + 1].distanceFromMinion < lowestCostToSelectedMinion && 
+		myMinion->apparentPathMap[inputX][inputY + 1].distanceFromMinion != -1))
 	{
-		lowestCostToSelectedMinion = myPathMap[inputX][inputY + 1].distanceFromMinion;
+		lowestCostToSelectedMinion = myMinion->apparentPathMap[inputX][inputY + 1].distanceFromMinion;
 		choice = 3;
 	}
-	if (inputX < BOARD_WIDTH - 1 && (myPathMap[inputX + 1][inputY].distanceFromMinion < lowestCostToSelectedMinion && myPathMap[inputX + 1][inputY].distanceFromMinion != -1))
+	if (inputX < BOARD_WIDTH - 1 && (myMinion->apparentPathMap[inputX + 1][inputY].distanceFromMinion < lowestCostToSelectedMinion && 
+		myMinion->apparentPathMap[inputX + 1][inputY].distanceFromMinion != -1))
 	{
-		lowestCostToSelectedMinion = myPathMap[inputX + 1][inputY].distanceFromMinion;
+		lowestCostToSelectedMinion = myMinion->apparentPathMap[inputX + 1][inputY].distanceFromMinion;
 		choice = 4;
 	}
 
@@ -1567,8 +1709,6 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 
 }
 
-
-
 int MasterBoard::moveMinion(int inputX, int inputY)
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
@@ -1644,7 +1784,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	selectedMinion->locationX = inputX;
 	selectedMinion->locationY = inputY;
 
-	cursor.selectMinionPointer->currentFuel -= myPathMap[inputX][inputY].distanceFromMinion;
+	cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
 
 	cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
 	deselectMinion();

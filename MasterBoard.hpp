@@ -12,14 +12,6 @@ const int GLOBALSUPPLYCAP	= 100;		//Global variables declarations
 
 enum playerTypeKind {	humanPlayer, computerPlayer };
 
-class pathSquare
-{
-public:
-	int distanceFromMinion = -1;
-	bool wasVisited = false;
-
-};
-
 class playerRosterEntry 
 {
 public:
@@ -55,7 +47,8 @@ public:
 	int BOARD_WIDTH = 15;
 	int BOARD_HEIGHT = 20;
 	int buildPath(bool isItInitialCall, int x, int y, char minionType, std::vector<std::vector<pathSquare>> & pathMapPointer);
-	int buildApparentPathMap(bool isItInitialCall, int x, int y, char minionType);
+	int buildApparentPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
+	int buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
 
 	int setRangeField(int inputX, int inputY);
 	int setIndividualVisionField(int inputX, int inputY, int visionLeft, int minionX, int minionY, int playerToSee);
@@ -85,9 +78,9 @@ public:
 	std::string captureProperty(tile* inputTile, Minion* inputMinion);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	Cursor cursor;
-	std::vector<std::vector<pathSquare>> myPathMap;
-	std::vector<std::vector<pathSquare>> compiePathMap;
+
 	std::vector<std::vector<tile>>  Board;
+	
 
 	std::vector<playerRosterEntry> playerRoster;
 

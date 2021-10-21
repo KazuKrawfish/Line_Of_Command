@@ -104,13 +104,22 @@ compie::compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInp
 	return;
 }
 
-int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer) 
+int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse) 
 {
 	InputLayer = providedInputLayer;
 	menuPointer = inputMenu;
 	compiePlayerFlag = inputPlayerFlag;
 	compieMinionRoster.resize(1);
-	return 1;
+
+
+	compiePathMap.resize(boardToUse->BOARD_WIDTH + 1);
+
+	for (int i = 0; i < boardToUse->BOARD_WIDTH; i++)
+	{
+		compiePathMap[i].resize(boardToUse->BOARD_HEIGHT);
+
+	}
+	return 0;
 }
 
 //Depends on minion health. If <5, looks for repair location.
@@ -131,8 +140,7 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			
-			
+					
 				bool throwaway = false;
 				int throwAwayInt = 0;
 				bool TestRun = true;
@@ -143,7 +151,7 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 				{
 					//If it is closer than what we previously had targeted, set it as the objective.
 					//Must also be valid, ie. not -1. Can actually get there!
-					int rangeToEnemy = boardToUse->myPathMap[x][y].distanceFromMinion;
+					int rangeToEnemy = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
 					if (rangeToEnemy != -1 && rangeToEnemy < distanceFromMinionToObjective)
 					{
 						distanceFromMinionToObjective = rangeToEnemy;
@@ -156,7 +164,7 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 					if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry && boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
 						&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag))
 					{
-						int rangeToProp = boardToUse->myPathMap[x][y].distanceFromMinion;
+						int rangeToProp = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
 						if (rangeToProp != -1 && rangeToProp < distanceFromMinionToObjective)
 						{
 							distanceFromMinionToObjective = rangeToProp;
@@ -175,7 +183,7 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 
 	//on that property, and search for the closest tile in our local area, that is within range.
 	//Currently this means compie will not get "trapped". Because it will use true pathmap builder, buildPath.
-	boardToUse->buildPath( true, selectedMinionRecord->objectiveTile->locationX, selectedMinionRecord->objectiveTile->locationY,  boardToUse->cursor.selectMinionPointer->type, boardToUse->compiePathMap);
+	boardToUse->buildTerrainOnlyPathMap( true, selectedMinionRecord->objectiveTile->locationX, selectedMinionRecord->objectiveTile->locationY,  boardToUse->cursor.selectMinionPointer);
 
 	//This offsets by adding the cost to move to the potentialObjectiveTile, and decreases by the amount to get to that interm. square.
 	//Turning compiePathMatrix into cost from interm. to potentialObjectiveTile.
@@ -183,8 +191,8 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			boardToUse->compiePathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].symbol);
-			boardToUse->compiePathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
+			compiePathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].symbol);
+			compiePathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
 		}
 	}
 
@@ -227,7 +235,7 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 			if (boardToUse->Board[x][y].hasMinionOnTop == false && boardToUse->Board[x][y].withinRange == true)
 			{
 				//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
-				int rangeBetweenTileAndObjective = boardToUse->compiePathMap[x][y].distanceFromMinion;
+				int rangeBetweenTileAndObjective = compiePathMap[x][y].distanceFromMinion;
 				if (distanceFromMinionToObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
 				{
 					selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
@@ -264,7 +272,7 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 					&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[x][y].symbol)  != -1
 					&& boardToUse->Board[x][y].hasMinionOnTop == true)
 				{	//If this is the closest objective so far, set as objective.
-					int rangeBetweenMinionAndTile = boardToUse->compiePathMap[x][y].distanceFromMinion;
+					int rangeBetweenMinionAndTile = boardToUse->cursor.selectMinionPointer->apparentPathMap[x][y].distanceFromMinion;
 						if (rangeBetweenMinionAndTile != -1 && distancefromMinionToObjective > rangeBetweenMinionAndTile)
 						{
 							selectedMinionRecord->objectiveTile = &boardToUse->Board[x][y];
@@ -283,7 +291,7 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 
 	//on that property, and search for the closest tile in our local area, that is within range.
 	//Currently this means compie will not get "trapped". Because it will use true pathmap builder, buildPath.
-	boardToUse->buildPath(true, selectedMinionRecord->objectiveTile->locationX, selectedMinionRecord->objectiveTile->locationY, boardToUse->cursor.selectMinionPointer->type, boardToUse->compiePathMap);
+	boardToUse->buildTerrainOnlyPathMap(true, selectedMinionRecord->objectiveTile->locationX, selectedMinionRecord->objectiveTile->locationY, boardToUse->cursor.selectMinionPointer);
 
 	//This offsets by adding the cost to move to the potentialObjectiveTile, and decreases by the amount to get to that interm. square.
 	//Turning compiePathMatrix into cost from interm. to potentialObjectiveTile.
@@ -291,9 +299,9 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			boardToUse->compiePathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type, 
+			compiePathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type, 
 				boardToUse->Board[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].symbol);
-			boardToUse->compiePathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
+			compiePathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
 		}
 	}
 
@@ -336,7 +344,7 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 			if (boardToUse->Board[x][y].hasMinionOnTop == false && boardToUse->Board[x][y].withinRange == true)
 			{
 				//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
-				int rangeBetweenTileAndObjective = boardToUse->compiePathMap[x][y].distanceFromMinion;
+				int rangeBetweenTileAndObjective = compiePathMap[x][y].distanceFromMinion;
 				if (distancefromMinionToObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
 				{
 					selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
@@ -360,137 +368,75 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 
 	//Within each of four adjacent tiles:
 	//Calculate the damage our minion would do to them, as well as the counterattack damage:
-
-	if (currentX > 1 && boardToUse->Board[currentX - 1][currentY].hasMinionOnTop && boardToUse->Board[currentX - 1][currentY].minionOnTop->team != boardToUse->playerFlag)
-	{
-		int attackerCost = 0;
-		int defenderCost = 0;
-
-		//Determine minion costs based on types:
-		//Uses ~ which gets cost regardless of base below us.
-		attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
-
-		defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX - 1][currentY].minionOnTop->type, '~');
-
-		bool willAmmoBeUsed = false;
-		int weaponUsed = 0;
-		bool ignoreLimitations = true;
-		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX - 1][currentY].minionOnTop, willAmmoBeUsed,weaponUsed ,ignoreLimitations);
-		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX - 1][currentY].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed, weaponUsed, ignoreLimitations) * (boardToUse->Board[currentX - 1][currentY].minionOnTop->health - attackerDamageDealt) / 100;
-		if (defenderCounterAttackDamageDealt < 0)
-			defenderCounterAttackDamageDealt = 0;
-
-		//This is the potential "value added" from combat, based on what we might lose vs gain.
-		double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
-
-		//If it's a better score, switch targets.
-		if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
-		{
-			*relativeSuitabilityScore = newRelativeSuitabilityScore;
-			selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[currentX][currentY]);
-			selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[currentX - 1][currentY]);
-			//No return, we want to check all tiles
-		}
-
-	}
-
-	if (currentX < boardToUse->BOARD_WIDTH - 1 && boardToUse->Board[currentX + 1][currentY].hasMinionOnTop && boardToUse->Board[currentX + 1][currentY].minionOnTop->team != boardToUse->playerFlag)
-	{
-		int attackerCost = 0;
-		int defenderCost = 0;
-
-		//Determine minion costs based on types:
-		attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
+	checkSingleTileForCombatValue(currentX, currentY, currentX - 1, currentY, myCursor, boardToUse, relativeSuitabilityScore, selectedMinionRecord);
 	
-		defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX + 1][currentY].minionOnTop->type, '~');
+	checkSingleTileForCombatValue(currentX, currentY, currentX + 1, currentY, myCursor, boardToUse, relativeSuitabilityScore, selectedMinionRecord);
+	
+	checkSingleTileForCombatValue(currentX, currentY, currentX, currentY - 1, myCursor, boardToUse, relativeSuitabilityScore, selectedMinionRecord);
+	
+	checkSingleTileForCombatValue(currentX, currentY, currentX, currentY + 1, myCursor, boardToUse, relativeSuitabilityScore, selectedMinionRecord);
 
-		bool willAmmoBeUsed = false;
-		int weaponUsed = 0;
-		bool ignoreLimitations = true;
-		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX + 1][currentY].minionOnTop, willAmmoBeUsed, weaponUsed, ignoreLimitations);
-		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX + 1][currentY].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed, weaponUsed, ignoreLimitations) * (boardToUse->Board[currentX + 1][currentY].minionOnTop->health - attackerDamageDealt) / 100;
-		if (defenderCounterAttackDamageDealt < 0)
-			defenderCounterAttackDamageDealt = 0;
+	return 0;
+}
 
-		//This is the potential "value added" from combat, based on what we might lose vs gain.
-		double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
+int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defenderX, int defenderY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore, compieMinionRecord* selectedMinionRecord) 
+{	
 
-		//If it's a better score, switch targets.
-		if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
-		{
-			*relativeSuitabilityScore = newRelativeSuitabilityScore;
-			selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[currentX][currentY]);
-			selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[currentX + 1][currentY]);
-			//No return, we want to check all tiles
-		}
-
+	//Any return of 1 will not have touched relativeSuitability or the compieRoster objective tiles so we're okay to just return.
+	if (attackerX < 0 || defenderX < 0 || attackerY < 0 || defenderY < 0)
+	{
+		return 1;
+	}
+	
+	if(attackerX >= boardToUse->BOARD_WIDTH || defenderX >= boardToUse->BOARD_WIDTH || attackerY >= boardToUse->BOARD_HEIGHT || defenderY >= boardToUse->BOARD_HEIGHT)
+	{
+		return 1;
 	}
 
-	if (currentY < boardToUse->BOARD_HEIGHT - 1 && boardToUse->Board[currentX][currentY + 1].hasMinionOnTop && boardToUse->Board[currentX][currentY + 1].minionOnTop->team != boardToUse->playerFlag)
+	if ((&boardToUse->Board[defenderX][defenderY].hasMinionOnTop) == false ||
+		boardToUse->Board[defenderX][defenderY].minionOnTop->team == boardToUse->playerFlag)
 	{
-		int attackerCost = 0;
-		int defenderCost = 0;
-
-		//Determine minion costs based on types:
-		attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
-
-		defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY + 1].minionOnTop->type, '~');
-
-		bool willAmmoBeUsed = false;
-		int weaponUsed = 0;
-		bool ignoreLimitations = true;
-		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX][currentY + 1].minionOnTop, willAmmoBeUsed, weaponUsed, ignoreLimitations);
-		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX][currentY + 1].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed, weaponUsed, ignoreLimitations) * (boardToUse->Board[currentX][currentY + 1].minionOnTop->health - attackerDamageDealt) / 100;
-		if (defenderCounterAttackDamageDealt < 0)
-			defenderCounterAttackDamageDealt = 0;
-
-		//This is the potential "value added" from combat, based on what we might lose vs gain.
-		double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
-
-		//If it's a better score, switch targets.
-		if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
-		{
-			*relativeSuitabilityScore = newRelativeSuitabilityScore;
-			selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[currentX][currentY]);
-			selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[currentX][currentY + 1]);
-			//No return, we want to check all tiles
-		}
-
+		return 1;
 	}
+	
 
-	if (currentY > 1 && boardToUse->Board[currentX][currentY - 1].hasMinionOnTop && boardToUse->Board[currentX][currentY - 1].minionOnTop->team != boardToUse->playerFlag)
+
+	int attackerCost = 0;
+	int defenderCost = 0;
+
+	//Determine minion costs based on types:
+	//Uses ~ which gets cost regardless of base below us.
+	attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
+	defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[defenderX][defenderY].minionOnTop->type, '~');
+
+	bool willAmmoBeUsed = false;
+	int weaponUsed = 0;
+	bool ignoreLimitations = true;
+
+	int attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[defenderX][defenderY].minionOnTop, willAmmoBeUsed, weaponUsed, ignoreLimitations);
+	int defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[defenderX][defenderY].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed, weaponUsed, ignoreLimitations) 
+		* (boardToUse->Board[defenderX][defenderY].minionOnTop->health - attackerDamageDealt) / 100;
+	
+	if (defenderCounterAttackDamageDealt < 0)
+		defenderCounterAttackDamageDealt = 0;
+
+	//This is the potential "value added" from combat, based on what we might lose vs gain.
+	double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
+
+	//If it's a better score, switch targets.
+	if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
 	{
-		int attackerCost = 0;
-		int defenderCost = 0;
-
-		//Determine minion costs based on types:
-		 attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
-
-		defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[currentX][currentY - 1].minionOnTop->type, '~');
-
-		bool willAmmoBeUsed = false;
-		int weaponUsed = 0;
-		bool ignoreLimitations = true;
-		attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[currentX][currentY - 1].minionOnTop, willAmmoBeUsed, weaponUsed, ignoreLimitations);
-		defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[currentX][currentY - 1].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed, weaponUsed, ignoreLimitations) * (boardToUse->Board[currentX][currentY - 1].minionOnTop->health - attackerDamageDealt) / 100;
-		if (defenderCounterAttackDamageDealt < 0)
-			defenderCounterAttackDamageDealt = 0;
-
-		//This is the potential "value added" from combat, based on what we might lose vs gain.
-		double newRelativeSuitabilityScore = attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost;
-
-		//If it's a better score, switch targets.
-		if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
-		{
-			*relativeSuitabilityScore = newRelativeSuitabilityScore;
-			selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[currentX][currentY]);
-			selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[currentX][currentY - 1]);
-			//No return, we want to check all tiles
-		}
-
+		*relativeSuitabilityScore = newRelativeSuitabilityScore;
+		selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[attackerX][attackerY]);
+		selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[defenderX][defenderY]);
+		//No return, we want to check all tiles
 	}
 
 	return 0;
+
+
+
+
 }
 
 double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compieMinionRecord * selectedMinionRecord )

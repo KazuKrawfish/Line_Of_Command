@@ -122,11 +122,22 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	}
 	if (MainMenu->debugMode == true) 
 	{
-		snprintf(pointerToPrint, 100, " Movement cost: %d \nCursor X/Y: %d/%d\n"	, 
-			boardToPrint->myPathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion,
-			boardToPrint->cursor.XCoord,
-			boardToPrint->cursor.YCoord);
-		
+		if (boardToPrint->cursor.selectMinionPointer != NULL) 
+		{
+			snprintf(pointerToPrint, 100, " True MP/Apparent/Terrain: %d/%d/%d, \nCursor X/Y: %d/%d\n",
+				boardToPrint->cursor.selectMinionPointer->truePathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion,
+				boardToPrint->cursor.selectMinionPointer->apparentPathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion,
+				boardToPrint->cursor.selectMinionPointer->terrainOnlyPathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion,
+				boardToPrint->cursor.XCoord,
+				boardToPrint->cursor.YCoord);
+		}
+		else 
+		{
+			snprintf(pointerToPrint, 100, "Cursor X/Y: %d/%d\n",
+				boardToPrint->cursor.XCoord,
+				boardToPrint->cursor.YCoord);
+		}
+
 		waddstr(MainMenu->mywindow, pointerToPrint);
 	}
 

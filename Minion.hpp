@@ -2,7 +2,7 @@
 #define MINION_HPP__
 
 #include <string>
-
+#include <vector>
 
 //Forward declaration for MasterBoard.
 class MasterBoard;
@@ -14,6 +14,13 @@ enum specialtyGroupType { normal, infantry, transport, stealth };
 //Domain type is used not for terrain but everything else. Defensive bonus from terrain, fuel requirement, refuel, move through enemy units, etc.
 enum domainType { land, air, sea, helo };
 
+class pathSquare
+{
+public:
+	int distanceFromMinion = -1;
+	bool wasVisited = false;
+
+};
 
 class Minion
 {
@@ -37,6 +44,13 @@ public:
 	int minAttackRange = 0;	//Only matters for ranged attacks (Whether Hybrid or rangedFire)
 	int visionRange = 0;
 	bool isCapturing = false;
+
+	//True path.
+	std::vector<std::vector<pathSquare>> truePathMap;			
+	//Does not account for minions that are not visible. Shows how the path appears to the player.
+	std::vector<std::vector<pathSquare>> apparentPathMap;
+	//Indicates how path is without accounting for minions in the way. Good for pathfinding for compie.
+	std::vector<std::vector<pathSquare>> terrainOnlyPathMap;	
 
 	int maxFuel = 0;
 	int currentFuel = 0;

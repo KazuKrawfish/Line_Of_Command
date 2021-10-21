@@ -281,14 +281,6 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, st
 		boardToPrint->Board[i].resize(boardToPrint->BOARD_HEIGHT);
 	}
 
-	boardToPrint->myPathMap.resize(boardToPrint->BOARD_WIDTH + 1);
-	boardToPrint->compiePathMap.resize(boardToPrint->BOARD_WIDTH + 1);
-	for (int i = 0; i < boardToPrint->BOARD_WIDTH; i++)
-	{
-		boardToPrint->myPathMap[i].resize(boardToPrint->BOARD_HEIGHT);
-		boardToPrint->compiePathMap[i].resize(boardToPrint->BOARD_HEIGHT);
-	}
-
 	//Then load player data:
 	//This is the current player whos turn it is:
 	*saveGame >> ThrowawayString;
@@ -647,7 +639,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				else if (playerTypeInput == 'c') 
 				{
 					boardToPlay->playerRoster[i].playerType = computerPlayer;
-					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer);
+					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
 				}
 				playerTypeDecided = true;
 			}
@@ -789,7 +781,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 		}
 		else if (boardToPlay->playerRoster[i].playerType == computerPlayer)
 		{
-			computerPlayerRoster[i].initalizeCompie( this, i, InputLayer);
+			computerPlayerRoster[i].initalizeCompie( this, i, InputLayer, boardToPlay);
 		}
 
 	}
