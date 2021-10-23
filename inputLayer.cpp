@@ -649,6 +649,9 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 
 int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 
+	//This tracks who may lose after an action. Only one player can lose per action, so only need one number.
+	int playerPotentiallyDefeated = 0;
+
 	if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
 	{
 		boardToInput->cursor.move(Input);
@@ -729,6 +732,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 			status = gameBoard;
 	}
 
+	bool lastMinionDestroyed = false;
 	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
 	if (*Input == 'r' && boardToInput->cursor.selectMinionFlag == true && boardToInput->cursor.selectMinionPointer->type != transport)
 		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
@@ -737,6 +741,8 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 					if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true)	//In range
 					{
 						//This is the actual attack portion. Return of 0 indicates successful attack.
+						//Note minion's owner so if they lose we know who lost.
+						playerPotentiallyDefeated = boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team;
 						bool attackSuccess = boardToInput->attackMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this);
 						if (attackSuccess == 0)
 						{
@@ -746,24 +752,41 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 
 	//Press 'c' to capture property minion is currently on.
 	//First, minion must be available.
-	//Also, must be infantry type. (Cavalry can capture too).
+	//Also, must be infantry type.
+
 	if (*Input == 'c' && boardToInput->cursor.selectMinionFlag == true )
 		if ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired
 		|| boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
 		&& boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry)
 	{
 		tile* tileToCheck = &boardToInput->Board[boardToInput->cursor.selectMinionPointer->locationX][boardToInput->cursor.selectMinionPointer->locationY];
-		
+		playerPotentiallyDefeated = tileToCheck->controller;
 		//Must be property and must not be the current player's property (Could be neutral).
 		if (tileToCheck->checkForProperty(tileToCheck->symbol) && tileToCheck->controller != boardToInput->playerFlag)
 		{
-			eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer);
+			
+			eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer, this);
 			boardToInput->deselectMinion();
 			status = gameBoard;
 		}
 	}
 	
 
+	return 0;
+}
+
+int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
+{
+	wclear(MainMenu->mywindow);
+	char* playerName = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
+	waddstr(MainMenu->mywindow, "Player ");
+	waddstr(MainMenu->mywindow, playerName);
+	waddstr(MainMenu->mywindow, " Was defeated. Press any key to continue.  \n");
+	move(WINDOW_HEIGHT * 3 + 1, 0);
+	wrefresh(MainMenu->mywindow);
+	
+	//Wait for one input.
+	wgetch(MainMenu->mywindow);
 	return 0;
 }
 

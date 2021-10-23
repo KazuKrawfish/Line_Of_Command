@@ -659,7 +659,7 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 	{
 		//Terrain only path will ignore all minions.
 		if ((Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && inputMinion->terrainOnlyPathMap[x][y - 1].wasVisited != true) ||
-			(Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && 0
+			(Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 &&
 			(inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
 			{
 			buildTerrainOnlyPathMap(false, x, y - 1, inputMinion);
@@ -984,7 +984,7 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
-	//totalNumberOfMinions = 0; Don't do this because destroyMinion will decrement the totalNumberOfMinions so we don't want to double dip.
+	
 
 	//Initialize MinionRoster to NULL AND kill all minions.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -1483,6 +1483,9 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 					Board[inputX][inputY].minionOnTop = minionRoster[i];
 				}
 				setVisionField(playerFlag);
+
+				//Increment that player's number of Minions
+				playerRoster[playerFlag].numberOfMinions++;
 				return 0;
 			}
 		}
@@ -1899,8 +1902,10 @@ int MasterBoard::dropOffMinion()
 	return 0;
 }
 
-std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion)
+std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer)
 {
+	int previousOwner = inputTile->controller;
+
 	//Check for actual property before we capture
 	if (inputTile->checkForProperty(inputTile->symbol) != true)
 	{
@@ -1918,18 +1923,72 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion)
 		inputTile->controller = inputMinion->team;
 		inputTile->capturePoints = 20;
 
-		inputMinion->isCapturing = false;
+		//If this is that player's headquarters, they are no longer alive - have lost.
+		if (inputTile->symbol == 'Q')
+		{
+			playerDefeat(previousOwner, playerFlag, InputLayer);
+		}
 
+		inputMinion->isCapturing = false;
+			   
 		//Create event text telling player property was captured.
 		textToReturn += "PLAYER ";
-		textToReturn += char(this->playerFlag);							//MUST FIX IMPLEMENTATION of Char-32 nonsense.
+		textToReturn += char(previousOwner);							//MUST FIX IMPLEMENTATION of Char-32 nonsense.
 		textToReturn += "'s ";
 		textToReturn += inputTile->description;
 		textToReturn += " CAPTURED!";
+
 	}
 
 	inputMinion->status = hasfired;
+
+
 	return textToReturn;
+}
+
+//Destroys all units owned by loser.
+//Transfers properties to either the HQ capper, or neutral.
+//Does NOT discriminate - you must set winningPlayer = 0 if all minions were destroyed.
+int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* InputLayer)
+{
+	playerRoster[losingPlayer].stillAlive = false;
+
+	bool throwAway = false;
+	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
+	{
+		if (minionRoster[i] != NULL && minionRoster[i]->team == losingPlayer)
+		{
+			destroyMinion(minionRoster[i], false, InputLayer);
+		}
+	}
+
+	for (int x = 0; x < BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < BOARD_HEIGHT; y++)
+		{
+			if (Board[x][y].controller == losingPlayer)
+			{
+				Board[x][y].controller = winningPlayer;
+
+				//If it was being capped by winning player, reset cap points. Otherwise, they remain.
+				if (winningPlayer != 0 && Board[x][y].hasMinionOnTop == true && Board[x][y].minionOnTop->team == winningPlayer)
+				{
+					Board[x][y].capturePoints = 20;
+				}
+			}
+		}
+	}
+
+	//Change over to defeat screen for that player.		
+	InputLayer->printPlayerDefeat(losingPlayer, this);
+		
+	//THen increment turn if appropriate (Died during player turn)
+	if (losingPlayer == playerFlag)
+	{
+		endTurn(InputLayer);
+	}
+
+	return 0;
 }
 
 int MasterBoard::deselectMinion()
@@ -2062,7 +2121,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 }
 
 int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer)
-{
+{	
+	int minionController = inputMinion->team;
+
 	//If carrying a guy, kill that guy too.
 	if (inputMinion->minionBeingTransported != NULL)
 	{
@@ -2088,12 +2149,24 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 		InputLayer->eventText += inputMinion->description;
 		InputLayer->eventText += " DESTROYED!";
 	}
-
+	
 	//Clean up. Currently since we're not cleaning up the minion roster after a death, there is a hole that may prevent saving properly.
-	//FIX FIX FIX
 	totalNumberOfMinions--;
 	minionRoster[inputMinion->seniority] = NULL;
 	delete inputMinion;
+
+	//Decrease player minion count.
+	playerRoster[minionController].numberOfMinions--;
+
+	if (playerRoster[minionController].numberOfMinions <= 0)
+	{
+		//"Neutral" player will be the "winner" of a defeat via destruction of all minions.
+		if (playerRoster[minionController].stillAlive == true)
+		{
+			playerDefeat(minionController, 0, InputLayer);
+		}
+
+	}
 
 	return 0;
 }
@@ -2101,25 +2174,28 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 int MasterBoard::endTurn(inputLayer* InputLayer) {
 
 	int gameTurnIncrement = 0;
-	//Either increment playerFlag or set it to zero, thus cycling through the players.
-	if (playerFlag < NUMBEROFPLAYERS)
-	{
-		playerFlag++;
 
-	}
-	else
-		if (playerFlag >= NUMBEROFPLAYERS)
+	do
+	{
+		//Either increment playerFlag or set it to zero, thus cycling through the players.
+		if (playerFlag < NUMBEROFPLAYERS)
 		{
-			//We need to tell inputLayer to tell mainMenu to increment gameTurn.
-			gameTurnIncrement = 1;
-			playerFlag = 1;
+			playerFlag++;
+
 		}
+		else
+			if (playerFlag >= NUMBEROFPLAYERS)
+			{
+				//We need to tell inputLayer to tell mainMenu to increment gameTurn.
+				gameTurnIncrement = 1;
+				playerFlag = 1;
+			}
+	} while (playerRoster[playerFlag].stillAlive == false);
 
 	//Set minionToBuy to the default null value.
 	InputLayer->requestedMinionToBuy = '\n';
 
 	//Reset every minion's status.
-	//Got messed up by people dying
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		if (minionRoster[i] != NULL)
@@ -2130,10 +2206,10 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 
 	//Shouldn't matter if local or not as long as it's not singleplayer
 	//If it is singleplayer we want to remain in map mode.
-	if (isItSinglePlayerGame == false)
+	if (isItSinglePlayerGame == false) 
+	{
 		InputLayer->status = waitingForNextLocalPlayer;
-
-
+	}
 
 	upkeep(InputLayer);
 
@@ -2168,6 +2244,7 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 	repairMinions();
 
 	resupplyMinions();
+
 
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{

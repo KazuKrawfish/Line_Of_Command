@@ -36,6 +36,7 @@ public:
 	int printMenu();
 	int printInsertMinion();
 	int printInsertTile();
+	int printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint);
 	int printLowerScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printUpperScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printScreen(MasterBoard* boardToPrint, int observerNumber);

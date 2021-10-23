@@ -75,7 +75,8 @@ public:
 	int resupplyMinions();
 	int clearBoard(inputLayer* InputLayer);
 	int consultMinionCostChart(char minionType, char propertyType);
-	std::string captureProperty(tile* inputTile, Minion* inputMinion);
+	int playerDefeat(int playerNumber, int winningPlayer, inputLayer* InputLayer);
+	std::string captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	Cursor cursor;
 

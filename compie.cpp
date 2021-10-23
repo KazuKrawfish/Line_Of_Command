@@ -674,10 +674,11 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 		//Capture enemy property
 		//The move automatically deselects. Thus reselect.
+		bool throwAway;
 		if (moveResult == 0) 
 		{
 			boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
-			(void) boardToUse->captureProperty(selectedMinionRecord->objectiveTile, boardToUse->cursor.selectMinionPointer);
+			(void) boardToUse->captureProperty(selectedMinionRecord->objectiveTile, boardToUse->cursor.selectMinionPointer, InputLayer);
 
 		}
 
