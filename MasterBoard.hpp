@@ -64,7 +64,7 @@ public:
 	int endTurn(inputLayer* InputLayer);
 	int upkeep(inputLayer* InputLayer);
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
-	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer);
+	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill);
 	int pickUpMinion(int inputX, int inputY);
 	int validatePath(int & inputX, int&  inputY);
 	int setCursorPath(bool firstTime, int inputX, int inputY);

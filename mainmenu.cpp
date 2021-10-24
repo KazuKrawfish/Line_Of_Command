@@ -439,7 +439,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 			//Computer takes turn if it is his turn to do so.
 			//Note that this doesn't deal with "status".
-			if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer)
+			if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && computerPlayerRoster[boardToPlay->playerFlag].gameOver == false )
 			{
 				computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
 				

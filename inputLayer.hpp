@@ -37,6 +37,7 @@ public:
 	int printInsertMinion();
 	int printInsertTile();
 	int printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint);
+	int printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint);
 	int printLowerScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printUpperScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printScreen(MasterBoard* boardToPrint, int observerNumber);
@@ -48,7 +49,7 @@ public:
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);
 	int printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber, Minion* minionToPrint);
-	int exitToMainMenu();
+	int exitToMainMenu(MasterBoard* boardToInput);
 	
 	std::string eventText = "";
 

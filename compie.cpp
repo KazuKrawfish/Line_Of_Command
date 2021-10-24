@@ -558,6 +558,11 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 //This function assumes the minion is already selected.
 int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord * selectedMinionRecord)
 {
+	if (gameOver == true)
+	{
+		return 1;
+	}
+
 	int returnX = 0;
 	int returnY = 0;
 
@@ -637,7 +642,12 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 
 int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
-	if ( selectedMinionRecord->tasking == attackLocalMinion)
+	if (gameOver == true)
+	{
+		return 1;
+	}
+
+	if (selectedMinionRecord->tasking == attackLocalMinion)
 	{
 		//Move cursor
 		if (boardToUse->cursor.relocate(selectedMinionRecord->potentialMoveTile->locationX, selectedMinionRecord->potentialMoveTile->locationY) == 1)
@@ -674,7 +684,6 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 		//Capture enemy property
 		//The move automatically deselects. Thus reselect.
-		bool throwAway;
 		if (moveResult == 0) 
 		{
 			boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
@@ -743,9 +752,12 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 	return 1;
 }
 
-
 int compie::takeMyTurn(MasterBoard* boardToUse)
 {
+	if (gameOver == true)
+	{
+		return 1;
+	}
 	bool allMinionsHaveMoved = false;
 	int waveIterator = 0;
 
@@ -770,7 +782,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 	}
 
 	//Go through minionRecord and determine tasking.
-	while (allMinionsHaveMoved == false)
+	while (allMinionsHaveMoved == false && gameOver == false)
 	{
 		//For a single iterationa assume all minions moved until proven otherwise
 		allMinionsHaveMoved = true;
@@ -819,19 +831,20 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 	//Still need to implement non-immediateExecute taskingStatus
 
+	if (gameOver == false && boardToUse->playerRoster[compiePlayerFlag].stillAlive == true)
+	{
 
+		determineProduction(boardToUse);
 
-	determineProduction(boardToUse);
+		//End turn at end
+		InputLayer->status = waitingForNextLocalPlayer;
 
-	//End turn at end
-	InputLayer->status = waitingForNextLocalPlayer;
-
-	int incrementGameTurn = boardToUse->endTurn(InputLayer);
-	//If we advanced a gameTurn, mainMenu will keep track of it.
-	menuPointer->gameTurn += incrementGameTurn;
-	//Have to always keep an autosave!
-	menuPointer->gameSave(".\\savegames\\Auto_save.txt", boardToUse);
-	
+		int incrementGameTurn = boardToUse->endTurn(InputLayer);
+		//If we advanced a gameTurn, mainMenu will keep track of it.
+		menuPointer->gameTurn += incrementGameTurn;
+		//Have to always keep an autosave!
+		menuPointer->gameSave(".\\savegames\\Auto_save.txt", boardToUse);
+	}
 
 	return 1;
 }
@@ -839,6 +852,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 //Right now this is actually buying units too.
 int compie::determineProduction(MasterBoard* boardToUse)
 {
+
 	int totalFactoriesLeft = 0;
 	int numberOfTanks = 0;
 	int numberOfInfantry = 0;

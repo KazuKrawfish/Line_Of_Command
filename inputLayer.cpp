@@ -778,7 +778,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 {
 	wclear(MainMenu->mywindow);
-	char* playerName = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
+	char* playerName = &(boardToPrint->playerRoster[playerDefeated].name[0]);
 	waddstr(MainMenu->mywindow, "Player ");
 	waddstr(MainMenu->mywindow, playerName);
 	waddstr(MainMenu->mywindow, " Was defeated. Press any key to continue.  \n");
@@ -787,8 +787,26 @@ int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 	
 	//Wait for one input.
 	wgetch(MainMenu->mywindow);
+	
 	return 0;
 }
+
+int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint) 
+{
+	wclear(MainMenu->mywindow);
+	char* playerName = &(boardToPrint->playerRoster[playerVictorious].name[0]);
+	waddstr(MainMenu->mywindow, "Player ");
+	waddstr(MainMenu->mywindow, playerName);
+	waddstr(MainMenu->mywindow, " Was victorious! Press any key to return to main menu.  \n");
+	move(WINDOW_HEIGHT * 3 + 1, 0);
+	wrefresh(MainMenu->mywindow);
+
+	//Wait for one input.
+	wgetch(MainMenu->mywindow);
+
+	return 0;
+}
+
 
 int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 
@@ -904,7 +922,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	if (*Input == 'x')
 	{
 		MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
-		exitToMainMenu();
+		exitToMainMenu(boardToInput);
 	}
 
 	return 0;
@@ -984,9 +1002,15 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 	return 0;
 }
 
-int inputLayer::exitToMainMenu() 
+int inputLayer::exitToMainMenu(MasterBoard* boardToInput)
 {
-	this->MainMenu->menuStatus = topmenu;
+	for (int i = 1; i < boardToInput->NUMBEROFPLAYERS + 1; i++)
+	{
+		MainMenu->computerPlayerRoster[i].gameOver = true;
+	}
+	
+	MainMenu->menuStatus = topmenu;
 	MainMenu->skipOneInput = true;
+	
 	return 0; 
 }

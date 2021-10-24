@@ -47,6 +47,8 @@ public:
 	mainMenu* menuPointer = NULL;
 	inputLayer* InputLayer = NULL;
 
+	bool gameOver = false;
+
 	int compiePlayerFlag = -1;	//Needs to get playerFlag.
 								//This would be updated in the load/new scenario functions.
 	int headquartersX = 0;

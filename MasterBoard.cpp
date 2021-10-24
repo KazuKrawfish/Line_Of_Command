@@ -516,6 +516,8 @@ int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 //Currently this is not doing what it should be doing- only partial initialization.
 MasterBoard::MasterBoard()
 {
+	playerFlag = 0;
+
 	//Not sure why we have to do an extra row, whatever! (Tried with one less and it caused out of bounds..... i am insane?!?!)
 	//First resize board to meet savegame specifications.
 	//Also resize mypathMap.
@@ -991,7 +993,7 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 	{
 		if (minionRoster[i] != NULL)
 		{
-			destroyMinion(minionRoster[i], false, InputLayer);
+			destroyMinion(minionRoster[i], false, InputLayer, true);
 			minionRoster[i] = NULL;
 		}
 	}
@@ -1482,10 +1484,10 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 				{
 					Board[inputX][inputY].minionOnTop = minionRoster[i];
 				}
-				setVisionField(playerFlag);
+				setVisionField(inputTeam);
 
 				//Increment that player's number of Minions
-				playerRoster[playerFlag].numberOfMinions++;
+				playerRoster[inputTeam].numberOfMinions++;
 				return 0;
 			}
 		}
@@ -1958,7 +1960,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 	{
 		if (minionRoster[i] != NULL && minionRoster[i]->team == losingPlayer)
 		{
-			destroyMinion(minionRoster[i], false, InputLayer);
+			destroyMinion(minionRoster[i], false, InputLayer, true);
 		}
 	}
 
@@ -1979,11 +1981,41 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 		}
 	}
 
+
 	//Change over to defeat screen for that player.		
 	InputLayer->printPlayerDefeat(losingPlayer, this);
-		
-	//THen increment turn if appropriate (Died during player turn)
-	if (losingPlayer == playerFlag)
+	
+	int playersLeft = 0;
+	//If this was the final defeat, change to main menu.
+	for (int i = 1; i < playerRoster.size(); i++) 
+	{
+		if (playerRoster[i].stillAlive == true)
+		{
+			playersLeft++;
+		}
+	}
+	
+	//ExitToMain also sets compie to stop playing in case this is his turn.
+	bool gameOver = false;
+	if (playersLeft <= 1)
+	{	
+		int winningPlayer = 0;
+		for (int i = 1; i < playerRoster.size(); i++)
+		{
+			if (playerRoster[i].stillAlive == true)
+			{
+				winningPlayer = i;
+			}
+		}
+
+		InputLayer->printPlayerVictory(winningPlayer, this);
+
+		InputLayer->exitToMainMenu(this);
+		gameOver = true;
+	}
+
+	//Then increment turn if appropriate (Died during player turn, game is not over yet.)
+	if (losingPlayer == playerFlag && gameOver == false)
 	{
 		endTurn(InputLayer);
 	}
@@ -2071,7 +2103,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		//If defender falls below 4, it dies.
 		bool printMessage = true;
 		int defendingPlayer = defendingMinion->team;
-		destroyMinion(defendingMinion, printMessage, InputLayer);
+		destroyMinion(defendingMinion, printMessage, InputLayer, false);
 		defenderAlive = false;
 		if (attackingMinion->veterancy <= 3)
 		{
@@ -2102,7 +2134,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 	if (attackingMinion->health < 5)			//The attacker can be destroyed too!
 	{
 		bool printMessage = true;
-		destroyMinion(attackingMinion, printMessage, InputLayer);
+		destroyMinion(attackingMinion, printMessage, InputLayer, false);
 		if (defenderAlive == true && defendingMinion->veterancy <= 3)
 		{
 			defendingMinion->veterancy++;
@@ -2120,14 +2152,14 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 
 }
 
-int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer)
+int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill)
 {	
 	int minionController = inputMinion->team;
 
 	//If carrying a guy, kill that guy too.
 	if (inputMinion->minionBeingTransported != NULL)
 	{
-		destroyMinion(inputMinion->minionBeingTransported, printMessage, InputLayer);
+		destroyMinion(inputMinion->minionBeingTransported, printMessage, InputLayer, AdminKill);
 	}
 
 	//If minion is being transported, then do not attmept to deselect or talk to its location.
@@ -2158,7 +2190,7 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 	//Decrease player minion count.
 	playerRoster[minionController].numberOfMinions--;
 
-	if (playerRoster[minionController].numberOfMinions <= 0)
+	if (playerRoster[minionController].numberOfMinions <= 0 && AdminKill == false)
 	{
 		//"Neutral" player will be the "winner" of a defeat via destruction of all minions.
 		if (playerRoster[minionController].stillAlive == true)
@@ -2251,28 +2283,30 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 		//If it's a minion you own and it's not being transported
 		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->transporter == NULL)
 		{
-			if (minionRoster[i]->domain == helo && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol == 'A')
+			if (minionRoster[i]->domain == helo && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'A')
 			{
 				minionRoster[i]->currentFuel -= 2;
 				if (minionRoster[i]->currentFuel <= 0)
 				{
-					destroyMinion(minionRoster[i], "No fuel", InputLayer);
+					destroyMinion(minionRoster[i], "No fuel", InputLayer, false);
 				}
-			}
-			if (minionRoster[i]->domain == air && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol == 'A')
+			} 
+			else
+			if ( minionRoster[i]->domain == air && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'A')
 			{
 				minionRoster[i]->currentFuel -= 5;
 				if (minionRoster[i]->currentFuel <= 0)
 				{
-					destroyMinion(minionRoster[i], "No fuel", InputLayer);
+					destroyMinion(minionRoster[i], "No fuel", InputLayer, false);
 				}
 			}
-			if (minionRoster[i]->domain == sea && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol == 'P')
+			else
+			if ( minionRoster[i]->domain == sea && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'P')
 			{
 				minionRoster[i]->currentFuel -= 2;
 				if (minionRoster[i]->currentFuel <= 0)
 				{
-					destroyMinion(minionRoster[i], "No fuel", InputLayer);
+					destroyMinion(minionRoster[i], "No fuel", InputLayer, false);
 				}
 			}
 		}
