@@ -91,6 +91,14 @@ public:
 	int totalNumberOfMinions;
 	bool isItSinglePlayerGame = false;
 
+
+	//MissionInfo///////////////////////////////
+	bool missionFlag= false;
+	std::string campaignName = "_";
+	int missionTurnLength = 0;	//Turn limit, or 0 if no turn limit.
+	int whoHoldsOut = 0;		//0 If missionLength is not on, otherwise indicates who wins if turns run out.
+	//MissionInfo///////////////////////////////
+
 private:
 
 };

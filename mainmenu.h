@@ -10,7 +10,7 @@
 
 
 enum mainMenuStatus { topmenu,  playingMap, waitingForRemotePlayer };
-enum interactionMethod {unchosen, local, remote};
+enum interactionMethod {unchosen, localSkirmish, localCampaign, remote};
 
 
 class mainMenu
@@ -31,11 +31,10 @@ public:
 	bool debugMode = false;
 	std::string sessionName = "localsession";
 	std::string myPlayerName = "~";
-	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame);
 	int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint);
-	int scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame, bool isSaveGame);
+	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame);
 	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int printTopMenu();
 	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
@@ -52,6 +51,7 @@ public:
 	//The below pulls from remote and opens the save game if there is an update. This should be used while player is waiting for others to finish their turn.
 	int multiplayerPullSaveGame();
 	WINDOW* mywindow;
+	std::string nextMissionName, missionInfo;
 
 	std::vector <compie> computerPlayerRoster;
 

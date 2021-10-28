@@ -92,9 +92,39 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 {
 	std::ofstream saveGame(inputSaveGameName);
 
+	saveGame << "Savegame_YesNo" << std::endl;
+	saveGame << 1 << std::endl;
+
 	//Unique to save_game vs scenario. First save number of players, and then player names (User names):
 	saveGame << "Number_of_players_below:" << std::endl;
 	saveGame << boardToPrint->NUMBEROFPLAYERS << std::endl;
+
+
+	//*********************************************//
+	//Input "Mission load" data here
+	saveGame << "Mission_On_Off" << std::endl;		//Mission or not
+	saveGame << boardToPrint->missionFlag << std::endl;
+
+	saveGame << "Campaign_Name" << std::endl;		//Mission or not
+	saveGame << boardToPrint->campaignName << std::endl;
+
+	saveGame << "TurnLimit_Or_0_ForOff" << std::endl;		//TurnLength - either 0 for no max turn length, or int to indicate length
+	saveGame << boardToPrint->missionTurnLength << std::endl;
+
+	saveGame << "Who_wins_after_turn_limit" << std::endl;		//Indicates who will win if turn length is met.
+	saveGame << boardToPrint->whoHoldsOut << std::endl;
+
+	saveGame << "Name_of_next_mission_(Same_Directory)" << std::endl;		//Name of next mission
+	saveGame << nextMissionName;
+
+	saveGame << "Mission_Briefing" << std::endl;	//String with mission info
+	saveGame << missionInfo << std::endl;
+
+	//End Mission Data Load
+	//*********************************************//
+
+
+
 	saveGame << "Player_Data:_Name_PlayerType_StillAlive_Treasury" << std::endl;
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
@@ -204,12 +234,20 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	return 1;
 }
 
-//Scenario Load is for new scenarios from a non-saved game.
-//Game Load is for saved games, which already have player data.
-int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer,  std::ifstream* saveGame)
-{ 
+//Load scenario game and initialize the board with its contents.
+int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame) 
+{
+	veryFirstTurn = true;
+
+	//Clear board in case scenario load was called by player menu later in game.
+	boardToPrint->clearBoard(InputLayer);
+
+	bool isItSaveGame = false;
+
 	std::string ThrowawayString;
-	
+
+	*saveGame >> ThrowawayString;
+	*saveGame >> isItSaveGame;
 
 	//First load number of players from save
 	//Remember to have one exta for ease of access (Player "0" is blank)
@@ -217,61 +255,64 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer,  std::
 	*saveGame >> boardToPrint->NUMBEROFPLAYERS;
 	boardToPrint->playerRoster.resize(boardToPrint->NUMBEROFPLAYERS + 1);
 
+	//*********************************************//
+	//Input "Mission load" data here
+	*saveGame >> ThrowawayString;		//Campaign_game
+	*saveGame >> boardToPrint->missionFlag;
+
+	*saveGame >> ThrowawayString;		//Campaign Name - used to navigate menu for next level
+	*saveGame >> boardToPrint->campaignName;
+
+	*saveGame >> ThrowawayString;		//TurnLength - either 0 for no max turn length, or int to indicate length
+	*saveGame >> boardToPrint->missionTurnLength;
+
+	*saveGame >> ThrowawayString;		//Indicates who will win if turn length is met.
+	*saveGame >> boardToPrint->whoHoldsOut;
+
+	*saveGame >> ThrowawayString;		//Name of next mission
+	*saveGame >> nextMissionName;
+
+	*saveGame >> ThrowawayString;		//String with mission info
+	*saveGame >> missionInfo;
+
+	//End Mission Data Load
+	//*********************************************//
+
+
 	//Unique to save_game vs scenario. Load player names (User names):
 	*saveGame >> ThrowawayString;
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
 		int playerType = 0;
 
-		*saveGame >> boardToPrint->playerRoster[i].name;
+		*saveGame >> boardToPrint->playerRoster[i].name;		//For new game this should be ~
 		*saveGame >> playerType;
 		*saveGame >> boardToPrint->playerRoster[i].stillAlive;
 		*saveGame >> boardToPrint->playerRoster[i].treasury;
-	
-		if(playerType == 0)
+
+		if (playerType == 0)
 			boardToPrint->playerRoster[i].playerType = humanPlayer;
 		else boardToPrint->playerRoster[i].playerType = computerPlayer;
-	
+
 	}
 
 	//Then load the game turn.
 	*saveGame >> ThrowawayString;
 	*saveGame >> gameTurn;
-		
-	//Although I don't love the name scenarioLoad, this is performing the same action as scenarioLoad so we're using it as good practice.
-	scenarioLoad(boardToPrint, InputLayer, saveGame,  true);
-	return 0; 
 
-}
-
-//Load scenario game and initialize the board with its contents.
-int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame, bool isSaveGame) {
-
-	veryFirstTurn = true;
-
-	//Clear board in case scenario load was called by player menu later in game.
-	boardToPrint->clearBoard(InputLayer);
-	
 
 	//If this is a new game, clear the treasury.
 	//(If going from a game in middle of play, to new game).
 	//Otherwise leave the values from the loadGame portion.
-	if (isSaveGame == false) 
-	{
-		//Reset treasury
-		for (int i = 0; i < boardToPrint->NUMBEROFPLAYERS + 1; i++)
-		{
-			boardToPrint->playerRoster[i].treasury = 0;
-		}
-	}
+	//Clear treasury not necessary, just use whatever is in the scenario.
 
-	std::string ThrowawayString;
 	//First load the map size:
 	//Ideally we can create new vector or whatever to have different map size:
 	*saveGame >> ThrowawayString;
 	*saveGame >> boardToPrint->BOARD_WIDTH;
 	*saveGame >> ThrowawayString;
 	*saveGame >> boardToPrint->BOARD_HEIGHT;
+
 
 	//Resize the map based on new data.
 	//Not sure why we have to give an additional line but it segfaulted otherwise
@@ -288,12 +329,15 @@ int mainMenu::scenarioLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, st
 
 	//Then load map
 	*saveGame >> ThrowawayString;
+
 	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
 
 		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
-			*saveGame >> boardToPrint->Board[x][y].symbol;
+			char checkonMe = 'L';
+			*saveGame >> checkonMe;
+			boardToPrint->Board[x][y].symbol = checkonMe;
 
 			//Also resize for withinVision
 			boardToPrint->Board[x][y].withinVision.resize(boardToPrint->NUMBEROFPLAYERS + 1);
@@ -525,18 +569,18 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 
 	//Determine if game is remote or local.
-	waddstr(mywindow,"Local (l) or remote (r) game?\n");
+	waddstr(mywindow, "Local skirmish (s), local campaign (c), or remote (r) game?\n");
 	gameType = unchosen;
 	while (gameType == unchosen)
 	{
 		*Input = wgetch(mywindow);
 
-		if (*Input == 'l')
+		if (*Input == 's')
 		{
 			wclear(mywindow);
-			waddstr(mywindow,"Local game selected.\n");
+			waddstr(mywindow,"Local skirmish selected.\n");
 			wrefresh(mywindow);
-			gameType = local;
+			gameType = localSkirmish;
 		}
 		else if (*Input == 'r') 
 		{
@@ -544,6 +588,13 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			waddstr(mywindow,"Remote game selected.\n");
 			wrefresh(mywindow);
 			gameType = remote;
+		}
+		else if (*Input == 'c')
+		{
+			wclear(mywindow);
+			waddstr(mywindow, "Local campaign selected.\n");
+			wrefresh(mywindow);
+			gameType = localCampaign;
 		}
 	}
 
@@ -556,24 +607,53 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
-		waddstr(mywindow,"Choose which scenario to load (Case sensitive): \n");
-		wgetstr( mywindow,pointToScenarioName);
-		std::string newScenario = scenarioToLoad;
-		newGameMap.open(".\\scenarios\\"+ newScenario + ".txt");
-		if (newGameMap.is_open())
+		//Need to print out mission/scenario printout here
+		if (gameType == localSkirmish || gameType == remote) 
 		{
-			waddstr(mywindow,"Successfully loaded!\n");
-			loadsuccessful = true;
-		}
-		else
-		{
-			waddstr(mywindow,"Could not load scenario. Please check that it exists and the right spelling was used.\n");
+			waddstr(mywindow, "Choose which scenario to load (Case sensitive): \n");
+			wgetstr(mywindow, pointToScenarioName);
+			std::string newScenario = scenarioToLoad;
+			newGameMap.open(".\\scenarios\\" + newScenario + ".txt");
+			if (newGameMap.is_open())
+			{
+				waddstr(mywindow, "Successfully loaded!\n");
+				loadsuccessful = true;
+			}
+			else
+			{
+				waddstr(mywindow, "Could not load scenario. Please check that it exists and the right spelling was used.\n");
 
+			}
 		}
-	
+		else if (gameType == localCampaign) 
+		{
+			waddstr(mywindow, "Choose which campaign to start (Case sensitive): \n");
+			wgetstr(mywindow, pointToScenarioName);
+			std::string newCampaignName = scenarioToLoad;
+			char missionToLoad[100];
+			std::string newMission = missionToLoad;
+			
+			std::ifstream newCampaign;
+			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\"+ newCampaignName +".txt");
+			
+			if (newCampaign.is_open())
+			{
+				waddstr(mywindow, "Successfully loaded!\n");
+				loadsuccessful = true;
+				std::string ThrowawayString;
+				newCampaign >> ThrowawayString;
+				newCampaign >> newMission;
+				newGameMap.open(".\\campaigns\\" + newCampaignName + "\\" + newMission + ".txt");
+			}
+			else
+			{
+				waddstr(mywindow, "Could not load campaign. Please check that it exists and the right spelling was used.\n");
+
+			}
+		}
 	}
 	//Actually load scenario. Initialize board, etc.
-	scenarioLoad(boardToPlay, InputLayer, &newGameMap, false);
+	gameLoad(boardToPlay, InputLayer, &newGameMap);
 	newGameMap.close();
 
 	std::ifstream loadSession;
@@ -604,8 +684,6 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	}
 
-
-
 	//Determine player names for number of players
 
 	//We added one to the array, just like treasury, for easy access.
@@ -615,35 +693,48 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	//Resize computer Roster for easy access.
 	computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
-	
-	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS ; i++)
-	{
-		snprintf(&outputName[0], 100, "Input Player %d's name: \n", i);
-		waddstr(mywindow,&outputName[0]);
-		wgetstr( mywindow,&inputName[0]);
-		boardToPlay->playerRoster[i].name = inputName;
 
-		bool playerTypeDecided = false;
-		while (!playerTypeDecided) 
+	if (gameType == localSkirmish || gameType == remote) //Campaign map sticks to names supplied
+	{
+		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 		{
-			char playerTypeInput = ' ';
-			snprintf(&outputName[0], 100, "Is this player human (h) or computer (c)? \n");
+			snprintf(&outputName[0], 100, "Input Player %d's name: \n", i);
 			waddstr(mywindow, &outputName[0]);
-			playerTypeInput = wgetch(mywindow);
-			if ( playerTypeInput == 'c' || playerTypeInput == 'h')
+			wgetstr(mywindow, &inputName[0]);
+			boardToPlay->playerRoster[i].name = inputName;
+
+			bool playerTypeDecided = false;
+
+
+			while (!playerTypeDecided)
 			{
-				if (playerTypeInput == 'h')
+				char playerTypeInput = ' ';
+				snprintf(&outputName[0], 100, "Is this player human (h) or computer (c)? \n");
+				waddstr(mywindow, &outputName[0]);
+				playerTypeInput = wgetch(mywindow);
+				if (playerTypeInput == 'c' || playerTypeInput == 'h')
 				{
-					boardToPlay->playerRoster[i].playerType = humanPlayer;
+					if (playerTypeInput == 'h')
+					{
+						boardToPlay->playerRoster[i].playerType = humanPlayer;
+					}
+					else if (playerTypeInput == 'c')
+					{
+						boardToPlay->playerRoster[i].playerType = computerPlayer;
+						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
+					}
+					playerTypeDecided = true;
 				}
-				else if (playerTypeInput == 'c') 
-				{
-					boardToPlay->playerRoster[i].playerType = computerPlayer;
-					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
-				}
-				playerTypeDecided = true;
 			}
+
 		}
+	}
+	else	//If campaign game we just give player 1's name
+	{
+		snprintf(&outputName[0], 100, "Input Player's name: \n");
+		waddstr(mywindow, &outputName[0]);
+		wgetstr(mywindow, &inputName[0]);
+		boardToPlay->playerRoster[1].name = inputName;
 	}
 
 	//Host is always player one for a new game.
@@ -668,6 +759,38 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	return 0;
 }
 
+/*int mainMenu::restartMission() 
+{
+
+}*/
+
+/*int mainMenu::nextMission() 
+{
+	waddstr(mywindow, "Choose which campaign to start (Case sensitive): \n");
+	wgetstr(mywindow, pointToScenarioName);
+	std::string newMission = scenarioToLoad;
+
+	std::ifstream newCampaign;
+	newCampaign.open(".\\campaigns\\" + newMission + ".txt");
+
+	if (newCampaign.is_open())
+	{
+		waddstr(mywindow, "Successfully loaded!\n");
+		loadsuccessful = true;
+		std::string ThrowawayString;
+		newCampaign >> ThrowawayString;
+		newCampaign >> newMission;
+		newGameMap.open(".\\campaigns\\" + newMission + ".txt");
+	}
+	else
+	{
+		waddstr(mywindow, "Could not load campaign. Please check that it exists and the right spelling was used.\n");
+
+	}
+
+
+}*/
+
 int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 { 
 	//Clear out the old roster. Then we can make new one.
@@ -677,19 +800,23 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	}
 
 	//Determine if game is remote or local.
-	waddstr(mywindow,"Local (l) or remote(r) game?\n");
+	waddstr(mywindow,"Local skirmish (s), local campaign (c), or remote(r) game?\n");
 	gameType = unchosen;
 	while (gameType == unchosen)
 	{
 		*Input = wgetch(mywindow);
 
-		if (*Input == 'l')
+		if (*Input == 'c')
 		{
-			gameType = local;
+			gameType = localCampaign;
 		}
 		else if (*Input == 'r')
 		{
 			gameType = remote;
+		}
+		else if (*Input == 's')
+		{
+			gameType = localSkirmish;
 		}
 	}
 
@@ -706,13 +833,17 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	{
 		wclear(mywindow);
 
-		if (gameType == local)
+		if (gameType == localSkirmish)
 		{
-			waddstr(mywindow, "Local game selected.\n");
+			waddstr(mywindow, "Local skirmish selected.\n");
 		}
 		else if (gameType == remote)
 		{
 			waddstr(mywindow, "Remote game selected.\n");
+		}
+		else if (gameType == localCampaign)
+		{
+			waddstr(mywindow, "Local campaign selected.\n");
 		}
 
 		waddstr(mywindow,"Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n");

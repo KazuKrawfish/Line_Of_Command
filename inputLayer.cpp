@@ -111,7 +111,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	{
 	if (currentTile->controller != 0)
 	{
-		waddstr(MainMenu->mywindow, "Player ");
 		waddstr(MainMenu->mywindow, playerName);
 		waddstr(MainMenu->mywindow, "'s ");
 		waddstr(MainMenu->mywindow, descriptionPointer);
@@ -153,7 +152,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		Minion* currentMinion = currentTile->minionOnTop;
 
 		//Print out basic minion status.
-		waddstr(MainMenu->mywindow, " Player ");
 		waddstr(MainMenu->mywindow, &(boardToPrint->playerRoster[currentMinion->team].name[0])	);
 		waddstr(MainMenu->mywindow, "'s ");
 		waddstr(MainMenu->mywindow, &currentMinion->description[0]);
@@ -208,7 +206,9 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 
 	//Print current turn.
-	snprintf(pointerToPrint, 100, "Player %d's turn. Treasury Total: %d\n", boardToPrint->playerFlag, boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+	char* playerTurnName = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
+	waddstr(MainMenu->mywindow, playerTurnName);
+	snprintf(pointerToPrint, 100, "'s turn. Treasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	waddstr(MainMenu->mywindow, pointerToPrint);
 	
 	char* eventTextToPrint = &eventText[0];
@@ -480,7 +480,6 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 {
 	wclear(MainMenu->mywindow);
 	char* playerName = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-	waddstr(MainMenu->mywindow, "Player ");
 	waddstr(MainMenu->mywindow, playerName);
 	waddstr(MainMenu->mywindow, "'s ");
 	waddstr(MainMenu->mywindow, " Turn. Press any key to begin.  \n");
@@ -779,7 +778,6 @@ int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 {
 	wclear(MainMenu->mywindow);
 	char* playerName = &(boardToPrint->playerRoster[playerDefeated].name[0]);
-	waddstr(MainMenu->mywindow, "Player ");
 	waddstr(MainMenu->mywindow, playerName);
 	waddstr(MainMenu->mywindow, " Was defeated. Press any key to continue.  \n");
 	move(WINDOW_HEIGHT * 3 + 1, 0);
@@ -795,7 +793,6 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 {
 	wclear(MainMenu->mywindow);
 	char* playerName = &(boardToPrint->playerRoster[playerVictorious].name[0]);
-	waddstr(MainMenu->mywindow, "Player ");
 	waddstr(MainMenu->mywindow, playerName);
 	waddstr(MainMenu->mywindow, " Was victorious! Press any key to return to main menu.  \n");
 	move(WINDOW_HEIGHT * 3 + 1, 0);
