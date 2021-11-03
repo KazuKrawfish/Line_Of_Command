@@ -108,6 +108,9 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << "Campaign_Name" << std::endl;		//Mission or not
 	saveGame << boardToPrint->campaignName << std::endl;
 
+	saveGame << "ScenarioOrMissionName" << std::endl;
+	saveGame << boardToPrint->scenarioOrMissionName << std::endl;	//Must be exactly the same as the txt file's name
+
 	saveGame << "TurnLimit_Or_0_ForOff" << std::endl;		//TurnLength - either 0 for no max turn length, or int to indicate length
 	saveGame << boardToPrint->missionTurnLength << std::endl;
 
@@ -115,7 +118,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << boardToPrint->whoHoldsOut << std::endl;
 
 	saveGame << "Name_of_next_mission_(Same_Directory)" << std::endl;		//Name of next mission
-	saveGame << nextMissionName;
+	saveGame << nextMissionName << std::endl;
 
 	saveGame << "Mission_Briefing" << std::endl;	//String with mission info
 	saveGame << missionInfo << std::endl;
@@ -262,6 +265,9 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 	*saveGame >> ThrowawayString;		//Campaign Name - used to navigate menu for next level
 	*saveGame >> boardToPrint->campaignName;
+
+	*saveGame >> ThrowawayString;
+	*saveGame >> boardToPrint->scenarioOrMissionName;	//Must be exactly the same as the txt file's name
 
 	*saveGame >> ThrowawayString;		//TurnLength - either 0 for no max turn length, or int to indicate length
 	*saveGame >> boardToPrint->missionTurnLength;

@@ -42,9 +42,11 @@ public:
 	int printUpperScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printScreen(MasterBoard* boardToPrint, int observerNumber);
 	int insertMinionInput(char* Input, MasterBoard* boardToInput);
+	int deleteMinionInput(MasterBoard* boardToInput);
 	int insertTileInput(char* Input, MasterBoard* boardToInput);
 	int gameBoardInput(char* Input, MasterBoard* boardToInput);
 	int menuInput(char* Input, MasterBoard* boardToInput);
+	int restartGame(MasterBoard* boardToInput);
 	int waitingScreenInput( MasterBoard* boardToInput);
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);

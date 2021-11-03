@@ -543,6 +543,31 @@ int inputLayer::insertMinionInput(char* Input, MasterBoard* boardToInput)
 
 }
 
+//If there is a minion underneath, destroy it regardless of any status.
+//Activate with debug mode and "z" input.
+int inputLayer::deleteMinionInput( MasterBoard* boardToInput)
+{
+	Cursor* myCursor = &boardToInput->cursor;
+	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
+
+
+	
+	if (myTile->hasMinionOnTop != true)
+	{
+		status = gameBoard;
+		return 1;
+	}
+	else 
+	{
+		boardToInput->destroyMinion(myTile->minionOnTop, false,this, true);
+		status = gameBoard;
+		return 0;
+	}		
+		
+	
+
+}
+
 int inputLayer::insertTileInput(char* Input, MasterBoard* boardToInput) 
 {
 	Cursor* myCursor = &boardToInput->cursor;
@@ -595,6 +620,11 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 	{
 		status = insertMinion;
 	}	
+
+	if (*Input == 'z' && MainMenu->debugMode == true)
+	{
+		deleteMinionInput(boardToInput);
+	}
 	
 	if (*Input == 'q' && MainMenu->debugMode == true)
 	{
@@ -814,6 +844,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	}
 
 	//Another working key for compie
+	//Currently (I think) breaks the game.
 	if (*Input == 'c' && MainMenu->debugMode == true)
 	{
 		MainMenu->computerPlayerRoster[boardToInput->playerFlag].takeMyTurn(boardToInput);
@@ -856,6 +887,11 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 
 	}
 	
+	//Restart current mission/scenario
+	if (*Input == 'r') 
+	{
+		restartGame(boardToInput);
+	}
 		
 	if (*Input == 'l')
 	{
@@ -923,6 +959,47 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	}
 
 	return 0;
+}
+
+int inputLayer::restartGame(MasterBoard* boardToInput)
+{
+	//Load the actual save game
+	std::ifstream loadGame;
+	bool loadsuccessful = false;
+
+	//Prompt user and load scenario
+	while (loadsuccessful == false)
+	{
+	
+		std::string gameToLoad = boardToInput->scenarioOrMissionName;
+		
+		if (boardToInput->missionFlag == true) 
+		{
+
+			loadGame.open(".\\campaigns\\" + boardToInput->campaignName +"\\" + gameToLoad + ".txt");
+		}
+		else 
+		{
+			loadGame.open(".\\scenarios\\" + gameToLoad + ".txt");
+		}
+
+		if (loadGame.is_open())
+		{
+			waddstr(MainMenu->mywindow, "Scenario/mission successfully loaded!\n");
+			loadsuccessful = true;
+		}
+		else
+		{
+			waddstr(MainMenu->mywindow, "Could not load scenario or mission. Please check that it exists and the right spelling was used.\n");
+
+		}
+
+	}
+	//Actually load scenario. Initialize board, etc.
+	MainMenu->gameLoad(boardToInput, this, &loadGame);
+	status = gameBoard;
+	return 0;
+
 }
 
 int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {

@@ -76,6 +76,7 @@ public:
 	int clearBoard(inputLayer* InputLayer);
 	int consultMinionCostChart(char minionType, char propertyType);
 	int playerDefeat(int playerNumber, int winningPlayer, inputLayer* InputLayer);
+
 	std::string captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	Cursor cursor;
@@ -95,6 +96,7 @@ public:
 	//MissionInfo///////////////////////////////
 	bool missionFlag= false;
 	std::string campaignName = "_";
+	std::string scenarioOrMissionName = "_";
 	int missionTurnLength = 0;	//Turn limit, or 0 if no turn limit.
 	int whoHoldsOut = 0;		//0 If missionLength is not on, otherwise indicates who wins if turns run out.
 	//MissionInfo///////////////////////////////
