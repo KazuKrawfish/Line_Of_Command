@@ -7,6 +7,9 @@
 #include <iostream>
 #include <vector>
 
+//Forward declare
+extern std::vector <std::vector<sf::IntRect>> rectArray;
+
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
 //												        . + ^ M  H m n h Q = ~  - A			P `
@@ -30,6 +33,9 @@ const int MOVE_VALUES_MATRIX[19][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1
 												/*U*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
 												/*V*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1 };
 
+
+
+
 class tile 
 {
 public:
@@ -51,7 +57,11 @@ public:
 		capturePoints = 20;
 		withinCursorPath = false;
 		hasBeenValidated = false;
-		//Image already initialized
+
+		//Basic image init below
+		//This is "plains"
+		mySprite.setTextureRect(rectArray[0][0]);
+		myFogSprite.setTextureRect(rectArray[0][1]);
 		
 	}
 
@@ -229,9 +239,13 @@ public:
 	int locationY;
 	bool withinCursorPath = false;
 	bool hasBeenValidated = false;
-	std::string Image =	{	'.','.','.',
-							'.','.','.',
-							'.','.','.' };
+
+	//GRAPHICS ///////////////////////////
+	sf::Sprite mySprite;
+	sf::Sprite myFogSprite;
+	sf::Texture* myTexture;
+
+	//GRAPHICS ///////////////////////////
 
 	int clearTile() {
 		symbol = '.';
@@ -250,18 +264,20 @@ public:
 		return 0;
 	}
 
-	int setCharacterstics() 
+	int setCharacterstics(sf::Texture * inputTexture) 
 	{
+		myTexture = inputTexture;
+		mySprite.setTexture(*myTexture);
+		myFogSprite.setTexture(*myTexture);
+		//Sprite had defualt texture-rect set in the constructor
+
 
 		switch (symbol)
 		{
 		case('.'):
-		{
+		{	
 			description = "Clear terrain.";
 			defenseFactor = 1.1;
-			Image = { '.','.','.',
-												'.','.','.',
-												'.','.','.' };
 			break;
 		}
 		case('H'):
@@ -269,9 +285,8 @@ public:
 			description = "City.";
 			defenseFactor = 1.3;
 			production = 2000;
-			Image = { 'H','=','H',
-												'H','=','H',
-												'H','=','H' };
+			mySprite.setTextureRect(rectArray[4][0]);
+			myFogSprite.setTextureRect(rectArray[4][0]);
 			break;
 		}
 		case('m'):
@@ -279,9 +294,7 @@ public:
 			description = "Mine.";
 			defenseFactor = 1.2;
 			production = 3000;
-			Image = { ' ','_',' ',
-												'/','n','\\',
-												'.','.','.' };
+
 			break;
 		}
 		case('n'):
@@ -289,9 +302,8 @@ public:
 			description = "Settlement.";
 			defenseFactor = 1.3;
 			production = 1000;
-			Image = { 'n','.','n',
-												'.','.','.',
-												'n','.','n' };
+			mySprite.setTextureRect(rectArray[4][0]);
+			myFogSprite.setTextureRect(rectArray[4][1]);
 			break;
 		}
 		case('h'):
@@ -299,9 +311,7 @@ public:
 			description = "Factory.";
 			defenseFactor = 1.3;
 			production = 1000;
-			Image = { '|','|','|',
-												'H','H','H',
-												'H','H','H' };
+			
 			break;
 		}
 		case('Q'):
@@ -309,54 +319,47 @@ public:
 			description = "Headquarters.";
 			defenseFactor = 1.4;
 			production = 1000;
-			Image = { '|','*','|',
-												'|','H','|',
-												'|','H','|' };
+			mySprite.setTextureRect(rectArray[4][0]);
+			myFogSprite.setTextureRect(rectArray[4][1]);
 			break;
 		}
 		case('='):
 		{
 			description = "Road.";
 			defenseFactor = 1.0;
-			Image = { '=',' ','=',
-												'=',' ','=',
-												'=',' ','=' };
+			mySprite.setTextureRect(rectArray[6][0]);
+			myFogSprite.setTextureRect(rectArray[6][1]);
 			break;
 		}
 		case('^'):
 		{
 			description = "Hill.";
 			defenseFactor = 1.1;
-			Image = { '/','\\','.',
-												'.','/','\\',
-												'/','\\','.' };
+			mySprite.setTextureRect(rectArray[2][0]);
+			myFogSprite.setTextureRect(rectArray[2][1]);
 			break;
 		}
 		case('M'):
 		{
 			description = "Mountain.";
 			defenseFactor = 1.4;
-			Image = { ' ','^',' ',
-												'/','_','\\',
-												'.','.','.' };
+			
 			break;
 		}
 		case('+'):		//Would like to have convertible to woodlot by engineer.....maybe
 		{
 			description = "Forest.";
 			defenseFactor = 1.2;
-			Image = { '^','^','^',
-												'^','^','^',
-												'|','|','|' };
+			mySprite.setTextureRect(rectArray[1][0]);
+			myFogSprite.setTextureRect(rectArray[1][1]);
 			break;
 		}
 		case('~'):
 		{
 			description = "High seas.";
 			defenseFactor = 1.0;
-			Image = { '~','~','~',
-											'~','~','~',
-											'~','~','~' };
+			mySprite.setTextureRect(rectArray[5][0]);
+			myFogSprite.setTextureRect(rectArray[5][1]);
 			break;
 		}
 
@@ -364,18 +367,15 @@ public:
 		{
 			description = "River.";
 			defenseFactor = 1.0;
-			Image = { '~',' ','~',
-											' ','~',' ',
-											'~',' ','~' };
+			mySprite.setTextureRect(rectArray[5][0]);
+			myFogSprite.setTextureRect(rectArray[5][1]);
 			break;
 		}
 		case('A'):
 		{
 			description = "Airbase.";
 			defenseFactor = 1.3;
-			Image = { '\\','n','.',
-											'|','\\','n',
-											'|','.','\\' };
+			
 			production = 1000;
 			break;
 		}
@@ -383,9 +383,7 @@ public:
 		{
 			description = "Port.";
 			defenseFactor = 1.3;
-			Image = { 'n','_','_',
-											'|','~','~',
-											'|','~','~' };
+			
 			production = 1000;
 			break;
 		}
@@ -393,9 +391,7 @@ public:
 		{
 			description = "Beach.";
 			defenseFactor = 1.0;
-			Image = {	'~','.','~',
-						'.','~','.',
-						'~','.','~' };
+			
 			break;
 		}
 		}

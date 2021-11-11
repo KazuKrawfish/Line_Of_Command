@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <SFML/Graphics.hpp>
 
 //Forward declaration for MasterBoard.
 class MasterBoard;
@@ -28,7 +29,7 @@ public:
 
 	//Constructors
 	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment,
-		int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo, int inputSecAmmo);
+		int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo, int inputSecAmmo, sf::Texture* inputTexture);
 	Minion();
 	~Minion();
 
@@ -66,10 +67,14 @@ public:
 	double health = 0;
 	Minion* minionBeingTransported = NULL;
 	Minion* transporter = NULL;
-	std::string Image = { '.','.','.',
-						'.','.','.',
-						'.','.','.' };
 	int veterancy = 0;
+
+	//GRAPHICS ///////////////////////////
+	sf::Sprite mySprite;
+	sf::Texture* myTexture;
+	//GRAPHICS ///////////////////////////
+	
+	
 
 	double calculateVetBonus();
 

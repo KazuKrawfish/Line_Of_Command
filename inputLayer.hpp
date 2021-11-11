@@ -27,7 +27,7 @@ class inputLayer
 {
 public:
 
-	inputLayer(mainMenu* inputMainMenu);
+	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour);
 	int printStatus(MasterBoard* boardToPrint, int observerNumber);
 	int printWaitingScreen(MasterBoard* boardToPrint);
 	int printMinionMenu(MasterBoard* boardToPrint);
@@ -50,7 +50,7 @@ public:
 	int waitingScreenInput( MasterBoard* boardToInput);
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);
-	int printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber, Minion* minionToPrint);
+	int printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber);
 	int exitToMainMenu(MasterBoard* boardToInput);
 	
 	std::string eventText = "";
@@ -60,6 +60,12 @@ public:
 	char requestedMinionToBuy = '\n';
 	int requestedUnitPrice = -1;
 	mainMenu* MainMenu;
+
+	//SFML Objects		/////////////////////////
+	sf::Texture* inputLayerTexture;
+	sf::Font* inputLayerFont;
+	sf::RenderWindow* inputLayerWindow;
+	//SFML Objects end	/////////////////////////
 
 
 private:

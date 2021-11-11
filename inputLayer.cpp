@@ -8,22 +8,86 @@
 #include <cmath>
 #include "compie.hpp"
 
-inputLayer::inputLayer(mainMenu* inputMainMenu) 
+
+char playCharInput(sf::RenderWindow* myWindow);
+
+inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour)
 {
+	inputLayerTexture = gameTexture;
+	inputLayerFont = cour;
+	inputLayerWindow = myWindow;
 	MainMenu = inputMainMenu;
 }
 
-int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString, int teamNumber, Minion* minionToPrint)
-{
-	wmove(MainMenu->mywindow, inputX*3, inputY*3);
-	waddch(MainMenu->mywindow, inputString[0] + COLOR_PAIR(teamNumber));
-	waddch(MainMenu->mywindow, inputString[1] + COLOR_PAIR(teamNumber));
-	waddch(MainMenu->mywindow, inputString[2] + COLOR_PAIR(teamNumber));
+int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber)
+{	
+	tile* tileToPrint = &boardToPrint->Board[actualX][actualY];
 
-	wmove(MainMenu->mywindow, inputX * 3 + 1, inputY * 3);
-	waddch(MainMenu->mywindow, inputString[3] + COLOR_PAIR(teamNumber));
-	waddch(MainMenu->mywindow, inputString[4] + COLOR_PAIR(teamNumber));
+	//First print tile, change sprite depending on if withinVision or not
+	tileToPrint->mySprite.setPosition(screenX * 50, screenY * 50);
+	tileToPrint->myFogSprite.setPosition(screenX * 50, screenY * 50);
+	if (tileToPrint->withinVision[playerNumber] == true)
+	{
+		inputLayerWindow->draw(tileToPrint->mySprite);
+	}
+	else
+	{
+		inputLayerWindow->draw(tileToPrint->myFogSprite);
+	}
+	
+	//Then print minion if withinVision
+	if (tileToPrint->hasMinionOnTop == true && tileToPrint->withinVision[playerNumber] == true)
+	{
+		tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50, screenY * 50);
+		inputLayerWindow->draw(tileToPrint->minionOnTop->mySprite);
+	}
+	   	 
+	//Initialize effects sprite, even though it may not always be used.
+	sf::Sprite effectsSprite;
+	effectsSprite.setTexture(*inputLayerTexture);
+	effectsSprite.setPosition(screenX * 50, screenY * 50);
+	
+	if (boardToPrint->cursor.selectMinionFlag == true
+		&& boardToPrint->cursor.selectMinionPointer->locationX == actualX
+		&& boardToPrint->cursor.selectMinionPointer->locationY == actualY
+		&& tileToPrint->withinVision[playerNumber] == true)
+	{
+		//If minion is selected here.
+		effectsSprite.setTextureRect(rectArray[1][2]);
+		inputLayerWindow->draw(effectsSprite);
+	}else 
+		if(tileToPrint->withinApparentRange == true )
+		{
+			//If this tile is within apparent range.
+			effectsSprite.setTextureRect(rectArray[3][2]);
+			inputLayerWindow->draw(effectsSprite);
+		}
+	else if (tileToPrint->withinRange == true 
+		&& (boardToPrint->cursor.selectMinionPointer->status == gaveupmovehasntfired
+		|| boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired) 
+		&& boardToPrint->cursor.selectMinionPointer->specialtyGroup == transport)
+			{
+			//If this tile is within range for drop off
+			effectsSprite.setTextureRect(rectArray[4][2]);
+			inputLayerWindow->draw(effectsSprite);
+			}
+		else if (	tileToPrint->withinRange == true
+			&& (boardToPrint->cursor.selectMinionPointer->status == gaveupmovehasntfired
+				|| boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired)	)
+			{
+				//If minion can fire and if this tile is within range.
+				effectsSprite.setTextureRect(rectArray[2][2]);
+				inputLayerWindow->draw(effectsSprite);
+			}
 
+	if (boardToPrint->cursor.XCoord == actualX && boardToPrint->cursor.YCoord == actualY)
+	{
+		boardToPrint->cursor.mySprite.setPosition(screenX * 50, screenY * 50);
+		inputLayerWindow->draw(boardToPrint->cursor.mySprite);
+
+	}
+
+	/*
 	//Print single tile needs access to board, it's not working currently
 	if (minionToPrint != NULL && minionToPrint->isCapturing == true)
 	{
@@ -40,8 +104,10 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	{
 		teamNumber += 24;
 	}
+	*/
 
-	wmove(MainMenu->mywindow, inputX * 3 + 2, inputY * 3);
+
+	/*
 	//Potentially add low fuel/ammo if appropriate. If not,
 	//Potentially add veterancy if Level 1 - 3:
 	bool lowAmmo = false;
@@ -56,7 +122,10 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 	{
 		lowAmmo = true;
 	}
-	
+	*/
+
+
+	/*	//Below are the add-on sprites for life/ammo/status
 	//Either print a,e or @ for combos of fuel/ammo shortage
 	if (lowFuel == true && lowAmmo == true)
 	{
@@ -94,7 +163,7 @@ int inputLayer::printSingleTile(int inputX, int inputY, std::string inputString,
 		waddch(MainMenu->mywindow, char (int(std::round(minionToPrint->health /10)) + 48) + COLOR_PAIR(teamNumber));
 	}
 	else waddch(MainMenu->mywindow, inputString[8] + COLOR_PAIR(teamNumber));
-	
+	*/
 	return 1;
 }
 
@@ -111,13 +180,13 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	{
 	if (currentTile->controller != 0)
 	{
-		waddstr(MainMenu->mywindow, playerName);
+	/*	waddstr(MainMenu->mywindow, playerName);
 		waddstr(MainMenu->mywindow, "'s ");
-		waddstr(MainMenu->mywindow, descriptionPointer);
+		waddstr(MainMenu->mywindow, descriptionPointer);*/
 	}
 	else
 	{
-		waddstr(MainMenu->mywindow, descriptionPointer);
+		//waddstr(MainMenu->mywindow, descriptionPointer);
 	}
 	if (MainMenu->debugMode == true) 
 	{
@@ -137,14 +206,14 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 				boardToPrint->cursor.YCoord);
 		}
 
-		waddstr(MainMenu->mywindow, pointerToPrint);
+		//waddstr(MainMenu->mywindow, pointerToPrint);
 	}
 
 	//If tile is undergoing capture, let us know.
 	if (currentTile->capturePoints != 20)
 	{
 		snprintf(pointerToPrint, 100, " Capture Points Left: %d ", currentTile->capturePoints);
-		waddstr(MainMenu->mywindow, pointerToPrint);
+		//waddstr(MainMenu->mywindow, pointerToPrint);
 	}
 
 	if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber])
@@ -152,67 +221,67 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		Minion* currentMinion = currentTile->minionOnTop;
 
 		//Print out basic minion status.
-		waddstr(MainMenu->mywindow, &(boardToPrint->playerRoster[currentMinion->team].name[0])	);
-		waddstr(MainMenu->mywindow, "'s ");
-		waddstr(MainMenu->mywindow, &currentMinion->description[0]);
+	//	waddstr(MainMenu->mywindow, &(boardToPrint->playerRoster[currentMinion->team].name[0])	);
+	//	waddstr(MainMenu->mywindow, "'s ");
+	//	waddstr(MainMenu->mywindow, &currentMinion->description[0]);
 		if (currentMinion->maxPriAmmo > 0 )
 		{
 			snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. %d Primary Ammo. \n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentPriAmmo);
 		}
 		else snprintf(pointerToPrint, 100, ": %d Health Left. %d Fuel. No main weapon. \n", int(currentMinion->health), currentMinion->currentFuel);
-		waddstr(MainMenu->mywindow, pointerToPrint);
+	//	waddstr(MainMenu->mywindow, pointerToPrint);
 
 		if (currentMinion->status == gaveupmovehasntfired)
 		{
-			waddstr(MainMenu->mywindow, "Holding position. Ready to attack.\n");
+	//		waddstr(MainMenu->mywindow, "Holding position. Ready to attack.\n");
 
 		}
 
 		if (currentMinion->status == hasmovedhasntfired)
 		{
-			waddstr(MainMenu->mywindow, "Has already moved this turn. ");
+		//	waddstr(MainMenu->mywindow, "Has already moved this turn. ");
 
 			if (currentMinion->rangeType == rangedFire)
 			{
-				waddstr(MainMenu->mywindow, "Cannot attack after moving. \n");
+		//		waddstr(MainMenu->mywindow, "Cannot attack after moving. \n");
 
 			}
 			if (currentMinion->rangeType == directFire)
 			{
-				waddstr(MainMenu->mywindow, "Ready to attack.\n");
+		//		waddstr(MainMenu->mywindow, "Ready to attack.\n");
 
 			}
 		}
 		if (currentMinion->status == hasfired)
 		{
-			waddstr(MainMenu->mywindow, "Has already moved this turn. Has attacked this turn. \n");
+		//	waddstr(MainMenu->mywindow, "Has already moved this turn. Has attacked this turn. \n");
 		}
 		if (currentMinion->status == hasntmovedorfired)
 		{
-			waddstr(MainMenu->mywindow, "Ready to move. Ready to attack. \n");
+		//	waddstr(MainMenu->mywindow, "Ready to move. Ready to attack. \n");
 		}
 	}
 	else
 	{
-		waddstr(MainMenu->mywindow, "\n\n");
+	//	waddstr(MainMenu->mywindow, "\n\n");
 	}
 
 }
 	else
 	{
-		waddstr(MainMenu->mywindow, "\n\n");
+	//	waddstr(MainMenu->mywindow, "\n\n");
 	}
 
 
 
 	//Print current turn.
 	char* playerTurnName = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-	waddstr(MainMenu->mywindow, playerTurnName);
+	//waddstr(MainMenu->mywindow, playerTurnName);
 	snprintf(pointerToPrint, 100, "'s turn. Treasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
-	waddstr(MainMenu->mywindow, pointerToPrint);
+	//waddstr(MainMenu->mywindow, pointerToPrint);
 	
 	char* eventTextToPrint = &eventText[0];
-	waddstr(MainMenu->mywindow, eventTextToPrint);
+	//waddstr(MainMenu->mywindow, eventTextToPrint);
 	eventText = "";
 
 	return 0;
@@ -221,11 +290,11 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 
 	minionStatus mystatus = boardToPrint->cursor.selectMinionPointer->status;
-
+	/*
 	if (mystatus == hasntmovedorfired)
 	{
-		waddstr(MainMenu->mywindow, "Move cursor(WASD) | Move minion (m)\n");
-		waddstr(MainMenu->mywindow, "Deselect minion(t) | Capture move(c)\n" );
+	waddstr(MainMenu->mywindow, "Move cursor(WASD) | Move minion (m)\n");
+	waddstr(MainMenu->mywindow, "Deselect minion(t) | Capture move(c)\n" );
 	}
 
 	if (mystatus == hasmovedhasntfired || mystatus == gaveupmovehasntfired)
@@ -233,22 +302,22 @@ int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 		waddstr(MainMenu->mywindow, "Move cursor(WASD) | Attack (r)\n");
 		waddstr(MainMenu->mywindow, "Deselect minion (t) | Capture (c)\n");
 	}
-	if (mystatus == hasfired)
+	 (mystatus == hasfired)
 	{
 		waddstr(MainMenu->mywindow, "\n\n");
-	}
+	}*/
 	return 0;
 
 }
 
 int inputLayer::printBoardMenu() {
-	waddstr(MainMenu->mywindow, "Move cursor (WASD) | Menu (m)\n");
-	waddstr(MainMenu->mywindow, "Select minion/property (t)\n");
+	//waddstr(MainMenu->mywindow, "Move cursor (WASD) | Menu (m)\n");
+	//waddstr(MainMenu->mywindow, "Select minion/property (t)\n");
 	return 0;
 }
 
 int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
-
+	/*
 	//If this is not the second valid purchase input
 	if (requestedMinionToBuy == '\n')
 	{
@@ -293,26 +362,26 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 			
 		}
 	}
-
+	*/
 	return 0;
 
 }
 
 int inputLayer::printMenu() {
-	waddstr(MainMenu->mywindow, "Save game (s) | Go to main menu (x) | Load save game (L) \n");
-	waddstr(MainMenu->mywindow, "End turn (e) | Exit menu (m) \n");
+	//waddstr(MainMenu->mywindow, "Save game (s) | Go to main menu (x) | Load save game (L) \n");
+	//waddstr(MainMenu->mywindow, "End turn (e) | Exit menu (m) \n");
 	return 0;
 }
 
 int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) {
 
-	mvwaddstr(MainMenu->mywindow, WINDOW_HEIGHT*3 + 1, 0, "                                                 \n");
+	/*mvwaddstr(MainMenu->mywindow, WINDOW_HEIGHT*3 + 1, 0, "                                                 \n");
 	waddstr(MainMenu->mywindow, "                                                 \n");
 	waddstr(MainMenu->mywindow, "                                                 \n");
 	waddstr(MainMenu->mywindow, "                                                 \n");
 	waddstr(MainMenu->mywindow, "                                                 \n");
 	wmove(MainMenu->mywindow, WINDOW_HEIGHT*3 + 1, 0 );
-
+	*/
 	if (status == gameBoard)
 	{
 		printBoardMenu();
@@ -354,16 +423,16 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) 
 
 int inputLayer::printInsertMinion() 
 {
-	waddstr(MainMenu->mywindow, "Insert a minion by typing its symbol\n");
-	waddstr(MainMenu->mywindow, "Exit insert menu (x) \n");
+	//waddstr(MainMenu->mywindow, "Insert a minion by typing its symbol\n");
+	//waddstr(MainMenu->mywindow, "Exit insert menu (x) \n");
 	return 0;
 
 }
 
 int inputLayer::printInsertTile()
 {
-	waddstr(MainMenu->mywindow, "Insert a tile by typing its symbol\n");
-	waddstr(MainMenu->mywindow, "Exit insert menu (q) \n");
+	//waddstr(MainMenu->mywindow, "Insert a tile by typing its symbol\n");
+	//waddstr(MainMenu->mywindow, "Exit insert menu (q) \n");
 	return 0;
 
 }
@@ -375,100 +444,12 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) 
 	int windowY = boardToPrint->windowLocationY;
 	int windowX = boardToPrint->windowLocationX;
 	
-
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
 	for (int i = windowY; i < (windowY + WINDOW_HEIGHT); i++)
 	{
 		for (int j = windowX; j < (windowX + WINDOW_WIDTH); j++)
 		{
-			//First do lower priority set which is tiles and minions. These can be ovveridden by cursor/in range.
-			//Is there a minion there? Do we have minions toggled on as visible? Is the minion within vision?
-			if (boardToPrint->Board[j][i].hasMinionOnTop == true && minionVisibleStatus == showMinions && boardToPrint->Board[j][i].withinVision[observerNumber] == true )
-			{
-					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].minionOnTop->Image, boardToPrint->Board[j][i].minionOnTop->team + 3, boardToPrint->Board[j][i].minionOnTop);
-			}
-			//If no minion print map piece.
-			else 
-			{
-				//If player controlled (Must be property), must always be visible
-				if (boardToPrint->Board[j][i].controller == observerNumber && observerNumber != 0)
-				{
-					printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 9, NULL);
-				}
-				//Not player controlled, either neutral/enemy property, or non-property
-				else
-				{
-					//If it's property
-					if (boardToPrint->Board[j][i].checkForProperty(boardToPrint->Board[j][i].symbol) == true)
-					{
-						//Within vision
-						if (boardToPrint->Board[j][i].withinVision[observerNumber] == true)
-						{
-							//If neutral property
-							if (boardToPrint->Board[j][i].controller == 0)
-							{
-								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, neutralTile, NULL);
-							}
-							else
-							{	//Player controlled inside vision
-								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 9, NULL);
-							}
-						}
-						//Outside vision
-						else
-						{
-							//If neutral property
-							if (boardToPrint->Board[j][i].controller == 0)
-							{
-								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogNeutralTile, NULL);
-							}
-							else
-							{	//Player controlled outside vision
-								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, boardToPrint->Board[j][i].controller + 15, NULL);
-							}
-						}
-					}
-					//It's not property
-					else
-					{
-						//Within vision
-						if (boardToPrint->Board[j][i].withinVision[observerNumber]== true)
-						{
-							if (boardToPrint->Board[j][i].symbol == '~' || boardToPrint->Board[j][i].symbol == '-')
-								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, waterTile, NULL);
-							else
-								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, landTile, NULL);
-						}
-						//Outside vision
-						else
-						{
-							if (boardToPrint->Board[j][i].symbol == '~' || boardToPrint->Board[j][i].symbol == '-')
-								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogWaterTile, NULL);
-							else
-								printSingleTile((i - windowY), (j - windowX), boardToPrint->Board[j][i].Image, fogLandTile, NULL);
-						}
-					}
-				}
-			}
-			//Higher "priority set" is cursor vs in range, thus it goes after the "base" portion of minions and tiles.
-			//If there is a cursor there, it takes priority for printing.
-			if (i == boardToPrint->cursor.getY() && j == boardToPrint->cursor.getX() && (boardToPrint->Board[j][i].withinVision[observerNumber] == true   ||   observerNumber == boardToPrint->playerFlag))
-			{
-				mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, 'X' + COLOR_PAIR(cursorSymbol));
-			}
-			else   //Don't want to print "range" indicator for selected minion. Just looks goofy.
-				if (boardToPrint->Board[j][i].withinCursorPath == true && minionVisibleStatus == showMinions &&
-					(boardToPrint->Board[j][i].hasMinionOnTop != true || boardToPrint->Board[j][i].minionOnTop != boardToPrint->cursor.selectMinionPointer )  )
-				{
-					mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, '*' + COLOR_PAIR(moveRangeSymbol));
-				}
-				else  //Don't want to print "range" indicator for selected minion. Just looks goofy.
-					if ( (boardToPrint->cursor.selectMinionFlag == true && ( boardToPrint->Board[j][i].withinRange == true || boardToPrint->Board[j][i].withinApparentRange == true) ) &&
-						minionVisibleStatus == showMinions && (boardToPrint->Board[j][i].hasMinionOnTop != true || boardToPrint->Board[j][i].minionOnTop != boardToPrint->cursor.selectMinionPointer))
-					{
-						mvwaddch(MainMenu->mywindow, (i - windowY) * 3 + 2, (j - windowX) * 3 + 1, ' ' + COLOR_PAIR(moveRangeSymbol));
-					}
-
+			printSingleTile((j - windowX),  (i - windowY), j , i , boardToPrint, observerNumber);
 		}
 		
 	}
@@ -478,13 +459,12 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) 
 
 int inputLayer::printWaitingScreen(MasterBoard* boardToPrint) 
 {
-	wclear(MainMenu->mywindow);
-	char* playerName = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-	waddstr(MainMenu->mywindow, playerName);
-	waddstr(MainMenu->mywindow, "'s ");
-	waddstr(MainMenu->mywindow, " Turn. Press any key to begin.  \n");
-	move(WINDOW_HEIGHT * 3 + 1, 0);
-	wrefresh(MainMenu->mywindow);
+	inputLayerWindow->clear();
+	sf::String topMenuJoinString = "Next player's turn. Press any key to begin.  \n";
+	sf::Text newText(topMenuJoinString, *inputLayerFont, 0);
+	MainMenu->mywindow->draw(newText);
+	inputLayerWindow->display();
+
 	return 0;
 
 }
@@ -493,10 +473,10 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber)
 {
 	if (status != waitingForNextLocalPlayer) 
 	{
-	wclear(MainMenu->mywindow);
+	inputLayerWindow->clear();
 	printUpperScreen(boardToPrint, observerNumber);
 	printLowerScreen(boardToPrint, observerNumber);
-	wrefresh(MainMenu->mywindow);
+	inputLayerWindow->display();
 	
 	}
 	else printWaitingScreen(boardToPrint);
@@ -602,7 +582,7 @@ int inputLayer::insertTileInput(char* Input, MasterBoard* boardToInput)
 		myTile->controller = 0;
 	}
 
-	myTile->setCharacterstics();
+	myTile->setCharacterstics(inputLayerTexture);
 	   	 
 	status = gameBoard;
 	return 0;
@@ -806,30 +786,30 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 
 int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 {
-	wclear(MainMenu->mywindow);
-	char* playerName = &(boardToPrint->playerRoster[playerDefeated].name[0]);
-	waddstr(MainMenu->mywindow, playerName);
-	waddstr(MainMenu->mywindow, " Was defeated. Press any key to continue.  \n");
-	move(WINDOW_HEIGHT * 3 + 1, 0);
-	wrefresh(MainMenu->mywindow);
-	
+
+	inputLayerWindow->clear();
+	sf::String topMenuJoinString = "A player defeated. Press any key to continue.  \n";
+	sf::Text newText(topMenuJoinString, *inputLayerFont, 0);
+	MainMenu->mywindow->draw(newText);
+	inputLayerWindow->display();
+
 	//Wait for one input.
-	wgetch(MainMenu->mywindow);
+	playCharInput(inputLayerWindow);
+	
 	
 	return 0;
 }
 
 int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint) 
 {
-	wclear(MainMenu->mywindow);
-	char* playerName = &(boardToPrint->playerRoster[playerVictorious].name[0]);
-	waddstr(MainMenu->mywindow, playerName);
-	waddstr(MainMenu->mywindow, " Was victorious! Press any key to return to main menu.  \n");
-	move(WINDOW_HEIGHT * 3 + 1, 0);
-	wrefresh(MainMenu->mywindow);
+	inputLayerWindow->clear();
+	sf::String topMenuJoinString = " Was victorious! Press any key to return to main menu.  \n";
+	sf::Text newText(topMenuJoinString, *inputLayerFont, 0);
+	MainMenu->mywindow->draw(newText);
+	inputLayerWindow->display();
 
 	//Wait for one input.
-	wgetch(MainMenu->mywindow);
+	playCharInput(inputLayerWindow);
 
 	return 0;
 }
@@ -894,54 +874,80 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	}
 		
 	if (*Input == 'l')
-	{
+	{	
 		//Load the actual save game
 		std::ifstream loadGameSave;
 		bool loadsuccessful = false;
 
 		//Prompt user and load scenario
+		int lineOffset = 1;
 		while (loadsuccessful == false)
 		{
-			waddstr(MainMenu->mywindow, "Choose which save game to load (Case sensitive): \n");
-			std::string gameToLoad;
-			char inputChars[100];
-			wgetstr( MainMenu->mywindow,&inputChars[0]);
-			gameToLoad = inputChars;
+			inputLayerWindow->clear();
+			sf::String loadPrompt = "Choose which save game to load (Case sensitive): \n";
+			sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset);
+			sf::Event event;
 
-			loadGameSave.open(".\\savegames\\" + gameToLoad + "_save.txt");
+			std::string stdloadGameName = loadGameName;
+			loadGameSave.open(".\\savegames\\" + stdloadGameName + "_save.txt");
 			if (loadGameSave.is_open())
 			{
-				waddstr(MainMenu->mywindow, "Save game successfully loaded!\n");
+				inputLayerWindow->clear();
+				sf::String successful = "Successfully loaded! Press any key to continue.\n";
+				sf::Text newText(successful, *inputLayerFont, MainMenu->menuTextSize);
+				inputLayerWindow->draw(newText);
+				inputLayerWindow->display();
+
 				loadsuccessful = true;
 			}
 			else
 			{
-				waddstr(MainMenu->mywindow, "Could not load save game. Please check that it exists and the right spelling was used.\n");
+				inputLayerWindow->clear();
+				sf::String loadPrompt = "Could not load scenario.\nPlease check that it exists and the right spelling was used.\n";
+				lineOffset = 2;
 
 			}
-
 		}
+
 		//Actually load scenario. Initialize board, etc.
 		MainMenu->gameLoad(boardToInput, this, &loadGameSave);
+		//Flush event queue to clear out "Enter" and other rifraf
+		sf::Event throwAwayEvent;
+		while (inputLayerWindow->pollEvent(throwAwayEvent));
+		//Give player a chance to click.
+		playCharInput(inputLayerWindow);
+
 		status = gameBoard;
+		
 	}
 
 	//Prompt user and save game.
 	if (*Input == 's')
 	{
-		//This is a mess but it's just using getstr instead of cin, which requires a little footwork.
-		char gameToSave[100];
+		int lineOffset = 1;
+		inputLayerWindow->clear();
+		sf::String savePrompt = "Choose a name to save your game.\n";
+		sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset);
 
-		//Ensure game is saved into the right directory.
-		std::string saveName = ".\\savegames\\";
+		std::string stdSaveGameName = ".\\savegames\\";
+		stdSaveGameName += saveGameName;
+		stdSaveGameName += "_save.txt";
 
-		waddstr(MainMenu->mywindow, "Choose file name to save your game:\n");
-		wgetstr( MainMenu->mywindow,&gameToSave[0]);
-		saveName += gameToSave;
-		saveName += "_save.txt";
+		MainMenu->gameSave(stdSaveGameName, boardToInput);
+		
+		inputLayerWindow->clear();
 
+		sf::String successSave = "Game saved. Press any key to continue.\n";
+		sf::Text newText(successSave, *inputLayerFont, MainMenu->menuTextSize);
+		inputLayerWindow->draw(newText);
+		inputLayerWindow->display();
 
-		MainMenu->gameSave(saveName, boardToInput);
+		//Flush event queue to clear out "Enter" and other rifraf
+		sf::Event throwAwayEvent;
+		while (inputLayerWindow->pollEvent(throwAwayEvent));
+
+		playCharInput(inputLayerWindow);
+		
 		status = gameBoard;
 	}
 
@@ -985,12 +991,12 @@ int inputLayer::restartGame(MasterBoard* boardToInput)
 
 		if (loadGame.is_open())
 		{
-			waddstr(MainMenu->mywindow, "Scenario/mission successfully loaded!\n");
+			std::cout << "Scenario/mission successfully loaded!\n";
 			loadsuccessful = true;
 		}
 		else
 		{
-			waddstr(MainMenu->mywindow, "Could not load scenario or mission. Please check that it exists and the right spelling was used.\n");
+			std::cout << "Could not load scenario or mission. Please check that it exists and the right spelling was used.\n";
 
 		}
 

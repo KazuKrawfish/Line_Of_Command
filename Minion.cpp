@@ -13,6 +13,9 @@ Minion::Minion()
 	status = hasntmovedorfired;
 	health = 100;
 
+	//Basic image init below
+	mySprite.setTextureRect(rectArray[0][2]);
+
 
 }
 
@@ -21,13 +24,19 @@ Minion::Minion()
 //When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement costs and consultMinionCostChart.
 //This assumes that the transport already exists if the minion is being carried. Can cause NULL dereference!
 Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam,
-	MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo)
+	MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, 
+	int inputPriAmmo, int inputSecAmmo, sf::Texture* inputTexture)
 {
 	veterancy = inputVeterancy;
 	seniority = inputSeniority;
 	minionEnvironment = Environment;
 	type = inputType;
 	health = inputHealth;
+
+	myTexture = inputTexture;
+	mySprite.setTexture(*myTexture);
+	mySprite.setTextureRect(rectArray[0][3]);
+	//Basic image init end
 
 	truePathMap.resize(Environment->BOARD_WIDTH + 1);
 	apparentPathMap.resize(Environment->BOARD_WIDTH + 1);
@@ -70,9 +79,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		Image = { 'i',' ','i',
-						' ','i',' ',
-						' ',' ',' ' };
+		mySprite.setTextureRect(rectArray[0][inputTeam+3]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -86,9 +93,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		Image = { 's',' ','s',
-								' ','s',' ',
-								' ',' ',' ' };
+		mySprite.setTextureRect(rectArray[1][inputTeam + 3]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
 		maxSecAmmo = 0;
@@ -102,9 +107,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		Image = { '-','n',' ',
-						'=','=','=',
-						' ',' ',' ' };
+		mySprite.setTextureRect(rectArray[3][inputTeam + 3]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -119,9 +122,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = hybridRange;
 		specialtyGroup = normal;
 		minAttackRange = 1;
-		Image = { '\\','\\','A',
-						'=','=','=',
-						' ',' ',' ' };
+		
 		maxFuel = 70;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
@@ -135,9 +136,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		Image = { '-','H',' ',
-						'=','=','=',
-						' ',' ',' ' };
+		
 		maxFuel = 60;
 		maxPriAmmo = 6;
 		maxSecAmmo = 0;
@@ -152,9 +151,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = rangedFire;
 		specialtyGroup = normal;
 		minAttackRange = 1;
-		Image = { ' ','\\','A',
-						'=','=','=',
-						' ',' ',' ' };
+		mySprite.setTextureRect(rectArray[5][inputTeam + 3]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -168,9 +165,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 5;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		Image = { '-','n',' ',
-						'o','=','o',
-						' ',' ',' ' };
+		mySprite.setTextureRect(rectArray[2][inputTeam + 3]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -185,9 +180,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = rangedFire;
 		minAttackRange = 2;
 		specialtyGroup = normal;
-		Image = { 'n','\\','\\',
-							'o','=','o',
-							' ',' ',' ' };
+		
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -201,9 +194,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		Image = { '-','+','-',
-				'<','=','*',
-				' ',' ',' ' };
+		
 		maxFuel = 80;
 		domain = helo;
 		maxPriAmmo = 9;
@@ -218,9 +209,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = transport;
-		Image = { '+',' ','+',
-				'<','=','=',
-				' ',' ',' ' };
+		
 		maxFuel = 80;
 		domain = helo;
 		break;
@@ -233,9 +222,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = transport;
-		Image = { '/','=','=',
-				'=','=','=',
-				' ',' ',' ' };
+		mySprite.setTextureRect(rectArray[4][inputTeam + 3]);
 		maxFuel = 70;
 		break;
 	}
@@ -248,9 +235,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = air;
-		Image = { '\\','|','/',
-				' ','v',' ',
-				' ',' ',' ' };
+		
 		maxFuel = 60;
 		maxPriAmmo = 3;
 		maxSecAmmo = -1;
@@ -265,9 +250,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = air;
-		Image = { '\\','Y','/',
-				'\'','V','\'',
-				' ',' ',' ' };
+		
 		maxFuel = 70;
 		maxPriAmmo = 3;
 		break;
@@ -282,9 +265,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		domain = sea;
 		minAttackRange = 1;
 		specialtyGroup = normal;
-		Image = { 'A','/','_',
-				'_','_','/',
-				' ',' ',' ' };
+		
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		break;
@@ -299,9 +280,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		minAttackRange = 1;
 		specialtyGroup = normal;
 		domain = sea;
-		Image = { 'n','-','_',
-				'_','_','/',
-				' ',' ',' ' };
+		
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
@@ -316,9 +295,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = sea;
-		Image = { '_','n','-',
-				'=','=','/',
-				' ',' ',' ' };
+		
 		maxFuel = 70;
 		maxPriAmmo = 1;
 		break;
@@ -332,9 +309,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = transport;
 		domain = sea;
-		Image = { 'n','_','_',
-				'_','_','/',
-				' ',' ',' ' };
+		
 		maxFuel = 80;
 		break;
 	}
@@ -347,9 +322,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = stealth;
 		domain = sea;
-		Image = { ' ','|',' ',
-				'=','=','=',
-				' ',' ',' ' };
+		
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		break;
@@ -363,9 +336,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = transport;
 		domain = sea;
-		Image = { 'H','_','_',
-				'_','_','/',
-				' ',' ',' ' };
+	
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		break;

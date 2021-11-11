@@ -5,13 +5,14 @@
 #include "Tile.hpp"
 #include "Cursor.hpp"
 #include "MasterBoard.hpp"
-#include <curses.h>
-
 
 
 enum mainMenuStatus { topmenu,  playingMap, waitingForRemotePlayer };
 enum interactionMethod {unchosen, localSkirmish, localCampaign, remote};
 
+//Forward declare global utilities
+char playCharInput(sf::RenderWindow* myWindow);
+sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
 
 class mainMenu
 {
@@ -43,17 +44,27 @@ public:
 	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int printWaitingScreen();
 	int waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer);
+	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
 	
-	mainMenu(WINDOW* myWindow);
+	//CONSTRUCTOR
+	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour);
+	//CONSTRUCTOR
+
 	//Multiplayer specific functions
 	//The below pushes the saved game to the remote server, and should be used at end of player turn.
 	int multiplayerPushSaveGame(MasterBoard* boardToSave);
 	//The below pulls from remote and opens the save game if there is an update. This should be used while player is waiting for others to finish their turn.
 	int multiplayerPullSaveGame();
-	WINDOW* mywindow;
+	const int menuTextSize = 20;
 	std::string nextMissionName, missionInfo;
 
 	std::vector <compie> computerPlayerRoster;
+
+	//SFML Objects		/////////////////////////
+	sf::RenderWindow* mywindow;
+	sf::Texture* myTexture;
+	sf::Font* myFont;
+	//SFML Objects end	/////////////////////////
 
 
 };

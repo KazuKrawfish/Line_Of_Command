@@ -42,7 +42,7 @@ class MasterBoard
 {
 public:
 	
-	MasterBoard();
+	MasterBoard(sf::Texture* inputTexture);
 	int NUMBEROFPLAYERS = 2;
 	int BOARD_WIDTH = 15;
 	int BOARD_HEIGHT = 20;
@@ -91,6 +91,10 @@ public:
 	int playerFlag;
 	int totalNumberOfMinions;
 	bool isItSinglePlayerGame = false;
+
+	//GRAPHICS	////////////////////////////////
+	sf::Texture * myTexture;
+	//GRAPHICS	///////////////////////////////
 
 
 	//MissionInfo///////////////////////////////

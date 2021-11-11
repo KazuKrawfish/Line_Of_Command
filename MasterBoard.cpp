@@ -514,9 +514,10 @@ int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 }
 
 //Currently this is not doing what it should be doing- only partial initialization.
-MasterBoard::MasterBoard()
+MasterBoard::MasterBoard(sf::Texture *inputTexture)
 {
 	playerFlag = 0;
+	myTexture = inputTexture;
 
 	//Not sure why we have to do an extra row, whatever! (Tried with one less and it caused out of bounds..... i am insane?!?!)
 	//First resize board to meet savegame specifications.
@@ -528,9 +529,7 @@ MasterBoard::MasterBoard()
 	}
 
 	//Initialize cursor.
-	cursor.XCoord = 1;
-	cursor.YCoord = 1;
-	cursor.boardToPlay = this;
+	cursor.initialize(inputTexture, this);
 
 	totalNumberOfMinions = 0;
 
@@ -1475,7 +1474,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo);
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo, myTexture);
 			if (minionRoster[i] != NULL)
 			{
 				minionRoster[i]->status = (minionStatus)status;
