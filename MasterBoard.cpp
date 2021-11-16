@@ -956,8 +956,19 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType, 
 //Tells us how an attacker would perform against an enemy. Useful for actual attack or calculation - doesn't actually deal damage.
 //Returns a number between 0 - 100 - actual health, not percent.
 //Also sets wouldAmmoBeUsed so caller can use for actual damage calcs and then subtract ammo if needed
-double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool& wouldAmmoBeUsed, int& weaponUsed,  bool ignoreLimitations)
+double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool& wouldAmmoBeUsed, int& weaponUsed, bool ignoreLimitations)
 {
+	if (attackingMinion == NULL )
+	{
+		std::cout << "Could not calculate damage dealt for " << playerRoster[defendingMinion->team].name << "'s " << defendingMinion->type << std::endl;
+		return -1;
+	}
+	if (defendingMinion == NULL)
+	{
+		std::cout << "Could not calculate damage dealt for " << playerRoster[attackingMinion->team].name << "'s " << attackingMinion->type << std::endl;
+		return -1;
+	}
+
 	//Assume ammo is not used until told otherwise.
 	wouldAmmoBeUsed = false;
 
@@ -1939,6 +1950,9 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 		textToReturn += inputTile->description;
 		textToReturn += " CAPTURED!";
 
+		inputTile->mySprite.setTextureRect(rectArray[inputTile->textureRectAnchorX + inputTile->controller][inputTile->textureRectAnchorY]);
+		inputTile->myFogSprite.setTextureRect(rectArray[inputTile->textureRectAnchorX + inputTile->controller][inputTile->textureRectAnchorY + 1]);
+
 	}
 
 	inputMinion->status = hasfired;
@@ -2009,7 +2023,13 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 
 		InputLayer->printPlayerVictory(winningPlayer, this);
 
-		InputLayer->exitToMainMenu(this);
+		if(missionFlag == false)
+			InputLayer->exitToMainMenu(this);	
+		else
+		{
+			InputLayer->NextMission(this);
+		}
+
 		gameOver = true;
 	}
 
@@ -2077,7 +2097,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 
 	//If artillery type, cannot attack adjacent (Minimum range)
 	if ((attackingMinion->rangeType == rangedFire)
-		&& (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
+		&& (isAdjacent(defendingMinion->locationX, attackingMinion->locationX, defendingMinion->locationY, attackingMinion->locationY)))
 	{
 		return 1;
 	}

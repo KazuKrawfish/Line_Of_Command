@@ -7,8 +7,11 @@
 #include <iostream>
 #include <vector>
 
+
 //Forward declare
 extern std::vector <std::vector<sf::IntRect>> rectArray;
+class Masterboard;
+
 
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
@@ -60,8 +63,11 @@ public:
 
 		//Basic image init below
 		//This is "plains"
-		mySprite.setTextureRect(rectArray[0][0]);
-		myFogSprite.setTextureRect(rectArray[0][1]);
+		//Fog of war tile will always be immediately below the normal tile.
+		textureRectAnchorX = 0;
+		textureRectAnchorY = 0;
+		mySprite.setTextureRect(rectArray[textureRectAnchorX][textureRectAnchorY]);
+		myFogSprite.setTextureRect(rectArray[textureRectAnchorX][textureRectAnchorY +1]);
 		
 	}
 
@@ -224,6 +230,8 @@ public:
 		return isProperty;
 	}
 
+	int determineRiverRoadType(bool thisTileChanged, MasterBoard* boardToSet);
+	
 	int production;				//Amount of money it produces
 	int controller;				//Player number 1/2 or neutral 0.
 	char symbol;
@@ -244,7 +252,11 @@ public:
 	sf::Sprite mySprite;
 	sf::Sprite myFogSprite;
 	sf::Texture* myTexture;
-
+	//AnchorX and Y track the location of the "base" tile ie. neutral.
+	//Only matters if sprite may change (Properties and roads/rivers)
+	//Fog of war tile will always be immediately below the normal tile.
+	int textureRectAnchorY;
+	int textureRectAnchorX;
 	//GRAPHICS ///////////////////////////
 
 	int clearTile() {
@@ -264,20 +276,22 @@ public:
 		return 0;
 	}
 
-	int setCharacterstics(sf::Texture * inputTexture) 
+	int setCharacterstics(sf::Texture * inputTexture, MasterBoard* boardToSet)
 	{
 		myTexture = inputTexture;
 		mySprite.setTexture(*myTexture);
 		myFogSprite.setTexture(*myTexture);
+
 		//Sprite had defualt texture-rect set in the constructor
-
-
+		
 		switch (symbol)
 		{
 		case('.'):
 		{	
 			description = "Clear terrain.";
 			defenseFactor = 1.1;
+			mySprite.setTextureRect(rectArray[0][0]);
+			myFogSprite.setTextureRect(rectArray[0][1]);
 			break;
 		}
 		case('H'):
@@ -285,8 +299,8 @@ public:
 			description = "City.";
 			defenseFactor = 1.3;
 			production = 2000;
-			mySprite.setTextureRect(rectArray[4][0]);
-			myFogSprite.setTextureRect(rectArray[4][0]);
+			mySprite.setTextureRect(rectArray[7][0]);
+			myFogSprite.setTextureRect(rectArray[8][0]);
 			break;
 		}
 		case('m'):
@@ -302,8 +316,12 @@ public:
 			description = "Settlement.";
 			defenseFactor = 1.3;
 			production = 1000;
-			mySprite.setTextureRect(rectArray[4][0]);
-			myFogSprite.setTextureRect(rectArray[4][1]);
+
+			textureRectAnchorX = 7;
+			textureRectAnchorY = 0;
+			
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller ][textureRectAnchorY + 1]);
 			break;
 		}
 		case('h'):
@@ -319,16 +337,23 @@ public:
 			description = "Headquarters.";
 			defenseFactor = 1.4;
 			production = 1000;
-			mySprite.setTextureRect(rectArray[4][0]);
-			myFogSprite.setTextureRect(rectArray[4][1]);
+			mySprite.setTextureRect(rectArray[7][1]);
+			myFogSprite.setTextureRect(rectArray[8][1]);
 			break;
 		}
 		case('='):
 		{
 			description = "Road.";
 			defenseFactor = 1.0;
-			mySprite.setTextureRect(rectArray[6][0]);
-			myFogSprite.setTextureRect(rectArray[6][1]);
+
+			textureRectAnchorY = 2;
+			textureRectAnchorX = 20;
+
+			mySprite.setTextureRect(rectArray[20][2]);
+			myFogSprite.setTextureRect(rectArray[20][3]);
+
+			determineRiverRoadType(true, boardToSet);
+
 			break;
 		}
 		case('^'):
@@ -343,7 +368,8 @@ public:
 		{
 			description = "Mountain.";
 			defenseFactor = 1.4;
-			
+			mySprite.setTextureRect(rectArray[3][0]);
+			myFogSprite.setTextureRect(rectArray[3][1]);
 			break;
 		}
 		case('+'):		//Would like to have convertible to woodlot by engineer.....maybe
@@ -358,8 +384,8 @@ public:
 		{
 			description = "High seas.";
 			defenseFactor = 1.0;
-			mySprite.setTextureRect(rectArray[5][0]);
-			myFogSprite.setTextureRect(rectArray[5][1]);
+			mySprite.setTextureRect(rectArray[4][0]);
+			myFogSprite.setTextureRect(rectArray[4][1]);
 			break;
 		}
 
@@ -367,8 +393,14 @@ public:
 		{
 			description = "River.";
 			defenseFactor = 1.0;
-			mySprite.setTextureRect(rectArray[5][0]);
-			myFogSprite.setTextureRect(rectArray[5][1]);
+
+			mySprite.setTextureRect(rectArray[9][2]);
+			myFogSprite.setTextureRect(rectArray[9][3]);
+
+			textureRectAnchorY = 2;
+			textureRectAnchorX = 9;
+
+			determineRiverRoadType( true, boardToSet);
 			break;
 		}
 		case('A'):

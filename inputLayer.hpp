@@ -31,11 +31,12 @@ public:
 	int printStatus(MasterBoard* boardToPrint, int observerNumber);
 	int printWaitingScreen(MasterBoard* boardToPrint);
 	int printMinionMenu(MasterBoard* boardToPrint);
-	int printBoardMenu();
+	int printBoardMenu(MasterBoard* boardToPrint);
 	int	printPropertyMenu(MasterBoard* boardToPrint);
 	int printMenu();
 	int printInsertMinion();
 	int printInsertTile();
+	int printMissionBriefing(MasterBoard* boardToInput);
 	int printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint);
 	int printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint);
 	int printLowerScreen(MasterBoard* boardToPrint, int observerNumber);
@@ -52,7 +53,8 @@ public:
 	int minionInput(char* Input, MasterBoard* boardToInput);
 	int printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber);
 	int exitToMainMenu(MasterBoard* boardToInput);
-	
+	int NextMission(MasterBoard* boardToInput);
+
 	std::string eventText = "";
 
 	gameInputLayer status = gameBoard;
@@ -65,6 +67,7 @@ public:
 	sf::Texture* inputLayerTexture;
 	sf::Font* inputLayerFont;
 	sf::RenderWindow* inputLayerWindow;
+	int menuLineTracker = 0;
 	//SFML Objects end	/////////////////////////
 
 

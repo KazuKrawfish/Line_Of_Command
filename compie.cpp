@@ -368,6 +368,8 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 
 	//Within each of four adjacent tiles:
 	//Calculate the damage our minion would do to them, as well as the counterattack damage:
+
+
 	checkSingleTileForCombatValue(currentX, currentY, currentX - 1, currentY, myCursor, boardToUse, relativeSuitabilityScore, selectedMinionRecord);
 	
 	checkSingleTileForCombatValue(currentX, currentY, currentX + 1, currentY, myCursor, boardToUse, relativeSuitabilityScore, selectedMinionRecord);
@@ -393,12 +395,12 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 		return 1;
 	}
 
-	if (boardToUse->Board[defenderX][defenderY].hasMinionOnTop == false )
+	if (boardToUse->Board[defenderX][defenderY].hasMinionOnTop == false || boardToUse->Board[defenderX][defenderY].withinVision[myCursor->selectMinionPointer->team] != true)
 	{
 		return 1;
 	}
 
-	if(	boardToUse->Board[defenderX][defenderY].minionOnTop->team == boardToUse->playerFlag)
+	if(	boardToUse->Board[defenderX][defenderY].minionOnTop->team == selectedMinionRecord->recordedMinion->team)
 	{
 		return 1;
 	}
@@ -479,10 +481,26 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 		{
 			//If the current tile DOES not have minion on top (IE we will be able to move there)
 			//Also must be within range
-			if ((boardToUse->Board[x][y].hasMinionOnTop == false || (myCursor->selectMinionPointer->locationY == y && myCursor->selectMinionPointer->locationX == x)) && boardToUse->Board[x][y].withinRange == true)
+			//Direct fire only
+			if (selectedMinionRecord->recordedMinion->rangeType == directFire && 
+				(boardToUse->Board[x][y].hasMinionOnTop == false || 
+				(myCursor->selectMinionPointer->locationY == y && myCursor->selectMinionPointer->locationX == x)) 
+				&& boardToUse->Board[x][y].withinRange == true)
 			{
 				checkAdjacentTilesForBestValuedEnemy(x, y, myCursor, boardToUse, &relativeSuitabilityScore, selectedMinionRecord);
 				//Already checked for closeness in the function itself so no need to do anything else
+			}
+			//Check each tile if suitable for artillery fire
+			//Must be visible
+			if (selectedMinionRecord->recordedMinion->rangeType == rangedFire	
+				&& boardToUse->Board[x][y].hasMinionOnTop == true 
+				&& boardToUse->Board[x][y].withinVision[myCursor->selectMinionPointer->team]
+				&& myCursor->selectMinionPointer->team != boardToUse->Board[x][y].minionOnTop->team)
+			{
+				//Must be within range but outside minimum range
+				if( myCursor->selectMinionPointer->minAttackRange < computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y)  
+					&& myCursor->selectMinionPointer->attackRange >= computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y))
+				checkSingleTileForCombatValue(myCursor->selectMinionPointer->locationX, myCursor->selectMinionPointer->locationY, x, y, myCursor, boardToUse, &relativeSuitabilityScore, selectedMinionRecord);
 			}
 		}
 	}

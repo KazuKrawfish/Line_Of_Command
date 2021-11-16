@@ -5,6 +5,7 @@
 #include <iostream>
 #include <ctype.h>
 #include <fstream>
+#include <stdio.h>
 #include "compie.hpp"
 
 class inputLayer;
@@ -160,9 +161,19 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 			LoadBoard->Board[x][y].locationX = x;
 			LoadBoard->Board[x][y].locationY = y;
 
-			LoadBoard->Board[x][y].setCharacterstics(myTexture);
+
 		}
 	}
+
+	for (int x = 0; x < LoadBoard->BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < LoadBoard->BOARD_HEIGHT; y++)
+		{
+			LoadBoard->Board[x][y].setCharacterstics(myTexture, LoadBoard);
+		}
+	}
+
+
 	return 0;
 }
 
@@ -199,7 +210,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << nextMissionName << std::endl;
 
 	saveGame << "Mission_Briefing" << std::endl;	//String with mission info
-	saveGame << missionInfo << std::endl;
+	saveGame << missionBriefing << std::endl;
 
 	//End Mission Data Load
 	//*********************************************//
@@ -357,7 +368,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	*saveGame >> nextMissionName;
 
 	*saveGame >> ThrowawayString;		//String with mission info
-	*saveGame >> missionInfo;
+	*saveGame >> missionBriefing;
 
 	//End Mission Data Load
 	//*********************************************//
@@ -430,7 +441,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 		}
 	}
-	setCharacteristics(boardToPrint);
+
 
 	//This is for properties.
 	char inputProperties;
@@ -444,6 +455,10 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 			boardToPrint->Board[x][y].controller = (int(inputProperties)) - 48;
 		}
 	}
+	//After team data is loaded, set property characteristics.
+	setCharacteristics(boardToPrint);
+
+
 	//Then load minion data:
 	*saveGame >> ThrowawayString;
 	int numberOfMinions;
@@ -871,8 +886,10 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	{
 		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 		{
-			mywindow->clear();
-			sf::String announceString = "Input Player's name: \n";
+			mywindow->clear(); 
+			char buffer[100];
+			snprintf(buffer, 100, "Input Player %d's name: \n", i);
+			sf::String announceString = buffer;
 			inputName = playerInputString(mywindow, myFont, announceString, 1);
 
 			boardToPlay->playerRoster[i].name = inputName;
@@ -911,14 +928,14 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	else	//If campaign game we just give player 1's name AND initialize all other players as compie
 	{
 		mywindow->clear();
-		topMenuNewString = "Input Player's name: \n";
+		topMenuNewString = "Input Player 1's name: \n";
 
 		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1);
 		boardToPlay->playerRoster[1].name = inputName;
 
 		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 		{
-			if (boardToPlay->playerRoster[i].playerType == computerPlayer);
+			if (boardToPlay->playerRoster[i].playerType == computerPlayer)
 				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
 		}
 
@@ -942,14 +959,12 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	else boardToPlay->isItSinglePlayerGame = false;
 
 	menuStatus = playingMap;
+	
+	//Before entering play, make sure to print out briefing.
+	InputLayer->printMissionBriefing(boardToPlay);
 
 	return 0;
 }
-
-/*int mainMenu::restartMission() 
-{
-
-}*/
 
 /*int mainMenu::nextMission() 
 {

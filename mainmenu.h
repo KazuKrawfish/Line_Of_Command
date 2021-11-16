@@ -12,7 +12,6 @@ enum interactionMethod {unchosen, localSkirmish, localCampaign, remote};
 
 //Forward declare global utilities
 char playCharInput(sf::RenderWindow* myWindow);
-sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
 
 class mainMenu
 {
@@ -56,7 +55,7 @@ public:
 	//The below pulls from remote and opens the save game if there is an update. This should be used while player is waiting for others to finish their turn.
 	int multiplayerPullSaveGame();
 	const int menuTextSize = 20;
-	std::string nextMissionName, missionInfo;
+	std::string nextMissionName, missionBriefing;
 
 	std::vector <compie> computerPlayerRoster;
 

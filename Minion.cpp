@@ -14,7 +14,7 @@ Minion::Minion()
 	health = 100;
 
 	//Basic image init below
-	mySprite.setTextureRect(rectArray[0][2]);
+	mySprite.setTextureRect(rectArray[0][4]);
 
 
 }
@@ -35,7 +35,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 	myTexture = inputTexture;
 	mySprite.setTexture(*myTexture);
-	mySprite.setTextureRect(rectArray[0][3]);
+	mySprite.setTextureRect(rectArray[0][4]);
 	//Basic image init end
 
 	truePathMap.resize(Environment->BOARD_WIDTH + 1);
@@ -79,7 +79,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		mySprite.setTextureRect(rectArray[0][inputTeam+3]);
+		mySprite.setTextureRect(rectArray[0][inputTeam+4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -93,7 +93,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		mySprite.setTextureRect(rectArray[1][inputTeam + 3]);
+		mySprite.setTextureRect(rectArray[1][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
 		maxSecAmmo = 0;
@@ -107,7 +107,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		mySprite.setTextureRect(rectArray[3][inputTeam + 3]);
+		mySprite.setTextureRect(rectArray[3][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -122,7 +122,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = hybridRange;
 		specialtyGroup = normal;
 		minAttackRange = 1;
-		
+		mySprite.setTextureRect(rectArray[7][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
@@ -136,7 +136,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		
+		mySprite.setTextureRect(rectArray[6][inputTeam + 4]);	
 		maxFuel = 60;
 		maxPriAmmo = 6;
 		maxSecAmmo = 0;
@@ -151,7 +151,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = rangedFire;
 		specialtyGroup = normal;
 		minAttackRange = 1;
-		mySprite.setTextureRect(rectArray[5][inputTeam + 3]);
+		mySprite.setTextureRect(rectArray[5][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -165,7 +165,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 5;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		mySprite.setTextureRect(rectArray[2][inputTeam + 3]);
+		mySprite.setTextureRect(rectArray[2][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -180,7 +180,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = rangedFire;
 		minAttackRange = 2;
 		specialtyGroup = normal;
-		
+		mySprite.setTextureRect(rectArray[8][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -222,7 +222,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = transport;
-		mySprite.setTextureRect(rectArray[4][inputTeam + 3]);
+		mySprite.setTextureRect(rectArray[4][inputTeam + 4]);
 		maxFuel = 70;
 		break;
 	}
