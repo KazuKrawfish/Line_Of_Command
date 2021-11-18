@@ -231,7 +231,7 @@ public:
 	}
 
 	int determineRiverRoadType(bool thisTileChanged, MasterBoard* boardToSet);
-	
+	int determineSeaType(bool thisTileChanged, MasterBoard* boardToSet);
 	int production;				//Amount of money it produces
 	int controller;				//Player number 1/2 or neutral 0.
 	char symbol;
@@ -299,8 +299,12 @@ public:
 			description = "City.";
 			defenseFactor = 1.3;
 			production = 2000;
-			mySprite.setTextureRect(rectArray[7][0]);
-			myFogSprite.setTextureRect(rectArray[8][0]);
+
+			textureRectAnchorX = 12;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
 			break;
 		}
 		case('m'):
@@ -329,6 +333,11 @@ public:
 			description = "Factory.";
 			defenseFactor = 1.3;
 			production = 1000;
+			textureRectAnchorX = 17;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
 			
 			break;
 		}
@@ -384,8 +393,15 @@ public:
 		{
 			description = "High seas.";
 			defenseFactor = 1.0;
-			mySprite.setTextureRect(rectArray[4][0]);
-			myFogSprite.setTextureRect(rectArray[4][1]);
+
+			textureRectAnchorY = 9;
+			textureRectAnchorX = 0;
+
+			mySprite.setTextureRect(rectArray[0][9]);
+			myFogSprite.setTextureRect(rectArray[0][10]);
+
+			determineSeaType(true, boardToSet);
+
 			break;
 		}
 

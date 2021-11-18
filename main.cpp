@@ -34,7 +34,7 @@
 //Global for the moment to support faster production
 //Everyone needs access to this at all times so it seems reasonable
 const int rectArrayWidth = 31;
-const int rectArrayHeight = 9;
+const int rectArrayHeight = 11;
 std::vector <std::vector<sf::IntRect>> rectArray;
 
 int main()

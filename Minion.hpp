@@ -10,6 +10,10 @@ class MasterBoard;
 
 //Status indicators are true also for transports, engineers, etc. hasfired will be true if the transport dropped a guy, for instance.
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired };
+//Hybrid fire rules:
+//Can move and shoot like direct fire, but only with secondary weapon.
+//Can stand still and fire pri or sec. Primary always has a minimum range of 1, and sec always has max range of 1.
+//Thus AA can fire at ground units next to regardless of move status, but can only shoot air units outside 1, if it stood still.
 enum RangeType { directFire, rangedFire, hybridRange };
 enum specialtyGroupType { normal, infantry, transport, stealth };
 //Domain type is used not for terrain but everything else. Defensive bonus from terrain, fuel requirement, refuel, move through enemy units, etc.

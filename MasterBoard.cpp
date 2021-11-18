@@ -267,8 +267,9 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 
 	if (attackingMinion.rangeType == hybridRange)
 	{
-		if (attackingMinion.status == gaveupmovehasntfired)
+		if (attackingMinion.status == gaveupmovehasntfired || attackingMinion.status == hasntmovedorfired)
 		{	//If hybrid and didn't move, can still do direct attack with secondary weapon.
+			//Had to change to allow AA to counterattack with secondary weapon.
 			if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
 			{
 				if (attackingMinion.currentSecAmmo > 0)
@@ -1375,9 +1376,8 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	}
 
 	//These are all cases where direct fire can occur:
-	if ((cursor.selectMinionPointer->rangeType == hybridRange && cursor.selectMinionPointer->status == hasmovedhasntfired)
-		|| (cursor.selectMinionPointer->rangeType == directFire &&
-		(cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)))
+	if ((cursor.selectMinionPointer->rangeType == directFire  )&&
+		(cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired))
 	{
 		if (inputX < BOARD_WIDTH - 1)
 			Board[inputX + 1][inputY].withinRange = true;
@@ -1393,7 +1393,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 	}
 	else	//If not a direct fire scenario, it's a ranged scenario:
-		if ((cursor.selectMinionPointer->rangeType == hybridRange || cursor.selectMinionPointer->rangeType == rangedFire) &&
+		if ((cursor.selectMinionPointer->rangeType == rangedFire) &&
 			(cursor.selectMinionPointer->status == gaveupmovehasntfired))
 		{
 
@@ -1417,7 +1417,47 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 					}
 				}
 			}
-		}
+		} 
+		else	//Or it's a hybrid fire scenario
+			if (cursor.selectMinionPointer->rangeType == hybridRange
+				&& cursor.selectMinionPointer->status == gaveupmovehasntfired )
+			{
+				for (int x = 0; x < BOARD_WIDTH; x++)
+				{
+					for (int y = 0; y < BOARD_HEIGHT; y++)
+					{
+
+						distanceX = abs(inputX - x);
+						distanceY = abs(inputY - y);
+
+						//Must be within range. Ignore minimum range.
+						if ((distanceX + distanceY) <= Board[inputX][inputY].minionOnTop->attackRange )
+						{
+							Board[x][y].withinRange = true;
+						}
+						else
+						{
+							Board[x][y].withinRange = false;
+						}
+					}
+				}
+			}else 
+				if ( cursor.selectMinionPointer->status == hasmovedhasntfired 
+					&& cursor.selectMinionPointer->rangeType == hybridRange)
+			{
+				if (inputX < BOARD_WIDTH - 1)
+					Board[inputX + 1][inputY].withinRange = true;
+
+				if (inputX > 0)
+					Board[inputX - 1][inputY].withinRange = true;
+
+				if (inputY < BOARD_HEIGHT - 1)
+					Board[inputX][inputY + 1].withinRange = true;
+
+				if (inputY > 0)
+					Board[inputX][inputY - 1].withinRange = true;
+
+			}
 
 	//Minion's tile should not have red indicator
 	Board[inputX][inputY].withinRange = false;

@@ -235,7 +235,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = air;
-		
+
+		mySprite.setTextureRect(rectArray[11][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 3;
 		maxSecAmmo = -1;
@@ -251,6 +252,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		specialtyGroup = normal;
 		domain = air;
 		
+		mySprite.setTextureRect(rectArray[12][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
 		break;
