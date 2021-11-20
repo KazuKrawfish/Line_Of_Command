@@ -576,10 +576,7 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 //This function assumes the minion is already selected.
 int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord * selectedMinionRecord)
 {
-	if (gameOver == true)
-	{
-		return 1;
-	}
+
 
 	int returnX = 0;
 	int returnY = 0;
@@ -660,10 +657,7 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 
 int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
-	if (gameOver == true)
-	{
-		return 1;
-	}
+
 
 	if (selectedMinionRecord->tasking == attackLocalMinion)
 	{
@@ -772,10 +766,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 int compie::takeMyTurn(MasterBoard* boardToUse)
 {
-	if (gameOver == true)
-	{
-		return 1;
-	}
+
 	bool allMinionsHaveMoved = false;
 	int waveIterator = 0;
 
@@ -800,7 +791,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 	}
 
 	//Go through minionRecord and determine tasking.
-	while (allMinionsHaveMoved == false && gameOver == false)
+	while (allMinionsHaveMoved == false)
 	{
 		//For a single iterationa assume all minions moved until proven otherwise
 		allMinionsHaveMoved = true;
@@ -849,7 +840,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 	//Still need to implement non-immediateExecute taskingStatus
 
-	if (gameOver == false && boardToUse->playerRoster[compiePlayerFlag].stillAlive == true)
+	if (boardToUse->playerRoster[compiePlayerFlag].stillAlive == true)
 	{
 
 		determineProduction(boardToUse);

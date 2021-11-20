@@ -195,6 +195,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = normal;
 		
+		mySprite.setTextureRect(rectArray[9][inputTeam + 4]);
 		maxFuel = 80;
 		domain = helo;
 		maxPriAmmo = 9;
@@ -209,7 +210,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = transport;
-		
+		mySprite.setTextureRect(rectArray[10][inputTeam + 4]);
 		maxFuel = 80;
 		domain = helo;
 		break;
@@ -268,6 +269,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		minAttackRange = 1;
 		specialtyGroup = normal;
 		
+		mySprite.setTextureRect(rectArray[13][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		break;
@@ -283,6 +285,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		specialtyGroup = normal;
 		domain = sea;
 		
+		mySprite.setTextureRect(rectArray[14][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
@@ -297,7 +300,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = sea;
-		
+		mySprite.setTextureRect(rectArray[16][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 1;
 		break;
@@ -311,7 +314,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = transport;
 		domain = sea;
-		
+		mySprite.setTextureRect(rectArray[15][inputTeam + 4]);
 		maxFuel = 80;
 		break;
 	}
@@ -324,7 +327,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = stealth;
 		domain = sea;
-		
+		mySprite.setTextureRect(rectArray[18][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		break;
@@ -338,7 +341,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = transport;
 		domain = sea;
-	
+		mySprite.setTextureRect(rectArray[17][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		break;

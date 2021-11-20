@@ -34,12 +34,14 @@ public:
 	int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint);
+	int introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame);
 	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int printTopMenu();
 	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer );
 	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
+
 	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int printWaitingScreen();
 	int waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer);
@@ -56,6 +58,7 @@ public:
 	int multiplayerPullSaveGame();
 	const int menuTextSize = 20;
 	std::string nextMissionName, missionBriefing;
+	int briefingLineNumber = 0;
 
 	std::vector <compie> computerPlayerRoster;
 

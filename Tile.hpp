@@ -346,8 +346,11 @@ public:
 			description = "Headquarters.";
 			defenseFactor = 1.4;
 			production = 1000;
-			mySprite.setTextureRect(rectArray[7][1]);
-			myFogSprite.setTextureRect(rectArray[8][1]);
+			textureRectAnchorX = 22;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
 			break;
 		}
 		case('='):

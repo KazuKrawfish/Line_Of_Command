@@ -1833,7 +1833,9 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	Board[oldX][oldY].minionOnTop = NULL;
 
 	//Reset capture points for tile.
+	//Reset minion's cap status
 	Board[oldX][oldY].capturePoints = 20;
+	selectedMinion->isCapturing = false;
 
 	//"Move" the minion to the new location.
 	selectedMinion->locationX = inputX;

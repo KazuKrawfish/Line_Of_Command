@@ -125,7 +125,37 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			effectsSprite.setTextureRect(rectArray[4][3]);
 			inputLayerWindow->draw(effectsSprite);
 		}
+	
+		if (tileToPrint->hasMinionOnTop == true && minionToPrint != NULL && minionToPrint->health < 95)
+		{
+			if(minionToPrint->health < 95 && minionToPrint->health >= 85)
+				effectsSprite.setTextureRect(rectArray[6][0]);
+			if (minionToPrint->health < 85 && minionToPrint->health >= 75)
+				effectsSprite.setTextureRect(rectArray[6][1]);
+			if (minionToPrint->health < 75 && minionToPrint->health >= 65)
+				effectsSprite.setTextureRect(rectArray[7][2]);
+			if (minionToPrint->health < 65 && minionToPrint->health >= 55)
+				effectsSprite.setTextureRect(rectArray[8][2]);
+			if (minionToPrint->health < 55 && minionToPrint->health >= 45)
+				effectsSprite.setTextureRect(rectArray[8][3]);
+			if (minionToPrint->health < 45 && minionToPrint->health >= 35)
+				effectsSprite.setTextureRect(rectArray[7][3]);
+			if (minionToPrint->health < 35 && minionToPrint->health >= 25)
+				effectsSprite.setTextureRect(rectArray[6][3]);
+			if (minionToPrint->health < 25 && minionToPrint->health >= 15)
+				effectsSprite.setTextureRect(rectArray[3][3]);
+			if (minionToPrint->health < 15 && minionToPrint->health >= 5)
+				effectsSprite.setTextureRect(rectArray[2][3]);
+	
+			inputLayerWindow->draw(effectsSprite);
+			
+		}
+		
+
+	
 	}
+
+
 
 
 	/*
@@ -177,14 +207,9 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 				else waddch(MainMenu->mywindow, inputString[6] + COLOR_PAIR(teamNumber));
 	
 	waddch(MainMenu->mywindow, inputString[7] + COLOR_PAIR(teamNumber));
-
-	//If minion is damaged indicate the health level on bottom right, otherwise print symbol
-	if (minionToPrint != NULL && minionToPrint->health <= 94)
-	{
-		waddch(MainMenu->mywindow, char (int(std::round(minionToPrint->health /10)) + 48) + COLOR_PAIR(teamNumber));
-	}
-	else waddch(MainMenu->mywindow, inputString[8] + COLOR_PAIR(teamNumber));
 	*/
+	//If minion is damaged indicate the health level on bottom right, otherwise print symbol
+
 	return 1;
 }
 
@@ -286,7 +311,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		} 
 		else if (currentMinion->maxSecAmmo == 0 && currentMinion->maxPriAmmo == -1)	//No pri, infinite sec.
 		{
-			snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): Infinite/None\n", int(currentMinion->health), currentMinion->currentFuel);
+			snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): None/Infinite\n", int(currentMinion->health), currentMinion->currentFuel);
 		}
 		else if (currentMinion->maxSecAmmo == -1 && currentMinion->maxPriAmmo > 0)	//Primary with no sec.
 		{
@@ -1136,8 +1161,10 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	return 0;
 }
 
+//Because this is only ordered by player, we don't have to worry about cleaning up compie behavior afterwards. So we can just re-load and go back to gameboard.
 int inputLayer::restartGame(MasterBoard* boardToInput)
 {
+
 	//Load the actual save game
 	std::ifstream loadGame;
 	bool loadsuccessful = false;
@@ -1208,13 +1235,21 @@ int inputLayer::NextMission(MasterBoard* boardToInput)
 		}
 
 	}
+	std::string playerName = boardToInput->playerRoster[1].name;
 	//Actually load scenario. Initialize board, etc.
 	MainMenu->gameLoad(boardToInput, this, &loadGame);
+	boardToInput->playerRoster[1].name = playerName;
+	//NEED to transfer player information -  just the name for now.
 
 	//We don't always print mission briefing but we do here
 	printMissionBriefing(boardToInput);
 
+
+
 	status = gameBoard;
+	
+	MainMenu->playGame(boardToInput, this);
+
 	return 0;
 
 }
@@ -1296,10 +1331,6 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 
 int inputLayer::exitToMainMenu(MasterBoard* boardToInput)
 {
-	for (int i = 1; i < boardToInput->NUMBEROFPLAYERS + 1; i++)
-	{
-		MainMenu->computerPlayerRoster[i].gameOver = true;
-	}
 
 	//Clear up resources we used to avoid memory leak.
 	boardToInput->clearBoard(this);

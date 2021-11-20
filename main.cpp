@@ -37,6 +37,7 @@ const int rectArrayWidth = 31;
 const int rectArrayHeight = 11;
 std::vector <std::vector<sf::IntRect>> rectArray;
 
+
 int main()
 {
 
@@ -61,6 +62,8 @@ int main()
 			rectArray[i][j].width = 50;
 		}
 	}
+
+
 	
 
 	sf::Font cour;
@@ -83,7 +86,8 @@ int main()
 	inputLayer InputLayer(&MainMenu, &mainWindow , &mainTexture, &cour);
 	MasterBoard GameBoard(&mainTexture);
 
-	MainMenu.playGame(&GameBoard, &InputLayer);
+	MainMenu.introScreen(&GameBoard, &InputLayer);
+
 	
 
 }

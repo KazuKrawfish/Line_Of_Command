@@ -91,6 +91,7 @@ public:
 	int playerFlag;
 	int totalNumberOfMinions;
 	bool isItSinglePlayerGame = false;
+	bool interruptFlag = false;
 
 	//GRAPHICS	////////////////////////////////
 	sf::Texture * myTexture;

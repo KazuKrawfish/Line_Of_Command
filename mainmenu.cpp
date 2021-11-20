@@ -209,8 +209,9 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << "Name_of_next_mission_(Same_Directory)" << std::endl;		//Name of next mission
 	saveGame << nextMissionName << std::endl;
 
-	saveGame << "Mission_Briefing" << std::endl;	//String with mission info
-	saveGame << missionBriefing << std::endl;
+	saveGame << "Mission_Briefing "  << std::endl;	//String with mission info
+	saveGame << briefingLineNumber << " ";
+	saveGame << missionBriefing;
 
 	//End Mission Data Load
 	//*********************************************//
@@ -367,8 +368,19 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	*saveGame >> ThrowawayString;		//Name of next mission
 	*saveGame >> nextMissionName;
 
+	 briefingLineNumber = 0;
 	*saveGame >> ThrowawayString;		//String with mission info
-	*saveGame >> missionBriefing;
+	*saveGame >> briefingLineNumber;
+	
+	missionBriefing = "";
+	
+		for (int i = 0; i < briefingLineNumber; i++)
+	{
+		std::string singleLine;
+		std::getline(*saveGame, singleLine);
+		missionBriefing += singleLine;
+		missionBriefing += "\n";
+	}
 
 	//End Mission Data Load
 	//*********************************************//
@@ -387,7 +399,9 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 		if (playerType == 0)
 			boardToPrint->playerRoster[i].playerType = humanPlayer;
-		else boardToPrint->playerRoster[i].playerType = computerPlayer;
+		else {
+			boardToPrint->playerRoster[i].playerType = computerPlayer;
+			}
 
 	}
 
@@ -502,8 +516,9 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	return 1;
 }
 
-int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
+int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer) 
 {
+
 	sf::String initialString("Line of Command \nCopyright 2021, Park Family Software Laboratory (ParkLab) \nPress any key to continue.");
 	sf::Text text(initialString, *myFont, menuTextSize);
 
@@ -513,7 +528,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 	sf::Event throwAwayEvent;
 	bool validInput = false;
-	while (validInput == false) 
+	while (validInput == false)
 	{
 		mywindow->waitEvent(throwAwayEvent);
 		if (throwAwayEvent.type == sf::Event::EventType::KeyPressed)
@@ -521,6 +536,17 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	}
 	mywindow->clear();
 
+
+
+	playGame(boardToPlay, InputLayer);
+
+
+	return 0;
+}
+
+int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
+{
+	
 	char Input = '~';
 
 	//Run as long as the user wants. Infinite while loop.
@@ -595,7 +621,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 			//Computer takes turn if it is his turn to do so.
 			//Note that this doesn't deal with "status".
-			if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && computerPlayerRoster[boardToPlay->playerFlag].gameOver == false )
+			if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && boardToPlay->playerRoster[boardToPlay->playerFlag].stillAlive == true)
 			{
 				computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
 				
@@ -966,32 +992,6 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	return 0;
 }
 
-/*int mainMenu::nextMission() 
-{
-	waddstr(mywindow, "Choose which campaign to start (Case sensitive): \n");
-	wgetstr(mywindow, pointToScenarioName);
-	std::string newMission = scenarioToLoad;
-
-	std::ifstream newCampaign;
-	newCampaign.open(".\\campaigns\\" + newMission + ".txt");
-
-	if (newCampaign.is_open())
-	{
-		waddstr(mywindow, "Successfully loaded!\n");
-		loadsuccessful = true;
-		std::string ThrowawayString;
-		newCampaign >> ThrowawayString;
-		newCampaign >> newMission;
-		newGameMap.open(".\\campaigns\\" + newMission + ".txt");
-	}
-	else
-	{
-		waddstr(mywindow, "Could not load campaign. Please check that it exists and the right spelling was used.\n");
-
-	}
-
-
-}*/
 
 int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 { 
