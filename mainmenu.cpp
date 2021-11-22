@@ -7,6 +7,8 @@
 #include <fstream>
 #include <stdio.h>
 #include "compie.hpp"
+#include <filesystem>
+
 
 class inputLayer;
 class MasterBoard;
@@ -391,8 +393,8 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
 		int playerType = 0;
-
-		*saveGame >> boardToPrint->playerRoster[i].name;		//For new game this should be ~
+		
+		*saveGame >>  boardToPrint->playerRoster[i].name ;	//For new game this should be ~
 		*saveGame >> playerType;
 		*saveGame >> boardToPrint->playerRoster[i].stillAlive;
 		*saveGame >> boardToPrint->playerRoster[i].treasury;
@@ -825,17 +827,47 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			
 			if (newCampaign.is_open())
 			{
+
+
+
+				loadsuccessful = true;
+				std::string CampaignBriefing;
+				
+				//Load up campaign briefing and print on screen
+				missionBriefing = "";
+				int briefingLineNumber = 0;
+				std::string throwAway;
+				newCampaign >> throwAway;
+				newCampaign >> briefingLineNumber;
+
+				for (int i = 0; i < briefingLineNumber; i++)
+				{
+					std::string singleLine;
+					std::getline(newCampaign, singleLine);
+					CampaignBriefing += singleLine;
+					CampaignBriefing += "\n";
+				}		
+
+				//Draw it out
 				mywindow->clear();
-				anotherTopMenuNewString = "Successfully loaded!\n";
-				sf::Text newText(anotherTopMenuNewString, *myFont, 0);
+				sf::Text newText(CampaignBriefing, *myFont, menuTextSize);
 				mywindow->draw(newText);
 				mywindow->display();
 
-				loadsuccessful = true;
-				std::string ThrowawayString;
-				newCampaign >> ThrowawayString;
+				sf::Event event;
+				mywindow->pollEvent(event);
+
+				//Wait for one input.
+				playCharInput(mywindow);
+
+
+				
 				newCampaign >> newMission;
 				newGameMap.open(".\\campaigns\\" + newCampaignName + "\\" + newMission + ".txt");
+
+
+
+
 			}
 			else
 			{

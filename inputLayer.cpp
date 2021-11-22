@@ -1201,7 +1201,7 @@ int inputLayer::restartGame(MasterBoard* boardToInput)
 	MainMenu->gameLoad(boardToInput, this, &loadGame);
 
 	//We don't always print mission briefing but we do here
-	printMissionBriefing(boardToInput);
+	printMissionBriefing(boardToInput );
 
 	status = gameBoard;
 	return 0;
@@ -1242,7 +1242,7 @@ int inputLayer::NextMission(MasterBoard* boardToInput)
 	//NEED to transfer player information -  just the name for now.
 
 	//We don't always print mission briefing but we do here
-	printMissionBriefing(boardToInput);
+	printMissionBriefing(boardToInput );
 
 
 
