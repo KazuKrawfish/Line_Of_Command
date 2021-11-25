@@ -115,7 +115,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	}
 	case('A'):
 	{
-		description = "Anti-Air";
+		description = "Anti-Aircraft";
 		movementRange = 6;
 		attackRange = 3;
 		visionRange = 3;
@@ -173,7 +173,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	}
 	case('R'):
 	{
-		description = "Rocket";
+		description = "Rocket Artillery";
 		movementRange = 5;
 		attackRange = 4;
 		visionRange = 2;
@@ -188,7 +188,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	}
 	case('v'):
 	{
-		description = "Viper";
+		description = "Attack Copter";
 		movementRange = 6;
 		attackRange = 1;
 		visionRange = 3;
@@ -204,7 +204,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 	}
 	case('h'):
 	{
-		description = "Huey";
+		description = "Transport Copter";
 		movementRange = 6;
 		attackRange = 0;
 		visionRange = 2;

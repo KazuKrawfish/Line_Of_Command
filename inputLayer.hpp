@@ -33,9 +33,9 @@ public:
 	int printMinionMenu(MasterBoard* boardToPrint);
 	int printBoardMenu(MasterBoard* boardToPrint);
 	int	printPropertyMenu(MasterBoard* boardToPrint);
-	int printMenu();
-	int printInsertMinion();
-	int printInsertTile();
+	int printMenu(MasterBoard* boardToPrint);
+	int printInsertMinion(MasterBoard* boardToPrint);
+	int printInsertTile(MasterBoard* boardToPrint);
 	int printMissionBriefing(MasterBoard* boardToInput);
 	int printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint);
 	int printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint);
@@ -62,6 +62,15 @@ public:
 	char requestedMinionToBuy = '\n';
 	int requestedUnitPrice = -1;
 	mainMenu* MainMenu;
+
+	//MenuCrawlerObjects
+	int menuCursor = 0;
+	std::vector <std::string> menuOptions { "Save game","Main menu","Load save game","End turn","Restart map","Exit menu"	};
+	std::vector <std::string> factoryOptions{ "Infantry\t1000", "Specialist\t3000", "Cavalry\t4000","APC\t5000","Artillery\t6000", "Armor\t7000",
+												"Anti-Aircraft\t8000", "Rocket Artillery\t15000", "Heavy Armor\t16000" };
+	std::vector <std::string> airbaseOptions{ "Transport Copter\t5000", "Attack Copter\t9000", "Interceptor\t15000", "Bomber\t18000"};
+	std::vector <std::string> portOptions{ "Gunboat\t6000", "Cruiser\t14000", "Landing Ship\t12000", "Submarine\t18000", "Battleship\t25000", "Aircraft Carrier\t25000" };
+	//MenuCrawlerObjects
 
 	//SFML Objects		/////////////////////////
 	sf::Texture* inputLayerTexture;

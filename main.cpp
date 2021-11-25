@@ -33,7 +33,7 @@
 
 //Global for the moment to support faster production
 //Everyone needs access to this at all times so it seems reasonable
-const int rectArrayWidth = 31;
+const int rectArrayWidth = 32;
 const int rectArrayHeight = 11;
 std::vector <std::vector<sf::IntRect>> rectArray;
 
@@ -46,8 +46,10 @@ int main()
 	//Load textures
 	sf::Texture mainTexture;
 	sf::Image mainImage;
+	sf::Texture globeTexture;
+	sf::Image globeImage;
 
-	
+		
 	//Initialize intRect grid
 	rectArray.resize(rectArrayWidth+1);
 	for (int i = 0; i < rectArrayWidth; i++)
@@ -62,10 +64,7 @@ int main()
 			rectArray[i][j].width = 50;
 		}
 	}
-
-
 	
-
 	sf::Font cour;
 	//Load up image and use to initiate texture
 	//Also set white to transparent
@@ -73,7 +72,12 @@ int main()
 	{
 		std::cout << "Couldn't load image!" << std::endl;
 	}
+	if (!globeImage.loadFromFile("globe.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
 	sf::Color colorWhite;
+	globeTexture.loadFromImage(globeImage);
 	mainImage.createMaskFromColor(colorWhite.White);
 	mainTexture.loadFromImage(mainImage);
 
@@ -82,13 +86,12 @@ int main()
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
 	
-	mainMenu MainMenu(&mainWindow, &mainTexture, &cour);
+	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, &globeTexture);
+	
 	inputLayer InputLayer(&MainMenu, &mainWindow , &mainTexture, &cour);
 	MasterBoard GameBoard(&mainTexture);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);
-
-	
 
 }
 

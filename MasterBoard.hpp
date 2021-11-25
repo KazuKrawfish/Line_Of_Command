@@ -46,6 +46,9 @@ public:
 	int NUMBEROFPLAYERS = 2;
 	int BOARD_WIDTH = 12;
 	int BOARD_HEIGHT = 10;
+	int WINDOW_HEIGHT = 10;
+	int WINDOW_WIDTH = 12;
+
 	int buildPath(bool isItInitialCall, int x, int y, char minionType, std::vector<std::vector<pathSquare>> & pathMapPointer);
 	int buildApparentPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
 	int buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);

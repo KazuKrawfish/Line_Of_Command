@@ -532,6 +532,9 @@ MasterBoard::MasterBoard(sf::Texture *inputTexture)
 	//Initialize cursor.
 	cursor.initialize(inputTexture, this);
 
+	//Re-initialize windows
+	WINDOW_HEIGHT = 10;
+	WINDOW_WIDTH = 12;
 	totalNumberOfMinions = 0;
 
 	//Initialize MinionRoster to NULL.
@@ -2166,7 +2169,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		int defendingPlayer = defendingMinion->team;
 		destroyMinion(defendingMinion, printMessage, InputLayer, false);
 		defenderAlive = false;
-		if (attackingMinion->veterancy <= 3)
+		if (attackingMinion->veterancy < 3)
 		{
 			attackingMinion->veterancy++;
 		}

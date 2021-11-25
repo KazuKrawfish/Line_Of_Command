@@ -427,6 +427,12 @@ public:
 			description = "Airbase.";
 			defenseFactor = 1.3;
 			
+			textureRectAnchorX = 16;
+			textureRectAnchorY = 8;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
+
 			production = 1000;
 			break;
 		}
@@ -435,6 +441,12 @@ public:
 			description = "Port.";
 			defenseFactor = 1.3;
 			
+			textureRectAnchorX = 27;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
+
 			production = 1000;
 			break;
 		}

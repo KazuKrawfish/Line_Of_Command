@@ -87,9 +87,10 @@ char playCharInput(sf::RenderWindow* myWindow)
 	return inputChar;
 }
 
-mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour)
+mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, sf::Texture* inputGlobeTexture)
 {
 	myTexture = gameTexture;
+	myGlobeTexture = inputGlobeTexture;
 	myFont = cour;
 	mywindow = myWindow;
 	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
@@ -424,6 +425,23 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	*saveGame >> ThrowawayString;
 	*saveGame >> boardToPrint->BOARD_HEIGHT;
 
+	//Once board height and width are loaded, we try to adjust window size to either smaller or larger.
+	if (boardToPrint->BOARD_WIDTH < MAX_WINDOW_WIDTH) 
+	{
+		boardToPrint->WINDOW_WIDTH = boardToPrint->BOARD_WIDTH;
+	}
+	else 
+	{
+		boardToPrint->WINDOW_WIDTH = MAX_WINDOW_WIDTH;
+	}
+	if (boardToPrint->BOARD_HEIGHT < MAX_WINDOW_HEIGHT)
+	{
+		boardToPrint->WINDOW_HEIGHT = boardToPrint->BOARD_HEIGHT;
+	}
+	else
+	{
+		boardToPrint->WINDOW_HEIGHT = MAX_WINDOW_HEIGHT;
+	}
 
 	//Resize the map based on new data.
 	//Not sure why we have to give an additional line but it segfaulted otherwise
@@ -521,11 +539,27 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer) 
 {
 
-	sf::String initialString("Line of Command \nCopyright 2021, Park Family Software Laboratory (ParkLab) \nPress any key to continue.");
-	sf::Text text(initialString, *myFont, menuTextSize);
+	sf::String titleString("Line of Command");
+	sf::String copyrightString("Copyright 2021, Supercontinent Software, Ltd.");
+	sf::String pressAnyKeyString("Press any key to continue.");
+	sf::Text titleText(titleString, *myFont, 30);
+	sf::Text copyrightText(copyrightString, *myFont, menuTextSize);
+	sf::Text pressAnyKeyText(pressAnyKeyString, *myFont, menuTextSize);
+
+	sf::Sprite globeSprite;
+	globeSprite.setTexture(*myGlobeTexture);
+	globeSprite.setPosition( 520, 150);
+	titleText.setPosition(520, 0);
+	copyrightText.setPosition(380, 40);
+	pressAnyKeyText.setPosition(500, 450);
 
 	mywindow->clear();
-	mywindow->draw(text);
+
+	mywindow->draw(globeSprite);
+	mywindow->draw(titleText);
+	mywindow->draw(copyrightText);
+	mywindow->draw(pressAnyKeyText);
+
 	mywindow->display();
 
 	sf::Event throwAwayEvent;
@@ -786,7 +820,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			anotherTopMenuNewString += "Choose which scenario to load (Case sensitive): \n";
 			sf::String scenarioName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset);
 			sf::Event event;
-
+			
 			std::string newScenario = scenarioName;
 			newGameMap.open(".\\scenarios\\" + newScenario + ".txt");
 			if (newGameMap.is_open())
