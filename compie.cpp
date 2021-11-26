@@ -11,6 +11,8 @@
 
 //Below functions are "utilities" that need to find a home.
 
+extern bool testBed;
+
 
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
 {
@@ -740,7 +742,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		boardToUse->setVisionField(0);
 		boardToUse->checkWindow();
 		InputLayer->printScreen(boardToUse, 0);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));//REMOVE
 
 	}
 	else
@@ -751,7 +753,8 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 			boardToUse->setVisionField(1);
 			boardToUse->checkWindow();
 			InputLayer->printScreen(boardToUse, 1);
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			if (testBed == false)
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 		}
 	}

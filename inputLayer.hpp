@@ -59,8 +59,6 @@ public:
 
 	gameInputLayer status = gameBoard;
 	specialKey minionVisibleStatus = showMinions;
-	char requestedMinionToBuy = '\n';
-	int requestedUnitPrice = -1;
 	mainMenu* MainMenu;
 
 	//MenuCrawlerObjects

@@ -666,7 +666,8 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			//This prints the screen AFTER the latest input has taken effect.
 			//Is this messing with remote play? Not sure.
 			boardToPlay->checkWindow();
-			InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag);
+			if (testBed == false)
+				InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag);
 
 		}
 	}

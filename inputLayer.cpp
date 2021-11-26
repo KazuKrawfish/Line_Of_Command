@@ -442,58 +442,50 @@ int inputLayer::printBoardMenu(MasterBoard* boardToPrint) {
 
 int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 	
+	tile* myTile = &boardToPrint->Board[boardToPrint->cursor.XCoord][boardToPrint->cursor.YCoord];
 
-	int totalLinesPrinted = 0;
-	sf::String boardMessage;
 
-	//If this is not the second valid purchase input
-	if (requestedMinionToBuy == '\n')
+
+	//First determine size of property menu we are using.
+	int propertyMenuSize = 0;
+	if (myTile->symbol == 'h')
+		propertyMenuSize = factoryOptions.size();
+	if (myTile->symbol == 'P')
+		propertyMenuSize = portOptions.size();
+	if (myTile->symbol == 'A')
+		propertyMenuSize = airbaseOptions.size();
+
+
+	//MenuCrawler
+	std::string boardMessage = "";
+
+	for (int i = 0; i < propertyMenuSize; i++)
 	{
-		if (boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()].symbol == 'h')
-		{
-			boardMessage = "Input Minion to Buy(i,s,a,r,c,R,T,A,P):\nDeselect Property (p)\n";
-		}
-		if (boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()].symbol == 'A')
-		{
-			boardMessage = "Input Minion to Buy(v,h,f,b):\nDeselect Property (p)\n";
-		}
-		if (boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()].symbol == 'P')
-		{
-			boardMessage = "Input Minion to Buy(B,G,C,V,U,L):\nDeselect Property (p)\n";
-		}
-		totalLinesPrinted = 2;
-	}
-	else if (requestedMinionToBuy != '\n')
-	{
-		if (requestedMinionToBuy == '!')
-		{
-			boardMessage = "Can't afford, try another symbol.\nInput Minion to Buy | Deselect Property (p)\n";
-		}
-		else if (requestedMinionToBuy == '?')
-		{
-			boardMessage = "Invalid input. Try another symbol.\nInput Minion to Buy | Deselect Property (p)\n";
-			
-		}
-		else
-		{
-			char toOutput[100];
-			snprintf(toOutput, 100, "Requested unit costs: %d. \n", requestedUnitPrice);
-			boardMessage = toOutput;
-			boardMessage += "Confirm (z) | Cancel (p)\n";
-			
-		}
-		totalLinesPrinted = 2;
-	}
+		if (menuCursor == i)
+			boardMessage += "*";
+		else boardMessage += " ";
 
-	
-	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
+		if(myTile->symbol == 'P')
+			boardMessage += portOptions[i];
+		if (myTile->symbol == 'A')
+			boardMessage += airbaseOptions[i];
+		if (myTile->symbol == 'h')
+			boardMessage += factoryOptions[i];
+
+		boardMessage += "\n";
+	}
+	boardMessage += "Press (p) to deselect property.";
+
+	sf::String sfBoardMessage = boardMessage;
+	sf::Text newText(sfBoardMessage, *inputLayerFont, MainMenu->menuTextSize);
+
 	newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+
 	inputLayerWindow->draw(newText);
 
-	menuLineTracker += totalLinesPrinted;
-	
-	return 0;
+	menuLineTracker += propertyMenuSize + 2;
 
+	return 0;
 }
 
 int inputLayer::printMenu(MasterBoard* boardToPrint) {
@@ -658,7 +650,8 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) 
 }
 
 int inputLayer::printWaitingScreen(MasterBoard* boardToPrint) 
-{
+{	
+	
 	inputLayerWindow->clear();
 	char buffer[100];
 	sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
@@ -666,7 +659,7 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 	sf::Text newText(announceString, *inputLayerFont, 20);
 	inputLayerWindow->draw(newText);
 	inputLayerWindow->display();
-
+	
 	return 0;
 
 }
@@ -714,7 +707,7 @@ int inputLayer::insertMinionInput(char* Input, MasterBoard* boardToInput)
 	if (myTile->hasMinionOnTop == true 	|| myTile->consultMovementChart(*Input, myTile->symbol) == 99)
 		return 1;
 												
-	requestedUnitPrice = boardToInput->consultMinionCostChart(*Input, '~');
+	int requestedUnitPrice = boardToInput->consultMinionCostChart(*Input, '~');
 
 	//If it is real minion, then price > 0
 	if (requestedUnitPrice > 0)
@@ -1300,6 +1293,11 @@ int inputLayer::NextMission(MasterBoard* boardToInput)
 
 int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 
+	tile* myTile =  & boardToInput->Board[boardToInput->cursor.XCoord][boardToInput->cursor.YCoord];
+	char requestedPurchase = '~';
+	bool purchaseSuccess = false;
+	int treasury = boardToInput->playerRoster[boardToInput->playerFlag].treasury;
+
 	//Need char for shift
  	if (*Input == '0')
 	{
@@ -1314,60 +1312,119 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 		return 0;
 	}
 
-	int treasury = boardToInput->playerRoster[boardToInput->playerFlag].treasury;
 
+	//First determine size of property menu we are using.
+	int propertyMenuSize = 0;
+	if( myTile->symbol == 'h') 
+		propertyMenuSize = factoryOptions.size();
+	if (myTile->symbol == 'P')
+		propertyMenuSize = portOptions.size();
+	if (myTile->symbol == 'A')
+		propertyMenuSize = airbaseOptions.size();
 
-
-	//If this is NOT the second valid purchase input
-	//IE we have not yet gotten any valid input for propertyLayer.
-	//Thus one of the three states (prestate, too expensive, not a real unit).
-	if (requestedMinionToBuy == '\n' || requestedMinionToBuy == '!' || requestedMinionToBuy == '?')
+	//Move cursor up/down
+	if (*Input == 's')
 	{
-		if (*Input == 'p')
-		{
-			//Deselect
-			status = gameBoard;
-			requestedMinionToBuy = '\n';
-			return 0;
-		}
-		//Consult cost table:
-		requestedUnitPrice = boardToInput->consultMinionCostChart(*Input, boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol);
+		menuCursor++;
 
-		//If it is a real unit we are trying to purchase
-		//Aka unitPrica is not -1 aka non-error
-		if (requestedUnitPrice > 0)
+		if (menuCursor >= propertyMenuSize)
+			menuCursor = 0;
+	}
+	else
+		if (*Input == 'w')
 		{
-			requestedMinionToBuy = *Input;
-
-			//If we can't afford, use special ! character
-			if (requestedUnitPrice > treasury)
-			{
-				//Indicates you can't afford
-				requestedMinionToBuy = '!';
-			}
+			menuCursor--;
+			if (menuCursor < 0)
+				menuCursor = propertyMenuSize - 1;
 		}
 		else
-		{
-			requestedMinionToBuy = '?';
-		}
+			if (*Input == 'p') 
+			{
+				menuCursor = 0;
+				status = gameBoard;
+				return 0;
+			}
+
+	//Attempted purchase of minion
+	//Factory first
+	if (*Input == 't' && myTile->symbol == 'h')
+	{
+
+
+		if (menuCursor == 0)
+			requestedPurchase = 'i';
+		if (menuCursor == 1)
+			requestedPurchase = 's';
+		if (menuCursor == 2)
+			requestedPurchase = 'c';
+		if (menuCursor == 3)
+			requestedPurchase = 'P';
+		if (menuCursor == 4)
+			requestedPurchase = 'a';
+		if (menuCursor == 5)
+			requestedPurchase = 'A';
+		if (menuCursor == 6)
+			requestedPurchase = 'R';
+		if (menuCursor == 7)
+			requestedPurchase = 'T';
+		if (menuCursor == 8)
+			requestedPurchase = 'r';
+
+
 
 	}
 
-	//This is the second valid input.
-	else
+	if (*Input == 't' && myTile->symbol == 'P')
 	{
-		if (*Input == 'p')
-		{
-			//Cancel purchase
-			requestedMinionToBuy = '\n';
-		}
-		if (*Input == 'z')
+
+		if (menuCursor == 0)
+			requestedPurchase = 'G';
+		if (menuCursor == 1)
+			requestedPurchase = 'C';
+		if (menuCursor == 2)
+			requestedPurchase = 'L';
+		if (menuCursor == 3)
+			requestedPurchase = 'U';
+		if (menuCursor == 4)
+			requestedPurchase = 'B';
+		if (menuCursor == 5)
+			requestedPurchase = 'V';
+
+
+	}
+
+	if (*Input == 't' && myTile->symbol == 'A')
+	{
+		
+		if (menuCursor == 0)
+			requestedPurchase = 'h';
+		if (menuCursor == 1)
+			requestedPurchase = 'v';
+		if (menuCursor == 2)
+			requestedPurchase = 'f';
+		if (menuCursor == 3)
+			requestedPurchase = 'b';
+
+
+
+	}
+
+
+
+	//Consult cost table:
+	int requestedUnitPrice = boardToInput->consultMinionCostChart(requestedPurchase, myTile->symbol);
+
+	//If it is a real unit we are trying to purchase
+	//Aka unitPrica is not -1 aka non-error
+	if (requestedUnitPrice > 0)
+	{
+		//Can we afford it
+		if (requestedUnitPrice <= treasury)
 		{
 			//Confirm purchase
-			boardToInput->attemptPurchaseMinion(requestedMinionToBuy, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag);
+			boardToInput->attemptPurchaseMinion(requestedPurchase, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag);
 			status = gameBoard;
-			requestedMinionToBuy = '\n';
-			requestedUnitPrice = -1;
+			menuCursor = 0;
 		}
 	}
 

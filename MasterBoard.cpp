@@ -11,6 +11,8 @@
 #include <cmath>
 
 
+extern bool testBed;
+
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2);
 
 //If the two input coordinates are next to each other, return true. Otherwise, return false.
@@ -964,7 +966,7 @@ double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defend
 {
 	if (attackingMinion == NULL )
 	{
-		std::cout << "Could not calculate damage dealt for " << playerRoster[defendingMinion->team].name << "'s " << defendingMinion->type << std::endl;
+  		std::cout << "Could not calculate damage dealt for " << playerRoster[defendingMinion->team].name << "'s " << defendingMinion->type << std::endl;
 		return -1;
 	}
 	if (defendingMinion == NULL)
@@ -2288,8 +2290,7 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 			}
 	} while (playerRoster[playerFlag].stillAlive == false);
 
-	//Set minionToBuy to the default null value.
-	InputLayer->requestedMinionToBuy = '\n';
+
 
 	//Reset every minion's status.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -2304,7 +2305,8 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 	//If it is singleplayer we want to remain in map mode.
 	if (isItSinglePlayerGame == false) 
 	{
-		InputLayer->status = waitingForNextLocalPlayer;
+		if(testBed == false)
+			InputLayer->status = waitingForNextLocalPlayer;
 	}
 
 	upkeep(InputLayer);

@@ -37,6 +37,8 @@ const int rectArrayWidth = 32;
 const int rectArrayHeight = 11;
 std::vector <std::vector<sf::IntRect>> rectArray;
 
+bool testBed = false;
+
 
 int main()
 {
