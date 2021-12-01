@@ -2219,7 +2219,13 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 }
 
 int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill)
-{	
+{
+	if (inputMinion == NULL)
+	{
+		std::cout << "Could not destroy mininion, it doesn't exist." << std::endl;
+		return 1;
+	}
+
 	int minionController = inputMinion->team;
 
 	//If carrying a guy, kill that guy too.

@@ -742,7 +742,8 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		boardToUse->setVisionField(0);
 		boardToUse->checkWindow();
 		InputLayer->printScreen(boardToUse, 0);
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));//REMOVE
+		if (testBed == false)
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
 	}
 	else

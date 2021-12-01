@@ -1360,15 +1360,16 @@ int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
 		if (menuCursor == 3)
 			requestedPurchase = 'P';
 		if (menuCursor == 4)
-			requestedPurchase = 'a';
-		if (menuCursor == 5)
-			requestedPurchase = 'A';
-		if (menuCursor == 6)
-			requestedPurchase = 'R';
-		if (menuCursor == 7)
-			requestedPurchase = 'T';
-		if (menuCursor == 8)
 			requestedPurchase = 'r';
+		if (menuCursor == 5)
+			requestedPurchase = 'a';
+		if (menuCursor == 6)
+			requestedPurchase = 'A';
+		if (menuCursor == 7)
+			requestedPurchase = 'R';
+		if (menuCursor == 8)
+			requestedPurchase = 'T';
+
 
 
 
@@ -1440,6 +1441,11 @@ int inputLayer::exitToMainMenu(MasterBoard* boardToInput)
 
 	MainMenu->menuStatus = topmenu;
 	MainMenu->skipOneInput = true;
+
+
+	//Leave it all behind and start again.
+	//Do you... really think we could?
+	MainMenu->playGame(boardToInput, this);
 	
 	return 0; 
 }

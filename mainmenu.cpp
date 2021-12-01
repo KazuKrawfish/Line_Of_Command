@@ -13,7 +13,7 @@
 class inputLayer;
 class MasterBoard;
 
-
+extern bool testBed;
 
 //Because we're having difficulty getting strings to work, we're leaving this for now.
 //Linenumber indicates offset for input field.
@@ -48,7 +48,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font *inp
 		{
 			stringFinished = true;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace) && inputString.getSize() > 0)
 		{
 			inputString.erase(inputString.getSize()-1);
 		}
