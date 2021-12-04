@@ -21,7 +21,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	MainMenu = inputMainMenu;
 }
 
-int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber)
+int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber, bool withinAnimation)
 {
 	tile* tileToPrint = &boardToPrint->Board[actualX][actualY];
 	//Initialize effects sprite, even though it may not always be used.
@@ -54,10 +54,12 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 
 		//Will only print  "selection" effects if human player's turn, or debug mode 
-		//AND if not in the middle of animation - indicated by the invisible flag on minion
+		//AND if not in the middle of animation - indicated by the invisible flag on minion for movement
+		//AND indicated by the withinAnimation flag, for attacks and such.
 		if ((boardToPrint->playerFlag == playerNumber || MainMenu->debugMode == true)
 			&& boardToPrint->cursor.selectMinionPointer != NULL 
-			&& boardToPrint->cursor.selectMinionPointer->invisible == false)
+			&& boardToPrint->cursor.selectMinionPointer->invisible == false
+			&& withinAnimation == false)
 		{
 		if (boardToPrint->cursor.selectMinionFlag == true
 			&& boardToPrint->cursor.selectMinionPointer->locationX == actualX
@@ -657,7 +659,7 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 
 }
 
-int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) {
+int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation) {
 	//windowLocation is a single scalar representing x and y.
 	//We do some basic math to break it into the two values for the function.
 	//Need to convert windowLocation into a better two part variable.
@@ -669,7 +671,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber) 
 	{
 		for (int j = windowX; j < (windowX + boardToPrint->WINDOW_WIDTH); j++)
 		{
-			printSingleTile((j - windowX),  (i - windowY), j , i , boardToPrint, observerNumber);
+			printSingleTile((j - windowX),  (i - windowY), j , i , boardToPrint, observerNumber, withinAnimation);
 		}
 		
 	}
@@ -700,8 +702,6 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	if (observerNumber == -1)
 		return -1;
 
-	inputLayerWindow->clear();
-
 	//If player controlled, tile the minion moves through will always be visible.
 	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
 	{
@@ -718,8 +718,9 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	minionToMove->invisible = true;
 
 	//Use usual print method
-	printUpperScreen(boardToPrint, observerNumber);
-	inputLayerWindow->display();
+	bool withinAnimation = true;
+	printScreen(boardToPrint, observerNumber, withinAnimation);
+
 
 	//Delay after printing;
 	if (testBed == false)
@@ -760,10 +761,10 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 		//Remember the last tile which is blank, to "clear" the effect
 		for (int i = 0; i < 5; i++) 
 		{
-			inputLayerWindow->clear();
+
 			tileAttacking->animationSprite->setTextureRect(rectArray[i][13]);
-			printUpperScreen(boardToPrint, observerNumber);
-			inputLayerWindow->display();
+			bool withinAnimation = true;
+			printScreen(boardToPrint, observerNumber, withinAnimation);
 			std::this_thread::sleep_for(std::chrono::milliseconds(70));
 		}
 	
@@ -789,10 +790,11 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 		//Remember the last tile which is blank, to "clear" the effect
 		for (int i = 0; i < 5; i++)
 		{
-			inputLayerWindow->clear();
+
 			tileBeingAttacked->animationSprite->setTextureRect(rectArray[i][14]);
-			printUpperScreen(boardToPrint, observerNumber);
-			inputLayerWindow->display();
+			bool withinAnimation = true;
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+
 			std::this_thread::sleep_for(std::chrono::milliseconds(70));
 		}
 	
@@ -810,12 +812,12 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 	return 0;
 }
 
-int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber)
+int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation)
 {
 	if (status != waitingForNextLocalPlayer) 
 	{
 	inputLayerWindow->clear();
-	printUpperScreen(boardToPrint, observerNumber);
+	printUpperScreen(boardToPrint, observerNumber, withinAnimation);
 	printLowerScreen(boardToPrint, observerNumber);
 	inputLayerWindow->display();
 	

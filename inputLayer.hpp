@@ -47,9 +47,9 @@ public:
 	//Print Whole Screen
 	int printStatus(MasterBoard* boardToPrint, int observerNumber);
 	int printLowerScreen(MasterBoard* boardToPrint, int observerNumber);
-	int printUpperScreen(MasterBoard* boardToPrint, int observerNumber);
-	int printScreen(MasterBoard* boardToPrint, int observerNumber);
-	int printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber);
+	int printUpperScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation);
+	int printScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation);
+	int printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber, bool withinAnimation);
 
 	//Graphics Print
 	int movementGraphics(MasterBoard* boardToPrint, int observerNumber, Minion * minionToMove, int locationX , int locationY);

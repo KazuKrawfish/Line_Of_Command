@@ -2053,7 +2053,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 	InputLayer->printPlayerDefeat(losingPlayer, this);
 	
 	int playersLeft = 0;
-	//If this was the final defeat, change to main menu.
+	//Determine if this was the last player alive
 	for (int i = 1; i < playerRoster.size(); i++) 
 	{
 		if (playerRoster[i].stillAlive == true)
@@ -2077,7 +2077,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 
 		InputLayer->printPlayerVictory(winningPlayer, this);
 
-		if(missionFlag == false)
+		if(missionFlag == false || playerRoster[winningPlayer].playerType == computerPlayer)
 			InputLayer->exitToMainMenu(this);	
 		else
 		{

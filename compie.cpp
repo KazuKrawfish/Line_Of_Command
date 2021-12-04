@@ -753,7 +753,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 	boardToUse->setVisionField(whoIsWatching);
 	boardToUse->checkWindow();
-	InputLayer->printScreen(boardToUse, whoIsWatching);
+	InputLayer->printScreen(boardToUse, whoIsWatching, false);
 
 	if (testBed == false)
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));

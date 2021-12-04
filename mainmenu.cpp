@@ -670,7 +670,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			//Is this messing with remote play? Not sure.
 			boardToPlay->checkWindow();
 			if (testBed == false)
-				InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag);
+				InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
 
 		}
 	}
