@@ -2118,13 +2118,21 @@ int MasterBoard::deselectMinion()
 
 //Additionally, can only attack once. If artillery, cannot have moved or be adjacent.
 //If hybrid, different attack based on if you have moved or not.
-int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
+int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber)
 {
 
 
 	//Simplify by finding shorthand values first.
 	Minion* attackingMinion = cursor.selectMinionPointer;
 	Minion* defendingMinion = Board[inputX][inputY].minionOnTop;
+
+	if (attackingMinion == NULL || defendingMinion == NULL)
+	{
+		std::cout << "Couldn't attack, one of the minions doesn't exist!" << std::endl;
+		return -1;
+	}
+
+
 	bool isAmmoUsed = false;
 	int weaponUsed = 0;
 	bool ignoreRealMapLimitations = false;
@@ -2156,8 +2164,11 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		return 1;
 	}
 
-	//Also, if artillery type, cannot attack if it's actually moved that turn.				
+	//Also, if artillery type, cannot attack if it's actually moved that turn.		
+	//Why is this just floating? Not sure
 
+	//Combat graphics for attacker
+	InputLayer->combatGraphics(this, observerNumber,& Board[attackingMinion->locationX][attackingMinion->locationY],& Board[inputX][inputY]);
 
 	isAmmoUsed = false;
 	//Decrease defender's health by attack value. Decrease ammo as needed.
@@ -2190,6 +2201,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 			//If defender still alive, then perform defensive counterfire.
 			//Same calculations as above - includes veterancy
 			isAmmoUsed = false;
+
+			//Combat graphics for defender
+			InputLayer->combatGraphics(this, observerNumber,  &Board[inputX][inputY]  , &Board[attackingMinion->locationX][attackingMinion->locationY] );
 
 			attackingMinion->health -= calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
 

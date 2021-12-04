@@ -65,6 +65,9 @@ char playCharInput(sf::RenderWindow* myWindow)
 	sf::Event event;
 	bool validInput = false;
 
+	//Clear the event queue while we were doing other things
+	while (myWindow->pollEvent(event));	//May be too false-positive-ish as far as clearing out legit user inputs, we'll see
+
 	while (validInput == false)
 	{
 		myWindow->waitEvent(event);
@@ -888,9 +891,6 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				sf::Text newText(CampaignBriefing, *myFont, menuTextSize);
 				mywindow->draw(newText);
 				mywindow->display();
-
-				sf::Event event;
-				mywindow->pollEvent(event);
 
 				//Wait for one input.
 				playCharInput(mywindow);

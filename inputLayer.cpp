@@ -144,6 +144,13 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			inputLayerWindow->draw(effectsSprite);
 		}
 	
+		//If minion has only movement and can still attack, grey triangle at top
+		if(minionToPrint->status == hasmovedhasntfired &&   minionToPrint->rangeType != rangedFire)
+		{
+			effectsSprite.setTextureRect(rectArray[5][0]);
+			inputLayerWindow->draw(effectsSprite);
+		}
+
 		//Minion exists and is below 1/3 fuel
 		if ( (minionToPrint->currentFuel == 0 || (double(minionToPrint->maxFuel) / double(minionToPrint->currentFuel)) >= 3))
 		{
@@ -216,7 +223,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 		//It must be set by previous function
 		tileToPrint->animationSprite->setPosition(screenX * 50, screenY * 50);
 		inputLayerWindow->draw(*(tileToPrint->animationSprite));
-		tileToPrint->animationSprite = NULL;
+
 
 	}
 
@@ -716,14 +723,92 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 
 	//Delay after printing;
 	if (testBed == false)
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		std::this_thread::sleep_for(std::chrono::milliseconds(140));
 
 	//Reset invisibilty status for minion selected
 	minionToMove->invisible = false;
 
+	//Reset animation sprite
+	boardToPrint->Board[locationX][locationY].animationSprite = NULL;
+
 	return 0;
 }
 
+int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, tile* tileAttacking, tile* tileBeingAttacked)
+{
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (tileAttacking == NULL || tileBeingAttacked == NULL)
+	{
+		std::cout << "Could not animate combat, one of the tiles was NULL" << std::endl;
+		return -1;
+	}
+	
+	//If within vision, we will watch attackerVisible
+	if (tileAttacking->withinVision[observerNumber] == true)
+	{
+
+		//Create new sprite for animation
+		tileAttacking->animationSprite = new sf::Sprite;
+		
+		//Set texture
+		tileAttacking->animationSprite->setTexture(*inputLayerTexture);
+	
+		//Now do animation sequence. Custom for combat.
+		//Remember the last tile which is blank, to "clear" the effect
+		for (int i = 0; i < 5; i++) 
+		{
+			inputLayerWindow->clear();
+			tileAttacking->animationSprite->setTextureRect(rectArray[i][13]);
+			printUpperScreen(boardToPrint, observerNumber);
+			inputLayerWindow->display();
+			std::this_thread::sleep_for(std::chrono::milliseconds(70));
+		}
+	
+		//Clean up afterwards if necessary
+		if (tileAttacking->animationSprite != NULL)
+		{
+			delete tileAttacking->animationSprite;
+			tileAttacking->animationSprite = NULL;
+		}
+	}
+
+	//If within vision, we will watch attackerVisible
+	if (tileBeingAttacked->withinVision[observerNumber] == true)
+	{
+
+		//Create new sprite for animation
+		tileBeingAttacked->animationSprite = new sf::Sprite;
+
+		//Set texture
+		tileBeingAttacked->animationSprite->setTexture(*inputLayerTexture);
+
+		//Now do animation sequence. Custom for combat.
+		//Remember the last tile which is blank, to "clear" the effect
+		for (int i = 0; i < 5; i++)
+		{
+			inputLayerWindow->clear();
+			tileBeingAttacked->animationSprite->setTextureRect(rectArray[i][14]);
+			printUpperScreen(boardToPrint, observerNumber);
+			inputLayerWindow->display();
+			std::this_thread::sleep_for(std::chrono::milliseconds(70));
+		}
+	
+		//Clean up afterwards if necessary
+		if (tileBeingAttacked->animationSprite != NULL)
+		{
+			delete tileBeingAttacked->animationSprite;
+			tileBeingAttacked->animationSprite = NULL;
+		}
+
+	
+	}
+
+
+	return 0;
+}
 
 int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber)
 {
@@ -1011,7 +1096,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 						//This is the actual attack portion. Return of 0 indicates successful attack.
 						//Note minion's owner so if they lose we know who lost.
 						playerPotentiallyDefeated = boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team;
-						bool attackSuccess = boardToInput->attackMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this);
+						bool attackSuccess = boardToInput->attackMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag);
 						if (attackSuccess == 0)
 						{
 							status = gameBoard;

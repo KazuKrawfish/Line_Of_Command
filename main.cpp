@@ -34,7 +34,7 @@
 //Global for the moment to support faster production
 //Everyone needs access to this at all times so it seems reasonable
 const int rectArrayWidth = 32;
-const int rectArrayHeight = 11;
+const int rectArrayHeight = 16;
 std::vector <std::vector<sf::IntRect>> rectArray;
 
 bool testBed = false;

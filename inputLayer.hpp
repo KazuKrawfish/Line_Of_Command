@@ -53,6 +53,7 @@ public:
 
 	//Graphics Print
 	int movementGraphics(MasterBoard* boardToPrint, int observerNumber, Minion * minionToMove, int locationX , int locationY);
+	int combatGraphics(MasterBoard* boardToPrint, int observerNumber, tile* tileAttacking, tile* tileBeingAttacked);
 	//EnPrint Functions:///////////////////////////////////////////////////////
 
 	//Non-Print Functions:////////////////////////////////////////////////////

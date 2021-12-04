@@ -692,7 +692,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		{
 			//The move automatically deselects. Thus reselect.
 			boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
-			boardToUse->attackMinion(selectedMinionRecord->potentialAttackTile->locationX, selectedMinionRecord->potentialAttackTile->locationY, InputLayer);
+			boardToUse->attackMinion(selectedMinionRecord->potentialAttackTile->locationX, selectedMinionRecord->potentialAttackTile->locationY, InputLayer, whoIsWatching);
 			
 		}
 
