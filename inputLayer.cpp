@@ -103,7 +103,9 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 	}
 
-	Minion* minionToPrint = tileToPrint->minionOnTop;
+	Minion* minionToPrint = NULL;
+	if(tileToPrint->hasMinionOnTop == true)
+		minionToPrint = tileToPrint->minionOnTop;
 	
 	//Must be visible to see effects!
 	if (tileToPrint->withinVision[playerNumber] == true && minionVisibleStatus == showMinions)
