@@ -60,7 +60,7 @@ public:
 	int setVisionField(int observerNumber);
 	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool & wouldAmmoBeUsed, int & weaponUsed, bool ignoreLimitations);
 	int selectMinion(int inputX, int inputY);
-	int moveMinion(int inputX, int inputY);
+	int moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber);
 	int deselectMinion();
 	int attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam);
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
@@ -69,7 +69,7 @@ public:
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill);
 	int pickUpMinion(int inputX, int inputY);
-	int validatePath(int & inputX, int&  inputY);
+	int validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching);
 	int setCursorPath(bool firstTime, int inputX, int inputY);
 	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep);
 	int dropOffMinion();

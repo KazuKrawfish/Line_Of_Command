@@ -251,6 +251,7 @@ public:
 	//GRAPHICS ///////////////////////////
 	sf::Sprite mySprite;
 	sf::Sprite myFogSprite;
+	sf::Sprite * animationSprite = NULL;
 	sf::Texture* myTexture;
 	//AnchorX and Y track the location of the "base" tile ie. neutral.
 	//Only matters if sprite may change (Properties and roads/rivers)

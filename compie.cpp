@@ -660,6 +660,21 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
 
+	int whoIsWatching = -1;		//-1 Is "default" meaning in a standard multiplayer game, nothing is printed during compie turn. It's hidden from view.
+	
+	//If we're in debug mode, give player vision over everything.
+	if (menuPointer->debugMode == true)
+	{
+		whoIsWatching = 0;
+
+	}
+	else
+		//If single player make sure player 1 can see, and print for them.
+		if (boardToUse->isItSinglePlayerGame == true)
+		{
+			whoIsWatching = 1;
+
+		}
 
 	if (selectedMinionRecord->tasking == attackLocalMinion)
 	{
@@ -671,7 +686,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 
 		//moveMinion needs to contain all the status elements too.
-		int moveResult = boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+		int moveResult = boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord, InputLayer, whoIsWatching);
 
 		if (moveResult == 0)
 		{
@@ -694,7 +709,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		}
 
 		//moveMinion needs to contain all the status elements too.
-		int moveResult = boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+		int moveResult = boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord, InputLayer, whoIsWatching);
 
 		//Capture enemy property
 		//The move automatically deselects. Thus reselect.
@@ -714,7 +729,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		boardToUse->cursor.relocate(selectedMinionRecord->potentialMoveTile->locationX, selectedMinionRecord->potentialMoveTile->locationY);
 
 		//moveMinion needs to contain all the status elements too.
-		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord, InputLayer, whoIsWatching);
 
 	}
 
@@ -724,7 +739,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		boardToUse->cursor.relocate(selectedMinionRecord->potentialMoveTile->locationX, selectedMinionRecord->potentialMoveTile->locationY);
 
 		//moveMinion needs to contain all the status elements too.
-		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord, InputLayer, whoIsWatching);
 
 	}
 
@@ -736,29 +751,12 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 	if (boardToUse->cursor.selectMinionFlag == true)
 		boardToUse->deselectMinion();
 
-	//If we're in debug mode, give player vision over everything.
-	if (menuPointer->debugMode == true)
-	{
-		boardToUse->setVisionField(0);
-		boardToUse->checkWindow();
-		InputLayer->printScreen(boardToUse, 0);
-		if (testBed == false)
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	boardToUse->setVisionField(whoIsWatching);
+	boardToUse->checkWindow();
+	InputLayer->printScreen(boardToUse, whoIsWatching);
 
-	}
-	else
-	{
-		//If single player make sure player 1 can see, and print for them.
-		if (boardToUse->isItSinglePlayerGame == true)
-		{
-			boardToUse->setVisionField(1);
-			boardToUse->checkWindow();
-			InputLayer->printScreen(boardToUse, 1);
-			if (testBed == false)
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-		}
-	}
+	if (testBed == false)
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	//Regardless of the tasking, it has now been executed.
 	selectedMinionRecord->taskingStatus = taskingExecuted;

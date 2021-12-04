@@ -28,32 +28,50 @@ class inputLayer
 public:
 
 	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour);
-	int printStatus(MasterBoard* boardToPrint, int observerNumber);
+	
+	//Print Functions:///////////////////////////////////////////////////////
+	//Non-game play
+	int printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint);
+	int printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint);
 	int printWaitingScreen(MasterBoard* boardToPrint);
+	int printMissionBriefing(MasterBoard* boardToInput);
+
+	//Player Options
 	int printMinionMenu(MasterBoard* boardToPrint);
 	int printBoardMenu(MasterBoard* boardToPrint);
 	int	printPropertyMenu(MasterBoard* boardToPrint);
 	int printMenu(MasterBoard* boardToPrint);
 	int printInsertMinion(MasterBoard* boardToPrint);
 	int printInsertTile(MasterBoard* boardToPrint);
-	int printMissionBriefing(MasterBoard* boardToInput);
-	int printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint);
-	int printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint);
+
+	//Print Whole Screen
+	int printStatus(MasterBoard* boardToPrint, int observerNumber);
 	int printLowerScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printUpperScreen(MasterBoard* boardToPrint, int observerNumber);
 	int printScreen(MasterBoard* boardToPrint, int observerNumber);
+	int printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber);
+
+	//Graphics Print
+	int movementGraphics(MasterBoard* boardToPrint, int observerNumber, Minion * minionToMove, int locationX , int locationY);
+	//EnPrint Functions:///////////////////////////////////////////////////////
+
+	//Non-Print Functions:////////////////////////////////////////////////////
+	//Inputs
 	int insertMinionInput(char* Input, MasterBoard* boardToInput);
 	int deleteMinionInput(MasterBoard* boardToInput);
 	int insertTileInput(char* Input, MasterBoard* boardToInput);
 	int gameBoardInput(char* Input, MasterBoard* boardToInput);
 	int menuInput(char* Input, MasterBoard* boardToInput);
-	int restartGame(MasterBoard* boardToInput);
-	int waitingScreenInput( MasterBoard* boardToInput);
+	int waitingScreenInput(MasterBoard* boardToInput);
 	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
 	int minionInput(char* Input, MasterBoard* boardToInput);
-	int printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber);
+
+
+	//Interconnex
+	int restartGame(MasterBoard* boardToInput);
 	int exitToMainMenu(MasterBoard* boardToInput);
 	int NextMission(MasterBoard* boardToInput);
+	//End Non-Print Functions ////////////////////////////////////////////////
 
 	std::string eventText = "";
 
@@ -61,14 +79,14 @@ public:
 	specialKey minionVisibleStatus = showMinions;
 	mainMenu* MainMenu;
 
-	//MenuCrawlerObjects
+	//MenuCrawlerObjects /////////////////////////
 	int menuCursor = 0;
 	std::vector <std::string> menuOptions { "Save game","Main menu","Load save game","End turn","Restart map","Exit menu"	};
 	std::vector <std::string> factoryOptions{ "Infantry\t1000", "Specialist\t3000", "Cavalry\t4000","APC\t5000","Artillery\t6000", "Armor\t7000",
 												"Anti-Aircraft\t8000", "Rocket Artillery\t15000", "Heavy Armor\t16000" };
 	std::vector <std::string> airbaseOptions{ "Transport Copter\t5000", "Attack Copter\t9000", "Interceptor\t15000", "Bomber\t18000"};
 	std::vector <std::string> portOptions{ "Gunboat\t6000", "Cruiser\t14000", "Landing Ship\t12000", "Submarine\t18000", "Battleship\t25000", "Aircraft Carrier\t25000" };
-	//MenuCrawlerObjects
+	//MenuCrawlerObjects /////////////////////////
 
 	//SFML Objects		/////////////////////////
 	sf::Texture* inputLayerTexture;

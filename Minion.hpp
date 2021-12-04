@@ -76,6 +76,7 @@ public:
 	//GRAPHICS ///////////////////////////
 	sf::Sprite mySprite;
 	sf::Texture* myTexture;
+	bool invisible = false;
 	//GRAPHICS ///////////////////////////
 	
 	

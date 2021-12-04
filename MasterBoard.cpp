@@ -1605,7 +1605,8 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 //Return 0 means successfully made it to location
 //Return 1 means we dropped prematurely at this input location.
 //Return 2 means we were blocked AND had to return without dropping at all.
-int MasterBoard::validatePath(int& inputX, int& inputY)
+//ValidatePath also prints its own graphics, indicating the path of movement.
+int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer * graphicsLayer, int whoIsWatching)
 {
 	bool madeItToTheEnd = false;
 	bool hitEnemy = false;
@@ -1635,6 +1636,9 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 
 	while (madeItToTheEnd == false && hitEnemy == false)
 	{
+		//Graphics - show move
+		graphicsLayer->movementGraphics(this, whoIsWatching, selectedMinion, currentX, currentY);
+
 		//If we have reached the cursor, do final evaluation.
 		//If there is a minion here, even though we reached end, we are "trapped", and we need to go back to potential drop.
 		if (cursor.getX() == currentX && cursor.getY() == currentY)
@@ -1647,7 +1651,7 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 		else
 
 			//Keep evaluating spots along the path.
-
+			//Only one spot should have "withinCursorPath && notValidated" so we use ifelse to go to each neighboring square
 			//If a spot is on path AND has no minion. Potential drop, and now move evaluation there.
 			if (currentX > 0 && Board[currentX - 1][currentY].withinCursorPath == true && Board[currentX - 1][currentY].hasBeenValidated == false)
 			{
@@ -1668,6 +1672,8 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 						Board[currentX - 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
 						//We can still proceed, but this is not a new potential drop point.
 						currentX--;
+
+
 					}
 					else
 					{
@@ -1768,8 +1774,9 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 
 
 }
-
-int MasterBoard::moveMinion(int inputX, int inputY)
+//Note re observerNumber: Don't know a better way to "know" who is supposed to watch, since the prints are supposed to be "interrupts"
+//Unfortunately it makes a rather circular input of observerNumber- it depends on input layer/compie functions, then transmits to inputlayer functions.
+int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber)		
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
 
@@ -1813,7 +1820,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 
 	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
 	//validatePath will actually move the minion, so we need to return afterwards.
-	validatePath(inputX, inputY);
+	validatePath(inputX, inputY, InputLayer, observerNumber);
 
 	//If the inputX has not changed, that means we got trapped and have to stand in place. 
 	//Still counts as moving.
