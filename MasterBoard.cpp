@@ -2200,7 +2200,12 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 
 	isAmmoUsed = false;
 	//Decrease defender's health by attack value. Decrease ammo as needed.
-	defendingMinion->health -= calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+	int randomFactor = (rand() % 10) - 5;
+	int damageDealt = randomFactor + calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+	if (damageDealt < 0)
+		damageDealt = 0;
+	defendingMinion->health -= damageDealt;
+		
 	if (isAmmoUsed == true)
 	{
 		if (weaponUsed == 1)
@@ -2224,7 +2229,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 		setVisionField(defendingPlayer);	//Change vision field to account for dead minion.
 	}
 	else	//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
-		if (   (attackingMinion->rangeType == directFire || attackingMinion->rangeType == hybridRange  ) &&	(defendingMinion->rangeType == directFire || defendingMinion->rangeType == hybridRange) && (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
+		if (   (attackingMinion->rangeType == directFire || attackingMinion->rangeType == hybridRange  ) 
+			&&	(defendingMinion->rangeType == directFire || defendingMinion->rangeType == hybridRange) 
+			&& (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
 		{
 			//If defender still alive, then perform defensive counterfire.
 			//Same calculations as above - includes veterancy
@@ -2233,7 +2240,11 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 			//Combat graphics for defender
 			InputLayer->combatGraphics(this, observerNumber,  &Board[inputX][inputY]  , &Board[attackingMinion->locationX][attackingMinion->locationY] );
 
-			attackingMinion->health -= calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+			int randomFactor = (rand() % 10 ) - 5;
+			int damageDealt = randomFactor + calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+			if (damageDealt < 0)
+				damageDealt = 0;
+			attackingMinion->health -= damageDealt;
 
 			if (isAmmoUsed == true)
 			{
