@@ -65,7 +65,7 @@ public:
 	int attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam);
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
 	int endTurn(inputLayer* InputLayer);
-	int upkeep(inputLayer* InputLayer);
+	int upkeep(inputLayer* InputLayer, bool veryFirstUpkeep);
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill);
 	int pickUpMinion(int inputX, int inputY);

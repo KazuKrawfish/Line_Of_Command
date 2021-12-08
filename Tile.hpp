@@ -16,7 +16,7 @@ class Masterboard;
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
 //												        . + ^ M  H m n h Q = ~  - A			P `
-const int MOVE_VALUES_MATRIX[19][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1,
+const int MOVE_VALUES_MATRIX[21][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1,
 												/*s*/   1,1,1,1, 1,1,1,1,1,1,99,1,1,		1, 1,
 												/*a*/	1,2,2,99,1,1,1,1,1,1,99,99,1,		1, 2,
 												/*r*/	1,2,2,99,1,1,1,1,1,1,99,99,1,		1, 2,
@@ -34,7 +34,9 @@ const int MOVE_VALUES_MATRIX[19][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1
 												/*C*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
 												/*G*/	99,99,99,99,99,99,99,99,99,99,1,1,99,1,1,
 												/*U*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
-												/*V*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1 };
+												/*V*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1 ,
+												/*K*/	1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1,
+												/*S*/	1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1 };
 
 
 
@@ -136,6 +138,10 @@ public:
 		case('V'):	//Aircraft carrier
 			x = 18;
 			break;
+		case('K'):	//Bunker
+			x = 19;
+		case('S'):	//SAM
+			x = 20;
 		}
 
 		//   . + ^ M  H m n h Q = ~ - A P

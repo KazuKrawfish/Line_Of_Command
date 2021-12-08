@@ -625,7 +625,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			//Always call upkeep once before play commences.
 			if (veryFirstTurn == true)
 			{		
-				boardToPlay->upkeep(InputLayer);
+				boardToPlay->upkeep(InputLayer, true);	//True means we are not collecting income on this upkeep
 				veryFirstTurn = false;
 			}
 

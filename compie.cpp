@@ -453,8 +453,30 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 
 	//First set the starting point for our search (x).
 	//Then set the upper bounds for our search (maxX).
-	int minX = myCursor->selectMinionPointer->locationX - myCursor->selectMinionPointer->movementRange;
-	int maxX = myCursor->selectMinionPointer->locationX + myCursor->selectMinionPointer->movementRange;
+	int minX = 0;
+	int maxX = 0;
+	int minY = 0;
+	int maxY = 0;
+	
+	if (myCursor->selectMinionPointer->rangeType == directFire) 
+	{
+		minX = myCursor->selectMinionPointer->locationX - myCursor->selectMinionPointer->movementRange;
+		maxX = myCursor->selectMinionPointer->locationX + myCursor->selectMinionPointer->movementRange;
+
+		minY = myCursor->selectMinionPointer->locationY - myCursor->selectMinionPointer->movementRange;
+		maxY = myCursor->selectMinionPointer->locationY + myCursor->selectMinionPointer->movementRange;
+	
+	}
+	if (myCursor->selectMinionPointer->rangeType == rangedFire)
+	{
+		minX = myCursor->selectMinionPointer->locationX - myCursor->selectMinionPointer->attackRange;
+		maxX = myCursor->selectMinionPointer->locationX + myCursor->selectMinionPointer->attackRange;
+
+		minY = myCursor->selectMinionPointer->locationY - myCursor->selectMinionPointer->attackRange;
+		maxY = myCursor->selectMinionPointer->locationY + myCursor->selectMinionPointer->attackRange;
+
+	}
+
 	if (minX < 0)
 	{
 		minX = 0;
@@ -463,9 +485,6 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 	{
 		maxX = boardToUse->BOARD_WIDTH;
 	}
-	//Same with y and maxY.
-	int minY = myCursor->selectMinionPointer->locationY - myCursor->selectMinionPointer->movementRange;
-	int maxY = myCursor->selectMinionPointer->locationY + myCursor->selectMinionPointer->movementRange;
 	if (minY < 0)
 	{
 		minY = 0;
@@ -494,16 +513,16 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 			}
 			//Check each tile if suitable for artillery fire
 			//Must be visible
-			if (selectedMinionRecord->recordedMinion->rangeType == rangedFire	
-				&& boardToUse->Board[x][y].hasMinionOnTop == true 
-				&& boardToUse->Board[x][y].withinVision[myCursor->selectMinionPointer->team]
+			if (selectedMinionRecord->recordedMinion->rangeType == rangedFire)	
+				if ( boardToUse->Board[x][y].hasMinionOnTop == true 
+				&& boardToUse->Board[x][y].withinVision[myCursor->selectMinionPointer->team] == true
 				&& myCursor->selectMinionPointer->team != boardToUse->Board[x][y].minionOnTop->team)
-			{
-				//Must be within range but outside minimum range
-				if( myCursor->selectMinionPointer->minAttackRange < computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y)  
-					&& myCursor->selectMinionPointer->attackRange >= computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y))
-				checkSingleTileForCombatValue(myCursor->selectMinionPointer->locationX, myCursor->selectMinionPointer->locationY, x, y, myCursor, boardToUse, &relativeSuitabilityScore, selectedMinionRecord);
-			}
+				{
+					//Must be within range but outside minimum range
+					if( myCursor->selectMinionPointer->minAttackRange < computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y)  
+						&& myCursor->selectMinionPointer->attackRange >= computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y))
+					checkSingleTileForCombatValue(myCursor->selectMinionPointer->locationX, myCursor->selectMinionPointer->locationY, x, y, myCursor, boardToUse, &relativeSuitabilityScore, selectedMinionRecord);
+				}
 		}
 	}
 
@@ -869,6 +888,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 	int numberOfInfantry = 0;
 	int numberOfCavalry = 0;
 	int numberOfSpecialists = 0;
+	int numberOfRanged = 0;
 
 	//Go through map and find all of our factories for totalFactories
 	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
@@ -913,6 +933,12 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				numberOfSpecialists++;
 				break;
 			}
+			case('r'):
+			case('R'):
+			{
+				numberOfRanged++;
+				break;
+			}
 			}
 		}
 	}
@@ -922,49 +948,106 @@ int compie::determineProduction(MasterBoard* boardToUse)
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
+			//First determine "surplus" treasury, which accounts for at least purchasing an infantry at every possible factory.
+			int availableTreasury = boardToUse->playerRoster[boardToUse->playerFlag].treasury + 1000 - totalFactoriesLeft * 1000;
+
+			//This can be tweaked. 
+			//If game turn is after turn 4, we do not need as many infantry, so we we set availableTreasury to arbitrarily large
+			//Every  factory amount will be "enough"
+			if (menuPointer->gameTurn > 4)
+				availableTreasury += 100000;
+
 			//If the current tile is our factory and there is no one already on top
 			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
-				//First determine "surplus" treasury, which accounts for at least purchasing an infantry at every possible factory.
-				int availableTreasury = boardToUse->playerRoster[boardToUse->playerFlag].treasury + 1000 - totalFactoriesLeft * 1000;
+
 				//If we have a proper proportion of tanks, buy cavalry.
-				if (int(numberOfTanks / 3) > numberOfCavalry && boardToUse->consultMinionCostChart('c', 'h') <= availableTreasury && boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('c', 'h'))
+				if (int(numberOfTanks / 3) > numberOfCavalry 
+					&& boardToUse->consultMinionCostChart('c', 'h') <= availableTreasury 
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('c', 'h'))
 				{
 					//Must be able to actually afford the unit.				
 					boardToUse->attemptPurchaseMinion('c', x, y, boardToUse->playerFlag);
+					numberOfCavalry++;
 					totalFactoriesLeft--;
 
 				}
-				else		//Infantry and specialists have a similar proportion.
-					if (int(numberOfInfantry / 3) > numberOfSpecialists && boardToUse->consultMinionCostChart('s', 'h') <= availableTreasury && boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('s', 'h'))
+				else	//If we have enough cav, buy rocket
+					if (int(numberOfTanks / 2) > numberOfRanged
+						&& boardToUse->consultMinionCostChart('R', 'h') <= availableTreasury
+						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('R', 'h'))
 					{
-						//Must be able to actually afford the unit.
-
-						boardToUse->attemptPurchaseMinion('s', x, y, boardToUse->playerFlag);
+						//Must be able to actually afford the unit.				
+						boardToUse->attemptPurchaseMinion('R', x, y, boardToUse->playerFlag);
+						numberOfCavalry++;
 						totalFactoriesLeft--;
-					}
-					else
-						if (boardToUse->consultMinionCostChart('T', 'h') <= availableTreasury && boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('T', 'h'))
-						{
-							//Must be able to actually afford the unit.
-							boardToUse->attemptPurchaseMinion('T', x, y, boardToUse->playerFlag);
-							totalFactoriesLeft--;
-						}
-						else if (boardToUse->consultMinionCostChart('a', 'h') <= availableTreasury && boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('a', 'h'))
-						{
-							//Must be able to actually afford the unit.
-							boardToUse->attemptPurchaseMinion('a', x, y, boardToUse->playerFlag);
-							totalFactoriesLeft--;
-						}
-						else if (boardToUse->consultMinionCostChart('i', 'h') <= availableTreasury && boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('i', 'h'))
-						{
 
+					}
+					else	//If we can't afford rocket, maybe we can afford arty
+					if (int(numberOfTanks / 2) > numberOfRanged
+						&& boardToUse->consultMinionCostChart('r', 'h') <= availableTreasury
+						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('r', 'h'))
+					{
+						//Must be able to actually afford the unit.				
+						boardToUse->attemptPurchaseMinion('r', x, y, boardToUse->playerFlag);
+						numberOfCavalry++;
+						totalFactoriesLeft--;
+
+					}
+						else		//Infantry and specialists have a similar proportion.
+						if (int(numberOfInfantry / 3) > numberOfSpecialists 
+							&& boardToUse->consultMinionCostChart('s', 'h') <= availableTreasury 
+							&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('s', 'h'))
+						{
 							//Must be able to actually afford the unit.
-							boardToUse->attemptPurchaseMinion('i', x, y, boardToUse->playerFlag);
+
+							boardToUse->attemptPurchaseMinion('s', x, y, boardToUse->playerFlag);
+							numberOfSpecialists++;
 							totalFactoriesLeft--;
 						}
+						else
+							if (boardToUse->consultMinionCostChart('T', 'h') <= availableTreasury 
+								&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('T', 'h'))
+							{
+								//Must be able to actually afford the unit.
+								boardToUse->attemptPurchaseMinion('T', x, y, boardToUse->playerFlag);
+								numberOfTanks++;
+								totalFactoriesLeft--;
+							}
+							else if (boardToUse->consultMinionCostChart('a', 'h') <= availableTreasury 
+								&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('a', 'h'))
+							{
+								//Must be able to actually afford the unit.
+								boardToUse->attemptPurchaseMinion('a', x, y, boardToUse->playerFlag);
+								numberOfTanks++;
+								totalFactoriesLeft--;
+							}
+							else if (boardToUse->consultMinionCostChart('i', 'h') <= availableTreasury 
+								&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('i', 'h'))
+							{
+
+								//Must be able to actually afford the unit.
+								boardToUse->attemptPurchaseMinion('i', x, y, boardToUse->playerFlag);
+								numberOfInfantry++;
+								totalFactoriesLeft--;
+							}
 
 			}
+
+			//Airbase production
+			//If the current tile is our factory and there is no one already on top
+			if (boardToUse->Board[x][y].symbol == 'A' &&
+				boardToUse->Board[x][y].controller == boardToUse->playerFlag &&
+				boardToUse->Board[x][y].hasMinionOnTop == false)
+			{
+				if (boardToUse->consultMinionCostChart('v', 'A') <= availableTreasury 
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('v', 'A'))
+				{
+					//Must be able to actually afford the unit.
+					boardToUse->attemptPurchaseMinion('v', x, y, boardToUse->playerFlag);
+				}
+			}
+
 		}
 
 	}

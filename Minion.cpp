@@ -186,6 +186,36 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxSecAmmo = -1;
 		break;
 	}
+	case('K'):
+	{
+		description = "Artillery Emplacement";
+		movementRange = 0;
+		attackRange = 4;
+		visionRange = 3;
+		rangeType = rangedFire;
+		minAttackRange = 1;
+		specialtyGroup = defense;
+		mySprite.setTextureRect(rectArray[22][inputTeam + 4]);
+		maxFuel = 10;
+		maxPriAmmo = 0;
+		maxSecAmmo = -1;
+		break;
+	}
+	case('S'):
+	{
+		description = "SAM Site";
+		movementRange = 0;
+		attackRange = 5;
+		visionRange = 4;
+		rangeType = rangedFire;
+		minAttackRange = 2;
+		specialtyGroup = defense;
+		mySprite.setTextureRect(rectArray[23][inputTeam + 4]);
+		maxFuel = 10;
+		maxPriAmmo = 0;
+		maxSecAmmo = -1;
+		break;
+	}
 	case('v'):
 	{
 		description = "Attack Copter";
