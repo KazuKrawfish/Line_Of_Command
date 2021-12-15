@@ -9,7 +9,6 @@
 #include "compie.hpp"
 #include <thread>
 
-extern bool testBed;
 
 char playCharInput(sf::RenderWindow* myWindow);
 
@@ -723,7 +722,6 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 
 
 	//Delay after printing;
-	if (testBed == false)
 		std::this_thread::sleep_for(std::chrono::milliseconds(140));
 
 	//Reset invisibilty status for minion selected
@@ -1214,7 +1212,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	else
 	//Ends the turn and passes it to the next player.
 	//Autosave every turn.
-	if (menuCursor == 3 && *Input == 't')
+	if (menuCursor == 0 && *Input == 't')
 	{
 		menuCursor = 0;
 
@@ -1235,7 +1233,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 			MainMenu->menuStatus = waitingForRemotePlayer;
 		}
 
-		status = gameBoard;
+		//status = gameBoard;
 
 	}
 	else
@@ -1247,7 +1245,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	}
 	else
 	//Load a game
-	if (menuCursor == 2 &&  *Input == 't')
+	if (menuCursor == 3 &&  *Input == 't')
 	{	
 		//Load the actual save game
 		std::ifstream loadGameSave;
@@ -1297,7 +1295,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	}
 	else
 	//Prompt user and save game.
-	if (menuCursor == 0 &&  *Input == 't')
+	if (menuCursor == 1 &&  *Input == 't')
 	{
 		int lineOffset = 1;
 		inputLayerWindow->clear();
@@ -1335,7 +1333,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	}
 
 	//Exit to main menu
-	if (menuCursor == 1 &&  *Input == 't')
+	if (menuCursor == 2 &&  *Input == 't')
 	{
 		MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
 		menuCursor = 0;

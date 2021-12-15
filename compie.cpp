@@ -11,7 +11,7 @@
 
 //Below functions are "utilities" that need to find a home.
 
-extern bool testBed;
+
 
 
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
@@ -102,7 +102,7 @@ compie::compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInp
 	InputLayer = providedInputLayer;
 	menuPointer = inputMenu;
 	compiePlayerFlag = inputPlayerFlag;
-	compieMinionRoster.resize(1);
+	compieMinionRoster.resize(GLOBALSUPPLYCAP);
 	return;
 }
 
@@ -111,7 +111,7 @@ int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer
 	InputLayer = providedInputLayer;
 	menuPointer = inputMenu;
 	compiePlayerFlag = inputPlayerFlag;
-	compieMinionRoster.resize(1);
+	compieMinionRoster.resize(GLOBALSUPPLYCAP);
 
 
 	compiePathMap.resize(boardToUse->BOARD_WIDTH + 1);
@@ -272,7 +272,7 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 				//We do care if occupied currently
 				if (boardToUse->Board[x][y].controller == boardToUse->playerFlag 
 					&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[x][y].symbol)  != -1
-					&& boardToUse->Board[x][y].hasMinionOnTop == true)
+					&& boardToUse->Board[x][y].hasMinionOnTop == false)
 				{	//If this is the closest objective so far, set as objective.
 					int rangeBetweenMinionAndTile = boardToUse->cursor.selectMinionPointer->apparentPathMap[x][y].distanceFromMinion;
 						if (rangeBetweenMinionAndTile != -1 && distancefromMinionToObjective > rangeBetweenMinionAndTile)
@@ -428,6 +428,10 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 	if (defenderCounterAttackDamageDealt < 0)
 		defenderCounterAttackDamageDealt = 0;
 
+	//If ranged unit, defender  cannot counterattack.
+	if (myCursor->selectMinionPointer->rangeType == rangedFire)
+		defenderCounterAttackDamageDealt = 0;
+
 	//This is the potential "value added" from combat, based on what we might lose vs gain.
 	double newRelativeSuitabilityScore = ( attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost )  / 100;
 
@@ -439,9 +443,9 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 		selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[defenderX][defenderY]);
 		//No return, we want to check all tiles
 	}
-
+	 
 	return 0;
-
+	  
 
 
 
@@ -458,6 +462,11 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 	int minY = 0;
 	int maxY = 0;
 	
+
+	//Debug
+	if (myCursor->selectMinionPointer->specialtyGroup == defense)
+		std::cout << "My defense" << std::endl;
+
 	if (myCursor->selectMinionPointer->rangeType == directFire) 
 	{
 		minX = myCursor->selectMinionPointer->locationX - myCursor->selectMinionPointer->movementRange;
@@ -609,9 +618,32 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 	}
 	Minion* myMinion = boardToUse->cursor.selectMinionPointer;
 
-	//Before anything else check for air unit fuel status
-	if (myMinion->domain != air || myMinion->currentFuel >= (myMinion->maxFuel / 3)) 
+	//If already repairing, keep repairing
+	//As long as consultCost doesn't return -1, the minion CAN be repaired there
+	if (myMinion->health < 100 &&
+		boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol) != -1)
 	{
+		selectedMinionRecord->tasking = holdPosition;
+		selectedMinionRecord->taskingStatus = immediateExecute;
+		return 1;
+	}
+
+
+	//If highly damaged or Air and low on fuel
+	if (myMinion->health < 50 ||
+		(myMinion->domain == air && myMinion->currentFuel < (myMinion->maxFuel / 3)))
+	{
+		int distance = strategicWithdraw(boardToUse, selectedMinionRecord);
+		if (distance < 999 && distance >= 0)	//Error code is -1
+		{
+			selectedMinionRecord->tasking = withdraw;
+			selectedMinionRecord->taskingStatus = immediateExecute;
+
+			return 1;
+		}
+	}
+	else
+	//Otherwise
 		//If already capturing continue that regardless.
 		if (myMinion->isCapturing == true)
 		{
@@ -632,43 +664,30 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 				selectedMinionRecord->taskingStatus = immediateExecute;
 				return 1;
 			}
-			else //If infantry, attempt to capture local properties.
-				if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
-				{
-					int distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY, selectedMinionRecord);
-					if (distance < 999 && selectedMinionRecord->potentialMoveTile != NULL)
-					{
-						selectedMinionRecord->tasking = captureLocalProperty;
-						selectedMinionRecord->taskingStatus = immediateExecute;
-						return 1;
-					}
-				}
-		}
-	}
-	
-	//If highly damaged or Air and low on fuel
-	if (myMinion->health < 50 ||
-		(myMinion->domain == air && myMinion->currentFuel < (myMinion->maxFuel / 3)	)	) 
-		{
-		int distance = strategicWithdraw(boardToUse, selectedMinionRecord);
-		if (distance < 999 && distance >= 0)	//Error code is -1
-		{
-			selectedMinionRecord->tasking = withdraw;
-			selectedMinionRecord->taskingStatus = immediateExecute;
 
-			return 1;
+			//If infantry, attempt to capture local properties.
+			if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
+			{
+				int distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY, selectedMinionRecord);
+				if (distance < 999 && selectedMinionRecord->potentialMoveTile != NULL)
+				{
+					selectedMinionRecord->tasking = captureLocalProperty;
+					selectedMinionRecord->taskingStatus = immediateExecute;
+					return 1;
+				}
+			}
+				
+			
+			int distance = strategicAdvance(boardToUse, selectedMinionRecord);
+			if (distance < 999 && distance >= 0)	//Error code is -1
+			{
+				selectedMinionRecord->tasking = advance;
+				selectedMinionRecord->taskingStatus = immediateExecute;
+				return 1;
+			}
+			
 		}
-		}
-	else
-		{
-		int distance = strategicAdvance(boardToUse, selectedMinionRecord);
-		if (distance < 999 && distance >= 0)	//Error code is -1
-		{
-			selectedMinionRecord->tasking = advance;
-			selectedMinionRecord->taskingStatus = immediateExecute;
-			return 1;
-		}
-		}
+
 
 	//If we somehow got here, just sit still.
 	selectedMinionRecord->tasking = holdPosition;
@@ -774,8 +793,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 	boardToUse->checkWindow();
 	InputLayer->printScreen(boardToUse, whoIsWatching, false);
 
-	if (testBed == false)
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
 	//Regardless of the tasking, it has now been executed.
 	selectedMinionRecord->taskingStatus = taskingExecuted;
@@ -797,16 +815,16 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 	//Very first move: Artillery fire at targets of opportunity.
 	for (int i = 0; i < compieMinionRoster.size(); i++)
 	{
-		if (compieMinionRoster[i].recordedMinion->rangeType == rangedFire && compieMinionRoster[i].taskingStatus == (awaitingTasking))
+		if (compieMinionRoster[i] != NULL &&  compieMinionRoster[i]->recordedMinion->rangeType == rangedFire && compieMinionRoster[i]->taskingStatus == (awaitingTasking))
 		{
 			//Move cursor, then select minion, then determine tasks
-			boardToUse->cursor.relocate(compieMinionRoster[i].recordedMinion->locationX, compieMinionRoster[i].recordedMinion->locationY);
+			boardToUse->cursor.relocate(compieMinionRoster[i]->recordedMinion->locationX, compieMinionRoster[i]->recordedMinion->locationY);
 			boardToUse->selectMinion(boardToUse->minionRoster[i]->locationX, boardToUse->minionRoster[i]->locationY);
-			determinePotentialMinionTasking(boardToUse, &compieMinionRoster[i]);
+			determinePotentialMinionTasking(boardToUse, compieMinionRoster[i]);
 
-			if (compieMinionRoster[i].tasking == attackLocalMinion)
+			if (compieMinionRoster[i]->tasking == attackLocalMinion)
 			{
-				executeMinionTasks(boardToUse, &compieMinionRoster[i]);
+				executeMinionTasks(boardToUse, compieMinionRoster[i]);
 			}
 		}
 	}
@@ -821,37 +839,39 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 		for (int i = 0; i < compieMinionRoster.size(); i++)
 		{
+			if (compieMinionRoster[i] != NULL)
 
-			//If awaitingTasking, determine tasking.
-			if (compieMinionRoster[i].taskingStatus == (awaitingTasking)) 
 			{
-			//Move cursor, then select minion, then determine tasks
-			boardToUse->cursor.relocate(compieMinionRoster[i].recordedMinion->locationX, compieMinionRoster[i].recordedMinion->locationY);
+				//If awaitingTasking, determine tasking.
+				if (compieMinionRoster[i]->taskingStatus == (awaitingTasking))
+				{
+					//Move cursor, then select minion, then determine tasks
+					boardToUse->cursor.relocate(compieMinionRoster[i]->recordedMinion->locationX, compieMinionRoster[i]->recordedMinion->locationY);
 
-			boardToUse->selectMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+					boardToUse->selectMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
 
-			determinePotentialMinionTasking(boardToUse, &compieMinionRoster[i]);
+					determinePotentialMinionTasking(boardToUse, compieMinionRoster[i]);
+				}
+
+				//If tasking is immediateExecute, do it now.
+				//Should already be selected
+				if (compieMinionRoster[i]->taskingStatus == (immediateExecute))
+				{
+					executeMinionTasks(boardToUse, compieMinionRoster[i]);
+				}
+
+				//If a single minion has not finished its tasking, set to false
+				if (compieMinionRoster[i]->taskingStatus != taskingExecuted)
+				{
+					allMinionsHaveMoved = false;
+				}
+
+				//If we are on Wave 3, execute, regardless of priority.
+				if (waveIterator == 3)
+				{
+					executeMinionTasks(boardToUse, compieMinionRoster[i]);
+				}
 			}
-
-			//If tasking is immediateExecute, do it now.
-			//Should already be selected
-			if (compieMinionRoster[i].taskingStatus == (immediateExecute)) 
-			{
-				executeMinionTasks(boardToUse, & compieMinionRoster[i]);
-			}
-
-			//If a single minion has not finished its tasking, set to false
-			if (compieMinionRoster[i].taskingStatus != taskingExecuted)
-			{
-				allMinionsHaveMoved = false;
-			}
-
-			//If we are on Wave 3, execute, regardless of priority.
-			if (waveIterator == 3) 
-			{
-				executeMinionTasks(boardToUse, &compieMinionRoster[i]);
-			}
-
 		}
 
 
@@ -861,7 +881,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 	//Still need to implement non-immediateExecute taskingStatus
 
-	if (boardToUse->playerRoster[compiePlayerFlag].stillAlive == true)
+	if ( boardToUse->playerRoster[compiePlayerFlag].stillAlive == true)
 	{
 
 		determineProduction(boardToUse);
@@ -889,6 +909,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 	int numberOfCavalry = 0;
 	int numberOfSpecialists = 0;
 	int numberOfRanged = 0;
+	int numberOfBombers = 0;
 
 	//Go through map and find all of our factories for totalFactories
 	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
@@ -937,6 +958,12 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			case('R'):
 			{
 				numberOfRanged++;
+				break;
+			}
+			case('v'):
+			case('b'):
+			{
+				numberOfBombers++;
 				break;
 			}
 			}
@@ -1040,13 +1067,33 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				boardToUse->Board[x][y].controller == boardToUse->playerFlag &&
 				boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
-				if (boardToUse->consultMinionCostChart('v', 'A') <= availableTreasury 
+				if (int(numberOfTanks / 3) > numberOfBombers
+					&& boardToUse->consultMinionCostChart('b', 'A') <= availableTreasury
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('b', 'A'))
+				{
+					//Must be able to actually afford the unit.
+					boardToUse->attemptPurchaseMinion('b', x, y, boardToUse->playerFlag);
+					numberOfBombers++;
+				}
+			}
+
+			if (boardToUse->Board[x][y].symbol == 'A' &&
+				boardToUse->Board[x][y].controller == boardToUse->playerFlag &&
+				boardToUse->Board[x][y].hasMinionOnTop == false)
+			{
+				if (  int(numberOfTanks / 3) > numberOfBombers
+					&& boardToUse->consultMinionCostChart('v', 'A') <= availableTreasury 
 					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('v', 'A'))
 				{
 					//Must be able to actually afford the unit.
 					boardToUse->attemptPurchaseMinion('v', x, y, boardToUse->playerFlag);
+					numberOfBombers++;
 				}
 			}
+
+
+			
+
 
 		}
 
@@ -1056,19 +1103,21 @@ int compie::determineProduction(MasterBoard* boardToUse)
 
 int compie::buildCompieMinionRoster(MasterBoard* boardToUse) 
 {
-	//Since masterBoard has no record to allow it to interact back towards compie, it's easier for compie to just rebuild
+	int numberOfCompieMinions = 0;
+
 	//A new compieMinionRoster every turn, instead of trying to track minion deaths.
-	if (compieMinionRoster.empty() == false)
-	{
-		compieMinionRoster.clear();
-	}
+
+
 	//Go through minion Roster.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
+		compieMinionRoster[i] = NULL;
 		//Must be a valid minion, and compie's minion. 
 		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag)
 		{
-			compieMinionRoster.push_back(compieMinionRecord(boardToUse->minionRoster[i]));
+			numberOfCompieMinions++;
+			compieMinionRoster[i] = new compieMinionRecord(boardToUse->minionRoster[i]);
+
 		}
 	}
 

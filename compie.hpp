@@ -42,7 +42,7 @@ public:
 	int buildCompieMinionRoster(MasterBoard* boardToUse);
 		
 
-	std::vector <compieMinionRecord> compieMinionRoster;
+	std::vector <compieMinionRecord*>  compieMinionRoster;
 	std::vector<std::vector<pathSquare>> compiePathMap;
 	mainMenu* menuPointer = NULL;
 	inputLayer* InputLayer = NULL;

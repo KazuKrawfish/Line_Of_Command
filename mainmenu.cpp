@@ -13,7 +13,7 @@
 class inputLayer;
 class MasterBoard;
 
-extern bool testBed;
+
 
 //Because we're having difficulty getting strings to work, we're leaving this for now.
 //Linenumber indicates offset for input field.
@@ -341,8 +341,6 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	//Clear board in case scenario load was called by player menu later in game.
 	boardToPrint->clearBoard(InputLayer);
 
-	bool isItSaveGame = false;
-
 	std::string ThrowawayString;
 
 	*saveGame >> ThrowawayString;
@@ -622,10 +620,10 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		
 		if (menuStatus == playingMap)
 		{
-			//Always call upkeep once before play commences.
-			if (veryFirstTurn == true)
+			//Only call upkeep before play commences if it is a new game AND very first turn
+			if (veryFirstTurn == true && isItSaveGame == false)
 			{		
-				boardToPlay->upkeep(InputLayer, true);	//True means we are not collecting income on this upkeep
+				boardToPlay->upkeep(InputLayer);	//True means we are not collecting income on this upkeep
 				veryFirstTurn = false;
 			}
 
@@ -651,12 +649,12 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			}
 			else if (InputLayer->status == insertMinion)
 			{
-				InputLayer->insertMinionInput(&Input, boardToPlay);
+				
+				InputLayer->insertTileInput(&Input, boardToPlay);
+			InputLayer->insertMinionInput(&Input, boardToPlay);
 			}
 			else if (InputLayer->status == insertTile)
-			{
-				InputLayer->insertTileInput(&Input, boardToPlay);
-			}
+			{}
 
 			//Computer takes turn if it is his turn to do so.
 			//Note that this doesn't deal with "status".
@@ -669,7 +667,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			//This prints the screen AFTER the latest input has taken effect.
 			//Is this messing with remote play? Not sure.
 			boardToPlay->checkWindow();
-			if (testBed == false)
+
 				InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
 
 		}

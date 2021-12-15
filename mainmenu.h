@@ -28,6 +28,7 @@ public:
 	//mainMenuStatus will indicate what interace the player is interacting with.
 	mainMenuStatus menuStatus = topmenu;
 	bool veryFirstTurn = true;
+	bool isItSaveGame = false;
 	bool debugMode = false;
 	std::string sessionName = "localsession";
 	std::string myPlayerName = "~";

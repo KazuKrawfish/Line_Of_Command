@@ -11,7 +11,7 @@
 #include <cmath>
 
 
-extern bool testBed;
+
 
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2);
 
@@ -436,7 +436,7 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 
 //Return of -1 indicates the minion requested does not exist.
 //New functionality: Input of '~' for propertyType indicates informational-only use of this function,
-//For instance, to determine if a unit even exists.
+//For instance, to determine if a unit even exists, or what its price is.
 int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 {
 	//Can't purchase defenses
@@ -2371,18 +2371,18 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 	//If it is singleplayer we want to remain in map mode.
 	if (isItSinglePlayerGame == false) 
 	{
-		if(testBed == false)
-			InputLayer->status = waitingForNextLocalPlayer;
+		InputLayer->status = waitingForNextLocalPlayer;
 	}
 
-	upkeep(InputLayer, false);	//False since we actually collect income for this upkeep
+	upkeep(InputLayer);	
 
 	return gameTurnIncrement;
 
 }
 
 //Upkeep
-int MasterBoard::upkeep(inputLayer* InputLayer, bool veryFirstUpkeep)
+//Upkeep always collects income. It is only called on the first turn of a new game, or at the end of a turn.
+int MasterBoard::upkeep(inputLayer* InputLayer)
 {
 	//Set vision field for current player
 	setVisionField(playerFlag);
@@ -2396,8 +2396,7 @@ int MasterBoard::upkeep(inputLayer* InputLayer, bool veryFirstUpkeep)
 			if (Board[x][y].controller == playerFlag)
 			{
 				//Provide income
-				if(veryFirstUpkeep == false)
-					playerRoster[playerFlag].treasury += Board[x][y].production;
+				playerRoster[playerFlag].treasury += Board[x][y].production;
 				
 				if (Board[x][y].symbol == 'Q')
 				{
