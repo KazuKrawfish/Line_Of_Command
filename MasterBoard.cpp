@@ -1996,7 +1996,7 @@ int MasterBoard::dropOffMinion()
 	return 0;
 }
 
-std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer)
+std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer, int  observerNumber)
 {
 	int previousOwner = inputTile->controller;
 
@@ -2011,6 +2011,9 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 	int pointsToTake = int(std::round(inputMinion->health / 10));
 	inputTile->capturePoints -= pointsToTake;
 	inputMinion->isCapturing = true;
+
+	InputLayer->captureGraphics(this, observerNumber, inputMinion, inputMinion->locationX, inputMinion->locationY);
+
 
 	if (inputTile->capturePoints <= 0)
 	{
@@ -2036,6 +2039,7 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 		inputTile->myFogSprite.setTextureRect(rectArray[inputTile->textureRectAnchorX + inputTile->controller][inputTile->textureRectAnchorY + 1]);
 
 	}
+
 
 	inputMinion->status = hasfired;
 

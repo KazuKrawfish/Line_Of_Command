@@ -810,6 +810,48 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 	return 0;
 }
 
+int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToCapture, int locationX, int locationY)
+{
+
+	//Should be checking for bad locX but will add later
+
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (minionToCapture == NULL )
+	{
+		std::cout << "Could not animate capture, the tile was NULL" << std::endl;
+		return -1;
+	}
+
+	//If within vision, we will watch capture occur
+	if (boardToPrint->Board[locationX][locationY].withinVision[observerNumber] == true)
+	{
+		//Cap rep'd by three flashes of that minion
+
+		for (int i = 0; i < 5; i++) 
+		{
+
+		//Temporarily make minion invisible, so it disappears from its starting point.
+		minionToCapture->invisible = !(minionToCapture->invisible);
+
+		//Use usual print method
+		bool withinAnimation = true;
+		printScreen(boardToPrint, observerNumber, withinAnimation);
+
+		//Delay after printing;
+		std::this_thread::sleep_for(std::chrono::milliseconds(120));
+
+
+		}
+	}
+
+
+	minionToCapture->invisible = false;
+
+}
+
 int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation)
 {
 	if (status != waitingForNextLocalPlayer) 
@@ -1118,7 +1160,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 		if (tileToCheck->checkForProperty(tileToCheck->symbol) && tileToCheck->controller != boardToInput->playerFlag)
 		{
 			
-			eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer, this);
+			eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer, this, boardToInput->playerFlag);
 			boardToInput->deselectMinion();
 			status = gameBoard;
 		}

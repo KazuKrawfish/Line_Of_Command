@@ -80,7 +80,7 @@ public:
 	int consultMinionCostChart(char minionType, char propertyType);
 	int playerDefeat(int playerNumber, int winningPlayer, inputLayer* InputLayer);
 
-	std::string captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer);
+	std::string captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer,  int  observerNumber);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	Cursor cursor;
 

@@ -754,7 +754,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		if (moveResult == 0) 
 		{
 			boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
-			(void) boardToUse->captureProperty(selectedMinionRecord->objectiveTile, boardToUse->cursor.selectMinionPointer, InputLayer);
+			(void) boardToUse->captureProperty(selectedMinionRecord->objectiveTile, boardToUse->cursor.selectMinionPointer, InputLayer, whoIsWatching);
 
 		}
 
