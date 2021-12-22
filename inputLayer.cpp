@@ -814,6 +814,7 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 {
 
 	//Should be checking for bad locX but will add later
+	tile* myTile = & boardToPrint->Board[locationX][locationY];
 
 	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
 	if (observerNumber == -1)
@@ -826,25 +827,35 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 	}
 
 	//If within vision, we will watch capture occur
-	if (boardToPrint->Board[locationX][locationY].withinVision[observerNumber] == true)
+	if (myTile->withinVision[observerNumber] == true)
 	{
-		//Cap rep'd by three flashes of that minion
+		//Create new sprite for animation
+		myTile->animationSprite = new sf::Sprite;
 
-		for (int i = 0; i < 5; i++) 
+		//Set texture
+		myTile->animationSprite->setTexture(*inputLayerTexture);
+
+
+		for (int i = 0; i < 2; i++) 
 		{
-
-		//Temporarily make minion invisible, so it disappears from its starting point.
-		minionToCapture->invisible = !(minionToCapture->invisible);
-
-		//Use usual print method
 		bool withinAnimation = true;
+		myTile->animationSprite->setTextureRect(rectArray[5][14]);
 		printScreen(boardToPrint, observerNumber, withinAnimation);
+		std::this_thread::sleep_for(std::chrono::milliseconds(180));
 
-		//Delay after printing;
-		std::this_thread::sleep_for(std::chrono::milliseconds(120));
-
+		myTile->animationSprite->setTextureRect(rectArray[5+ minionToCapture->team][14]);
+		printScreen(boardToPrint, observerNumber, withinAnimation);
+		std::this_thread::sleep_for(std::chrono::milliseconds(180));
 
 		}
+
+		//Clean up afterwards if necessary
+		if (myTile->animationSprite != NULL)
+		{
+			delete myTile->animationSprite;
+			myTile->animationSprite = NULL;
+		}
+
 	}
 
 

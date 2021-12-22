@@ -2241,9 +2241,6 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 			//Same calculations as above - includes veterancy
 			isAmmoUsed = false;
 
-			//Combat graphics for defender
-			InputLayer->combatGraphics(this, observerNumber,  &Board[inputX][inputY]  , &Board[attackingMinion->locationX][attackingMinion->locationY] );
-
 			int randomFactor = (rand() % 10 ) - 5;
 			int damageDealt = randomFactor + calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
 			if (damageDealt < 0)
@@ -2258,6 +2255,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 					attackingMinion->currentSecAmmo--;
 			}
 
+			//Combat graphics for defender
+			if(damageDealt > 0)
+				InputLayer->combatGraphics(this, observerNumber, &Board[inputX][inputY], &Board[attackingMinion->locationX][attackingMinion->locationY]);
 
 		}
 

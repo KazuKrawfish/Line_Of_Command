@@ -649,12 +649,12 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			}
 			else if (InputLayer->status == insertMinion)
 			{
-				
-				InputLayer->insertTileInput(&Input, boardToPlay);
-			InputLayer->insertMinionInput(&Input, boardToPlay);
+				InputLayer->insertMinionInput(&Input, boardToPlay);
 			}
 			else if (InputLayer->status == insertTile)
-			{}
+			{
+				InputLayer->insertTileInput(&Input, boardToPlay);
+			}
 
 			//Computer takes turn if it is his turn to do so.
 			//Note that this doesn't deal with "status".
