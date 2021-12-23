@@ -805,6 +805,25 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 int compie::takeMyTurn(MasterBoard* boardToUse)
 {
+	int whoIsWatching = -1;		//-1 Is "default" meaning in a standard multiplayer game, nothing is printed during compie turn. It's hidden from view.
+
+	//If we're in debug mode, give player vision over everything.
+	if (menuPointer->debugMode == true)
+	{
+		whoIsWatching = 0;
+
+	}
+	else
+		//If single player make sure player 1 can see, and print for them.
+		if (boardToUse->isItSinglePlayerGame == true)
+		{
+			whoIsWatching = 1;
+
+		}
+	
+	boardToUse->upkeep(InputLayer, whoIsWatching);
+
+
 
 	bool allMinionsHaveMoved = false;
 	int waveIterator = 0;

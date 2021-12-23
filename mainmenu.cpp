@@ -623,7 +623,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			//Only call upkeep before play commences if it is a new game AND very first turn
 			if (veryFirstTurn == true && isItSaveGame == false)
 			{		
-				boardToPlay->upkeep(InputLayer);	//True means we are not collecting income on this upkeep
+				boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);	//True means we are not collecting income on this upkeep
 				veryFirstTurn = false;
 			}
 
@@ -668,7 +668,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			//Is this messing with remote play? Not sure.
 			boardToPlay->checkWindow();
 
-				InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
+			InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
 
 		}
 	}

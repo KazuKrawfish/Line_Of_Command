@@ -858,8 +858,55 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 
 	}
 
+}
 
-	minionToCapture->invisible = false;
+int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToSupply, int locationX, int locationY) 
+{
+	//Should be checking for bad locX but will add later
+	tile* myTile = &boardToPrint->Board[locationX][locationY];
+
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (minionToSupply == NULL)
+	{
+		std::cout << "Could not animate capture, the tile was NULL" << std::endl;
+		return -1;
+	}
+
+	//If within vision, we will watch capture occur
+	if (myTile->withinVision[observerNumber] == true)
+	{
+		//Create new sprite for animation
+		myTile->animationSprite = new sf::Sprite;
+
+		//Set texture
+		myTile->animationSprite->setTexture(*inputLayerTexture);
+
+		myTile->animationSprite->setTextureRect(rectArray[5][14]);
+
+		for (int i = 0; i < 3; i++)
+		{
+			bool withinAnimation = true;
+			myTile->animationSprite->setTextureRect(rectArray[6][13]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+			std::this_thread::sleep_for(std::chrono::milliseconds(180));
+
+			myTile->animationSprite->setTextureRect(rectArray[5][13]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+			std::this_thread::sleep_for(std::chrono::milliseconds(180));
+
+		}
+
+		//Clean up afterwards if necessary
+		if (myTile->animationSprite != NULL)
+		{
+			delete myTile->animationSprite;
+			myTile->animationSprite = NULL;
+		}
+
+	}
 
 }
 
@@ -885,6 +932,24 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 {
 	//Only lasts one input.
 	status = gameBoard;
+
+	if (MainMenu->debugMode == true)	//If debug, see from 0's perspective.
+	{
+		boardToInput->upkeep(this, 0);
+	}
+	else  if (boardToInput->isItSinglePlayerGame == true)	//If it's single player, then we see from player 1's perspective. 
+	{
+		boardToInput->upkeep(this, 1);
+	}
+	else if (boardToInput->isItSinglePlayerGame == false && boardToInput->playerRoster[boardToInput->playerFlag].playerType == computerPlayer)	//If compie during multiplayer, no sight
+	{
+		boardToInput->upkeep(this, -1);
+	}
+	else
+	{
+		boardToInput->upkeep(this, boardToInput->playerFlag);
+	}
+	//Do upkeep here for all players
 
 	return 0;
 }
@@ -1117,7 +1182,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 		&& boardToInput->cursor.getY() == boardToInput->cursor.selectMinionPointer->locationY)
 	{
 		//May not be successful, so not necessarily return 0
-		if (boardToInput->individualResupply(boardToInput->cursor.selectMinionPointer, false) == 0)
+		if (boardToInput->individualResupply(boardToInput->cursor.selectMinionPointer, false, this, boardToInput->playerFlag) == 0)
 			status = gameBoard;
 	}
 

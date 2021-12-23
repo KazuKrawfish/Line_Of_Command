@@ -9,9 +9,7 @@
 #include "inputLayer.hpp"
 #include "compie.hpp"
 #include <cmath>
-
-
-
+#include "mainmenu.h"
 
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2);
 
@@ -30,7 +28,7 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 	}
 }
 
-int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
+int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber)
 {
 
 	int x = SupplyUnit->locationX;
@@ -43,27 +41,51 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
 	//Check each surrounding tile for a ground or sea unit and resupply them.
 	if (x < BOARD_WIDTH - 1 && Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team == playerFlag && Board[x + 1][y].minionOnTop->domain != air)
 	{
-		Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
-		Board[x + 1][y].minionOnTop->currentPriAmmo = Board[x + 1][y].minionOnTop->maxPriAmmo;
-		Board[x + 1][y].minionOnTop->currentSecAmmo = Board[x + 1][y].minionOnTop->maxSecAmmo;
+		if (Board[x + 1][y].minionOnTop->currentFuel != Board[x + 1][y].minionOnTop->maxFuel ||
+			Board[x + 1][y].minionOnTop->currentPriAmmo != Board[x + 1][y].minionOnTop->maxPriAmmo ||
+			Board[x + 1][y].minionOnTop->currentSecAmmo != Board[x + 1][y].minionOnTop->maxSecAmmo)
+		{
+			Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
+			Board[x + 1][y].minionOnTop->currentPriAmmo = Board[x + 1][y].minionOnTop->maxPriAmmo;
+			Board[x + 1][y].minionOnTop->currentSecAmmo = Board[x + 1][y].minionOnTop->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, Board[x + 1][y].minionOnTop, Board[x + 1][y].minionOnTop->locationX, Board[x + 1][y].minionOnTop->locationY);
+		}
 	}
 	if (x > 0 && Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team == playerFlag && Board[x - 1][y].minionOnTop->domain != air)
 	{
-		Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
-		Board[x - 1][y].minionOnTop->currentPriAmmo = Board[x - 1][y].minionOnTop->maxPriAmmo;
-		Board[x - 1][y].minionOnTop->currentSecAmmo = Board[x - 1][y].minionOnTop->maxSecAmmo;
+		if (Board[x - 1][y].minionOnTop->currentFuel != Board[x - 1][y].minionOnTop->maxFuel ||
+			Board[x - 1][y].minionOnTop->currentPriAmmo != Board[x - 1][y].minionOnTop->maxPriAmmo ||
+			Board[x - 1][y].minionOnTop->currentSecAmmo != Board[x - 1][y].minionOnTop->maxSecAmmo)
+		{
+			Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
+			Board[x - 1][y].minionOnTop->currentPriAmmo = Board[x - 1][y].minionOnTop->maxPriAmmo;
+			Board[x - 1][y].minionOnTop->currentSecAmmo = Board[x - 1][y].minionOnTop->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, Board[x - 1][y].minionOnTop, Board[x - 1][y].minionOnTop->locationX, Board[x - 1][y].minionOnTop->locationY);
+		}
 	}
 	if (y < BOARD_HEIGHT - 1 && Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->team == playerFlag && Board[x][y + 1].minionOnTop->domain != air)
 	{
-		Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
-		Board[x][y + 1].minionOnTop->currentPriAmmo = Board[x][y + 1].minionOnTop->maxPriAmmo;
-		Board[x][y + 1].minionOnTop->currentSecAmmo = Board[x][y + 1].minionOnTop->maxSecAmmo;
+		if (Board[x ][y +1].minionOnTop->currentFuel != Board[x ][y+ 1].minionOnTop->maxFuel ||
+			Board[x ][y +1].minionOnTop->currentPriAmmo != Board[x ][y + 1].minionOnTop->maxPriAmmo ||
+			Board[x ][y +1].minionOnTop->currentSecAmmo != Board[x ][y + 1].minionOnTop->maxSecAmmo) 
+		{
+			Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
+			Board[x][y + 1].minionOnTop->currentPriAmmo = Board[x][y + 1].minionOnTop->maxPriAmmo;
+			Board[x][y + 1].minionOnTop->currentSecAmmo = Board[x][y + 1].minionOnTop->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, Board[x][y + 1].minionOnTop, Board[x][y + 1].minionOnTop->locationX, Board[x][y + 1].minionOnTop->locationY);
+		}
 	}
 	if (y > 0 && Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->team == playerFlag && Board[x][y - 1].minionOnTop->domain != air)
 	{
-		Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
-		Board[x][y - 1].minionOnTop->currentPriAmmo = Board[x][y - 1].minionOnTop->maxPriAmmo;
-		Board[x][y - 1].minionOnTop->currentSecAmmo = Board[x][y - 1].minionOnTop->maxSecAmmo;
+		if (Board[x][y - 1].minionOnTop->currentFuel != Board[x][y - 1].minionOnTop->maxFuel ||
+			Board[x][y - 1].minionOnTop->currentPriAmmo != Board[x][y - 1].minionOnTop->maxPriAmmo ||
+			Board[x][y - 1].minionOnTop->currentSecAmmo != Board[x][y - 1].minionOnTop->maxSecAmmo) 
+		{
+			Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
+			Board[x][y - 1].minionOnTop->currentPriAmmo = Board[x][y - 1].minionOnTop->maxPriAmmo;
+			Board[x][y - 1].minionOnTop->currentSecAmmo = Board[x][y - 1].minionOnTop->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, Board[x][y - 1].minionOnTop, Board[x][y - 1].minionOnTop->locationX, Board[x][y - 1].minionOnTop->locationY);
+		}
 	}
 
 	if (isItDuringUpkeep == false)
@@ -434,7 +456,7 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 }
 
 
-//Return of -1 indicates the minion requested does not exist.
+//Return of -1 indicates the minion requested does not exist, or it can't be bought there.
 //New functionality: Input of '~' for propertyType indicates informational-only use of this function,
 //For instance, to determine if a unit even exists, or what its price is.
 int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
@@ -2122,6 +2144,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 	//Then increment turn if appropriate (Died during player turn, game is not over yet.)
 	if (losingPlayer == playerFlag && gameOver == false)
 	{
+		//Observer will be next player
 		endTurn(InputLayer);
 	}
 
@@ -2373,12 +2396,13 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 
 	//Shouldn't matter if local or not as long as it's not singleplayer
 	//If it is singleplayer we want to remain in map mode.
-	if (isItSinglePlayerGame == false) 
+	if (isItSinglePlayerGame == false)
 	{
 		InputLayer->status = waitingForNextLocalPlayer;
 	}
 
-	upkeep(InputLayer);	
+
+	
 
 	return gameTurnIncrement;
 
@@ -2386,7 +2410,7 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 
 //Upkeep
 //Upkeep always collects income. It is only called on the first turn of a new game, or at the end of a turn.
-int MasterBoard::upkeep(inputLayer* InputLayer)
+int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 {
 	//Set vision field for current player
 	setVisionField(playerFlag);
@@ -2413,7 +2437,7 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 
 	repairMinions();
 
-	resupplyMinions();
+	resupplyMinions(InputLayer, observerNumber);
 
 
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -2500,7 +2524,7 @@ int MasterBoard::repairMinions()
 	return 0;
 }
 
-int MasterBoard::resupplyMinions()
+int MasterBoard::resupplyMinions(inputLayer* InputLayer, int observerNumber)
 {
 
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -2512,14 +2536,22 @@ int MasterBoard::resupplyMinions()
 			//If it is on a player controlled tile, and that tile is a "repairing/resupplying" tile for the given unit.
 			if (tileToExamine->controller == playerFlag && consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) != -1)
 			{
+				//Check to see if resupply is even necessary
+				if(minionRoster[i]->currentFuel != minionRoster[i]->maxFuel	
+					|| minionRoster[i]->currentPriAmmo != minionRoster[i]->maxPriAmmo 
+					|| minionRoster[i]->currentSecAmmo != minionRoster[i]->maxSecAmmo)
+				{ 
 				minionRoster[i]->currentFuel = minionRoster[i]->maxFuel;
 				minionRoster[i]->currentPriAmmo = minionRoster[i]->maxPriAmmo;
 				minionRoster[i]->currentSecAmmo = minionRoster[i]->maxSecAmmo;
+				cursor.relocate(minionRoster[i]->locationX, minionRoster[i]->locationY);
+				InputLayer->supplyGraphics(this, observerNumber, minionRoster[i], minionRoster[i]->locationX, minionRoster[i]->locationY);
+				}
 			}
 
 			if (minionRoster[i]->type == 'P')
 			{
-				individualResupply(minionRoster[i], true);
+				individualResupply(minionRoster[i], true, InputLayer, observerNumber);
 			}
 
 		}
