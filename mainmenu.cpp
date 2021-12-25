@@ -237,6 +237,11 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << "Game_turn_below:" << std::endl;
 	saveGame << gameTurn << std::endl;
 	
+	//Then save fog of war status.
+	saveGame << "Fog_Of_War:" << std::endl;
+	saveGame << boardToPrint->fogOfWar << std::endl;
+
+
 	//Then save the map size:
 	saveGame << "Map_width_below:" << std::endl;
 	saveGame << boardToPrint->BOARD_WIDTH << std::endl;
@@ -413,6 +418,9 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	*saveGame >> ThrowawayString;
 	*saveGame >> gameTurn;
 
+	//Then load fog of war status - in "new" game this should be overriden by player choice.
+	*saveGame >> ThrowawayString;
+	*saveGame >> boardToPrint->fogOfWar;
 
 	//If this is a new game, clear the treasury.
 	//(If going from a game in middle of play, to new game).

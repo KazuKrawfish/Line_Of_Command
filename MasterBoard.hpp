@@ -102,6 +102,7 @@ public:
 
 
 	//MissionInfo///////////////////////////////
+	bool fogOfWar = false;
 	bool missionFlag= false;
 	std::string campaignName = "_";
 	std::string scenarioOrMissionName = "_";

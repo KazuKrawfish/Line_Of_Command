@@ -236,12 +236,24 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 			//Currently prevents compie from getting trapped on strat. move.
 			if (boardToUse->Board[x][y].hasMinionOnTop == false && boardToUse->Board[x][y].withinRange == true)
 			{
-				//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
-				int rangeBetweenTileAndObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion;
-				if (rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
+					//If the minion is ranged, all adjacent tiles must be free from enemies.
+					//Either we are on the board's edge, or the adjacent tile has a friendly minion, or no minion
+				if (selectedMinionRecord->recordedMinion->rangeType != rangedFire || 
+					(
+					( x < 1 || (  boardToUse->Board[x-1][y].hasMinionOnTop == false || boardToUse->Board[x - 1][y].minionOnTop->team == compiePlayerFlag) )
+					&& (y < 1 || (boardToUse->Board[x ] [y-1].hasMinionOnTop == false || boardToUse->Board[x][y-1].minionOnTop->team == compiePlayerFlag) )
+					&& (x == boardToUse->BOARD_WIDTH - 1 || (boardToUse->Board[x + 1][y].hasMinionOnTop == false || boardToUse->Board[x+ 1][y].minionOnTop->team == compiePlayerFlag) )
+					&& (y == boardToUse->BOARD_HEIGHT -1 || (boardToUse->Board[x][y + 1].hasMinionOnTop == false || boardToUse->Board[x][y + 1].minionOnTop->team == compiePlayerFlag))
+					) 
+					)
 				{
-					selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
-					bestDistanceTileToObjective = rangeBetweenTileAndObjective;
+					//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
+					int rangeBetweenTileAndObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion;
+					if (rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
+					{
+						selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
+						bestDistanceTileToObjective = rangeBetweenTileAndObjective;
+					}
 				}
 			}
 		}
@@ -273,13 +285,16 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 				if (boardToUse->Board[x][y].controller == boardToUse->playerFlag 
 					&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[x][y].symbol)  != -1
 					&& boardToUse->Board[x][y].hasMinionOnTop == false)
-				{	//If this is the closest objective so far, set as objective.
-					int rangeBetweenMinionAndTile = boardToUse->cursor.selectMinionPointer->apparentPathMap[x][y].distanceFromMinion;
+				{	//Need to make sure not factory = this is jamming up production
+					if (boardToUse->Board[x][y].symbol != 'h') {
+						//If this is the closest objective so far, set as objective.
+						int rangeBetweenMinionAndTile = boardToUse->cursor.selectMinionPointer->apparentPathMap[x][y].distanceFromMinion;
 						if (rangeBetweenMinionAndTile != -1 && distancefromMinionToObjective > rangeBetweenMinionAndTile)
 						{
 							selectedMinionRecord->objectiveTile = &boardToUse->Board[x][y];
 							distancefromMinionToObjective = rangeBetweenMinionAndTile;
 						}
+					}
 				}
 			
 		}
@@ -347,7 +362,7 @@ int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selec
 			{
 				//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
 				int rangeBetweenTileAndObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion;
-				if (rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
+				if (rangeBetweenTileAndObjective >= 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
 				{
 					selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
 					bestDistanceTileToObjective = rangeBetweenTileAndObjective;
@@ -429,7 +444,8 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 		defenderCounterAttackDamageDealt = 0;
 
 	//If ranged unit, defender  cannot counterattack.
-	if (myCursor->selectMinionPointer->rangeType == rangedFire)
+	//If defender is ranged unit, also cannot counterattack
+	if (myCursor->selectMinionPointer->rangeType == rangedFire || boardToUse->Board[defenderX][defenderY].minionOnTop->rangeType == rangedFire)
 		defenderCounterAttackDamageDealt = 0;
 
 	//This is the potential "value added" from combat, based on what we might lose vs gain.
@@ -620,18 +636,20 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 
 	//If already repairing, keep repairing
 	//As long as consultCost doesn't return -1, the minion CAN be repaired there
-	if (myMinion->health < 100 &&
-		boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol) != -1)
+	//We may still attack guys next to us
+	if (myMinion->health < 100 
+		&& boardToUse->Board[myMinion->locationX][myMinion->locationY].controller == compiePlayerFlag
+		&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol) != -1)
 	{
 		selectedMinionRecord->tasking = holdPosition;
 		selectedMinionRecord->taskingStatus = immediateExecute;
-		return 1;
-	}
 
+	}
+	else
 
 	//If highly damaged or Air and low on fuel
 	if (myMinion->health < 50 ||
-		(myMinion->domain == air && myMinion->currentFuel < (myMinion->maxFuel / 3)))
+		(myMinion->domain == air && (  myMinion->currentFuel < (myMinion->maxFuel / 3)  || myMinion->currentPriAmmo == 0 || myMinion->currentSecAmmo == 0)))   
 	{
 		int distance = strategicWithdraw(boardToUse, selectedMinionRecord);
 		if (distance < 999 && distance >= 0)	//Error code is -1
@@ -689,9 +707,27 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 		}
 
 
-	//If we somehow got here, just sit still.
-	selectedMinionRecord->tasking = holdPosition;
-	selectedMinionRecord->taskingStatus = immediateExecute;
+
+	
+	
+	//Check adjacent tiles if we want to attack them, even if we stood still.
+	double suitabilityScore = 0;
+
+	checkAdjacentTilesForBestValuedEnemy(selectedMinionRecord->recordedMinion->locationX, selectedMinionRecord->recordedMinion->locationY,
+		&boardToUse->cursor, boardToUse, &suitabilityScore, selectedMinionRecord);
+	
+	if (selectedMinionRecord->potentialAttackTile != NULL)
+	{
+		selectedMinionRecord->tasking = attackLocalMinion;
+		selectedMinionRecord->taskingStatus = immediateExecute;
+	}
+	else 
+	{
+		//If we somehow got here, just sit still.
+		selectedMinionRecord->tasking = holdPosition;
+		selectedMinionRecord->taskingStatus = immediateExecute;
+	}
+	
 	return 0;
 }
 
@@ -845,6 +881,11 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 			{
 				executeMinionTasks(boardToUse, compieMinionRoster[i]);
 			}
+			else //If we couldn't find someone to shoot, reset to awaiting tasking, and move on.
+			{
+				compieMinionRoster[i]->taskingStatus = awaitingTasking;
+				compieMinionRoster[i]->potentialMoveTile = NULL;
+			}
 		}
 	}
 
@@ -861,14 +902,15 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 			if (compieMinionRoster[i] != NULL)
 
 			{
+				//Move cursor, then select minion
+				boardToUse->cursor.relocate(compieMinionRoster[i]->recordedMinion->locationX, compieMinionRoster[i]->recordedMinion->locationY);
+
+				boardToUse->selectMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
+
+
 				//If awaitingTasking, determine tasking.
 				if (compieMinionRoster[i]->taskingStatus == (awaitingTasking))
 				{
-					//Move cursor, then select minion, then determine tasks
-					boardToUse->cursor.relocate(compieMinionRoster[i]->recordedMinion->locationX, compieMinionRoster[i]->recordedMinion->locationY);
-
-					boardToUse->selectMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord);
-
 					determinePotentialMinionTasking(boardToUse, compieMinionRoster[i]);
 				}
 

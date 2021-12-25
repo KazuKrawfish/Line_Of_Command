@@ -1361,7 +1361,7 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 int MasterBoard::setVisionField(int observerNumber)
 {
 	//If observer is "neutral", they can see the whole map.
-	if (observerNumber == 0)
+	if (observerNumber == 0  || fogOfWar == false)
 	{
 		for (int x = 0; x < BOARD_WIDTH; x++)
 		{
