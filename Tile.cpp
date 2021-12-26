@@ -9,37 +9,61 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 	bool leftNeigh = false;
 	bool rightNeigh = false;
 
+	tile* thisTile =  & boardToSet->Board[locationX][locationY];
+
 	//Check each neighbor to see if they are same type
 	//If they are, note it, and call determineRiverRoadType on that tile.
 	if (locationY + 1 >= boardToSet->BOARD_HEIGHT
-		|| (boardToSet->Board[locationX][locationY + 1].symbol == symbol))
-	{
+		|| (boardToSet->Board[locationX][locationY + 1].symbol == symbol) 
+		)
+	{ 
 		downNeigh = true;
 		if(locationY + 1 < boardToSet->BOARD_HEIGHT && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY + 1].determineRiverRoadType(false, boardToSet);
 	}
+	if( locationY < boardToSet->BOARD_HEIGHT - 1   && (boardToSet->Board[locationX][locationY + 1].symbol == '~' && thisTile->symbol == '-')) 
+	{
+		downNeigh = true;
+	}
+
 	if (locationY <= 0
-		|| (boardToSet->Board[locationX][locationY - 1].symbol == symbol))
+		|| (boardToSet->Board[locationX][locationY - 1].symbol == symbol)
+		)
 	{
 		upNeigh = true;
 		if (locationY > 0 && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY - 1].determineRiverRoadType( false, boardToSet);
 	}
+	if (locationY > 0 && (boardToSet->Board[locationX][locationY - 1].symbol == '~' && thisTile->symbol == '-'))
+	{
+		upNeigh = true;
+	}
+
 	if (locationX <= 0
-		|| (boardToSet->Board[locationX - 1][locationY].symbol == symbol))
+		|| (boardToSet->Board[locationX - 1][locationY].symbol == symbol)
+		)
 	{
 		leftNeigh = true;
 		if (locationX > 0 && thisTileChanged == true)
 			boardToSet->Board[locationX - 1][locationY].determineRiverRoadType( false, boardToSet);
 	}
+	if (locationX > 0 && (boardToSet->Board[locationX - 1][locationY].symbol == '~' && thisTile->symbol == '-'))
+	{
+		leftNeigh = true;
+	}
+
 	if (locationX + 1 >= boardToSet->BOARD_WIDTH
-		|| (boardToSet->Board[locationX + 1][locationY].symbol == symbol))
+		|| (boardToSet->Board[locationX + 1][locationY].symbol == symbol)
+		)
 	{
 		rightNeigh = true;
 		if (locationX + 1 < boardToSet->BOARD_WIDTH && thisTileChanged == true)
 			boardToSet->Board[locationX + 1][locationY].determineRiverRoadType(false , boardToSet);
 	}
-
+	if (locationX < boardToSet->BOARD_WIDTH - 1 && (boardToSet->Board[locationX + 1][locationY].symbol == '~' && thisTile->symbol == '-'))
+	{
+		rightNeigh = true;
+	}
 
 	//Change sprite rect based on selections above
 	//Default is up-down

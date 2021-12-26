@@ -49,6 +49,11 @@ int compie::analyzeMap(MasterBoard* boardToUse)
 //Assumes minion is selected since we're going to check for withinRange.
 int compie::defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
+
+	//For now artillery doesn't do this
+	if (selectedMinionRecord->recordedMinion->rangeType == rangedFire)
+		return 0;
+
 	Cursor* myCursor = &boardToUse->cursor;
 
 	//If headquarters under attack by enemy
@@ -63,6 +68,7 @@ int compie::defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* sele
 			selectedMinionRecord->potentialAttackTile = &  boardToUse->Board[headquartersX][headquartersY];
 			selectedMinionRecord->tasking = defendHQ;
 			selectedMinionRecord->taskingStatus = immediateExecute;
+			return 1;
 		}
 		else if (headquartersX < boardToUse->BOARD_WIDTH - 1 && boardToUse->Board[headquartersX + 1][headquartersY].withinRange == true &&
 			(boardToUse->Board[headquartersX + 1][headquartersY].hasMinionOnTop != true ||
@@ -72,6 +78,7 @@ int compie::defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* sele
 			selectedMinionRecord->potentialAttackTile = &boardToUse->Board[headquartersX][headquartersY];
 			selectedMinionRecord->tasking = defendHQ;
 			selectedMinionRecord->taskingStatus = immediateExecute;
+			return 1;
 		}
 		else if (headquartersY > 0 && boardToUse->Board[headquartersX][headquartersY - 1].withinRange == true &&
 			(boardToUse->Board[headquartersX][headquartersY - 1].hasMinionOnTop != true ||
@@ -81,6 +88,7 @@ int compie::defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* sele
 			selectedMinionRecord->potentialAttackTile = &boardToUse->Board[headquartersX][headquartersY];
 			selectedMinionRecord->tasking = defendHQ;
 			selectedMinionRecord->taskingStatus = immediateExecute;
+			return 1;
 		}
 		else if (headquartersY < boardToUse->BOARD_HEIGHT - 1 && boardToUse->Board[headquartersX][headquartersY + 1].withinRange == true &&
 			(boardToUse->Board[headquartersX][headquartersY + 1].hasMinionOnTop != true ||
@@ -90,12 +98,99 @@ int compie::defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* sele
 			selectedMinionRecord->potentialAttackTile = &boardToUse->Board[headquartersX][headquartersY];
 			selectedMinionRecord->tasking = defendHQ;
 			selectedMinionRecord->taskingStatus = immediateExecute;
+			return 1;
 		}
+	
+
+	}
+	else 	return 0;
+}
+
+
+//Assumes minion is selected since we're going to check for withinRange.
+int compie::defendProperty(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
+{
+	//For now artillery doesn't do this
+	if (selectedMinionRecord->recordedMinion->rangeType == rangedFire)
+		return 0;
+
+	Cursor* myCursor = &boardToUse->cursor;
+
+	//First set the starting point for our search (x).
+	//Then set the upper bounds for our search (maxX).
+	int minX = myCursor->selectMinionPointer->locationX - myCursor->selectMinionPointer->movementRange;
+	int maxX = myCursor->selectMinionPointer->locationX + myCursor->selectMinionPointer->movementRange;
+	if (minX < 0)
+	{
+		minX = 0;
+	}
+	if (maxX > boardToUse->BOARD_WIDTH)
+	{
+		maxX = boardToUse->BOARD_WIDTH;
+	}
+	//Same with y and maxY.
+	int minY = myCursor->selectMinionPointer->locationY - myCursor->selectMinionPointer->movementRange;
+	int maxY = myCursor->selectMinionPointer->locationY + myCursor->selectMinionPointer->movementRange;
+	if (minY < 0)
+	{
+		minY = 0;
+	}
+	if (maxY > boardToUse->BOARD_HEIGHT)
+	{
+		maxY = boardToUse->BOARD_HEIGHT;
 	}
 
+	for (int x = minX; x < maxX; x++)
+	{
+		for (int y = minY; y < maxY; y++)
 
+		{
+			//If property under attack by enemy
+			if (boardToUse->Board[x][y].hasMinionOnTop && boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag)
+			{
+				//Check each adjacent tile to see if you can move there, and then set tasking to do so.
+				if (x > 0 && boardToUse->Board[x - 1][y].withinRange == true &&
+					(boardToUse->Board[x - 1][y].hasMinionOnTop != true ||
+					(myCursor->selectMinionPointer->locationY == y && myCursor->selectMinionPointer->locationX == x - 1)))
+				{
+					selectedMinionRecord->potentialMoveTile = &boardToUse->Board[x - 1][y];
+					selectedMinionRecord->potentialAttackTile = &boardToUse->Board[x][y];
+					return 1;
+				}
+				else if (x < boardToUse->BOARD_WIDTH - 1 && boardToUse->Board[x + 1][y].withinRange == true &&
+					(boardToUse->Board[x + 1][y].hasMinionOnTop != true ||
+					(myCursor->selectMinionPointer->locationY == y && myCursor->selectMinionPointer->locationX == x + 1)))
+				{
+					selectedMinionRecord->potentialMoveTile = &boardToUse->Board[x + 1][y];
+					selectedMinionRecord->potentialAttackTile = &boardToUse->Board[x][y];
+					return 1;
+				}
+				else if (y > 0 && boardToUse->Board[x][y - 1].withinRange == true &&
+					(boardToUse->Board[x][y - 1].hasMinionOnTop != true ||
+					(myCursor->selectMinionPointer->locationY == y - 1 && myCursor->selectMinionPointer->locationX == x)))
+				{
+					selectedMinionRecord->potentialMoveTile = &boardToUse->Board[x][y - 1];
+					selectedMinionRecord->potentialAttackTile = &boardToUse->Board[x][y];
+					return 1;
+				}
+				else if (y < boardToUse->BOARD_HEIGHT - 1 && boardToUse->Board[x][y + 1].withinRange == true &&
+					(boardToUse->Board[x][y + 1].hasMinionOnTop != true ||
+					(myCursor->selectMinionPointer->locationY == y + 1 && myCursor->selectMinionPointer->locationX == x)))
+				{
+					selectedMinionRecord->potentialMoveTile = &boardToUse->Board[x][y + 1];
+					selectedMinionRecord->potentialAttackTile = &boardToUse->Board[x][y];
+					return 1;
+				}
+
+
+			}
+
+		}
+	}
+	
 	return 0;
 }
+
 
 compie::compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer)
 {
@@ -243,7 +338,7 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 					( x < 1 || (  boardToUse->Board[x-1][y].hasMinionOnTop == false || boardToUse->Board[x - 1][y].minionOnTop->team == compiePlayerFlag) )
 					&& (y < 1 || (boardToUse->Board[x ] [y-1].hasMinionOnTop == false || boardToUse->Board[x][y-1].minionOnTop->team == compiePlayerFlag) )
 					&& (x == boardToUse->BOARD_WIDTH - 1 || (boardToUse->Board[x + 1][y].hasMinionOnTop == false || boardToUse->Board[x+ 1][y].minionOnTop->team == compiePlayerFlag) )
-					&& (y == boardToUse->BOARD_HEIGHT -1 || (boardToUse->Board[x][y + 1].hasMinionOnTop == false || boardToUse->Board[x][y + 1].minionOnTop->team == compiePlayerFlag))
+					&& (y == boardToUse->BOARD_HEIGHT - 1 || (boardToUse->Board[x][y + 1].hasMinionOnTop == false || boardToUse->Board[x][y + 1].minionOnTop->team == compiePlayerFlag))
 					) 
 					)
 				{
@@ -480,8 +575,8 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 	
 
 	//Debug
-	if (myCursor->selectMinionPointer->specialtyGroup == defense)
-		std::cout << "My defense" << std::endl;
+	if (myCursor->selectMinionPointer->rangeType == rangedFire)
+		std::cout << "My arty" << std::endl;
 
 	if (myCursor->selectMinionPointer->rangeType == directFire) 
 	{
@@ -546,7 +641,7 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 					//Must be within range but outside minimum range
 					if( myCursor->selectMinionPointer->minAttackRange < computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y)  
 						&& myCursor->selectMinionPointer->attackRange >= computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y))
-					checkSingleTileForCombatValue(myCursor->selectMinionPointer->locationX, myCursor->selectMinionPointer->locationY, x, y, myCursor, boardToUse, &relativeSuitabilityScore, selectedMinionRecord);
+ 					checkSingleTileForCombatValue(myCursor->selectMinionPointer->locationX, myCursor->selectMinionPointer->locationY, x, y, myCursor, boardToUse, &relativeSuitabilityScore, selectedMinionRecord);
 				}
 		}
 	}
@@ -646,7 +741,6 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 
 	}
 	else
-
 	//If highly damaged or Air and low on fuel
 	if (myMinion->health < 50 ||
 		(myMinion->domain == air && (  myMinion->currentFuel < (myMinion->maxFuel / 3)  || myMinion->currentPriAmmo == 0 || myMinion->currentSecAmmo == 0)))   
@@ -672,8 +766,21 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 			return 1;
 		}
 		else
-		{
-
+			if (defendHeadquarters(boardToUse, selectedMinionRecord) == 1) 
+			{
+				return 1;
+			}
+			else		//DefendProperty ensures that defending prop has higher priority than attacking a local minion regardless of cost
+				if (defendProperty(boardToUse, selectedMinionRecord) == 1) 
+				{
+					selectedMinionRecord->tasking = defendProp;
+					selectedMinionRecord->taskingStatus = immediateExecute;
+					return 1;
+				
+				}
+				else
+				{
+			
 			//Otherwise see if there are enemies in local area within range and suitable to attack.
 			double relativeSuitabilityScore = findBestValuedEnemyWithinLocalArea(boardToUse, selectedMinionRecord);
 			if (relativeSuitabilityScore > 0 && selectedMinionRecord->potentialAttackTile != NULL)
@@ -750,7 +857,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 		}
 
-	if (selectedMinionRecord->tasking == attackLocalMinion)
+	if (selectedMinionRecord->tasking == attackLocalMinion || selectedMinionRecord->tasking == defendHQ || selectedMinionRecord->tasking == defendProp)
 	{
 		//Move cursor
 		if (boardToUse->cursor.relocate(selectedMinionRecord->potentialMoveTile->locationX, selectedMinionRecord->potentialMoveTile->locationY) == 1)

@@ -29,6 +29,7 @@ public:
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY, compieMinionRecord* selectedMinionRecord);
 	double findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
+	int defendProperty(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore, compieMinionRecord* selectedMinionRecord);
 	int checkSingleTileForCombatValue(int attackerX, int attackerY, int defenderX, int defenderY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore, compieMinionRecord* selectedMinionRecord);
 	int determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);

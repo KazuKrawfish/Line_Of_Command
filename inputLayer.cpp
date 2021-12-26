@@ -40,6 +40,37 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 		inputLayerWindow->draw(tileToPrint->myFogSprite);
 	}
 
+	//Now handle river tiles onto sea:
+	if (tileToPrint->symbol == '~') 
+	{
+		sf::Sprite riverSprite;
+		riverSprite.setTexture(*inputLayerTexture);
+		riverSprite.setPosition(screenX * 50, screenY * 50);
+
+		if (actualX < boardToPrint->BOARD_WIDTH - 1 &&  boardToPrint->Board[actualX+1][actualY].symbol == '-') 
+		{
+			riverSprite.setTextureRect(rectArray[16][10]);
+			inputLayerWindow->draw(riverSprite);
+		}
+		if (actualY < boardToPrint->BOARD_HEIGHT - 1 && boardToPrint->Board[actualX ][actualY+1].symbol == '-')
+		{
+			riverSprite.setTextureRect(rectArray[18][10]);
+			inputLayerWindow->draw(riverSprite);
+		}
+		if (actualY > 0 && boardToPrint->Board[actualX][actualY - 1].symbol == '-')
+		{
+			riverSprite.setTextureRect(rectArray[19][10]);
+			inputLayerWindow->draw(riverSprite);
+		}
+		if (actualX > 0 && boardToPrint->Board[actualX - 1][actualY].symbol == '-')
+		{
+			riverSprite.setTextureRect(rectArray[17][10]);
+			inputLayerWindow->draw(riverSprite);
+		}
+	}
+
+
+
 	//We only do minions and associated effects if they are visible
 	if (minionVisibleStatus == showMinions)
 	{
