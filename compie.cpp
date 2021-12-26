@@ -717,7 +717,7 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 //This function assumes the minion is already selected.
 int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord * selectedMinionRecord)
 {
-
+	std::cout << "Determining task for " << selectedMinionRecord->recordedMinion->description << " " << selectedMinionRecord->recordedMinion->seniority<< std::endl;
 
 	int returnX = 0;
 	int returnY = 0;
@@ -840,6 +840,7 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 
 int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
+	std::cout << "Moving " << selectedMinionRecord->recordedMinion->description << " " << selectedMinionRecord->recordedMinion->seniority<< std::endl;
 
 	int whoIsWatching = -1;		//-1 Is "default" meaning in a standard multiplayer game, nothing is printed during compie turn. It's hidden from view.
 	
@@ -877,8 +878,6 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 			
 		}
 
-		//Regardless of success, set to executed task.
-		boardToUse->deselectMinion();
 	}
 
 	if (selectedMinionRecord->tasking == captureLocalProperty)
@@ -901,7 +900,6 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 		}
 
-		boardToUse->deselectMinion();
 	}
 
 	if (selectedMinionRecord->tasking == advance)
@@ -929,8 +927,8 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		//Do nothing
 	}
 
-	if (boardToUse->cursor.selectMinionFlag == true)
-		boardToUse->deselectMinion();
+
+	boardToUse->deselectMinion();
 
 	boardToUse->setVisionField(whoIsWatching);
 	boardToUse->checkWindow();
@@ -993,6 +991,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 				compieMinionRoster[i]->taskingStatus = awaitingTasking;
 				compieMinionRoster[i]->potentialMoveTile = NULL;
 			}
+			boardToUse->deselectMinion();
 		}
 	}
 
@@ -1039,6 +1038,9 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 				{
 					executeMinionTasks(boardToUse, compieMinionRoster[i]);
 				}
+
+				boardToUse->deselectMinion();
+
 			}
 		}
 
@@ -1149,7 +1151,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			//This can be tweaked. 
 			//If game turn is after turn 4, we do not need as many infantry, so we we set availableTreasury to arbitrarily large
 			//Every  factory amount will be "enough"
-			if (menuPointer->gameTurn > 4)
+			if (menuPointer->gameTurn > 2)
 				availableTreasury += 100000;
 
 			//If the current tile is our factory and there is no one already on top

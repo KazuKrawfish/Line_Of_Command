@@ -1156,6 +1156,9 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 			//May also be different domain
 			//Also must be within range
 			//Also must have enough fuel
+			if (x == 6 && y == 2 && myMinion->type == 'c')
+				std::cout << "gothim" << std::endl;
+
 			if (myMinion->truePathMap[x][y].distanceFromMinion != -1 && myMinion->truePathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange 
 				&& myMinion->truePathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
 				if (Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag
@@ -1829,6 +1832,9 @@ int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer * graphicsLay
 int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber)		
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
+
+	if (selectedMinion->type == 'c')
+		std::cout << "Gothim" << std::endl;
 
 	//First make sure the move is legal. Must be within range, must not have moved.
 	//If in "apparent range" that means there's an enemy hiding there, we proceed until validatePath.
