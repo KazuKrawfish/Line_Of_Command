@@ -15,7 +15,7 @@ class Masterboard;
 
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
-//												        . + ^ M  H m n h Q = ~  - A			P `
+//												        . + ^ M  H m n h Q = ~  - A			P *
 const int MOVE_VALUES_MATRIX[21][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1,
 												/*s*/   1,1,1,1, 1,1,1,1,1,1,99,1,1,		1, 1,
 												/*a*/	1,2,2,99,1,1,1,1,1,1,99,99,1,		1, 2,
@@ -30,11 +30,11 @@ const int MOVE_VALUES_MATRIX[21][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1
 												/*f*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,		1, 1,
 												/*b*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,		1, 1,	
 												/*L*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
-												/*B*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
-												/*C*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
+												/*B*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,99,
+												/*C*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,99,
 												/*G*/	99,99,99,99,99,99,99,99,99,99,1,1,99,1,1,
-												/*U*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
-												/*V*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1 ,
+												/*U*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,99,
+												/*V*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,99 ,
 												/*K*/	1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1,
 												/*S*/	1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1 };
 
@@ -189,7 +189,7 @@ public:
 		case('P'):	//Port
 			y = 13;
 			break;
-		case('\''):	//Beach
+		case('*'):	//Beach
 			y = 14;
 			break;
 		}
@@ -219,7 +219,7 @@ public:
 		case('='):
 		case('~'):
 		case('-'):
-		case('\''):
+		case('*'):
 			isProperty = false;
 			break;
 		case('A'):
@@ -237,7 +237,7 @@ public:
 	}
 
 	int determineRiverRoadType(bool thisTileChanged, MasterBoard* boardToSet);
-	int determineSeaType(bool thisTileChanged, MasterBoard* boardToSet);
+	int determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet);
 	int production;				//Amount of money it produces
 	int controller;				//Player number 1/2 or neutral 0.
 	char symbol;
@@ -410,7 +410,7 @@ public:
 			mySprite.setTextureRect(rectArray[0][9]);
 			myFogSprite.setTextureRect(rectArray[0][10]);
 
-			determineSeaType(true, boardToSet);
+			determineSeaBeachType(true, boardToSet);
 
 			break;
 		}
@@ -434,7 +434,7 @@ public:
 			description = "Airbase.";
 			defenseFactor = 1.3;
 			
-			textureRectAnchorX = 16;
+			textureRectAnchorX = 23	;
 			textureRectAnchorY = 8;
 
 			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
@@ -457,11 +457,19 @@ public:
 			production = 1000;
 			break;
 		}
-		case('\''):
+		case('*'):
 		{
 			description = "Beach.";
 			defenseFactor = 1.0;
-			
+
+			textureRectAnchorY = 11;
+			textureRectAnchorX = 0;
+
+			mySprite.setTextureRect(rectArray[0][11]);
+			myFogSprite.setTextureRect(rectArray[0][12]);
+
+			determineSeaBeachType(true, boardToSet);
+
 			break;
 		}
 		}

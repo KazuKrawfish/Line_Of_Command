@@ -40,32 +40,74 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 		inputLayerWindow->draw(tileToPrint->myFogSprite);
 	}
 
-	//Now handle river tiles onto sea:
-	if (tileToPrint->symbol == '~') 
+	//Now handle river tiles onto sea and beach
+	if (tileToPrint->symbol == '~' || tileToPrint->symbol == '*') 
 	{
 		sf::Sprite riverSprite;
 		riverSprite.setTexture(*inputLayerTexture);
 		riverSprite.setPosition(screenX * 50, screenY * 50);
 
+		int riverYCoord = 9;
+		if (tileToPrint->withinVision[playerNumber] == false)
+		{
+			riverYCoord = 10;
+		}
+
+
 		if (actualX < boardToPrint->BOARD_WIDTH - 1 &&  boardToPrint->Board[actualX+1][actualY].symbol == '-') 
 		{
-			riverSprite.setTextureRect(rectArray[16][10]);
+			riverSprite.setTextureRect(rectArray[16][riverYCoord]);
 			inputLayerWindow->draw(riverSprite);
 		}
 		if (actualY < boardToPrint->BOARD_HEIGHT - 1 && boardToPrint->Board[actualX ][actualY+1].symbol == '-')
 		{
-			riverSprite.setTextureRect(rectArray[18][10]);
-			inputLayerWindow->draw(riverSprite);
+			riverSprite.setTextureRect(rectArray[18][riverYCoord]);
+ 			inputLayerWindow->draw(riverSprite);
 		}
 		if (actualY > 0 && boardToPrint->Board[actualX][actualY - 1].symbol == '-')
 		{
-			riverSprite.setTextureRect(rectArray[19][10]);
+			riverSprite.setTextureRect(rectArray[19][riverYCoord]);
 			inputLayerWindow->draw(riverSprite);
 		}
 		if (actualX > 0 && boardToPrint->Board[actualX - 1][actualY].symbol == '-')
 		{
-			riverSprite.setTextureRect(rectArray[17][10]);
+			riverSprite.setTextureRect(rectArray[17][riverYCoord]);
 			inputLayerWindow->draw(riverSprite);
+		}
+	}
+
+	//Now handle shoal onto sea
+	if (tileToPrint->symbol == '~')
+	{
+		sf::Sprite beachSprite;
+		beachSprite.setTexture(*inputLayerTexture);
+		beachSprite.setPosition(screenX * 50, screenY * 50);
+
+		int beachYCoord = 11;
+		if (tileToPrint->withinVision[playerNumber] == false)
+		{
+			beachYCoord = 12;
+		}
+
+		if (actualX < boardToPrint->BOARD_WIDTH - 1 && boardToPrint->Board[actualX + 1][actualY].symbol == '*')
+		{
+			beachSprite.setTextureRect(rectArray[16][beachYCoord]);
+			inputLayerWindow->draw(beachSprite);
+		}
+		if (actualY < boardToPrint->BOARD_HEIGHT - 1 && boardToPrint->Board[actualX][actualY + 1].symbol == '*')
+		{
+			beachSprite.setTextureRect(rectArray[18][beachYCoord]);
+			inputLayerWindow->draw(beachSprite);
+		}
+		if (actualY > 0 && boardToPrint->Board[actualX][actualY - 1].symbol == '*')
+		{
+			beachSprite.setTextureRect(rectArray[19][beachYCoord]);
+			inputLayerWindow->draw(beachSprite);
+		}
+		if (actualX > 0 && boardToPrint->Board[actualX - 1][actualY].symbol == '*')
+		{
+			beachSprite.setTextureRect(rectArray[17][beachYCoord]);
+			inputLayerWindow->draw(beachSprite);
 		}
 	}
 

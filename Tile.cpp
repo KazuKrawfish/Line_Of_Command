@@ -21,7 +21,9 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 		if(locationY + 1 < boardToSet->BOARD_HEIGHT && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY + 1].determineRiverRoadType(false, boardToSet);
 	}
-	if( locationY < boardToSet->BOARD_HEIGHT - 1   && (boardToSet->Board[locationX][locationY + 1].symbol == '~' && thisTile->symbol == '-')) 
+	if( locationY < boardToSet->BOARD_HEIGHT - 1  
+		&& (  (boardToSet->Board[locationX][locationY + 1].symbol == '~' || boardToSet->Board[locationX][locationY + 1].symbol == '*')
+			&& thisTile->symbol == '-'))
 	{
 		downNeigh = true;
 	}
@@ -34,7 +36,9 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 		if (locationY > 0 && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY - 1].determineRiverRoadType( false, boardToSet);
 	}
-	if (locationY > 0 && (boardToSet->Board[locationX][locationY - 1].symbol == '~' && thisTile->symbol == '-'))
+	if (locationY > 0 
+		&& ((boardToSet->Board[locationX][locationY - 1].symbol == '~' || boardToSet->Board[locationX][locationY - 1].symbol == '*')
+			&& thisTile->symbol == '-'))
 	{
 		upNeigh = true;
 	}
@@ -47,7 +51,9 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 		if (locationX > 0 && thisTileChanged == true)
 			boardToSet->Board[locationX - 1][locationY].determineRiverRoadType( false, boardToSet);
 	}
-	if (locationX > 0 && (boardToSet->Board[locationX - 1][locationY].symbol == '~' && thisTile->symbol == '-'))
+	if (locationX > 0 
+		&& ((boardToSet->Board[locationX - 1 ][locationY ].symbol == '~' || boardToSet->Board[locationX- 1][locationY ].symbol == '*') 
+			&& thisTile->symbol == '-'))
 	{
 		leftNeigh = true;
 	}
@@ -60,7 +66,9 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 		if (locationX + 1 < boardToSet->BOARD_WIDTH && thisTileChanged == true)
 			boardToSet->Board[locationX + 1][locationY].determineRiverRoadType(false , boardToSet);
 	}
-	if (locationX < boardToSet->BOARD_WIDTH - 1 && (boardToSet->Board[locationX + 1][locationY].symbol == '~' && thisTile->symbol == '-'))
+	if (locationX < boardToSet->BOARD_WIDTH - 1 && (
+		(boardToSet->Board[locationX + 1 ][locationY ].symbol == '~' || boardToSet->Board[locationX + 1][locationY ].symbol == '*') 
+		&& thisTile->symbol == '-'))
 	{
 		rightNeigh = true;
 	}
@@ -150,7 +158,7 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 }
 
 
-int tile::determineSeaType(bool thisTileChanged, MasterBoard* boardToSet)
+int tile::determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet)
 {
 	bool upNeigh = false;
 	bool downNeigh = false;
@@ -158,34 +166,34 @@ int tile::determineSeaType(bool thisTileChanged, MasterBoard* boardToSet)
 	bool rightNeigh = false;
 
 	//Check each neighbor to see if they are same type
-	//If they are, note it, and call determineRiverRoadType on that tile.
+	//If they are, note it, and call determineSeaBeachType on that tile.
 	if (locationY + 1 >= boardToSet->BOARD_HEIGHT
-		|| (boardToSet->Board[locationX][locationY + 1].symbol == symbol))
+		|| (boardToSet->Board[locationX][locationY + 1].symbol == '~' || boardToSet->Board[locationX][locationY + 1].symbol == '*'))
 	{
 		downNeigh = true;
 		if (locationY + 1 < boardToSet->BOARD_HEIGHT && thisTileChanged == true)
-			boardToSet->Board[locationX][locationY + 1].determineSeaType(false, boardToSet);
+			boardToSet->Board[locationX][locationY + 1].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationY <= 0
-		|| (boardToSet->Board[locationX][locationY - 1].symbol == symbol))
+		|| (boardToSet->Board[locationX][locationY - 1].symbol == '~' || boardToSet->Board[locationX][locationY - 1].symbol == '*'))
 	{
 		upNeigh = true;
 		if (locationY > 0 && thisTileChanged == true)
-			boardToSet->Board[locationX][locationY - 1].determineSeaType(false, boardToSet);
+			boardToSet->Board[locationX][locationY - 1].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationX <= 0
-		|| (boardToSet->Board[locationX - 1][locationY].symbol == symbol))
+		|| (boardToSet->Board[locationX - 1][locationY ].symbol == '~' || boardToSet->Board[locationX - 1][locationY ].symbol == '*'))
 	{
 		leftNeigh = true;
 		if (locationX > 0 && thisTileChanged == true)
-			boardToSet->Board[locationX - 1][locationY].determineSeaType(false, boardToSet);
+			boardToSet->Board[locationX - 1][locationY].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationX + 1 >= boardToSet->BOARD_WIDTH
-		|| (boardToSet->Board[locationX + 1][locationY].symbol == symbol))
+		|| (boardToSet->Board[locationX + 1][locationY].symbol == '~' || boardToSet->Board[locationX + 1][locationY].symbol == '*'))
 	{
 		rightNeigh = true;
 		if (locationX + 1 < boardToSet->BOARD_WIDTH && thisTileChanged == true)
-			boardToSet->Board[locationX + 1][locationY].determineSeaType(false, boardToSet);
+			boardToSet->Board[locationX + 1][locationY].determineSeaBeachType(false, boardToSet);
 	}
 
 	
