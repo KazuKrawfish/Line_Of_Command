@@ -168,28 +168,28 @@ int tile::determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet)
 	//Check each neighbor to see if they are same type
 	//If they are, note it, and call determineSeaBeachType on that tile.
 	if (locationY + 1 >= boardToSet->BOARD_HEIGHT
-		|| (boardToSet->Board[locationX][locationY + 1].symbol == '~' || boardToSet->Board[locationX][locationY + 1].symbol == '*'))
+		|| (boardToSet->Board[locationX][locationY + 1].symbol == '~' || boardToSet->Board[locationX][locationY + 1].symbol == '*' ))
 	{
 		downNeigh = true;
 		if (locationY + 1 < boardToSet->BOARD_HEIGHT && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY + 1].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationY <= 0
-		|| (boardToSet->Board[locationX][locationY - 1].symbol == '~' || boardToSet->Board[locationX][locationY - 1].symbol == '*'))
+		|| (boardToSet->Board[locationX][locationY - 1].symbol == '~' || boardToSet->Board[locationX][locationY - 1].symbol == '*' ))
 	{
 		upNeigh = true;
 		if (locationY > 0 && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY - 1].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationX <= 0
-		|| (boardToSet->Board[locationX - 1][locationY ].symbol == '~' || boardToSet->Board[locationX - 1][locationY ].symbol == '*'))
+		|| (boardToSet->Board[locationX - 1][locationY ].symbol == '~' || boardToSet->Board[locationX - 1][locationY ].symbol == '*' ))
 	{
 		leftNeigh = true;
 		if (locationX > 0 && thisTileChanged == true)
 			boardToSet->Board[locationX - 1][locationY].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationX + 1 >= boardToSet->BOARD_WIDTH
-		|| (boardToSet->Board[locationX + 1][locationY].symbol == '~' || boardToSet->Board[locationX + 1][locationY].symbol == '*'))
+		|| (boardToSet->Board[locationX + 1][locationY].symbol == '~' || boardToSet->Board[locationX + 1][locationY].symbol == '*' ))
 	{
 		rightNeigh = true;
 		if (locationX + 1 < boardToSet->BOARD_WIDTH && thisTileChanged == true)

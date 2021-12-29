@@ -88,12 +88,15 @@ char playCharInput(sf::RenderWindow* myWindow)
 
 
 	return inputChar;
-}
+} 
 
-mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, sf::Texture* inputGlobeTexture)
+mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, sf::Texture* inputMenuWallpaper, sf::Texture* inputStartWallPaper, sf::Texture* inputTopMenu, sf::Texture* inputstartScreenStatement)
 {
 	myTexture = gameTexture;
-	myGlobeTexture = inputGlobeTexture;
+	menuWallPaper = inputMenuWallpaper;
+	startWallPaper = inputStartWallPaper;
+	topMenuTexture = inputTopMenu;
+	startScreenStatement = inputstartScreenStatement;
 	myFont = cour;
 	mywindow = myWindow;
 	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
@@ -548,26 +551,34 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer) 
 {
 
-	sf::String titleString("Line of Command");
+/*	sf::String titleString("Line of Command");
 	sf::String copyrightString("Copyright 2021, Supercontinent Software, Ltd.");
 	sf::String pressAnyKeyString("Press any key to continue.");
 	sf::Text titleText(titleString, *myFont, 30);
 	sf::Text copyrightText(copyrightString, *myFont, menuTextSize);
 	sf::Text pressAnyKeyText(pressAnyKeyString, *myFont, menuTextSize);
+	*/
 
-	sf::Sprite globeSprite;
-	globeSprite.setTexture(*myGlobeTexture);
-	globeSprite.setPosition( 520, 150);
-	titleText.setPosition(520, 0);
+	//sf::Sprite globeSprite;
+	//globeSprite.setTexture(*myGlobeTexture);
+	//globeSprite.setPosition( 520, 150);
+	
+	sf::Sprite startWallpaperSprite;
+	startWallpaperSprite.setTexture(*startWallPaper);
+
+	sf::Sprite startScreenStatementSprite;
+	startScreenStatementSprite.setTexture(*startScreenStatement);
+	startScreenStatementSprite.setPosition(330, 130);
+		
+/*	titleText.setPosition(520, 0);
 	copyrightText.setPosition(380, 40);
-	pressAnyKeyText.setPosition(500, 450);
+	pressAnyKeyText.setPosition(500, 450);*/
 
 	mywindow->clear();
 
-	mywindow->draw(globeSprite);
-	mywindow->draw(titleText);
-	mywindow->draw(copyrightText);
-	mywindow->draw(pressAnyKeyText);
+	//mywindow->draw(troopsSprite);
+	mywindow->draw(startWallpaperSprite);	
+	mywindow->draw(startScreenStatementSprite);
 
 	mywindow->display();
 
@@ -727,19 +738,22 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 
 int mainMenu::printTopMenu()
 {
+
+	sf::Sprite topMenuWallpaperSprite;
+	topMenuWallpaperSprite.setTexture(*menuWallPaper);
+
+	sf::Sprite topMenuSprite;
+	topMenuSprite.setTexture(*topMenuTexture);
+
+
 	mywindow->clear();
-	sf::String topMenuString("Main Menu \nLoad saved game(l) | Start new game(n) | Join remote game(j) \n");
-	if (debugMode == false)
-	{
-		topMenuString += "To enter debug mode, press '~' \n";
-	}
-	else 
-	{
-		topMenuString += "In debug mode. To leave debug mode, press '~' \n";
-	}
+
+	mywindow->draw(topMenuWallpaperSprite);
+
+	topMenuSprite.setPosition( 450, 150);
+
 	
-	sf::Text text(topMenuString, *myFont, menuTextSize);
-	mywindow->draw(text);
+	mywindow->draw(topMenuSprite);
 	mywindow->display();
 	
 	return 0;

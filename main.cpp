@@ -33,7 +33,7 @@
 
 //Global for the moment to support faster production
 //Everyone needs access to this at all times so it seems reasonable
-const int rectArrayWidth = 32;
+const int rectArrayWidth = 38;
 const int rectArrayHeight = 16;
 std::vector <std::vector<sf::IntRect>> rectArray;
 
@@ -48,8 +48,14 @@ int main()
 	//Load textures
 	sf::Texture mainTexture;
 	sf::Image mainImage;
-	sf::Texture globeTexture;
-	sf::Image globeImage;
+	sf::Texture warshipTexture;
+	sf::Image warshipsImage;
+	sf::Image troopsImage;
+	sf::Texture troopsTexture;
+	sf::Image topMenuImage;
+	sf::Texture topMenuTexture;
+	sf::Image startScreenImage;
+	sf::Texture startScreenTexture;
 
 		
 	//Initialize intRect grid
@@ -74,12 +80,28 @@ int main()
 	{
 		std::cout << "Couldn't load image!" << std::endl;
 	}
-	if (!globeImage.loadFromFile("globe.png"))
+	if (!troopsImage.loadFromFile("troops.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+	if (!warshipsImage.loadFromFile("warships.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+	if (!topMenuImage.loadFromFile("topMenu.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+	if (!startScreenImage.loadFromFile("startScreenStatement.png"))
 	{
 		std::cout << "Couldn't load image!" << std::endl;
 	}
 	sf::Color colorWhite;
-	globeTexture.loadFromImage(globeImage);
+	warshipTexture.loadFromImage(warshipsImage);
+	troopsTexture.loadFromImage(troopsImage);
+	topMenuTexture.loadFromImage(topMenuImage);
+	startScreenTexture.loadFromImage(startScreenImage);
+
 	mainImage.createMaskFromColor(colorWhite.White);
 	mainTexture.loadFromImage(mainImage);
 
@@ -88,7 +110,7 @@ int main()
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
 	
-	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, &globeTexture);
+	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, &warshipTexture,& troopsTexture, &topMenuTexture, &startScreenTexture);
 	
 	inputLayer InputLayer(&MainMenu, &mainWindow , &mainTexture, &cour);
 	MasterBoard GameBoard(&mainTexture);

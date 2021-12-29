@@ -110,9 +110,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			inputLayerWindow->draw(beachSprite);
 		}
 	}
-
-
-
+	   	 
 	//We only do minions and associated effects if they are visible
 	if (minionVisibleStatus == showMinions)
 	{

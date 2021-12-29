@@ -49,7 +49,7 @@ public:
 	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
 	
 	//CONSTRUCTOR
-	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, sf::Texture* inputGlobeTexture);
+	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, sf::Texture* inputMenuWallpaper, sf::Texture* inputStartWallPaper, sf::Texture* inputTopMenu , sf::Texture* inputstartScreenStatement);
 	//CONSTRUCTOR
 
 	//Multiplayer specific functions
@@ -66,7 +66,10 @@ public:
 	//SFML Objects		/////////////////////////
 	sf::RenderWindow* mywindow;
 	sf::Texture* myTexture;
-	sf::Texture* myGlobeTexture;
+	sf::Texture* menuWallPaper;
+	sf::Texture* startWallPaper;
+	sf::Texture* startScreenStatement;
+	sf::Texture* topMenuTexture;
 	sf::Font* myFont;
 	//SFML Objects end	/////////////////////////
 

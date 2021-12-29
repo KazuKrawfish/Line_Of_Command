@@ -434,8 +434,8 @@ public:
 			description = "Airbase.";
 			defenseFactor = 1.3;
 			
-			textureRectAnchorX = 23	;
-			textureRectAnchorY = 8;
+			textureRectAnchorX = 32	;
+			textureRectAnchorY = 0;
 
 			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
 			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
