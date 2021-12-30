@@ -5,6 +5,7 @@
 #include "Tile.hpp"
 #include "Cursor.hpp"
 #include "MasterBoard.hpp"
+#include <SFML/Audio.hpp>
 
 
 enum mainMenuStatus { topmenu,  playingMap, waitingForRemotePlayer };
@@ -49,7 +50,9 @@ public:
 	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
 	
 	//CONSTRUCTOR
-	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, sf::Texture* inputMenuWallpaper, sf::Texture* inputStartWallPaper, sf::Texture* inputTopMenu , sf::Texture* inputstartScreenStatement);
+	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, 
+		sf::Texture* inputMenuWallpaper, sf::Texture* inputStartWallPaper, sf::Texture* inputTopMenu ,
+		sf::Texture* inputstartScreenStatement, sf::Music* inputIntroMusic);
 	//CONSTRUCTOR
 
 	//Multiplayer specific functions
@@ -71,6 +74,8 @@ public:
 	sf::Texture* startScreenStatement;
 	sf::Texture* topMenuTexture;
 	sf::Font* myFont;
+
+	sf::Music* introMusic;
 	//SFML Objects end	/////////////////////////
 
 

@@ -10,14 +10,16 @@
 #include <thread>
 
 
-char playCharInput(sf::RenderWindow* myWindow);
 
-inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour)
+char playCharInput(sf::RenderWindow* myWindow); 
+
+inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects)
 {
 	inputLayerTexture = gameTexture;
 	inputLayerFont = cour;
 	inputLayerWindow = myWindow;
 	MainMenu = inputMainMenu;
+	soundEffects = inputSoundEffects;
 }
 
 int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber, bool withinAnimation)
@@ -816,6 +818,11 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 		return -1;
 	}
 	
+	//Provide sound regardless of vision
+	(*soundEffects)[tileAttacking->minionOnTop->mySoundEffect].play();
+
+
+
 	//If within vision, we will watch attackerVisible
 	if (tileAttacking->withinVision[observerNumber] == true)
 	{
@@ -859,7 +866,6 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 		//Remember the last tile which is blank, to "clear" the effect
 		for (int i = 0; i < 5; i++)
 		{
-
 			tileBeingAttacked->animationSprite->setTextureRect(rectArray[i][14]);
 			bool withinAnimation = true;
 			printScreen(boardToPrint, observerNumber, withinAnimation);
@@ -877,6 +883,9 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 	
 	}
 
+
+
+	(*soundEffects)[tileAttacking->minionOnTop->mySoundEffect].stop();
 
 	return 0;
 }

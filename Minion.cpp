@@ -97,6 +97,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxFuel = 70;
 		maxPriAmmo = 3;
 		maxSecAmmo = 0;
+		mySoundEffect = rpg;
 		break;
 	}
 	case('a'):
@@ -111,6 +112,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxFuel = 70;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
+		mySoundEffect = cannon;
 		break;
 	}
 	case('A'):
@@ -126,6 +128,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxFuel = 70;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
+		mySoundEffect = antiAircraftCannon;
 		break;
 	}
 	case('T'):
@@ -140,6 +143,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxFuel = 60;
 		maxPriAmmo = 6;
 		maxSecAmmo = 0;
+		mySoundEffect = cannon;
 		break;
 	}
 	case('r'):
@@ -155,6 +159,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
+		mySoundEffect = bombs;
 		break;
 	}
 	case('c'):
@@ -286,6 +291,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		mySprite.setTextureRect(rectArray[12][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
+
+		mySoundEffect = bombs;
 		break;
 	}
 	case('B'):

@@ -2,7 +2,7 @@
 #define INPUT_HPP__
 
 #include "compie.hpp"
-
+#include <SFML/Audio.hpp>
 
 //Fwd dec
 class compie;
@@ -27,7 +27,7 @@ class inputLayer
 {
 public:
 
-	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour);
+	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects );
 	
 	//Print Functions:///////////////////////////////////////////////////////
 	//Non-game play
@@ -92,6 +92,7 @@ public:
 	//MenuCrawlerObjects /////////////////////////
 
 	//SFML Objects		/////////////////////////
+	std::vector <sf::Sound> * soundEffects;
 	sf::Texture* inputLayerTexture;
 	sf::Font* inputLayerFont;
 	sf::RenderWindow* inputLayerWindow;

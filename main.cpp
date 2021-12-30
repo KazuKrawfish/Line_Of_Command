@@ -12,6 +12,7 @@
 #include "compie.hpp"
 #include "mainmenu.h"
 
+
 /*
 #ifdef _WIN32
 #include <conio.h>
@@ -57,6 +58,18 @@ int main()
 	sf::Image startScreenImage;
 	sf::Texture startScreenTexture;
 
+	//Load Sounds/Music
+	sf::Music introMusic;
+
+	
+
+	//Initialize Sounds Array
+	const int numberOfSoundEffects = 10;
+	std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "bombs", "antiAircraftCannon" };
+	std::vector <sf::SoundBuffer > soundEffectBuffers;
+	std::vector <sf::Sound> soundEffects;
+	soundEffects.resize(numberOfSoundEffects + 1);
+
 		
 	//Initialize intRect grid
 	rectArray.resize(rectArrayWidth+1);
@@ -96,12 +109,33 @@ int main()
 	{
 		std::cout << "Couldn't load image!" << std::endl;
 	}
+	if (!introMusic.openFromFile("IntroTheme.wav"))
+	{
+		std::cout << "Couldn't load intro theme!" << std::endl;
+	}
+	
+	//Init sound effect buffer and sound arrays
+	soundEffectBuffers.resize(soundEffectNames.size() + 1);
+	for (int i = 0; i < soundEffectNames.size(); i++)
+	{
+		std::string fileName = soundEffectNames[i] + ".wav";
+		if (!soundEffectBuffers[i].loadFromFile(fileName))
+		{
+			std::cout << "Couldn't load" << soundEffectNames[i]<< std::endl;
+		}
+		//Transfer Sound Buffer to Sounds
+
+		soundEffects[i].setBuffer(soundEffectBuffers[i]);
+	}
+
 	sf::Color colorWhite;
+	
+	//Transfer Images to Textures
 	warshipTexture.loadFromImage(warshipsImage);
 	troopsTexture.loadFromImage(troopsImage);
 	topMenuTexture.loadFromImage(topMenuImage);
 	startScreenTexture.loadFromImage(startScreenImage);
-
+	
 	mainImage.createMaskFromColor(colorWhite.White);
 	mainTexture.loadFromImage(mainImage);
 
@@ -110,9 +144,9 @@ int main()
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
 	
-	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, &warshipTexture,& troopsTexture, &topMenuTexture, &startScreenTexture);
+	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, &warshipTexture,& troopsTexture, &topMenuTexture, &startScreenTexture , &introMusic);
 	
-	inputLayer InputLayer(&MainMenu, &mainWindow , &mainTexture, &cour);
+	inputLayer InputLayer(&MainMenu, &mainWindow , &mainTexture, &cour, &soundEffects);
 	MasterBoard GameBoard(&mainTexture);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);
