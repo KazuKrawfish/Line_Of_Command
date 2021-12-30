@@ -85,9 +85,6 @@ char playCharInput(sf::RenderWindow* myWindow)
 
 	}
 
-
-
-
 	return inputChar;
 } 
 

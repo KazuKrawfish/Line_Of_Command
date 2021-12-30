@@ -19,7 +19,8 @@ enum specialtyGroupType { normal, infantry, transport, stealth, defense };
 //Domain type is used not for terrain but everything else. Defensive bonus from terrain, fuel requirement, refuel, move through enemy units, etc.
 enum domainType { land, air, sea, helo };
 
-enum soundEffectType {machineGun, rpg, cannon, bombs, antiAircraftCannon, };
+enum soundEffectType {machineGun, rpg, cannon, antiAircraftCannon, infantryMove, vehicleMove, buildUnit, capture, resupply, repair };
+
 
 class pathSquare
 {
@@ -82,7 +83,8 @@ public:
 	//GRAPHICS ///////////////////////////
 	
 	//SOUND EFFECTS //////////////////////
-	soundEffectType mySoundEffect = machineGun;
+	soundEffectType myAttackSound = machineGun;
+	soundEffectType myMoveSound = infantryMove;
 	//SOUND EFFECTS //////////////////////
 
 	

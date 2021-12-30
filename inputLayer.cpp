@@ -774,6 +774,10 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	if (observerNumber == -1)
 		return -1;
 
+	//Sound effects
+	(*soundEffects)[minionToMove->myMoveSound].play();
+
+
 	//If player controlled, tile the minion moves through will always be visible.
 	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
 	{
@@ -803,6 +807,10 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	//Reset animation sprite
 	boardToPrint->Board[locationX][locationY].animationSprite = NULL;
 
+
+	(*soundEffects)[minionToMove->myMoveSound].stop();
+
+
 	return 0;
 }
 
@@ -819,7 +827,7 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 	}
 	
 	//Provide sound regardless of vision
-	(*soundEffects)[tileAttacking->minionOnTop->mySoundEffect].play();
+	(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].play();
 
 
 
@@ -882,10 +890,8 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 
 	
 	}
-
-
-
-	(*soundEffects)[tileAttacking->minionOnTop->mySoundEffect].stop();
+	
+	(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].stop();
 
 	return 0;
 }
@@ -905,6 +911,9 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 		std::cout << "Could not animate capture, the tile was NULL" << std::endl;
 		return -1;
 	}
+
+	(*soundEffects)[capture].play();
+
 
 	//If within vision, we will watch capture occur
 	if (myTile->withinVision[observerNumber] == true)
@@ -938,6 +947,8 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 
 	}
 
+	(*soundEffects)[capture].stop();
+
 }
 
 int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToSupply, int locationX, int locationY) 
@@ -954,6 +965,8 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 		std::cout << "Could not animate capture, the tile was NULL" << std::endl;
 		return -1;
 	}
+
+	(*soundEffects)[resupply].play();
 
 	//If within vision, we will watch capture occur
 	if (myTile->withinVision[observerNumber] == true)
@@ -987,6 +1000,8 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 		}
 
 	}
+
+	(*soundEffects)[resupply].stop();
 
 }
 

@@ -64,8 +64,8 @@ int main()
 	
 
 	//Initialize Sounds Array
-	const int numberOfSoundEffects = 10;
-	std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "bombs", "antiAircraftCannon" };
+	const int numberOfSoundEffects = 20;
+	std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "antiAircraftCannon", "infantryMove", "vehicleMove", "buildUnit", "capture", "resupply", "repair" };
 	std::vector <sf::SoundBuffer > soundEffectBuffers;
 	std::vector <sf::Sound> soundEffects;
 	soundEffects.resize(numberOfSoundEffects + 1);
@@ -109,7 +109,7 @@ int main()
 	{
 		std::cout << "Couldn't load image!" << std::endl;
 	}
-	if (!introMusic.openFromFile("IntroTheme.wav"))
+	if (!introMusic.openFromFile("soundEffects\\introTheme.wav"))
 	{
 		std::cout << "Couldn't load intro theme!" << std::endl;
 	}
@@ -118,7 +118,7 @@ int main()
 	soundEffectBuffers.resize(soundEffectNames.size() + 1);
 	for (int i = 0; i < soundEffectNames.size(); i++)
 	{
-		std::string fileName = soundEffectNames[i] + ".wav";
+		std::string fileName = "soundEffects\\" + soundEffectNames[i] + ".wav";
 		if (!soundEffectBuffers[i].loadFromFile(fileName))
 		{
 			std::cout << "Couldn't load" << soundEffectNames[i]<< std::endl;
