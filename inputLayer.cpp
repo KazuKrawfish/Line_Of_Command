@@ -962,7 +962,7 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 
 	if (minionToSupply == NULL)
 	{
-		std::cout << "Could not animate capture, the tile was NULL" << std::endl;
+		std::cout << "Could not animate supply, the tile was NULL" << std::endl;
 		return -1;
 	}
 
@@ -976,8 +976,6 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 
 		//Set texture
 		myTile->animationSprite->setTexture(*inputLayerTexture);
-
-		myTile->animationSprite->setTextureRect(rectArray[5][14]);
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -1002,6 +1000,111 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 	}
 
 	(*soundEffects)[resupply].stop();
+
+}
+
+int inputLayer::trapGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionTrapped, int locationX, int locationY) 
+{
+	//Should be checking for bad locX but will add later
+	tile* myTile = &boardToPrint->Board[locationX][locationY];
+
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (minionTrapped == NULL)
+	{
+		std::cout << "Could not animate trap, the tile was NULL" << std::endl;
+		return -1;
+	}
+
+	(*soundEffects)[trapped].play();
+
+	//If within vision, we will watch trap occur
+	if (myTile->withinVision[observerNumber] == true)
+	{
+		//Create new sprite for animation
+		myTile->animationSprite = new sf::Sprite;
+
+		//Set texture
+		myTile->animationSprite->setTexture(*inputLayerTexture);
+
+
+		bool withinAnimation = true;
+
+		myTile->animationSprite->setTextureRect(rectArray[8][13]);
+		printScreen(boardToPrint, observerNumber, withinAnimation);
+		std::this_thread::sleep_for(std::chrono::milliseconds(350));
+
+		myTile->animationSprite->setTextureRect(rectArray[5][13]);
+		printScreen(boardToPrint, observerNumber, withinAnimation);
+
+
+		//Clean up afterwards if necessary
+		if (myTile->animationSprite != NULL)
+		{
+			delete myTile->animationSprite;
+			myTile->animationSprite = NULL;
+		}
+
+	}
+
+	(*soundEffects)[trapped].stop();
+
+
+
+}
+
+int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToSupply, int locationX, int locationY) 
+{
+
+	//Should be checking for bad locX but will add later
+	tile* myTile = &boardToPrint->Board[locationX][locationY];
+
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (minionToSupply == NULL)
+	{
+		std::cout << "Could not animate repair, the tile was NULL" << std::endl;
+		return -1;
+	}
+
+	(*soundEffects)[repair].play();
+
+	//If within vision, we will watch repair occur
+	if (myTile->withinVision[observerNumber] == true)
+	{
+		//Create new sprite for animation
+		myTile->animationSprite = new sf::Sprite;
+
+		//Set texture
+		myTile->animationSprite->setTexture(*inputLayerTexture);
+
+		for (int i = 0; i < 3; i++)
+		{
+			bool withinAnimation = true;
+			myTile->animationSprite->setTextureRect(rectArray[7][13]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+			std::this_thread::sleep_for(std::chrono::milliseconds(180));
+
+			myTile->animationSprite->setTextureRect(rectArray[5][13]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+			std::this_thread::sleep_for(std::chrono::milliseconds(180));
+
+		}
+
+		//Clean up afterwards if necessary
+		if (myTile->animationSprite != NULL)
+		{
+			delete myTile->animationSprite;
+			myTile->animationSprite = NULL;
+		}
+
+	}
+
+	(*soundEffects)[repair].stop();
 
 }
 

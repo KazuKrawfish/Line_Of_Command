@@ -1681,9 +1681,7 @@ int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer * graphicsLay
 
 
 	Board[currentX][currentY].hasBeenValidated = true;
-
-
-
+	   
 	//Check each adjacent space. If it is within the cursor path and doesn't have enemy minion, turn cursorPath here off, and return its validatePath value.
 	//If a drop happens, return 1.
 
@@ -1825,7 +1823,6 @@ int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer * graphicsLay
 
 
 
-
 }
 //Note re observerNumber: Don't know a better way to "know" who is supposed to watch, since the prints are supposed to be "interrupts"
 //Unfortunately it makes a rather circular input of observerNumber- it depends on input layer/compie functions, then transmits to inputlayer functions.
@@ -1873,7 +1870,7 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 
 	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
 	//validatePath will actually move the minion, so we need to return afterwards.
-	validatePath(inputX, inputY, InputLayer, observerNumber);
+	int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber);
 
 	//If the inputX has not changed, that means we got trapped and have to stand in place. 
 	//Still counts as moving.
@@ -1909,6 +1906,13 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 	cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
 
 	cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
+
+
+	if(didTrapHappen == 1)
+	{ 
+		InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
+	}
+
 	deselectMinion();
 
 	setVisionField(playerFlag);
@@ -2438,7 +2442,7 @@ int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 		}
 	}
 
-	repairMinions();
+	repairMinions(InputLayer, observerNumber);
 
 	resupplyMinions(InputLayer, observerNumber);
 
@@ -2481,7 +2485,7 @@ int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 	return 0;
 }
 
-int MasterBoard::repairMinions()
+int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 {
 	//This was terminating "early" since it would hit a NULL spot so minions wouldn't get seen to be healed.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -2495,6 +2499,7 @@ int MasterBoard::repairMinions()
 			{
 				if (minionRoster[i]->health < 100)
 				{
+					InputLayer->repairGraphics(this, observerNumber, minionRoster[i], minionRoster[i]->locationX, minionRoster[i]->locationY);
 
 					//silent repair
 					if (minionRoster[i]->health > 94)

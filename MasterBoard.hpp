@@ -74,7 +74,7 @@ public:
 	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber);
 	int dropOffMinion();
 	int checkWindow();
-	int repairMinions();
+	int repairMinions(inputLayer* InputLayer, int observerNumber);
 	int resupplyMinions(inputLayer* InputLayer, int observerNumber);
 	int clearBoard(inputLayer* InputLayer);
 	int consultMinionCostChart(char minionType, char propertyType);
