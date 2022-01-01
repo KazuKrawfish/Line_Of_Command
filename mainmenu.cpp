@@ -630,9 +630,10 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		if (menuStatus == playingMap)
 		{
 			//Only call upkeep before play commences if it is a new game AND very first turn
-			if (veryFirstTurn == true && isItSaveGame == false)
+			//And not compie. Compie performs upkeep in its own function.
+			if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == humanPlayer)
 			{		
-				boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);	//True means we are not collecting income on this upkeep
+				boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
 				veryFirstTurn = false;
 			}
 

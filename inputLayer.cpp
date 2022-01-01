@@ -753,15 +753,16 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber, 
 
 int inputLayer::printWaitingScreen(MasterBoard* boardToPrint) 
 {	
-	
-	inputLayerWindow->clear();
-	char buffer[100];
-	sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
-	announceString += "'s turn. Press any key to begin.  \n";
-	sf::Text newText(announceString, *inputLayerFont, 20);
-	inputLayerWindow->draw(newText);
-	inputLayerWindow->display();
-	
+	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer) 
+	{
+		inputLayerWindow->clear();
+		char buffer[100];
+		sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
+		announceString += "'s turn. Press any key to begin.  \n";
+		sf::Text newText(announceString, *inputLayerFont, 20);
+		inputLayerWindow->draw(newText);
+		inputLayerWindow->display();
+	}
 	return 0;
 
 }
@@ -1071,6 +1072,8 @@ int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 		return -1;
 	}
 
+	std::cout << "Repairing " << minionToSupply->description << std::endl;
+
 	(*soundEffects)[repair].play();
 
 	//If within vision, we will watch repair occur
@@ -1131,23 +1134,25 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 	//Only lasts one input.
 	status = gameBoard;
 
-	if (MainMenu->debugMode == true)	//If debug, see from 0's perspective.
-	{
-		boardToInput->upkeep(this, 0);
+	if (boardToInput->playerRoster[boardToInput->playerFlag].playerType == humanPlayer) {
+		if (MainMenu->debugMode == true)	//If debug, see from 0's perspective.
+		{
+			boardToInput->upkeep(this, 0);
+		}
+		else  if (boardToInput->isItSinglePlayerGame == true)	//If it's single player, then we see from player 1's perspective. 
+		{
+			boardToInput->upkeep(this, 1);
+		}
+		else if (boardToInput->isItSinglePlayerGame == false && boardToInput->playerRoster[boardToInput->playerFlag].playerType == computerPlayer)	//If compie during multiplayer, no sight
+		{
+			boardToInput->upkeep(this, -1);
+		}
+		else
+		{
+			boardToInput->upkeep(this, boardToInput->playerFlag);
+		}
 	}
-	else  if (boardToInput->isItSinglePlayerGame == true)	//If it's single player, then we see from player 1's perspective. 
-	{
-		boardToInput->upkeep(this, 1);
-	}
-	else if (boardToInput->isItSinglePlayerGame == false && boardToInput->playerRoster[boardToInput->playerFlag].playerType == computerPlayer)	//If compie during multiplayer, no sight
-	{
-		boardToInput->upkeep(this, -1);
-	}
-	else
-	{
-		boardToInput->upkeep(this, boardToInput->playerFlag);
-	}
-	//Do upkeep here for all players
+	//Do upkeep here for all human players
 
 	return 0;
 }

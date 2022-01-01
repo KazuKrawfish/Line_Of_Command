@@ -2487,6 +2487,8 @@ int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 
 int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 {
+	std::cout << "Repair ALL MINIONS" << std::endl;
+
 	//This was terminating "early" since it would hit a NULL spot so minions wouldn't get seen to be healed.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{

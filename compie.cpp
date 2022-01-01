@@ -146,7 +146,7 @@ int compie::defendProperty(MasterBoard* boardToUse, compieMinionRecord* selected
 
 		{
 			//If property under attack by enemy
-			if (boardToUse->Board[x][y].hasMinionOnTop && boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag)
+			if (boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop && boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag)
 			{
 				//Check each adjacent tile to see if you can move there, and then set tasking to do so.
 				if (x > 0 && boardToUse->Board[x - 1][y].withinRange == true &&
