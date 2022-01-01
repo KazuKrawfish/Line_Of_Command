@@ -95,6 +95,8 @@ public:
 
 	//SFML Objects		/////////////////////////
 	std::vector <sf::Sound> * soundEffects;
+	bool soundsOn = false;
+	int speedFactor = 0.1;
 	sf::Texture* inputLayerTexture;
 	sf::Font* inputLayerFont;
 	sf::RenderWindow* inputLayerWindow;

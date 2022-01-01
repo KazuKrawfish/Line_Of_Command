@@ -1056,10 +1056,29 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 		determineProduction(boardToUse);
 
-		//End turn at end
-		InputLayer->status = waitingForNextLocalPlayer;
-
+		   
 		int incrementGameTurn = boardToUse->endTurn(InputLayer);
+		
+		//This is convoluted but if only compies are playing for us to view, we want to skip past the "waiting for next player" screen
+		//This is overriding the endTurn function.
+		bool allComputerPlayers = true;
+		for (int i = 1; i < boardToUse->NUMBEROFPLAYERS+1; i++)
+		{
+			if (boardToUse->playerRoster[i].playerType == humanPlayer)
+				allComputerPlayers = false;
+		}
+		if (allComputerPlayers == false)
+		{
+			InputLayer->status = waitingForNextLocalPlayer;
+		}
+		else 
+		{
+			InputLayer->status = gameBoard; 
+			menuPointer->skipOneInput = true;
+		}
+		//End workaround here	///////////
+
+
 		//If we advanced a gameTurn, mainMenu will keep track of it.
 		menuPointer->gameTurn += incrementGameTurn;
 		//Have to always keep an autosave!

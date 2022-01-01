@@ -776,7 +776,10 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 		return -1;
 
 	//Sound effects
-	(*soundEffects)[minionToMove->myMoveSound].play();
+	if (soundsOn == true)
+	{
+		(*soundEffects)[minionToMove->myMoveSound].play();
+	}
 
 
 	//If player controlled, tile the minion moves through will always be visible.
@@ -800,7 +803,7 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 
 
 	//Delay after printing;
-		std::this_thread::sleep_for(std::chrono::milliseconds(140));
+		std::this_thread::sleep_for(std::chrono::milliseconds(140 * speedFactor));
 
 	//Reset invisibilty status for minion selected
 	minionToMove->invisible = false;
@@ -808,9 +811,10 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	//Reset animation sprite
 	boardToPrint->Board[locationX][locationY].animationSprite = NULL;
 
-
-	(*soundEffects)[minionToMove->myMoveSound].stop();
-
+	if (soundsOn == true)
+	{
+		(*soundEffects)[minionToMove->myMoveSound].stop();
+	}
 
 	return 0;
 }
@@ -827,9 +831,11 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 		return -1;
 	}
 	
-	//Provide sound regardless of vision
-	(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].play();
-
+	if (soundsOn == true)
+	{
+		//Provide sound regardless of vision
+		(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].play();
+	}
 
 
 	//If within vision, we will watch attackerVisible
@@ -850,7 +856,7 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 			tileAttacking->animationSprite->setTextureRect(rectArray[i][13]);
 			bool withinAnimation = true;
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(70));
+			std::this_thread::sleep_for(std::chrono::milliseconds(70 * speedFactor));
 		}
 	
 		//Clean up afterwards if necessary
@@ -879,7 +885,7 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 			bool withinAnimation = true;
 			printScreen(boardToPrint, observerNumber, withinAnimation);
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(70));
+			std::this_thread::sleep_for(std::chrono::milliseconds(70 * speedFactor));
 		}
 	
 		//Clean up afterwards if necessary
@@ -891,9 +897,10 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 
 	
 	}
-	
-	(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].stop();
-
+	if (soundsOn == true)
+	{
+		(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].stop();
+	}
 	return 0;
 }
 
@@ -913,8 +920,10 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 		return -1;
 	}
 
-	(*soundEffects)[capture].play();
-
+	if (soundsOn == true)
+	{
+		(*soundEffects)[capture].play();
+	}
 
 	//If within vision, we will watch capture occur
 	if (myTile->withinVision[observerNumber] == true)
@@ -931,11 +940,11 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 		bool withinAnimation = true;
 		myTile->animationSprite->setTextureRect(rectArray[5][14]);
 		printScreen(boardToPrint, observerNumber, withinAnimation);
-		std::this_thread::sleep_for(std::chrono::milliseconds(180));
+		std::this_thread::sleep_for(std::chrono::milliseconds(180 * speedFactor));
 
 		myTile->animationSprite->setTextureRect(rectArray[5+ minionToCapture->team][14]);
 		printScreen(boardToPrint, observerNumber, withinAnimation);
-		std::this_thread::sleep_for(std::chrono::milliseconds(180));
+		std::this_thread::sleep_for(std::chrono::milliseconds(180 * speedFactor));
 
 		}
 
@@ -948,8 +957,10 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 
 	}
 
-	(*soundEffects)[capture].stop();
-
+	if (soundsOn == true)
+	{
+		(*soundEffects)[capture].stop();
+	}
 }
 
 int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToSupply, int locationX, int locationY) 
@@ -967,7 +978,10 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 		return -1;
 	}
 
-	(*soundEffects)[resupply].play();
+	if (soundsOn == true)
+	{
+		(*soundEffects)[resupply].play();
+	}
 
 	//If within vision, we will watch capture occur
 	if (myTile->withinVision[observerNumber] == true)
@@ -983,11 +997,11 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 			bool withinAnimation = true;
 			myTile->animationSprite->setTextureRect(rectArray[6][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180));
+			std::this_thread::sleep_for(std::chrono::milliseconds(180 * speedFactor));
 
 			myTile->animationSprite->setTextureRect(rectArray[5][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180));
+			std::this_thread::sleep_for(std::chrono::milliseconds(180 * speedFactor));
 
 		}
 
@@ -1000,7 +1014,10 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 
 	}
 
-	(*soundEffects)[resupply].stop();
+	if (soundsOn == true)
+	{
+		(*soundEffects)[resupply].stop();
+	}
 
 }
 
@@ -1019,7 +1036,10 @@ int inputLayer::trapGraphics(MasterBoard* boardToPrint, int observerNumber, Mini
 		return -1;
 	}
 
-	(*soundEffects)[trapped].play();
+	if (soundsOn == true)
+	{
+		(*soundEffects)[trapped].play();
+	}
 
 	//If within vision, we will watch trap occur
 	if (myTile->withinVision[observerNumber] == true)
@@ -1035,7 +1055,7 @@ int inputLayer::trapGraphics(MasterBoard* boardToPrint, int observerNumber, Mini
 
 		myTile->animationSprite->setTextureRect(rectArray[8][13]);
 		printScreen(boardToPrint, observerNumber, withinAnimation);
-		std::this_thread::sleep_for(std::chrono::milliseconds(350));
+		std::this_thread::sleep_for(std::chrono::milliseconds(350 * speedFactor));
 
 		myTile->animationSprite->setTextureRect(rectArray[5][13]);
 		printScreen(boardToPrint, observerNumber, withinAnimation);
@@ -1050,8 +1070,10 @@ int inputLayer::trapGraphics(MasterBoard* boardToPrint, int observerNumber, Mini
 
 	}
 
-	(*soundEffects)[trapped].stop();
-
+	if (soundsOn == true)
+	{
+		(*soundEffects)[trapped].stop();
+	}
 
 
 }
@@ -1074,7 +1096,11 @@ int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 
 	std::cout << "Repairing " << minionToSupply->description << std::endl;
 
-	(*soundEffects)[repair].play();
+	if (soundsOn == true)
+	{
+		(*soundEffects)[repair].play();
+
+	}
 
 	//If within vision, we will watch repair occur
 	if (myTile->withinVision[observerNumber] == true)
@@ -1090,11 +1116,11 @@ int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 			bool withinAnimation = true;
 			myTile->animationSprite->setTextureRect(rectArray[7][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180));
+			std::this_thread::sleep_for(std::chrono::milliseconds(180 * speedFactor));
 
 			myTile->animationSprite->setTextureRect(rectArray[5][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180));
+			std::this_thread::sleep_for(std::chrono::milliseconds(180 * speedFactor));
 
 		}
 
@@ -1107,8 +1133,10 @@ int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 
 	}
 
-	(*soundEffects)[repair].stop();
-
+	if (soundsOn == true)
+	{
+		(*soundEffects)[repair].stop();
+	}
 }
 
 int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation)
