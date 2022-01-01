@@ -680,6 +680,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
 
 		}
+	
 	}
 	return 0;
 }
@@ -694,25 +695,36 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 	//If user wants to load a map.
 	if (*Input == 'l') 
 	{
-		topMenuLoad(Input, boardToPlay, InputLayer);
+		int goBack = topMenuLoad(Input, boardToPlay, InputLayer);
+		if (goBack == 0)
+		{
+			InputLayer->status = gameBoard;
+		}
 		skipOneInput = true;
-		InputLayer->status = gameBoard;
 	} 
 	else
 	//Newgame
 	if (*Input == 'n')
 	{
- 		topMenuNew(Input, boardToPlay, InputLayer);
-		skipOneInput = true;
+ 		int goBack = topMenuNew(Input, boardToPlay, InputLayer);
+		if (goBack == 0) 
+		{
+
 		InputLayer->status = gameBoard;
+		}
+		skipOneInput = true;
 	}
 	else
 	//Join a remote game
 	if (*Input == 'j')
 	{
-		topMenuJoin(boardToPlay, InputLayer);
+		int goBack = topMenuJoin(boardToPlay, InputLayer);
+		if (goBack == 0)
+		{
+
+			InputLayer->status = gameBoard;
+		}
 		skipOneInput = true;
-		InputLayer->status = gameBoard;
 	}else
 	//Toggle debug mode.
 	if (*Input == '~')
@@ -808,6 +820,10 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			mywindow->draw(newText);
 			mywindow->display();
 			gameType = localCampaign;
+		}
+		else if(*Input == 'b')
+		{
+			return 1;
 		}
 	}
 	
@@ -1080,7 +1096,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 	//Determine if game is remote or local.
 	mywindow->clear();
-	sf::String topMenuNewString("Local skirmish (s), local campaign (c), or remote (r) game? \n");
+	sf::String topMenuNewString("Local skirmish (s), local campaign (c), or remote (r) game? Or Back (b)\n");
 	sf::Text text(topMenuNewString, *myFont, menuTextSize);
 	mywindow->draw(text);
 	mywindow->display();
@@ -1100,6 +1116,10 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 		else if (*Input == 's')
 		{
 			gameType = localSkirmish;
+		}
+		else if (*Input == 'b')
+		{
+			return 1;
 		}
 	}
 

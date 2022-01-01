@@ -1491,13 +1491,6 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		MainMenu->scrambleMap(boardToInput, this);	//This needs to be cleaned up to deal with minions.
 	}
 
-	//Another working key for compie
-	//Currently (I think) breaks the game.
-	if (*Input == 'c' && MainMenu->debugMode == true)
-	{
-		MainMenu->computerPlayerRoster[boardToInput->playerFlag].takeMyTurn(boardToInput);
-	}
-
 	//Need char for shift
 	if (*Input == '0')
 	{

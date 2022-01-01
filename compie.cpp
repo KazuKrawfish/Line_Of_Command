@@ -544,15 +544,19 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 		defenderCounterAttackDamageDealt = 0;
 
 	//This is the potential "value added" from combat, based on what we might lose vs gain.
-	double newRelativeSuitabilityScore = ( attackerDamageDealt * defenderCost - defenderCounterAttackDamageDealt * attackerCost )  / 100;
+	double newRelativeSuitabilityScore = ( (attackerDamageDealt * defenderCost )- (defenderCounterAttackDamageDealt * attackerCost) )  / 100;
 
 	//If it's a better score, switch targets.
 	if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
 	{
+		//New criteria: defender's damage dealt must be less than 50
+		if(defenderCounterAttackDamageDealt < 50 )
+		{
 		*relativeSuitabilityScore = newRelativeSuitabilityScore;
 		selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[attackerX][attackerY]);
 		selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[defenderX][defenderY]);
 		//No return, we want to check all tiles
+		}
 	}
 	 
 	return 0;
@@ -573,10 +577,6 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 	int minY = 0;
 	int maxY = 0;
 	
-
-	//Debug
-	if (myCursor->selectMinionPointer->rangeType == rangedFire)
-		std::cout << "My arty" << std::endl;
 
 	if (myCursor->selectMinionPointer->rangeType == directFire) 
 	{
