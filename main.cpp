@@ -139,11 +139,13 @@ int main()
 	mainImage.createMaskFromColor(colorWhite.White);
 	mainTexture.loadFromImage(mainImage);
 
-	if (!cour.loadFromFile("cour.ttf"))
+	if (!cour.loadFromFile("times.ttf"))
 	{
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
 	
+
+
 	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, &warshipTexture,& troopsTexture, &topMenuTexture, &startScreenTexture , &introMusic);
 	
 	inputLayer InputLayer(&MainMenu, &mainWindow , &mainTexture, &cour, &soundEffects);

@@ -692,48 +692,67 @@ int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* In
 
 	*Input = playCharInput(mywindow);
 
-	//If user wants to load a map.
-	if (*Input == 'l') 
+	//Move cursor up and down
+	if (*Input == 's')
 	{
-		int goBack = topMenuLoad(Input, boardToPlay, InputLayer);
-		if (goBack == 0)
-		{
-			InputLayer->status = gameBoard;
-		}
+		menuIterator++;
 		skipOneInput = true;
-	} 
-	else
-	//Newgame
-	if (*Input == 'n')
-	{
- 		int goBack = topMenuNew(Input, boardToPlay, InputLayer);
-		if (goBack == 0) 
-		{
-
-		InputLayer->status = gameBoard;
-		}
-		skipOneInput = true;
+		if (menuIterator >= topMenuOptions.size())
+			menuIterator = 0;
 	}
 	else
-	//Join a remote game
-	if (*Input == 'j')
-	{
-		int goBack = topMenuJoin(boardToPlay, InputLayer);
-		if (goBack == 0)
+		if (*Input == 'w')
 		{
-
-			InputLayer->status = gameBoard;
+			menuIterator--;
+			skipOneInput = true;
+			if (menuIterator < 0)
+				menuIterator = topMenuOptions.size() - 1;
 		}
-		skipOneInput = true;
-	}else
-	//Toggle debug mode.
-	if (*Input == '~')
-	{
-		if (debugMode == false)
-			debugMode = true;
-		else if (debugMode == true)
-			debugMode = false;
-	}
+		else
+			//Load game
+			if (menuIterator == 0 && *Input == 't')
+			{
+				int goBack = topMenuLoad(Input, boardToPlay, InputLayer);
+				if (goBack == 0)
+				{
+					InputLayer->status = gameBoard;
+				}
+				skipOneInput = true;
+			}
+			else
+			//Start new game
+			if (menuIterator == 1 && *Input == 't')
+			{
+				int goBack = topMenuNew(Input, boardToPlay, InputLayer);
+				if (goBack == 0)
+				{
+
+					InputLayer->status = gameBoard;
+				}
+				skipOneInput = true;
+			}	
+			else
+			//Join a remote game
+			if (menuIterator == 2 && *Input == 't')
+			{
+				int goBack = topMenuJoin(boardToPlay, InputLayer);
+				if (goBack == 0)
+				{
+
+					InputLayer->status = gameBoard;
+				}
+				skipOneInput = true;
+			}
+			else
+			//Toggle debug mode.
+			if (menuIterator == 3 && *Input == 't')
+			{
+				if (debugMode == false)
+					debugMode = true;
+				else if (debugMode == true)
+					debugMode = false;
+				skipOneInput = true;
+			}
 
 	return 0;
 }
@@ -747,15 +766,39 @@ int mainMenu::printTopMenu()
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(*topMenuTexture);
 
+	//MenuCrawler
+	std::string boardMessage = "";
+
+	for (int i = 0; i < topMenuOptions.size(); i++)
+	{
+		if (menuIterator == i)
+			boardMessage += "*";
+		else boardMessage += "  ";
+		boardMessage += topMenuOptions[i];
+		if (topMenuOptions[i] == "Editor Mode")
+		{
+			if (debugMode == true)
+				boardMessage += " On";
+			else
+				boardMessage += " Off";
+		}
+		boardMessage += "\n\n";
+	}
+	
+	sf::String sfBoardMessage = boardMessage;
+	sf::Text newText(sfBoardMessage, *myFont, 30);
 
 	mywindow->clear();
 
 	mywindow->draw(topMenuWallpaperSprite);
 
 	topMenuSprite.setPosition( 450, 150);
-
-	
 	mywindow->draw(topMenuSprite);
+	
+	newText.setFillColor(sf::Color::Black);
+	newText.setPosition(480, 230);
+	mywindow->draw(newText);
+	
 	mywindow->display();
 	
 	return 0;
@@ -765,7 +808,7 @@ int mainMenu::printWaitingScreen()
 {
 	mywindow->clear();
 	sf::String waitingScreenString("Waiting for other player(s) \n");
-	sf::Text text(waitingScreenString, *myFont, 0);
+	sf::Text text(waitingScreenString, *myFont, 20);
 	mywindow->draw(text);
 	mywindow->display();
 	return 0;
