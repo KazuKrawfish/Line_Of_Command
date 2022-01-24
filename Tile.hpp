@@ -73,6 +73,7 @@ public:
 		
 	}
 
+	//Takes a given minion and terrain type, consults the movement chart, and returns the cost to move on this particular tile.
 	int consultMovementChart(char minionType, char terrainType)
 	{
 

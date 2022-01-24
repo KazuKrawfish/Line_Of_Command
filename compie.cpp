@@ -20,27 +20,357 @@ int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
 
 }
 //Above functions are "utilities" that need to find a home.
-
-//Helps compie determine semi-constant map elements.
-int compie::analyzeMap(MasterBoard* boardToUse)
+int compie::statusUpdate(MasterBoard* boardToUse) 
 {
-	//Find headquarters:
+	double totalPropertiesCompieOwns = 0;
+	double totalFactoriesCompieOwns = 0;
+
+	//Clear all land masses of infantry/army size amounts
+	for (int i = 1; i < compieLandMassMap.roster.size(); i++)
+	{
+		compieLandMassMap.roster[i].armySizeHere = 0;
+		compieLandMassMap.roster[i].onlyInfantryArmySizeHere = 0;
+	}
+
+	buildCompieMinionRoster(boardToUse);
+
+	//Now find factories and properties totals int total- we calculate the turn's armamentFactor as a global rate, not individual land masses.
+	//Otherwise the compie would randomly skew certain areas to high-mech. and they'd never build units if it remained actually poor.
 	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
+			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
+			{
+				if (boardToUse->Board[x][y].symbol == 'h')
+				{
+					totalFactoriesCompieOwns++;
+				}
+				
+				totalPropertiesCompieOwns++;
+
+			}
+		}
+	}
+
+	armamentFactor = totalFactoriesCompieOwns / totalPropertiesCompieOwns;
+	for (int i = 1; i < compieLandMassMap.roster.size(); i++)
+	{
+		compieLandMassMap.roster[i].infantryMaxHere = armamentFactor * compieLandMassMap.roster[i].maxArmySize;
+	}
+
+	return 0;
+
+}
+
+
+//Builds land mass map for compie. Recursive since it has to build contiguous territories.
+//Should return the number used. Which should only matter if this was the first one called.
+int compie::buildLandMassMap(MasterBoard* boardToUse, int x, int y, int nextNumber)
+{	
+	int myNumber = compieLandMassMap.grid[x][y].landMassNumber;
+	bool firstSquare = false;
+
+	//If this territory is impassible, go no further.
+	//Indicates this square is impassible and thus doesn't belong to any landMass.
+	if (myNumber == -1)	//Previously assigned based on 99 == -1
+		return -1;	
+
+	//If not impassable
+	if (myNumber >= 0 )
+	{
+
+		//This is the first square we're analyzing (We weren't reached previously)
+		//That means this is part of a new landmass.
+		//Otherwise we were assigned a value before this function was called.
+		if (compieLandMassMap.grid[x][y].landMassNumber == 0)
+		{
+			compieLandMassMap.grid[x][y].landMassNumber = nextNumber;
+			firstSquare = true;
+
+		}
+		
+
+		//Check each neighbor. If they have a number/are impassible skip them. Otherwise they get your number.
+		//Then call buildLandMasMap on them.
+		if (x > 0)
+		{
+			if (compieLandMassMap.grid[x - 1][y].landMassNumber == 0)
+			{
+				compieLandMassMap.grid[x - 1][y].landMassNumber = myNumber;
+				buildLandMassMap(boardToUse, x- 1, y, nextNumber);
+			}
+		}
+		if (y > 0)
+		{
+			if (compieLandMassMap.grid[x ][y -1].landMassNumber == 0)
+			{
+				compieLandMassMap.grid[x][y - 1].landMassNumber = myNumber;
+				buildLandMassMap(boardToUse, x , y-1, nextNumber);
+			}
+		}
+		if (y < boardToUse->BOARD_HEIGHT - 1)
+		{
+			if (compieLandMassMap.grid[x][y+ 1].landMassNumber == 0)
+			{
+				compieLandMassMap.grid[x][y + 1].landMassNumber = myNumber;
+				buildLandMassMap(boardToUse, x, y + 1, nextNumber);
+			}
+		}
+		if (x < boardToUse->BOARD_WIDTH- 1)
+		{
+			if (compieLandMassMap.grid[x + 1][y ].landMassNumber == 0)
+			{
+				compieLandMassMap.grid[x + 1][y].landMassNumber = myNumber;
+				buildLandMassMap(boardToUse, x + 1, y , nextNumber);
+			}
+		}
+
+
+		//If this was first call, return next number iterated.
+		//If not the first call, return nextNumber without iteration.
+		if (firstSquare == true)
+			return nextNumber + 1;
+		else return nextNumber;
+
+	}
+
+	return -1;
+}
+
+int compie::analyzeSingleLandMass(MasterBoard* boardToUse, int landMassNumber) 
+{
+
+	int maxX = 0;
+	int minX = 0;
+	int minY = 0;
+	int maxY = 0;
+
+	double landToLandBorders = 0;
+	double landToImpassBorders = 0;
+	double totalLandSquares = 0;
+
+	bool firstSquare = true;
+
+	//First find borders of single land mass.
+	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
+		{
+			if (compieLandMassMap.grid[x][y].landMassNumber == landMassNumber)
+			{
+				if (x < minX || firstSquare == true)
+				{
+					minX = x;
+
+				}
+				if (x > maxX || firstSquare == true)
+				{
+					maxX = x;
+
+				}	
+				
+				if (y < minY || firstSquare == true)
+				{
+					minY = y;
+
+				}
+				if (y > maxY || firstSquare == true)
+				{
+					maxY = y;
+
+				}
+			
+				if (firstSquare == true)
+					firstSquare = false;
+			
+			}
+		}
+	}
+
+	//Count borders of individual squares
+	for (int x = minX; x <= maxX; x++)
+	{
+		for (int y = minY; y <= maxY; y++)
+		{
+			if (compieLandMassMap.grid[x][y].landMassNumber == landMassNumber)
+			{
+				totalLandSquares++;
+			}
+
+			//If not on rightmost edge of board, check right border
+			//Must be the same land mass to be counted
+			if (x < boardToUse->BOARD_WIDTH - 1 && x < maxX)
+			{
+				if (compieLandMassMap.grid[x][y].landMassNumber == landMassNumber)
+				{
+
+					if (compieLandMassMap.grid[x][y].landMassNumber == compieLandMassMap.grid[x + 1][y].landMassNumber)
+					{
+						landToLandBorders++;
+					}
+					else	//Otherwise it must be impassible
+					{
+						landToImpassBorders++;
+					}
+				}
+				else 
+				{	//If it's not a land/passable square, all borders by def. must be impass borders.
+					landToImpassBorders++;
+				}
+			}
+			//Then check bottom border of this square, if we're not at board bottom.
+			if (y < boardToUse->BOARD_HEIGHT - 1 && y < maxY)
+			{
+				if (compieLandMassMap.grid[x][y].landMassNumber == landMassNumber)
+				{
+
+					if (compieLandMassMap.grid[x][y].landMassNumber == compieLandMassMap.grid[x][y + 1].landMassNumber)
+					{
+						landToLandBorders++;
+					}
+					else	//Otherwise it must be impassible
+					{
+						landToImpassBorders++;
+					}
+				}
+				else
+				{	//If it's not a land/passable square, all borders by def. must be impass borders.
+					landToImpassBorders++;
+				}
+
+			}
+
+			
+
+		}
+	}
+
+	//Compute edginessFactor
+	compieLandMassMap.roster[landMassNumber].edginessFactor = landToLandBorders / (landToLandBorders + landToImpassBorders);
+	compieLandMassMap.roster[landMassNumber].landEdges = landToLandBorders;
+	compieLandMassMap.roster[landMassNumber].impassEdges = landToImpassBorders;
+
+	
+	//Set borders for final product
+	compieLandMassMap.roster[landMassNumber].leftX = minX;
+	compieLandMassMap.roster[landMassNumber].rightX = maxX;
+	compieLandMassMap.roster[landMassNumber].topY = minY;
+	compieLandMassMap.roster[landMassNumber].bottomY = maxY;
+
+	//Set land count for final product
+	compieLandMassMap.roster[landMassNumber].totalLandSquareCount = totalLandSquares;
+
+	//Set area for final product
+	compieLandMassMap.roster[landMassNumber].totalArea = (maxX - minX + 1)  * (maxY - minY + 1 );
+
+	//Compute landFactor and set for final product
+	compieLandMassMap.roster[landMassNumber].landinessFactor = totalLandSquares / (compieLandMassMap.roster[landMassNumber].totalArea);
+
+	compieLandMassMap.roster[landMassNumber].initialized = true;
+
+	return 0;
+
+}
+
+//Helps compie determine semi-constant map elements.
+int compie::analyzeMap(MasterBoard* boardToUse)
+{
+	//Go through each square on the board
+	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
+		{
+
+			//Find headquarters:
 			if (boardToUse->Board[x][y].symbol == 'Q' && boardToUse->Board[x][y].controller == compiePlayerFlag)
 			{
 				headquartersX = x;
 				headquartersY = y;
 			}
 
-
 			//Count number of properties on map
 			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true)
 				totalPropertiesOnMap++;
+
+			//Here we find which properties are impassible to an infantry, which helps determine the boundaries for compie's land mass map.
+			int movementCostHere = boardToUse->Board[x][y].consultMovementChart('i', boardToUse->Board[x][y].symbol);
+			if (movementCostHere == -1)
+			{
+				std::cout << "Error while analyzing map, incorrect symbol" << std::endl;
+			}
+			else if (movementCostHere == 99)
+			{
+				compieLandMassMap.grid[x][y].landMassNumber = -1;
+			}
+
+
 		}
 
+	}
+
+	int nextLandMassNumber = 1;
+	//Now go through board again, and build land mass map.
+	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
+		{
+			//If this landMassSquare is passable, call recursive builder.
+			if(compieLandMassMap.grid[x][y].landMassNumber != -1)
+				nextLandMassNumber = buildLandMassMap(boardToUse, x, y, nextLandMassNumber);
+		}
+	}
+
+	//One for each land mass, one for 0 index, and one extra because it weirdly fails on me.
+	compieLandMassMap.roster.resize(nextLandMassNumber);
+
+	//Iterate through board and analyze any landmasses that have not been analyzed.
+	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
+		{
+			
+			if (compieLandMassMap.grid[x][y].landMassNumber != -1 ) 
+			{
+				if (compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].initialized == false)
+				{
+					analyzeSingleLandMass(boardToUse, compieLandMassMap.grid[x][y].landMassNumber);
+				}
+			}
+			
+		}
+	}
+
+
+
+	for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
+	{
+		for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
+		{
+		std::cout << " " << compieLandMassMap.grid[x][y].landMassNumber;
+		}
+		std::cout << "\n";
+
+	}
+
+	for (int y = 1; y < compieLandMassMap.roster.size(); y++)
+	{
+		///(6 == 2*2) <-- 2: Half of landMass belongs to compie, 2: To provide room for maneuver and repair
+		double normalizedArea = compieLandMassMap.roster[y].totalLandSquareCount * compieLandMassMap.roster[y].landinessFactor;
+		compieLandMassMap.roster[y].maxArmySize = normalizedArea * compieLandMassMap.roster[y].edginessFactor / (4) + 2;
+		
+		if (compieLandMassMap.roster[y].maxArmySize < 4)
+		{
+			compieLandMassMap.roster[y].maxArmySize = 4;
+		}
+		
+		std::cout << "Land Mass: " << y << std::endl;
+		std::cout << "Total Area: " << compieLandMassMap.roster[y].totalArea << std::endl;
+		std::cout << "Total Land Squares: " << compieLandMassMap.roster[y].totalLandSquareCount << std::endl;
+		std::cout << "Edge Factor: " << compieLandMassMap.roster[y].edginessFactor << " (Land Edges: "<< compieLandMassMap.roster[y].landEdges<< ") (Impass. Edges: " << compieLandMassMap.roster[y].impassEdges << ")" << std::endl;
+		std::cout << "Land Factor: " << compieLandMassMap.roster[y].landinessFactor << std::endl;
+		std::cout << "Max Army Size here: " << compieLandMassMap.roster[y].maxArmySize << std::endl;
+		std::cout << "----------" << std::endl;
 	}
 
 	return 0;
@@ -103,7 +433,9 @@ int compie::defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* sele
 	
 
 	}
-	else 	return 0;
+	
+	
+	return 0;
 }
 
 
@@ -209,13 +541,16 @@ int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer
 	compieMinionRoster.resize(GLOBALSUPPLYCAP);
 
 
-	compiePathMap.resize(boardToUse->BOARD_WIDTH + 1);
+	compieLandMassMap.grid.resize(boardToUse->BOARD_WIDTH + 1);
 
 	for (int i = 0; i < boardToUse->BOARD_WIDTH; i++)
 	{
-		compiePathMap[i].resize(boardToUse->BOARD_HEIGHT);
+		compieLandMassMap.grid[i].resize(boardToUse->BOARD_HEIGHT);
 
 	}
+
+	analyzeMap(boardToUse);
+
 	return 0;
 }
 
@@ -964,13 +1299,11 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 	
 	boardToUse->upkeep(InputLayer, whoIsWatching);
 
-
+	statusUpdate(boardToUse);
 
 	bool allMinionsHaveMoved = false;
 	int waveIterator = 0;
 
-	//Every turn build new compieminionRoster	
-	buildCompieMinionRoster(boardToUse);
 
 	//Very first move: Artillery fire at targets of opportunity.
 	for (int i = 0; i < compieMinionRoster.size(); i++)
@@ -1177,6 +1510,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
 
+
 				//If we have a proper proportion of tanks, buy cavalry.
 				if (int(numberOfTanks / 3) > numberOfCavalry 
 					&& boardToUse->consultMinionCostChart('c', 'h') <= availableTreasury 
@@ -1213,7 +1547,11 @@ int compie::determineProduction(MasterBoard* boardToUse)
 						else		//Infantry and specialists have a similar proportion.
 						if (int(numberOfInfantry / 3) > numberOfSpecialists 
 							&& boardToUse->consultMinionCostChart('s', 'h') <= availableTreasury 
-							&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('s', 'h'))
+							&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('s', 'h')
+							&& 
+							(compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere  <
+								compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
+							)
 						{
 							//Must be able to actually afford the unit.
 
@@ -1239,7 +1577,10 @@ int compie::determineProduction(MasterBoard* boardToUse)
 								totalFactoriesLeft--;
 							}
 							else if (boardToUse->consultMinionCostChart('i', 'h') <= availableTreasury 
-								&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('i', 'h'))
+								&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('i', 'h')
+								&& (compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
+									compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
+								)
 							{
 
 								//Must be able to actually afford the unit.
@@ -1296,7 +1637,6 @@ int compie::buildCompieMinionRoster(MasterBoard* boardToUse)
 
 	//A new compieMinionRoster every turn, instead of trying to track minion deaths.
 
-
 	//Go through minion Roster.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
@@ -1307,6 +1647,12 @@ int compie::buildCompieMinionRoster(MasterBoard* boardToUse)
 			numberOfCompieMinions++;
 			compieMinionRoster[i] = new compieMinionRecord(boardToUse->minionRoster[i]);
 
+			//Also count number of infantry/total units in this land mass.
+			compieLandMassMap.roster[compieLandMassMap.grid[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].landMassNumber].armySizeHere++;
+			if (boardToUse->minionRoster[i]->specialtyGroup == infantry)
+			{
+				compieLandMassMap.roster[compieLandMassMap.grid[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].landMassNumber].onlyInfantryArmySizeHere++;
+			}
 		}
 	}
 

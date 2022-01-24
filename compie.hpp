@@ -17,6 +17,55 @@ class Cursor;
 class mainMenu;
 class compieMinionRecord;
 
+//Used to make up compie's land mass map.
+
+struct landMassSquare
+{
+public:
+	int landMassNumber = 0;
+	//  0 - square hasn't been visited yet.
+	// -1 - square is impassible.
+	//  # - indicates land mass this belongs to.
+
+};
+
+struct landMassInfoEntry 
+{
+	bool initialized = false;
+	double totalLandSquareCount = 0;
+	double totalArea = 0;
+
+	int leftX = 0;
+	int rightX = 0;
+	int topY = 0;
+	int bottomY = 0;
+
+	double edginessFactor = 1.0;
+
+	//Don't really need other than for debug
+	int landEdges = 0;
+	int impassEdges = 0;
+	
+	double landinessFactor = 1.0;
+
+	//These determine the number and quality of units the compie will build on a certain land mass.
+	int maxArmySize = 0;
+	double infantryMaxHere = 0;
+	double armySizeHere = 0;
+	double onlyInfantryArmySizeHere = 0;
+
+
+};
+
+class landMass
+{
+	public:
+	//Used for compie production calculations.
+	std::vector<std::vector<landMassSquare>> grid;
+	std::vector <landMassInfoEntry> roster;
+
+};
+
 
 class compie 
 {
@@ -36,15 +85,22 @@ public:
 	int executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int takeMyTurn(MasterBoard* boardToUse);
 	int determineProduction(MasterBoard* boardToUse);
+
+	//Analysis tools called at game load.
 	int analyzeMap(MasterBoard* boardToUse);
-	
+	int buildLandMassMap(MasterBoard* boardToUse, int x, int y, int nextNumber);
+	int analyzeSingleLandMass(MasterBoard* boardToUse, int landMassNumber);
+	int statusUpdate(MasterBoard* boardToUse);
 
 	//New functions for new compie 2_0
 	int buildCompieMinionRoster(MasterBoard* boardToUse);
-		
-
+	
+	//Used for compie minion calculations.
 	std::vector <compieMinionRecord*>  compieMinionRoster;
-	std::vector<std::vector<pathSquare>> compiePathMap;
+
+	//LandMass contains a grid of squares
+	landMass compieLandMassMap; 
+
 	mainMenu* menuPointer = NULL;
 	inputLayer* InputLayer = NULL;
 
@@ -55,7 +111,9 @@ public:
 	int headquartersX = 0;
 	int headquartersY = 0;
 	int totalPropertiesOnMap = 0;
-	int totalContinents = 0;
+	double armamentFactor = 1;
+
+
 
 };
 

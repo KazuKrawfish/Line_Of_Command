@@ -616,7 +616,7 @@ MasterBoard::MasterBoard(sf::Texture *inputTexture)
 	return;
 }
 
-//This servie builds another parallel set of distances that ignores all units.
+//This service builds another parallel set of distances that ignores all units.
 int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion) 
 {
 
