@@ -1,3 +1,13 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	inputLayer.cpp
+//
+/*	
+The inputLayer class is responsible for all player-related and interface activities. It interacts with the masterboard class, sending commands 
+to move minions and such, while receiving data from the board to print to screen for animations and static display. It also goes back up to mainmenu 
+when necessary, ie. when game ends or player wants to leave the current game.
+*/
+
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
 #include "inputLayer.hpp"
@@ -8,8 +18,6 @@
 #include <cmath>
 #include "compie.hpp"
 #include <thread>
-
-
 
 char playCharInput(sf::RenderWindow* myWindow); 
 

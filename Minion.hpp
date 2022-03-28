@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	Minion.hpp
+//
+
 #ifndef MINION_HPP__
 #define MINION_HPP__
 

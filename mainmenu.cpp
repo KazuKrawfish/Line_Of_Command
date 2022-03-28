@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	mainMenu.cpp
+//
+
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
 #include "inputLayer.hpp"

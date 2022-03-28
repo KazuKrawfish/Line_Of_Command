@@ -1,3 +1,13 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	inputLayer.hpp
+//
+/*
+The inputLayer class is responsible for all player-related and interface activities. It interacts with the masterboard class, sending commands
+to move minions and such, while receiving data from the board to print to screen for animations and static display. It also goes back up to mainmenu
+when necessary, ie. when game ends or player wants to leave the current game.
+*/
+
 #ifndef INPUT_HPP__
 #define INPUT_HPP__
 

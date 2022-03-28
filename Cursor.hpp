@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	Cursor.hpp
+//
+
 #ifndef CURSOR_HPP__
 #define CURSOR_HPP__
 

@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	compieMinionRecord.cpp
+//
+
 #include "compieMinionRecord.hpp"
 #include <thread>
 #include <iostream>

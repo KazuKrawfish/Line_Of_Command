@@ -1,3 +1,11 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	tile.hpp
+//
+/*
+The Tile class is the basic unit of terrain that makes up the gameboard. It contains data like terrain type, movement costs, defense bonuses, etc.
+*/
+
 #ifndef TILE_H__
 #define TILE_H__
 

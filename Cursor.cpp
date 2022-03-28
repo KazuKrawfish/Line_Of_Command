@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	Cursor.cpp
+//
+
 #include "Cursor.hpp"
 #include "MasterBoard.hpp"
 

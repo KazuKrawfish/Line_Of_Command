@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	compie.hpp
+//
+
 #ifndef COMPIE_H__
 #define COMPIE_H__
 
