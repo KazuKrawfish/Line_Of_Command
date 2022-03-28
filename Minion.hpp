@@ -3,16 +3,24 @@
 
 #include <string>
 #include <vector>
+#include <SFML/Graphics.hpp>
 
 //Forward declaration for MasterBoard.
 class MasterBoard;
 
 //Status indicators are true also for transports, engineers, etc. hasfired will be true if the transport dropped a guy, for instance.
 enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmovehasntfired };
+//Hybrid fire rules:
+//Can move and shoot like direct fire, but only with secondary weapon.
+//Can stand still and fire pri or sec. Primary always has a minimum range of 1, and sec always has max range of 1.
+//Thus AA can fire at ground units next to regardless of move status, but can only shoot air units outside 1, if it stood still.
 enum RangeType { directFire, rangedFire, hybridRange };
-enum specialtyGroupType { normal, infantry, transport, stealth };
+enum specialtyGroupType { normal, infantry, transport, stealth, defense };
 //Domain type is used not for terrain but everything else. Defensive bonus from terrain, fuel requirement, refuel, move through enemy units, etc.
 enum domainType { land, air, sea, helo };
+
+enum soundEffectType {machineGun, rpg, cannon, antiAircraftCannon, infantryMove, vehicleMove, buildUnit, capture, resupply, repair , trapped};
+
 
 class pathSquare
 {
@@ -28,7 +36,7 @@ public:
 
 	//Constructors
 	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment,
-		int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo, int inputSecAmmo);
+		int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo, int inputSecAmmo, sf::Texture* inputTexture);
 	Minion();
 	~Minion();
 
@@ -66,10 +74,20 @@ public:
 	double health = 0;
 	Minion* minionBeingTransported = NULL;
 	Minion* transporter = NULL;
-	std::string Image = { '.','.','.',
-						'.','.','.',
-						'.','.','.' };
 	int veterancy = 0;
+
+	//GRAPHICS ///////////////////////////
+	sf::Sprite mySprite;
+	sf::Texture* myTexture;
+	bool invisible = false;
+	//GRAPHICS ///////////////////////////
+	
+	//SOUND EFFECTS //////////////////////
+	soundEffectType myAttackSound = machineGun;
+	soundEffectType myMoveSound = infantryMove;
+	//SOUND EFFECTS //////////////////////
+
+	
 
 	double calculateVetBonus();
 

@@ -7,10 +7,16 @@
 #include <iostream>
 #include <vector>
 
+
+//Forward declare
+extern std::vector <std::vector<sf::IntRect>> rectArray;
+class Masterboard;
+
+
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
-//												        . + ^ M  H m n h Q = ~  - A			P `
-const int MOVE_VALUES_MATRIX[19][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1,
+//												        . + ^ M  H m n h Q = ~  - A			P *
+const int MOVE_VALUES_MATRIX[21][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1,
 												/*s*/   1,1,1,1, 1,1,1,1,1,1,99,1,1,		1, 1,
 												/*a*/	1,2,2,99,1,1,1,1,1,1,99,99,1,		1, 2,
 												/*r*/	1,2,2,99,1,1,1,1,1,1,99,99,1,		1, 2,
@@ -24,11 +30,16 @@ const int MOVE_VALUES_MATRIX[19][15] =			/*i*/  {1,1,2,3, 1,1,1,1,1,1,99,2,1,		1
 												/*f*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,		1, 1,
 												/*b*/	1,1,1,1, 1,1,1,1,1,1,1, 1, 1,		1, 1,	
 												/*L*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
-												/*B*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
-												/*C*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
+												/*B*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,99,
+												/*C*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,99,
 												/*G*/	99,99,99,99,99,99,99,99,99,99,1,1,99,1,1,
-												/*U*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1,
-												/*V*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,1 };
+												/*U*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,99,
+												/*V*/	99,99,99,99,99,99,99,99,99,99,1,99,99,1,99 ,
+												/*K*/	1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1,
+												/*S*/	1,1,2,3, 1,1,1,1,1,1,99,2,1,		1, 1 };
+
+
+
 
 class tile 
 {
@@ -51,10 +62,18 @@ public:
 		capturePoints = 20;
 		withinCursorPath = false;
 		hasBeenValidated = false;
-		//Image already initialized
+
+		//Basic image init below
+		//This is "plains"
+		//Fog of war tile will always be immediately below the normal tile.
+		textureRectAnchorX = 0;
+		textureRectAnchorY = 0;
+		mySprite.setTextureRect(rectArray[textureRectAnchorX][textureRectAnchorY]);
+		myFogSprite.setTextureRect(rectArray[textureRectAnchorX][textureRectAnchorY +1]);
 		
 	}
 
+	//Takes a given minion and terrain type, consults the movement chart, and returns the cost to move on this particular tile.
 	int consultMovementChart(char minionType, char terrainType)
 	{
 
@@ -120,6 +139,10 @@ public:
 		case('V'):	//Aircraft carrier
 			x = 18;
 			break;
+		case('K'):	//Bunker
+			x = 19;
+		case('S'):	//SAM
+			x = 20;
 		}
 
 		//   . + ^ M  H m n h Q = ~ - A P
@@ -167,7 +190,7 @@ public:
 		case('P'):	//Port
 			y = 13;
 			break;
-		case('\''):	//Beach
+		case('*'):	//Beach
 			y = 14;
 			break;
 		}
@@ -197,7 +220,7 @@ public:
 		case('='):
 		case('~'):
 		case('-'):
-		case('\''):
+		case('*'):
 			isProperty = false;
 			break;
 		case('A'):
@@ -214,6 +237,8 @@ public:
 		return isProperty;
 	}
 
+	int determineRiverRoadType(bool thisTileChanged, MasterBoard* boardToSet);
+	int determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet);
 	int production;				//Amount of money it produces
 	int controller;				//Player number 1/2 or neutral 0.
 	char symbol;
@@ -229,9 +254,18 @@ public:
 	int locationY;
 	bool withinCursorPath = false;
 	bool hasBeenValidated = false;
-	std::string Image =	{	'.','.','.',
-							'.','.','.',
-							'.','.','.' };
+
+	//GRAPHICS ///////////////////////////
+	sf::Sprite mySprite;
+	sf::Sprite myFogSprite;
+	sf::Sprite * animationSprite = NULL;
+	sf::Texture* myTexture;
+	//AnchorX and Y track the location of the "base" tile ie. neutral.
+	//Only matters if sprite may change (Properties and roads/rivers)
+	//Fog of war tile will always be immediately below the normal tile.
+	int textureRectAnchorY;
+	int textureRectAnchorX;
+	//GRAPHICS ///////////////////////////
 
 	int clearTile() {
 		symbol = '.';
@@ -250,18 +284,22 @@ public:
 		return 0;
 	}
 
-	int setCharacterstics() 
+	int setCharacterstics(sf::Texture * inputTexture, MasterBoard* boardToSet)
 	{
+		myTexture = inputTexture;
+		mySprite.setTexture(*myTexture);
+		myFogSprite.setTexture(*myTexture);
 
+		//Sprite had defualt texture-rect set in the constructor
+		
 		switch (symbol)
 		{
 		case('.'):
-		{
+		{	
 			description = "Clear terrain.";
 			defenseFactor = 1.1;
-			Image = { '.','.','.',
-												'.','.','.',
-												'.','.','.' };
+			mySprite.setTextureRect(rectArray[0][0]);
+			myFogSprite.setTextureRect(rectArray[0][1]);
 			break;
 		}
 		case('H'):
@@ -269,9 +307,12 @@ public:
 			description = "City.";
 			defenseFactor = 1.3;
 			production = 2000;
-			Image = { 'H','=','H',
-												'H','=','H',
-												'H','=','H' };
+
+			textureRectAnchorX = 12;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
 			break;
 		}
 		case('m'):
@@ -279,9 +320,7 @@ public:
 			description = "Mine.";
 			defenseFactor = 1.2;
 			production = 3000;
-			Image = { ' ','_',' ',
-												'/','n','\\',
-												'.','.','.' };
+
 			break;
 		}
 		case('n'):
@@ -289,9 +328,12 @@ public:
 			description = "Settlement.";
 			defenseFactor = 1.3;
 			production = 1000;
-			Image = { 'n','.','n',
-												'.','.','.',
-												'n','.','n' };
+
+			textureRectAnchorX = 7;
+			textureRectAnchorY = 0;
+			
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller ][textureRectAnchorY + 1]);
 			break;
 		}
 		case('h'):
@@ -299,9 +341,12 @@ public:
 			description = "Factory.";
 			defenseFactor = 1.3;
 			production = 1000;
-			Image = { '|','|','|',
-												'H','H','H',
-												'H','H','H' };
+			textureRectAnchorX = 17;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
+			
 			break;
 		}
 		case('Q'):
@@ -309,54 +354,65 @@ public:
 			description = "Headquarters.";
 			defenseFactor = 1.4;
 			production = 1000;
-			Image = { '|','*','|',
-												'|','H','|',
-												'|','H','|' };
+			textureRectAnchorX = 22;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
 			break;
 		}
 		case('='):
 		{
 			description = "Road.";
 			defenseFactor = 1.0;
-			Image = { '=',' ','=',
-												'=',' ','=',
-												'=',' ','=' };
+
+			textureRectAnchorY = 2;
+			textureRectAnchorX = 20;
+
+			mySprite.setTextureRect(rectArray[20][2]);
+			myFogSprite.setTextureRect(rectArray[20][3]);
+
+			determineRiverRoadType(true, boardToSet);
+
 			break;
 		}
 		case('^'):
 		{
 			description = "Hill.";
 			defenseFactor = 1.1;
-			Image = { '/','\\','.',
-												'.','/','\\',
-												'/','\\','.' };
+			mySprite.setTextureRect(rectArray[2][0]);
+			myFogSprite.setTextureRect(rectArray[2][1]);
 			break;
 		}
 		case('M'):
 		{
 			description = "Mountain.";
 			defenseFactor = 1.4;
-			Image = { ' ','^',' ',
-												'/','_','\\',
-												'.','.','.' };
+			mySprite.setTextureRect(rectArray[3][0]);
+			myFogSprite.setTextureRect(rectArray[3][1]);
 			break;
 		}
 		case('+'):		//Would like to have convertible to woodlot by engineer.....maybe
 		{
 			description = "Forest.";
 			defenseFactor = 1.2;
-			Image = { '^','^','^',
-												'^','^','^',
-												'|','|','|' };
+			mySprite.setTextureRect(rectArray[1][0]);
+			myFogSprite.setTextureRect(rectArray[1][1]);
 			break;
 		}
 		case('~'):
 		{
 			description = "High seas.";
 			defenseFactor = 1.0;
-			Image = { '~','~','~',
-											'~','~','~',
-											'~','~','~' };
+
+			textureRectAnchorY = 9;
+			textureRectAnchorX = 0;
+
+			mySprite.setTextureRect(rectArray[0][9]);
+			myFogSprite.setTextureRect(rectArray[0][10]);
+
+			determineSeaBeachType(true, boardToSet);
+
 			break;
 		}
 
@@ -364,18 +420,27 @@ public:
 		{
 			description = "River.";
 			defenseFactor = 1.0;
-			Image = { '~',' ','~',
-											' ','~',' ',
-											'~',' ','~' };
+
+			mySprite.setTextureRect(rectArray[9][2]);
+			myFogSprite.setTextureRect(rectArray[9][3]);
+
+			textureRectAnchorY = 2;
+			textureRectAnchorX = 9;
+
+			determineRiverRoadType( true, boardToSet);
 			break;
 		}
 		case('A'):
 		{
 			description = "Airbase.";
 			defenseFactor = 1.3;
-			Image = { '\\','n','.',
-											'|','\\','n',
-											'|','.','\\' };
+			
+			textureRectAnchorX = 32	;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
+
 			production = 1000;
 			break;
 		}
@@ -383,19 +448,29 @@ public:
 		{
 			description = "Port.";
 			defenseFactor = 1.3;
-			Image = { 'n','_','_',
-											'|','~','~',
-											'|','~','~' };
+			
+			textureRectAnchorX = 27;
+			textureRectAnchorY = 0;
+
+			mySprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX + controller][textureRectAnchorY + 1]);
+
 			production = 1000;
 			break;
 		}
-		case('\''):
+		case('*'):
 		{
 			description = "Beach.";
 			defenseFactor = 1.0;
-			Image = {	'~','.','~',
-						'.','~','.',
-						'~','.','~' };
+
+			textureRectAnchorY = 11;
+			textureRectAnchorX = 0;
+
+			mySprite.setTextureRect(rectArray[0][11]);
+			myFogSprite.setTextureRect(rectArray[0][12]);
+
+			determineSeaBeachType(true, boardToSet);
+
 			break;
 		}
 		}

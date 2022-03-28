@@ -6,7 +6,14 @@
 #include <iostream>
 #include <ctype.h>
 #include <fstream>
+#include "MasterBoard.hpp"
+#include "Tile.hpp"
+#include "inputLayer.hpp"
+#include "compie.hpp"
+#include "mainmenu.h"
 
+
+/*
 #ifdef _WIN32
 #include <conio.h>
 #include <windows.h>
@@ -20,93 +27,131 @@
 #else
 #error "Unknown build target!"
 #endif
+*/
 
 
-#include "MasterBoard.hpp"
-#include "Tile.hpp"
-#include "Minion.hpp"
-#include "inputLayer.hpp"
-#include "compie.hpp"
-#include <curses.h>
-#include "mainmenu.h"
+
+
+//Global for the moment to support faster production
+//Everyone needs access to this at all times so it seems reasonable
+const int rectArrayWidth = 38;
+const int rectArrayHeight = 16;
+std::vector <std::vector<sf::IntRect>> rectArray;
+
 
 
 
 int main()
 {
-	WINDOW* debugWindow;
-	WINDOW* unusedWindow = initscr();
 
-	//Old window depended on 40x90.
-	//So should be good for anything after that.
-	resize_term(40, 150);
+	sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
 
+	//Load textures
+	sf::Texture mainTexture;
+	sf::Image mainImage;
+	sf::Texture warshipTexture;
+	sf::Image warshipsImage;
+	sf::Image troopsImage;
+	sf::Texture troopsTexture;
+	sf::Image topMenuImage;
+	sf::Texture topMenuTexture;
+	sf::Image startScreenImage;
+	sf::Texture startScreenTexture;
 
-	//Lines, columns, startY, startX
-	debugWindow = newwin(40, 20, 0, 100);
-	wclear(debugWindow);
-	waddstr(debugWindow, "I am debug window.");
-	wrefresh(debugWindow);
+	//Load Sounds/Music
+	sf::Music introMusic;
 
-	WINDOW* mainWindow = newwin(40, 90, 0, 0);
-	wclear(mainWindow);
-	winsch(mainWindow, 'b');
-	wrefresh(mainWindow);
-
-	mainMenu MainMenu(mainWindow);
-	inputLayer InputLayer(&MainMenu);
-	MasterBoard GameBoard;
-
-
-	start_color();
-
-	//Terrain we can see - black background.
-	init_pair(landTile, COLOR_BLACK, COLOR_GREEN);
-	init_pair(waterTile, COLOR_GREEN, COLOR_BLUE);
 	
-	//Player minion colors
-	init_pair(player1Minion, COLOR_RED, COLOR_YELLOW);
-	init_pair(player2Minion, COLOR_BLUE, COLOR_CYAN);
-	init_pair(player3Minion, COLOR_CYAN, COLOR_BLACK);
-	init_pair(player4Minion, COLOR_MAGENTA, COLOR_BLACK);
-	init_pair(player5Minion, COLOR_YELLOW, COLOR_BLACK);
-	init_pair(player6Minion, COLOR_GREEN, COLOR_BLACK);
 
-	//Player minion inverse colors
-	init_pair(player1MinionInverse, COLOR_YELLOW, COLOR_RED);
-	init_pair(player2MinionInverse, COLOR_CYAN, COLOR_BLUE);
-	init_pair(player3MinionInverse, COLOR_BLACK, COLOR_CYAN);
-	init_pair(player4MinionInverse, COLOR_BLACK, COLOR_MAGENTA);
-	init_pair(player5MinionInverse, COLOR_BLACK, COLOR_YELLOW);
-	init_pair(player6MinionInverse, COLOR_BLACK, COLOR_GREEN);		
+	//Initialize Sounds Array
+	const int numberOfSoundEffects = 20;
+	std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "antiAircraftCannon", "infantryMove", "vehicleMove", "buildUnit", "capture", "resupply", "repair", "trapped" };
+	std::vector <sf::SoundBuffer > soundEffectBuffers;
+	std::vector <sf::Sound> soundEffects;
+	soundEffects.resize(numberOfSoundEffects + 1);
+
+		
+	//Initialize intRect grid
+	rectArray.resize(rectArrayWidth+1);
+	for (int i = 0; i < rectArrayWidth; i++)
+	{
+		rectArray[i].resize(rectArrayHeight+1);
+		for (int j = 0; j < rectArrayHeight; j++)
+		{
+
+			rectArray[i][j].left = i * 52 + 1;
+			rectArray[i][j].top = j * 52 + 1;
+			rectArray[i][j].height = 50;
+			rectArray[i][j].width = 50;
+		}
+	}
 	
-	//Player tile colors
-	init_pair(player1Tile, COLOR_RED, COLOR_GREEN);
-	init_pair(player2Tile, COLOR_BLUE, COLOR_GREEN);
-	init_pair(player3Tile, COLOR_CYAN, COLOR_GREEN);
-	init_pair(player4Tile, COLOR_MAGENTA, COLOR_GREEN);
-	init_pair(player5Tile, COLOR_YELLOW, COLOR_GREEN);
-	init_pair(player6Tile, COLOR_GREEN, COLOR_BLACK);
-	init_pair(neutralTile, COLOR_WHITE, COLOR_GREEN);
-
-	//Outside of vision, terrain - shrouded in fog.
-	init_pair(fogLandTile, COLOR_BLACK, COLOR_WHITE);
-	init_pair(fogWaterTile, COLOR_BLUE, COLOR_WHITE);
-	init_pair(fogPlayer1Tile, COLOR_RED, COLOR_WHITE);
-	init_pair(fogPlayer2Tile, COLOR_BLUE, COLOR_WHITE);
-	init_pair(fogPlayer3Tile, COLOR_CYAN, COLOR_WHITE);
-	init_pair(fogPlayer4Tile, COLOR_MAGENTA, COLOR_WHITE);
-	init_pair(fogPlayer5Tile, COLOR_YELLOW, COLOR_WHITE);
-	init_pair(fogPlayer6Tile, COLOR_GREEN, COLOR_WHITE);
-	init_pair(fogNeutralTile, COLOR_BLACK, COLOR_WHITE);
-
-	//Utility colors
-	init_pair(cursorSymbol, COLOR_BLACK, COLOR_WHITE);
-	init_pair(attackRangeSymbol, COLOR_BLACK, COLOR_RED);
-	init_pair(moveRangeSymbol, COLOR_BLACK, COLOR_RED);
-
-	MainMenu.playGame(&GameBoard, &InputLayer);
+	sf::Font cour;
+	//Load up image and use to initiate texture
+	//Also set white to transparent
+	if (!mainImage.loadFromFile("tilesAndUnits.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+	if (!troopsImage.loadFromFile("troops.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+	if (!warshipsImage.loadFromFile("warships.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+	if (!topMenuImage.loadFromFile("topMenu.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+	if (!startScreenImage.loadFromFile("startScreenStatement.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+	if (!introMusic.openFromFile("soundEffects\\introTheme.wav"))
+	{
+		std::cout << "Couldn't load intro theme!" << std::endl;
+	}
 	
+	//Init sound effect buffer and sound arrays
+	soundEffectBuffers.resize(soundEffectNames.size() + 1);
+	for (int i = 0; i < soundEffectNames.size(); i++)
+	{
+		std::string fileName = "soundEffects\\" + soundEffectNames[i] + ".wav";
+		if (!soundEffectBuffers[i].loadFromFile(fileName))
+		{
+			std::cout << "Couldn't load" << soundEffectNames[i]<< std::endl;
+		}
+		//Transfer Sound Buffer to Sounds
+
+		soundEffects[i].setBuffer(soundEffectBuffers[i]);
+	}
+
+	sf::Color colorWhite;
+	
+	//Transfer Images to Textures
+	warshipTexture.loadFromImage(warshipsImage);
+	troopsTexture.loadFromImage(troopsImage);
+	topMenuTexture.loadFromImage(topMenuImage);
+	startScreenTexture.loadFromImage(startScreenImage);
+	
+	mainImage.createMaskFromColor(colorWhite.White);
+	mainTexture.loadFromImage(mainImage);
+
+	if (!cour.loadFromFile("times.ttf"))
+	{
+		std::cout << "Couldn't load fonts!" << std::endl;
+	}
+	
+
+
+	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, &warshipTexture,& troopsTexture, &topMenuTexture, &startScreenTexture , &introMusic);
+	
+	inputLayer InputLayer(&MainMenu, &mainWindow , &mainTexture, &cour, &soundEffects);
+	MasterBoard GameBoard(&mainTexture);
+
+	MainMenu.introScreen(&GameBoard, &InputLayer);
 
 }
 

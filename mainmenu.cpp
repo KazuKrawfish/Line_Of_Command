@@ -5,16 +5,105 @@
 #include <iostream>
 #include <ctype.h>
 #include <fstream>
+#include <stdio.h>
 #include "compie.hpp"
+#include <filesystem>
+
+
 
 class inputLayer;
 class MasterBoard;
 
 
-mainMenu::mainMenu(WINDOW* myWindow)
+
+//Because we're having difficulty getting strings to work, we're leaving this for now.
+//Linenumber indicates offset for input field.
+//If you provide an announcement string with 2 lines, LineNumber should be 3.
+sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font *inputFont, sf::String AnnouncementString, int LineNumber)
 {
+	sf::String inputString = "";
+	sf::Event event;
+	bool stringFinished = false;
+
+	myWindow->clear();
+	sf::Text announceText(AnnouncementString, *inputFont, menuTextSize);
+	myWindow->draw(announceText);
+	myWindow->display();
+
+	while (stringFinished == false)
+	{
+		myWindow->waitEvent(event);
+		if (event.type == sf::Event::EventType::TextEntered)
+		{
+
+			inputString += event.text.unicode;
+			sf::Text text(inputString, *inputFont, menuTextSize );
+			text.setPosition(0, ( menuTextSize+1) * LineNumber );
+			
+			myWindow->clear();
+			myWindow->draw(announceText);
+			myWindow->draw(text);
+			myWindow->display();
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+		{
+			stringFinished = true;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::BackSpace) && inputString.getSize() > 0)
+		{
+			inputString.erase(inputString.getSize()-1);
+		}
+
+
+	}
+	std::string debugString = inputString;
+	return inputString;
+}
+
+char playCharInput(sf::RenderWindow* myWindow)
+{
+	char inputChar = '~';
+	sf::Event event;
+	bool validInput = false;
+
+	//Clear the event queue while we were doing other things
+	while (myWindow->pollEvent(event));	//May be too false-positive-ish as far as clearing out legit user inputs, we'll see
+
+	while (validInput == false)
+	{
+		myWindow->waitEvent(event);
+		if (event.type == sf::Event::EventType::TextEntered)
+		{
+		validInput = true;
+		inputChar = event.text.unicode;
+		}
+		else
+		{
+			NULL;
+		}
+
+
+	}
+
+	return inputChar;
+} 
+
+mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, 
+	sf::Texture* inputMenuWallpaper, sf::Texture* inputStartWallPaper, sf::Texture* inputTopMenu,
+	sf::Texture* inputstartScreenStatement, sf::Music* inputIntroMusic)
+{
+	myTexture = gameTexture;
+	menuWallPaper = inputMenuWallpaper;
+	startWallPaper = inputStartWallPaper;
+	topMenuTexture = inputTopMenu;
+	startScreenStatement = inputstartScreenStatement;
+	introMusic = inputIntroMusic;
+	myFont = cour;
 	mywindow = myWindow;
 	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
+	
+	//Initialize the clearField sprite used for player string input
+
 }
 //Gameplay note:
 //As currently constructed, host for a new scenario must be player 1. Anyone join will play the turn assigned based on their player name.
@@ -82,9 +171,19 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 			LoadBoard->Board[x][y].locationX = x;
 			LoadBoard->Board[x][y].locationY = y;
 
-			LoadBoard->Board[x][y].setCharacterstics();
+
 		}
 	}
+
+	for (int x = 0; x < LoadBoard->BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < LoadBoard->BOARD_HEIGHT; y++)
+		{
+			LoadBoard->Board[x][y].setCharacterstics(myTexture, LoadBoard);
+		}
+	}
+
+
 	return 0;
 }
 
@@ -120,8 +219,9 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << "Name_of_next_mission_(Same_Directory)" << std::endl;		//Name of next mission
 	saveGame << nextMissionName << std::endl;
 
-	saveGame << "Mission_Briefing" << std::endl;	//String with mission info
-	saveGame << missionInfo << std::endl;
+	saveGame << "Mission_Briefing "  << std::endl;	//String with mission info
+	saveGame << briefingLineNumber << " ";
+	saveGame << missionBriefing;
 
 	//End Mission Data Load
 	//*********************************************//
@@ -141,6 +241,11 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	saveGame << "Game_turn_below:" << std::endl;
 	saveGame << gameTurn << std::endl;
 	
+	//Then save fog of war status.
+	saveGame << "Fog_Of_War:" << std::endl;
+	saveGame << boardToPrint->fogOfWar << std::endl;
+
+
 	//Then save the map size:
 	saveGame << "Map_width_below:" << std::endl;
 	saveGame << boardToPrint->BOARD_WIDTH << std::endl;
@@ -245,8 +350,6 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	//Clear board in case scenario load was called by player menu later in game.
 	boardToPrint->clearBoard(InputLayer);
 
-	bool isItSaveGame = false;
-
 	std::string ThrowawayString;
 
 	*saveGame >> ThrowawayString;
@@ -278,8 +381,19 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	*saveGame >> ThrowawayString;		//Name of next mission
 	*saveGame >> nextMissionName;
 
+	 briefingLineNumber = 0;
 	*saveGame >> ThrowawayString;		//String with mission info
-	*saveGame >> missionInfo;
+	*saveGame >> briefingLineNumber;
+	
+	missionBriefing = "";
+	
+		for (int i = 0; i < briefingLineNumber; i++)
+	{
+		std::string singleLine;
+		std::getline(*saveGame, singleLine);
+		missionBriefing += singleLine;
+		missionBriefing += "\n";
+	}
 
 	//End Mission Data Load
 	//*********************************************//
@@ -290,15 +404,17 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
 		int playerType = 0;
-
-		*saveGame >> boardToPrint->playerRoster[i].name;		//For new game this should be ~
+		
+		*saveGame >>  boardToPrint->playerRoster[i].name ;	//For new game this should be ~
 		*saveGame >> playerType;
 		*saveGame >> boardToPrint->playerRoster[i].stillAlive;
 		*saveGame >> boardToPrint->playerRoster[i].treasury;
 
 		if (playerType == 0)
 			boardToPrint->playerRoster[i].playerType = humanPlayer;
-		else boardToPrint->playerRoster[i].playerType = computerPlayer;
+		else {
+			boardToPrint->playerRoster[i].playerType = computerPlayer;
+			}
 
 	}
 
@@ -306,6 +422,9 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	*saveGame >> ThrowawayString;
 	*saveGame >> gameTurn;
 
+	//Then load fog of war status - in "new" game this should be overriden by player choice.
+	*saveGame >> ThrowawayString;
+	*saveGame >> boardToPrint->fogOfWar;
 
 	//If this is a new game, clear the treasury.
 	//(If going from a game in middle of play, to new game).
@@ -319,6 +438,23 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	*saveGame >> ThrowawayString;
 	*saveGame >> boardToPrint->BOARD_HEIGHT;
 
+	//Once board height and width are loaded, we try to adjust window size to either smaller or larger.
+	if (boardToPrint->BOARD_WIDTH < MAX_WINDOW_WIDTH) 
+	{
+		boardToPrint->WINDOW_WIDTH = boardToPrint->BOARD_WIDTH;
+	}
+	else 
+	{
+		boardToPrint->WINDOW_WIDTH = MAX_WINDOW_WIDTH;
+	}
+	if (boardToPrint->BOARD_HEIGHT < MAX_WINDOW_HEIGHT)
+	{
+		boardToPrint->WINDOW_HEIGHT = boardToPrint->BOARD_HEIGHT;
+	}
+	else
+	{
+		boardToPrint->WINDOW_HEIGHT = MAX_WINDOW_HEIGHT;
+	}
 
 	//Resize the map based on new data.
 	//Not sure why we have to give an additional line but it segfaulted otherwise
@@ -352,7 +488,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 		}
 	}
-	setCharacteristics(boardToPrint);
+
 
 	//This is for properties.
 	char inputProperties;
@@ -366,6 +502,10 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 			boardToPrint->Board[x][y].controller = (int(inputProperties)) - 48;
 		}
 	}
+	//After team data is loaded, set property characteristics.
+	setCharacteristics(boardToPrint);
+
+
 	//Then load minion data:
 	*saveGame >> ThrowawayString;
 	int numberOfMinions;
@@ -409,19 +549,57 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	return 1;
 }
 
+int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer) 
+{
+
+	sf::Sprite startWallpaperSprite;
+	startWallpaperSprite.setTexture(*startWallPaper);
+
+	sf::Sprite startScreenStatementSprite;
+	startScreenStatementSprite.setTexture(*startScreenStatement);
+	startScreenStatementSprite.setPosition(330, 130);
+
+	mywindow->clear();
+
+	introMusic->play();
+
+	mywindow->draw(startWallpaperSprite);	
+	mywindow->draw(startScreenStatementSprite);
+
+	mywindow->display();
+
+	sf::Event throwAwayEvent;
+	bool validInput = false;
+	while (validInput == false)
+	{
+		mywindow->waitEvent(throwAwayEvent);
+		if (throwAwayEvent.type == sf::Event::EventType::KeyPressed)
+		{
+			validInput = true;
+			skipOneInput = true;
+		}
+	}
+	mywindow->clear();
+
+	introMusic->stop();
+
+
+	playGame(boardToPlay, InputLayer);
+
+
+	return 0;
+}
+
 int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
-	wclear(mywindow);
-	waddstr(mywindow,"Line of Command\n");
-	waddstr(mywindow,"Copyright 2021, Park Family Software Laboratory (ParkLab)\n");
-	waddstr(mywindow,"Press any key to continue.");
-	wrefresh(mywindow);
-
+	
 	char Input = '~';
 
 	//Run as long as the user wants. Infinite while loop.
 	while (true)		
 	{
+		sf::Event playerInput;
+
 		//This is a utility function to prevent "hanging" screens
 		if (skipOneInput == true) 
 		{
@@ -430,7 +608,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		}
 		else 
 		{
-			Input = wgetch(mywindow);
+		Input = playCharInput(mywindow);
 		}
 
 		//If we're still on top menu, do that instead of game/inputLayer.
@@ -451,10 +629,11 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		
 		if (menuStatus == playingMap)
 		{
-			//Always call upkeep once before play commences.
-			if (veryFirstTurn == true)
+			//Only call upkeep before play commences if it is a new game AND very first turn
+			//And not compie. Compie performs upkeep in its own function.
+			if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == humanPlayer)
 			{		
-				boardToPlay->upkeep(InputLayer);
+				boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
 				veryFirstTurn = false;
 			}
 
@@ -489,7 +668,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 			//Computer takes turn if it is his turn to do so.
 			//Note that this doesn't deal with "status".
-			if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && computerPlayerRoster[boardToPlay->playerFlag].gameOver == false )
+			if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && boardToPlay->playerRoster[boardToPlay->playerFlag].stillAlive == true)
 			{
 				computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
 				
@@ -498,71 +677,141 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			//This prints the screen AFTER the latest input has taken effect.
 			//Is this messing with remote play? Not sure.
 			boardToPlay->checkWindow();
-			InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag);
+
+			InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
 
 		}
+	
 	}
 	return 0;
 }
 
 int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
-	*Input = wgetch(mywindow);
+	sf::Event playerInput;
+	mywindow->waitEvent(playerInput);
 
-	//If user wants to load a map.
-	if (*Input == 'l') 
+	*Input = playCharInput(mywindow);
+
+	//Move cursor up and down
+	if (*Input == 's')
 	{
-		topMenuLoad(Input, boardToPlay, InputLayer);
+		menuIterator++;
 		skipOneInput = true;
-		InputLayer->status = gameBoard;
-	} 
-	else
-	//Newgame
-	if (*Input == 'n')
-	{
- 		topMenuNew(Input, boardToPlay, InputLayer);
-		skipOneInput = true;
-		InputLayer->status = gameBoard;
+		if (menuIterator >= topMenuOptions.size())
+			menuIterator = 0;
 	}
 	else
-	//Join a remote game
-	if (*Input == 'j')
-	{
-		topMenuJoin(boardToPlay, InputLayer);
-		skipOneInput = true;
-		InputLayer->status = gameBoard;
-	}else
-	//Toggle debug mode.
-	if (*Input == '~')
-	{
-		if (debugMode == false)
-			debugMode = true;
-		else if (debugMode == true)
-			debugMode = false;
-	}
+		if (*Input == 'w')
+		{
+			menuIterator--;
+			skipOneInput = true;
+			if (menuIterator < 0)
+				menuIterator = topMenuOptions.size() - 1;
+		}
+		else
+			//Load game
+			if (menuIterator == 0 && *Input == 't')
+			{
+				int goBack = topMenuLoad(Input, boardToPlay, InputLayer);
+				if (goBack == 0)
+				{
+					InputLayer->status = gameBoard;
+				}
+				skipOneInput = true;
+			}
+			else
+			//Start new game
+			if (menuIterator == 1 && *Input == 't')
+			{
+				int goBack = topMenuNew(Input, boardToPlay, InputLayer);
+				if (goBack == 0)
+				{
+
+					InputLayer->status = gameBoard;
+				}
+				skipOneInput = true;
+			}	
+			else
+			//Join a remote game
+			if (menuIterator == 2 && *Input == 't')
+			{
+				int goBack = topMenuJoin(boardToPlay, InputLayer);
+				if (goBack == 0)
+				{
+
+					InputLayer->status = gameBoard;
+				}
+				skipOneInput = true;
+			}
+			else
+			//Toggle debug mode.
+			if (menuIterator == 3 && *Input == 't')
+			{
+				if (debugMode == false)
+					debugMode = true;
+				else if (debugMode == true)
+					debugMode = false;
+				skipOneInput = true;
+			}
 
 	return 0;
 }
 
 int mainMenu::printTopMenu()
 {
-	wclear(mywindow);
-	waddstr(mywindow,"Main Menu\n");
-	waddstr(mywindow,"Load saved game (l) | Start new game (n) | Join remote game (j) \n");
+
+	sf::Sprite topMenuWallpaperSprite;
+	topMenuWallpaperSprite.setTexture(*menuWallPaper);
+
+	sf::Sprite topMenuSprite;
+	topMenuSprite.setTexture(*topMenuTexture);
+
+	//MenuCrawler
+	std::string boardMessage = "";
+
+	for (int i = 0; i < topMenuOptions.size(); i++)
+	{
+		if (menuIterator == i)
+			boardMessage += "*";
+		else boardMessage += "  ";
+		boardMessage += topMenuOptions[i];
+		if (topMenuOptions[i] == "Editor Mode")
+		{
+			if (debugMode == true)
+				boardMessage += " On";
+			else
+				boardMessage += " Off";
+		}
+		boardMessage += "\n\n";
+	}
 	
-	if(debugMode == false)
-		waddstr(mywindow,"To enter debug mode, press '~' \n");
-	else waddstr(mywindow, "In debug mode. To leave debug mode, press '~' \n");
+	sf::String sfBoardMessage = boardMessage;
+	sf::Text newText(sfBoardMessage, *myFont, 30);
+
+	mywindow->clear();
+
+	mywindow->draw(topMenuWallpaperSprite);
+
+	topMenuSprite.setPosition( 450, 150);
+	mywindow->draw(topMenuSprite);
 	
-	wrefresh(mywindow);
+	newText.setFillColor(sf::Color::Black);
+	newText.setPosition(480, 230);
+	mywindow->draw(newText);
+	
+	mywindow->display();
+	
 	return 0;
 }
 
 int mainMenu::printWaitingScreen() 
 {
-	wclear(mywindow);
-	waddstr(mywindow,"Waiting for other player(s) \n");
-	wrefresh(mywindow);
+	mywindow->clear();
+	sf::String waitingScreenString("Waiting for other player(s) \n");
+	sf::Text text(waitingScreenString, *myFont, 20);
+	mywindow->draw(text);
+	mywindow->display();
 	return 0;
 }
 
@@ -573,87 +822,166 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	computerPlayerRoster.clear();
 	}
 
+	sf::Event playerInput;
+
 
 	//Determine if game is remote or local.
-	waddstr(mywindow, "Local skirmish (s), local campaign (c), or remote (r) game?\n");
+	mywindow->clear();
+	sf::String topMenuNewString("New Game Selected. \nLocal skirmish (s), local campaign (c), or remote (r) game? \n");
+	sf::Text text(topMenuNewString, *myFont, menuTextSize);
+	mywindow->draw(text);
+	mywindow->display();
 	gameType = unchosen;
 	while (gameType == unchosen)
 	{
-		*Input = wgetch(mywindow);
+		*Input = playCharInput(mywindow);
 
+
+		sf::String nextTopMenuNewString;
 		if (*Input == 's')
 		{
-			wclear(mywindow);
-			waddstr(mywindow,"Local skirmish selected.\n");
-			wrefresh(mywindow);
+			mywindow->clear();
+			nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
+			sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 			gameType = localSkirmish;
 		}
 		else if (*Input == 'r') 
 		{
-			wclear(mywindow);
-			waddstr(mywindow,"Remote game selected.\n");
-			wrefresh(mywindow);
+			mywindow->clear();
+			nextTopMenuNewString = "Remote game selected. Press any key to continue.\n";
+			sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 			gameType = remote;
 		}
 		else if (*Input == 'c')
 		{
-			wclear(mywindow);
-			waddstr(mywindow, "Local campaign selected.\n");
-			wrefresh(mywindow);
+			mywindow->clear();
+			nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
+			sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 			gameType = localCampaign;
 		}
+		else if(*Input == 'b')
+		{
+			return 1;
+		}
 	}
+	
+	//Await player input to move past the selected item.
+	playCharInput(mywindow);
+
 
 	//Load the actual map
 	std::ifstream newGameMap;
-	char scenarioToLoad[100];
-	char* pointToScenarioName = &scenarioToLoad[0];
 	bool loadsuccessful = false;
 
+	sf::String anotherTopMenuNewString;
+	
+	
+	//Necessary to move lines around in the input field screen and avoid overlap.
+	int lineOffset = 1;
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
 		//Need to print out mission/scenario printout here
 		if (gameType == localSkirmish || gameType == remote) 
 		{
-			waddstr(mywindow, "Choose which scenario to load (Case sensitive): \n");
-			wgetstr(mywindow, pointToScenarioName);
-			std::string newScenario = scenarioToLoad;
+			mywindow->clear();
+			anotherTopMenuNewString += "Choose which scenario to load (Case sensitive): \n";
+			sf::String scenarioName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset);
+			sf::Event event;
+			
+			std::string newScenario = scenarioName;
 			newGameMap.open(".\\scenarios\\" + newScenario + ".txt");
 			if (newGameMap.is_open())
 			{
-				waddstr(mywindow, "Successfully loaded!\n");
+				mywindow->clear();
+				anotherTopMenuNewString = "Successfully loaded!\n";
+				sf::Text newText(anotherTopMenuNewString, *myFont, menuTextSize);
+				mywindow->draw(newText);
+				mywindow->display();
+
 				loadsuccessful = true;
 			}
 			else
 			{
-				waddstr(mywindow, "Could not load scenario. Please check that it exists and the right spelling was used.\n");
+				mywindow->clear();
+				anotherTopMenuNewString = "Could not load scenario.\nPlease check that it exists and the right spelling was used.\n";
+				lineOffset = 3;
+				sf::Text newText(anotherTopMenuNewString, *myFont, menuTextSize);
+				mywindow->draw(newText);
+				mywindow->display();
 
 			}
 		}
 		else if (gameType == localCampaign) 
 		{
-			waddstr(mywindow, "Choose which campaign to start (Case sensitive): \n");
-			wgetstr(mywindow, pointToScenarioName);
-			std::string newCampaignName = scenarioToLoad;
-			char missionToLoad[100];
-			std::string newMission = missionToLoad;
+			mywindow->clear();
+			anotherTopMenuNewString = "Choose which campaign to start (Case sensitive): \n";
+			
+			sf::String sfCampaignName = "";
+			sf::Event event;
+			sfCampaignName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset);	//Homebrew function
+
+			std::string newCampaignName = sfCampaignName;
+			std::string newMission = "";
 			
 			std::ifstream newCampaign;
 			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\"+ newCampaignName +".txt");
 			
 			if (newCampaign.is_open())
 			{
-				waddstr(mywindow, "Successfully loaded!\n");
+
+
+
 				loadsuccessful = true;
-				std::string ThrowawayString;
-				newCampaign >> ThrowawayString;
+				std::string CampaignBriefing;
+				
+				//Load up campaign briefing and print on screen
+				missionBriefing = "";
+				int briefingLineNumber = 0;
+				std::string throwAway;
+				newCampaign >> throwAway;
+				newCampaign >> briefingLineNumber;
+
+				for (int i = 0; i < briefingLineNumber; i++)
+				{
+					std::string singleLine;
+					std::getline(newCampaign, singleLine);
+					CampaignBriefing += singleLine;
+					CampaignBriefing += "\n";
+				}		
+
+				//Draw it out
+				mywindow->clear();
+				sf::Text newText(CampaignBriefing, *myFont, menuTextSize);
+				mywindow->draw(newText);
+				mywindow->display();
+
+				//Wait for one input.
+				playCharInput(mywindow);
+
+
+				
 				newCampaign >> newMission;
 				newGameMap.open(".\\campaigns\\" + newCampaignName + "\\" + newMission + ".txt");
+
+
+
+
 			}
 			else
 			{
-				waddstr(mywindow, "Could not load campaign. Please check that it exists and the right spelling was used.\n");
+				mywindow->clear();
+				anotherTopMenuNewString = "Could not load campaign.\nPlease check that it exists and the right spelling was used. \n";
+				lineOffset = 3;
+				sf::Text newText(anotherTopMenuNewString, *myFont, menuTextSize);
+				mywindow->draw(newText);
+				mywindow->display();
 
 			}
 		}
@@ -662,6 +990,10 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	gameLoad(boardToPlay, InputLayer, &newGameMap);
 	newGameMap.close();
 
+	//Flush event queue to clear out "Enter" and other rifraf
+	sf::Event throwAwayEvent;
+	while (mywindow->pollEvent(throwAwayEvent));
+
 	std::ifstream loadSession;
 	bool sessionCreationSuccessful = false;
 	//Prompt user for session name and ensure it is unique:
@@ -669,22 +1001,36 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	while (gameType == remote && sessionCreationSuccessful == false)
 	{
 		//Get attempted session name:
-		waddstr(mywindow,"Input session name:\n");
-		char inputSessionName[100];
-		wgetstr( mywindow,&inputSessionName[0]);
-		sessionName = inputSessionName;
+		mywindow->clear();
+		topMenuNewString = "Input session name: \n";
+		
+
+		sf::String sfSessionName = playerInputString(mywindow, myFont, topMenuNewString, 1);
+		sessionName = sfSessionName;
 
 		//Now append filepath and atempt to open. If open succeeds, this session already exists!
 		loadSession.open(".\\multiplayer\\lineOfCommandMultiplayer\\" + sessionName + "_save.txt");
 
 		if (loadSession.is_open())
 		{
-			waddstr(mywindow,"This session already exists. Enter a different session name. \n");
+			mywindow->clear();
+			topMenuNewString = "This session already exists. Enter a different session name. \n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
+
+
 
 		}
 		else
 		{
-			waddstr(mywindow,"This session is unique.\n");
+			mywindow->clear();
+			topMenuNewString = "This session is unique.\n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
+
+
 			sessionCreationSuccessful = true;
 		}
 
@@ -694,8 +1040,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	//We added one to the array, just like treasury, for easy access.
 	int numberOfCompies = 0;
-	char inputName[100];
-	char outputName[100];
+	sf::String inputName;
 
 	//Resize computer Roster for easy access.
 	computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
@@ -704,9 +1049,12 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	{
 		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 		{
-			snprintf(&outputName[0], 100, "Input Player %d's name: \n", i);
-			waddstr(mywindow, &outputName[0]);
-			wgetstr(mywindow, &inputName[0]);
+			mywindow->clear(); 
+			char buffer[100];
+			snprintf(buffer, 100, "Input Player %d's name: \n", i);
+			sf::String announceString = buffer;
+			inputName = playerInputString(mywindow, myFont, announceString, 1);
+
 			boardToPlay->playerRoster[i].name = inputName;
 
 			bool playerTypeDecided = false;
@@ -715,9 +1063,14 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			while (!playerTypeDecided)
 			{
 				char playerTypeInput = ' ';
-				snprintf(&outputName[0], 100, "Is this player human (h) or computer (c)? \n");
-				waddstr(mywindow, &outputName[0]);
-				playerTypeInput = wgetch(mywindow);
+				topMenuNewString = "Is this player human (h) or computer (c)? \n";
+				sf::Text anotherText(topMenuNewString, *myFont, menuTextSize);
+				mywindow->clear();
+				mywindow->draw(anotherText);
+				mywindow->display();
+				
+				playerTypeInput = playCharInput(mywindow);
+				
 				if (playerTypeInput == 'c' || playerTypeInput == 'h')
 				{
 					if (playerTypeInput == 'h')
@@ -735,12 +1088,20 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 		}
 	}
-	else	//If campaign game we just give player 1's name
+	else	//If campaign game we just give player 1's name AND initialize all other players as compie
 	{
-		snprintf(&outputName[0], 100, "Input Player's name: \n");
-		waddstr(mywindow, &outputName[0]);
-		wgetstr(mywindow, &inputName[0]);
+		mywindow->clear();
+		topMenuNewString = "Input Player 1's name: \n";
+
+		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1);
 		boardToPlay->playerRoster[1].name = inputName;
+
+		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
+		{
+			if (boardToPlay->playerRoster[i].playerType == computerPlayer)
+				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
+		}
+
 	}
 
 	//Host is always player one for a new game.
@@ -761,41 +1122,13 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	else boardToPlay->isItSinglePlayerGame = false;
 
 	menuStatus = playingMap;
+	
+	//Before entering play, make sure to print out briefing.
+	InputLayer->printMissionBriefing(boardToPlay);
 
 	return 0;
 }
 
-/*int mainMenu::restartMission() 
-{
-
-}*/
-
-/*int mainMenu::nextMission() 
-{
-	waddstr(mywindow, "Choose which campaign to start (Case sensitive): \n");
-	wgetstr(mywindow, pointToScenarioName);
-	std::string newMission = scenarioToLoad;
-
-	std::ifstream newCampaign;
-	newCampaign.open(".\\campaigns\\" + newMission + ".txt");
-
-	if (newCampaign.is_open())
-	{
-		waddstr(mywindow, "Successfully loaded!\n");
-		loadsuccessful = true;
-		std::string ThrowawayString;
-		newCampaign >> ThrowawayString;
-		newCampaign >> newMission;
-		newGameMap.open(".\\campaigns\\" + newMission + ".txt");
-	}
-	else
-	{
-		waddstr(mywindow, "Could not load campaign. Please check that it exists and the right spelling was used.\n");
-
-	}
-
-
-}*/
 
 int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 { 
@@ -806,11 +1139,15 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	}
 
 	//Determine if game is remote or local.
-	waddstr(mywindow,"Local skirmish (s), local campaign (c), or remote(r) game?\n");
+	mywindow->clear();
+	sf::String topMenuNewString("Local skirmish (s), local campaign (c), or remote (r) game? Or Back (b)\n");
+	sf::Text text(topMenuNewString, *myFont, menuTextSize);
+	mywindow->draw(text);
+	mywindow->display();
 	gameType = unchosen;
 	while (gameType == unchosen)
 	{
-		*Input = wgetch(mywindow);
+		*Input = playCharInput(mywindow);
 
 		if (*Input == 'c')
 		{
@@ -824,50 +1161,71 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 		{
 			gameType = localSkirmish;
 		}
+		else if (*Input == 'b')
+		{
+			return 1;
+		}
 	}
 
 	//Load the actual save game
 	//This garbage is necessary because for some reason, getstr will not play with strings, even if you provide & and [0]
 	std::ifstream loadGameSave;
-	std::string saveToLoad;
-	char scenarioToLoad[100];
-	char* pointToSaveName = &scenarioToLoad[0];
+
 	bool loadsuccessful = false;
 
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
-		wclear(mywindow);
 
+		mywindow->clear();
 		if (gameType == localSkirmish)
 		{
-			waddstr(mywindow, "Local skirmish selected.\n");
+
+			topMenuNewString = "Local skirmish selected.\n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 		}
 		else if (gameType == remote)
 		{
-			waddstr(mywindow, "Remote game selected.\n");
+			topMenuNewString = "Remote game selected.\n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 		}
 		else if (gameType == localCampaign)
 		{
-			waddstr(mywindow, "Local campaign selected.\n");
+			topMenuNewString = "Local campaign selected.\n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 		}
 
-		waddstr(mywindow,"Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n");
-		wrefresh(mywindow);
+		mywindow->clear();
+		topMenuNewString = "Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
 
-		wgetstr( mywindow,&pointToSaveName[0]);
-		saveToLoad = scenarioToLoad;
+
+		sf::String scenarioName = playerInputString(mywindow, myFont, topMenuNewString, 1);
+		std::string saveToLoad = scenarioName;
+		
 		saveToLoad += "_save.txt";
 		loadGameSave.open(".\\savegames\\" + saveToLoad);
 		if (loadGameSave.is_open())
 		{
-			waddstr(mywindow,"Save game successfully loaded!\n");
+			mywindow->clear();
+			topMenuNewString = "Save game successfully loaded!\n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 			loadsuccessful = true;
 		}
 		else
 		{
-			waddstr(mywindow,"Could not load save game. Please check that it exists and the right spelling was used.\n");
-
+			mywindow->clear();
+			topMenuNewString = "Could not load save game. Please check that it exists and the right spelling was used.\n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 		}
 
 	}
@@ -881,10 +1239,12 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	//IF IT IS REMOTE
 	while (gameType == remote && sessionCreationSuccessful == false)
 	{
+		mywindow->clear();
+		topMenuNewString = "Input session name:\n";
+
 		//Get attempted session name:
-		waddstr(mywindow,"Input session name:\n");
-		char inputSessionName[100];
-		wgetstr( mywindow,&inputSessionName[0]);
+		
+		sf::String inputSessionName = playerInputString(mywindow, myFont, topMenuNewString, 1);
 		sessionName = inputSessionName;
 
 		//Now append filepath and atempt to open. If open succeeds, this session already exists!
@@ -893,12 +1253,19 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 		if (loadSession.is_open())
 		{
-			waddstr(mywindow,"This session already exists. Enter a different session name. \n");
-			
+			mywindow->clear();
+			topMenuNewString = "This session already exists. Enter a different session name. \n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display(); 			
 		}
 		else
 		{
-			waddstr(mywindow,"This session is unique.\n");
+			mywindow->clear();
+			topMenuNewString = "This session is unique.\n";
+			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			mywindow->draw(newText);
+			mywindow->display();
 			sessionCreationSuccessful = true;
 		}
 
@@ -936,18 +1303,26 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 int mainMenu::topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer) 
 {
 	//Set flags to remote and waiting for first turn for the session.
+	//Probably needs editing to make it not allow bad inputs
+
 	gameType = remote;
 	awaitingFirstTurnThisSession = true;
 
 	//Get session name:
-	char inputSessionName[100];
-	waddstr(mywindow,"Input session name: (Case sensitive)\n");
-	wgetstr( mywindow,&inputSessionName[0]);
+	mywindow->clear();
+	sf::String topMenuJoinString = "Input session name: (Case sensitive)\n";
+
+
+	sf::String inputSessionName = playerInputString(mywindow, myFont, topMenuJoinString, 1);
 	sessionName = inputSessionName;
 
-	char inputPlayerName[100];
-	waddstr(mywindow,"Input your player name: (Case sensitive)\n");
-	wgetstr( mywindow,&inputPlayerName[0]);
+	mywindow->clear();
+	topMenuJoinString = "Input your player name: (Case sensitive)\n";
+	sf::Text anotherNewText(topMenuJoinString, *myFont, 0);
+	mywindow->draw(anotherNewText);
+	mywindow->display();
+
+	sf::String inputPlayerName = playerInputString(mywindow, myFont, topMenuJoinString, 1);
 	myPlayerName = inputPlayerName;
 
 	waitForRemotePlayer(boardToPlay, InputLayer);
@@ -985,7 +1360,12 @@ int mainMenu::multiplayerPullSaveGame()
 
 int mainMenu::waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer)
 {
-	waddstr(mywindow,"waitForRemotePlayer \n");
+	mywindow->clear();
+	sf::String topMenuJoinString = "Waiting for remote player.\n";
+	sf::Text newText(topMenuJoinString, *myFont, 0);
+	mywindow->draw(newText);
+	mywindow->display();
+
 	
 	//We are waiting for updated save game.
 	bool isItMyTurnYet = false;

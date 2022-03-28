@@ -2,6 +2,21 @@
 #include "MasterBoard.hpp"
 
 
+int Cursor::initialize(sf::Texture* inputTexture, MasterBoard* inputBoardToPlay)
+{
+	XCoord = 1;
+	YCoord = 1;
+	boardToPlay = inputBoardToPlay;
+	myTexture = inputTexture;
+	
+	//Basic image init below
+	//This is the cursor image, it should never change.
+	mySprite.setTexture(*inputTexture);
+	mySprite.setTextureRect(rectArray[0][2]);
+
+	return 0;
+}
+
 int Cursor::move(char* Input)
 {
 int didItMove = 1;

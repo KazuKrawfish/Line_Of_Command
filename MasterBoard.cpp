@@ -9,7 +9,7 @@
 #include "inputLayer.hpp"
 #include "compie.hpp"
 #include <cmath>
-
+#include "mainmenu.h"
 
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2);
 
@@ -28,7 +28,7 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 	}
 }
 
-int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
+int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber)
 {
 
 	int x = SupplyUnit->locationX;
@@ -41,27 +41,51 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
 	//Check each surrounding tile for a ground or sea unit and resupply them.
 	if (x < BOARD_WIDTH - 1 && Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team == playerFlag && Board[x + 1][y].minionOnTop->domain != air)
 	{
-		Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
-		Board[x + 1][y].minionOnTop->currentPriAmmo = Board[x + 1][y].minionOnTop->maxPriAmmo;
-		Board[x + 1][y].minionOnTop->currentSecAmmo = Board[x + 1][y].minionOnTop->maxSecAmmo;
+		if (Board[x + 1][y].minionOnTop->currentFuel != Board[x + 1][y].minionOnTop->maxFuel ||
+			Board[x + 1][y].minionOnTop->currentPriAmmo != Board[x + 1][y].minionOnTop->maxPriAmmo ||
+			Board[x + 1][y].minionOnTop->currentSecAmmo != Board[x + 1][y].minionOnTop->maxSecAmmo)
+		{
+			Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
+			Board[x + 1][y].minionOnTop->currentPriAmmo = Board[x + 1][y].minionOnTop->maxPriAmmo;
+			Board[x + 1][y].minionOnTop->currentSecAmmo = Board[x + 1][y].minionOnTop->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, Board[x + 1][y].minionOnTop, Board[x + 1][y].minionOnTop->locationX, Board[x + 1][y].minionOnTop->locationY);
+		}
 	}
 	if (x > 0 && Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team == playerFlag && Board[x - 1][y].minionOnTop->domain != air)
 	{
-		Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
-		Board[x - 1][y].minionOnTop->currentPriAmmo = Board[x - 1][y].minionOnTop->maxPriAmmo;
-		Board[x - 1][y].minionOnTop->currentSecAmmo = Board[x - 1][y].minionOnTop->maxSecAmmo;
+		if (Board[x - 1][y].minionOnTop->currentFuel != Board[x - 1][y].minionOnTop->maxFuel ||
+			Board[x - 1][y].minionOnTop->currentPriAmmo != Board[x - 1][y].minionOnTop->maxPriAmmo ||
+			Board[x - 1][y].minionOnTop->currentSecAmmo != Board[x - 1][y].minionOnTop->maxSecAmmo)
+		{
+			Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
+			Board[x - 1][y].minionOnTop->currentPriAmmo = Board[x - 1][y].minionOnTop->maxPriAmmo;
+			Board[x - 1][y].minionOnTop->currentSecAmmo = Board[x - 1][y].minionOnTop->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, Board[x - 1][y].minionOnTop, Board[x - 1][y].minionOnTop->locationX, Board[x - 1][y].minionOnTop->locationY);
+		}
 	}
 	if (y < BOARD_HEIGHT - 1 && Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->team == playerFlag && Board[x][y + 1].minionOnTop->domain != air)
 	{
-		Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
-		Board[x][y + 1].minionOnTop->currentPriAmmo = Board[x][y + 1].minionOnTop->maxPriAmmo;
-		Board[x][y + 1].minionOnTop->currentSecAmmo = Board[x][y + 1].minionOnTop->maxSecAmmo;
+		if (Board[x ][y +1].minionOnTop->currentFuel != Board[x ][y+ 1].minionOnTop->maxFuel ||
+			Board[x ][y +1].minionOnTop->currentPriAmmo != Board[x ][y + 1].minionOnTop->maxPriAmmo ||
+			Board[x ][y +1].minionOnTop->currentSecAmmo != Board[x ][y + 1].minionOnTop->maxSecAmmo) 
+		{
+			Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
+			Board[x][y + 1].minionOnTop->currentPriAmmo = Board[x][y + 1].minionOnTop->maxPriAmmo;
+			Board[x][y + 1].minionOnTop->currentSecAmmo = Board[x][y + 1].minionOnTop->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, Board[x][y + 1].minionOnTop, Board[x][y + 1].minionOnTop->locationX, Board[x][y + 1].minionOnTop->locationY);
+		}
 	}
 	if (y > 0 && Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->team == playerFlag && Board[x][y - 1].minionOnTop->domain != air)
 	{
-		Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
-		Board[x][y - 1].minionOnTop->currentPriAmmo = Board[x][y - 1].minionOnTop->maxPriAmmo;
-		Board[x][y - 1].minionOnTop->currentSecAmmo = Board[x][y - 1].minionOnTop->maxSecAmmo;
+		if (Board[x][y - 1].minionOnTop->currentFuel != Board[x][y - 1].minionOnTop->maxFuel ||
+			Board[x][y - 1].minionOnTop->currentPriAmmo != Board[x][y - 1].minionOnTop->maxPriAmmo ||
+			Board[x][y - 1].minionOnTop->currentSecAmmo != Board[x][y - 1].minionOnTop->maxSecAmmo) 
+		{
+			Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
+			Board[x][y - 1].minionOnTop->currentPriAmmo = Board[x][y - 1].minionOnTop->maxPriAmmo;
+			Board[x][y - 1].minionOnTop->currentSecAmmo = Board[x][y - 1].minionOnTop->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, Board[x][y - 1].minionOnTop, Board[x][y - 1].minionOnTop->locationX, Board[x][y - 1].minionOnTop->locationY);
+		}
 	}
 
 	if (isItDuringUpkeep == false)
@@ -76,48 +100,52 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep)
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
-//														i     s     a     r     c     R     T     A     v	  h		P  	  f		b	  L		B	  C	    G	  U		V
-const double ATTACK_VALUES_MATRIX[19][19] = {	/*i*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-												/*s*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0,	0,	  0,    0,	  0,	0,
-												/*a*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0.25,	0,	  0,    0.25, 0,	0,
-												/*r*/	0.90, 0.85, 0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70, 0,	0,	  0.30,	0.30, 0.35, 0.45, 0,	0.30,
-												/*c*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,    0,	  0,	0,
-												/*R*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.60, 0.40, 0.50, 0.70, 0,	0.40,
-												/*T*/	0.0,  0.00, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.00, 0.00, 0.90, 0,	0,	  0.15, 0,	  0,	0.15, 0,	0,
-												/*A*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,
-												/*v*/	0.00, 0.00, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.00, 0.00, 0.60, 0,	0,	  0.35,	0.25, 0.30, 0.35, 0,	0.25,
-												/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-												/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-												/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.80, 1.0,	0,	  0.60,	0.70, 0,	0,	  0,	0,	  0,	0,
-												/*b*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.80,	0.50, 0.60, 0.85, 0,	0.50,
-												/*L*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-												/*B*/	1.0,  0.95, 0.85, 0.90, 0.90, 0.90, 0.60, 0.90, 0,	  0,	0.90, 0,	0,	  0.70,	0.50, 0.60, 0.75, 0,	0.50,
-												/*C*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,
-												/*G*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0.60, 0.40, 0.50, 0.60, 0,	0.40,
-												/*U*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0.75,	0.40, 0.70, 0.95, 0.50,	0.40,
-												/*V*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,    0,	  0,	0 };
+//														i     s     a     r     c     R     T     A     v	  h		P  	  f		b	  L		B	  C	    G	  U		V		K		S
+const double ATTACK_VALUES_MATRIX[21][21] = {	/*i*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+												/*s*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0,	0,	  0,    0,	  0,	0,		0.2,	0.2,
+												/*a*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0.25,	0,	  0,    0.25, 0,	0,		0.2,	0.2,
+												/*r*/	0.90, 0.85, 0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70, 0,	0,	  0.30,	0.30, 0.35, 0.45, 0,	0.30,	0.4,	0.4,
+												/*c*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,    0,	  0,	0,		0,		0,
+												/*R*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.60, 0.40, 0.50, 0.70, 0,	0.40,	0.5,	0.5,
+												/*T*/	0.0,  0.00, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.00, 0.00, 0.90, 0,	0,	  0.15, 0,	  0,	0.15, 0,	0,		0.55,	0.55,
+												/*A*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0,		0,	
+												/*v*/	0.00, 0.00, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.00, 0.00, 0.60, 0,	0,	  0.35,	0.25, 0.30, 0.35, 0,	0.25,	0.35,	0.35,
+												/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+												/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+												/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.80, 1.0,	0,	  0.60,	0.70, 0,	0,	  0,	0,	  0,	0,		0,		0,
+												/*b*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.80,	0.50, 0.60, 0.85, 0,	0.50,	0.5,	0.5,
+												/*L*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+												/*B*/	1.0,  0.95, 0.85, 0.90, 0.90, 0.90, 0.60, 0.90, 0,	  0,	0.90, 0,	0,	  0.70,	0.50, 0.60, 0.75, 0,	0.50, 	0.6,	0.6,
+												/*C*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0,		0,
+												/*G*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0.60, 0.40, 0.50, 0.60, 0,	0.40,	0,		0,
+												/*U*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0.75,	0.40, 0.70, 0.95, 0.50,	0.40,	0,		0,
+												/*V*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,    0,	  0,	0, 		0,		0, 
+												/*K*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.60, 0.40, 0.50, 0.70, 0,	0.40,	0.5,	0.5,
+												/*S*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0,		0 };
 
 
-														//		i     s     a     r     c     R     T     A     v     h     P	  f		b	  L		B	  C	    G	  U		V
-const double SECONDARY_ATTACK_VALUES_MATRIX[19][19] = {	/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,
-														/*s*/	0.60, 0.55, 0.08, 0.12, 0.18, 0.30, 0.02, 0.08, 0.08, 0.12, 0.12, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,
-														/*a*/	0.70, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,
-														/*r*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-														/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,
-														/*R*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-														/*T*/	0.85, 0.80, 0.15, 0.25, 0.40, 0.50, 0.10, 0.20, 0.15, 0.25, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,
-														/*A*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,
-														/*v*/	0.65, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.55, 0.75, 0.35, 0,	0,	  0.05,	0.05, 0.05,	0.05, 0,	0.05,
-														/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-														/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-														/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.40, 0.5,	0,	  0.30,	0.35, 0,	0,	  0,	0,	  0,	0,
-														/*b*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,	0,
-														/*L*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-														/*B*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-														/*C*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0.60, 0.40, 0.50, 0.60, 0.50,	0.40,
-														/*G*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-														/*U*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,
-														/*V*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,    0,	  0,	0 };
+														//		i     s     a     r     c     R     T     A     v     h     P	  f		b	  L		B	  C	    G	  U		V		K		S
+const double SECONDARY_ATTACK_VALUES_MATRIX[21][21] = {	/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.01,	0.01,
+														/*s*/	0.60, 0.55, 0.08, 0.12, 0.18, 0.30, 0.02, 0.08, 0.08, 0.12, 0.12, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.02,	0.02,
+														/*a*/	0.70, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.05,
+														/*r*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.05,
+														/*R*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*T*/	0.85, 0.80, 0.15, 0.25, 0.40, 0.50, 0.10, 0.20, 0.15, 0.25, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.1,	0.1,
+														/*A*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.05,
+														/*v*/	0.65, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.55, 0.75, 0.35, 0,	0,	  0.05,	0.05, 0.05,	0.05, 0,	0.05,	0.05,	0.05,
+														/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.40, 0.5,	0,	  0.30,	0.35, 0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*b*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*L*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*B*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*C*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0.60, 0.40, 0.50, 0.60, 0.50,	0.40,	0,		0,
+														/*G*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*U*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*V*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,    0,	  0,	0 ,		0,		0,
+														/*K*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
+														/*S*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0 ,		0 };
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Assumes attacking minion is selected. Otherwise withinRange won't work.
@@ -192,6 +220,12 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 	case('V'):
 		x = 18;
 		break;
+	case('K'):
+		x = 19;
+		break;
+	case('S'):
+		x = 20;
+		break;
 	}
 
 	switch (attackingMinion.type)
@@ -253,6 +287,12 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 	case('V'):
 		y = 18;
 		break;
+	case('K'):
+		y = 19;
+		break;
+	case('S'):
+		y = 20;
+		break;
 	}
 
 	if (x == -1 || y == -1)
@@ -267,8 +307,9 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 
 	if (attackingMinion.rangeType == hybridRange)
 	{
-		if (attackingMinion.status == gaveupmovehasntfired)
+		if (attackingMinion.status == gaveupmovehasntfired || attackingMinion.status == hasntmovedorfired)
 		{	//If hybrid and didn't move, can still do direct attack with secondary weapon.
+			//Had to change to allow AA to counterattack with secondary weapon.
 			if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
 			{
 				if (attackingMinion.currentSecAmmo > 0)
@@ -415,11 +456,17 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 }
 
 
-//Return of -1 indicates the minion requested does not exist.
+//Return of -1 indicates the minion requested does not exist, or it can't be bought there.
 //New functionality: Input of '~' for propertyType indicates informational-only use of this function,
-//For instance, to determine if a unit even exists.
+//For instance, to determine if a unit even exists, or what its price is.
 int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 {
+	//Can't purchase defenses
+	if (minionType == 'K' || minionType == 'S')
+	{
+		return  100000;
+	}
+
 	bool canItBeBoughtHere = false;
 
 	//Allows non-base inputs for information only.
@@ -514,9 +561,10 @@ int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 }
 
 //Currently this is not doing what it should be doing- only partial initialization.
-MasterBoard::MasterBoard()
+MasterBoard::MasterBoard(sf::Texture *inputTexture)
 {
 	playerFlag = 0;
+	myTexture = inputTexture;
 
 	//Not sure why we have to do an extra row, whatever! (Tried with one less and it caused out of bounds..... i am insane?!?!)
 	//First resize board to meet savegame specifications.
@@ -528,10 +576,11 @@ MasterBoard::MasterBoard()
 	}
 
 	//Initialize cursor.
-	cursor.XCoord = 1;
-	cursor.YCoord = 1;
-	cursor.boardToPlay = this;
+	cursor.initialize(inputTexture, this);
 
+	//Re-initialize windows
+	WINDOW_HEIGHT = 10;
+	WINDOW_WIDTH = 12;
 	totalNumberOfMinions = 0;
 
 	//Initialize MinionRoster to NULL.
@@ -567,7 +616,7 @@ MasterBoard::MasterBoard()
 	return;
 }
 
-//This servie builds another parallel set of distances that ignores all units.
+//This service builds another parallel set of distances that ignores all units.
 int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion) 
 {
 
@@ -957,8 +1006,19 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType, 
 //Tells us how an attacker would perform against an enemy. Useful for actual attack or calculation - doesn't actually deal damage.
 //Returns a number between 0 - 100 - actual health, not percent.
 //Also sets wouldAmmoBeUsed so caller can use for actual damage calcs and then subtract ammo if needed
-double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool& wouldAmmoBeUsed, int& weaponUsed,  bool ignoreLimitations)
+double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool& wouldAmmoBeUsed, int& weaponUsed, bool ignoreLimitations)
 {
+	if (attackingMinion == NULL )
+	{
+  		std::cout << "Could not calculate damage dealt for " << playerRoster[defendingMinion->team].name << "'s " << defendingMinion->type << std::endl;
+		return -1;
+	}
+	if (defendingMinion == NULL)
+	{
+		std::cout << "Could not calculate damage dealt for " << playerRoster[attackingMinion->team].name << "'s " << attackingMinion->type << std::endl;
+		return -1;
+	}
+
 	//Assume ammo is not used until told otherwise.
 	wouldAmmoBeUsed = false;
 
@@ -1096,6 +1156,9 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 			//May also be different domain
 			//Also must be within range
 			//Also must have enough fuel
+			if (x == 6 && y == 2 && myMinion->type == 'c')
+				std::cout << "gothim" << std::endl;
+
 			if (myMinion->truePathMap[x][y].distanceFromMinion != -1 && myMinion->truePathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange 
 				&& myMinion->truePathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
 				if (Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag
@@ -1301,7 +1364,7 @@ int MasterBoard::setIndividualVisionField(int inputX, int inputY, int visionLeft
 int MasterBoard::setVisionField(int observerNumber)
 {
 	//If observer is "neutral", they can see the whole map.
-	if (observerNumber == 0)
+	if (observerNumber == 0  || fogOfWar == false)
 	{
 		for (int x = 0; x < BOARD_WIDTH; x++)
 		{
@@ -1365,9 +1428,8 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	}
 
 	//These are all cases where direct fire can occur:
-	if ((cursor.selectMinionPointer->rangeType == hybridRange && cursor.selectMinionPointer->status == hasmovedhasntfired)
-		|| (cursor.selectMinionPointer->rangeType == directFire &&
-		(cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)))
+	if ((cursor.selectMinionPointer->rangeType == directFire  )&&
+		(cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired))
 	{
 		if (inputX < BOARD_WIDTH - 1)
 			Board[inputX + 1][inputY].withinRange = true;
@@ -1383,7 +1445,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 	}
 	else	//If not a direct fire scenario, it's a ranged scenario:
-		if ((cursor.selectMinionPointer->rangeType == hybridRange || cursor.selectMinionPointer->rangeType == rangedFire) &&
+		if ((cursor.selectMinionPointer->rangeType == rangedFire) &&
 			(cursor.selectMinionPointer->status == gaveupmovehasntfired))
 		{
 
@@ -1407,7 +1469,47 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 					}
 				}
 			}
-		}
+		} 
+		else	//Or it's a hybrid fire scenario
+			if (cursor.selectMinionPointer->rangeType == hybridRange
+				&& cursor.selectMinionPointer->status == gaveupmovehasntfired )
+			{
+				for (int x = 0; x < BOARD_WIDTH; x++)
+				{
+					for (int y = 0; y < BOARD_HEIGHT; y++)
+					{
+
+						distanceX = abs(inputX - x);
+						distanceY = abs(inputY - y);
+
+						//Must be within range. Ignore minimum range.
+						if ((distanceX + distanceY) <= Board[inputX][inputY].minionOnTop->attackRange )
+						{
+							Board[x][y].withinRange = true;
+						}
+						else
+						{
+							Board[x][y].withinRange = false;
+						}
+					}
+				}
+			}else 
+				if ( cursor.selectMinionPointer->status == hasmovedhasntfired 
+					&& cursor.selectMinionPointer->rangeType == hybridRange)
+			{
+				if (inputX < BOARD_WIDTH - 1)
+					Board[inputX + 1][inputY].withinRange = true;
+
+				if (inputX > 0)
+					Board[inputX - 1][inputY].withinRange = true;
+
+				if (inputY < BOARD_HEIGHT - 1)
+					Board[inputX][inputY + 1].withinRange = true;
+
+				if (inputY > 0)
+					Board[inputX][inputY - 1].withinRange = true;
+
+			}
 
 	//Minion's tile should not have red indicator
 	Board[inputX][inputY].withinRange = false;
@@ -1475,7 +1577,7 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo);
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo, myTexture);
 			if (minionRoster[i] != NULL)
 			{
 				minionRoster[i]->status = (minionStatus)status;
@@ -1502,6 +1604,12 @@ int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputT
 //First check ensures if minion has moved and shot, you can't select. Also if it's ranged and moved, you can't.
 int MasterBoard::selectMinion(int inputX, int inputY)
 {
+	if (inputX == -1 || inputY == -1)
+	{
+		std::cout << "Invalid selectMinion coordinates!" << std::endl;
+		return -1;
+	}
+
 	//Friendly minion
 	//Has either not moved at all, or moved but not fired and isn't ranged
 	//Or gave up move, hasn't fired
@@ -1550,7 +1658,8 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 //Return 0 means successfully made it to location
 //Return 1 means we dropped prematurely at this input location.
 //Return 2 means we were blocked AND had to return without dropping at all.
-int MasterBoard::validatePath(int& inputX, int& inputY)
+//ValidatePath also prints its own graphics, indicating the path of movement.
+int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer * graphicsLayer, int whoIsWatching)
 {
 	bool madeItToTheEnd = false;
 	bool hitEnemy = false;
@@ -1572,14 +1681,15 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 
 
 	Board[currentX][currentY].hasBeenValidated = true;
-
-
-
+	   
 	//Check each adjacent space. If it is within the cursor path and doesn't have enemy minion, turn cursorPath here off, and return its validatePath value.
 	//If a drop happens, return 1.
 
 	while (madeItToTheEnd == false && hitEnemy == false)
 	{
+		//Graphics - show move
+		graphicsLayer->movementGraphics(this, whoIsWatching, selectedMinion, currentX, currentY);
+
 		//If we have reached the cursor, do final evaluation.
 		//If there is a minion here, even though we reached end, we are "trapped", and we need to go back to potential drop.
 		if (cursor.getX() == currentX && cursor.getY() == currentY)
@@ -1592,7 +1702,7 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 		else
 
 			//Keep evaluating spots along the path.
-
+			//Only one spot should have "withinCursorPath && notValidated" so we use ifelse to go to each neighboring square
 			//If a spot is on path AND has no minion. Potential drop, and now move evaluation there.
 			if (currentX > 0 && Board[currentX - 1][currentY].withinCursorPath == true && Board[currentX - 1][currentY].hasBeenValidated == false)
 			{
@@ -1613,6 +1723,8 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 						Board[currentX - 1][currentY].hasBeenValidated = true;	//Prevent from coming back here
 						//We can still proceed, but this is not a new potential drop point.
 						currentX--;
+
+
 					}
 					else
 					{
@@ -1711,10 +1823,10 @@ int MasterBoard::validatePath(int& inputX, int& inputY)
 
 
 
-
 }
-
-int MasterBoard::moveMinion(int inputX, int inputY)
+//Note re observerNumber: Don't know a better way to "know" who is supposed to watch, since the prints are supposed to be "interrupts"
+//Unfortunately it makes a rather circular input of observerNumber- it depends on input layer/compie functions, then transmits to inputlayer functions.
+int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber)		
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
 
@@ -1758,7 +1870,7 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 
 	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
 	//validatePath will actually move the minion, so we need to return afterwards.
-	validatePath(inputX, inputY);
+	int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber);
 
 	//If the inputX has not changed, that means we got trapped and have to stand in place. 
 	//Still counts as moving.
@@ -1783,7 +1895,9 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	Board[oldX][oldY].minionOnTop = NULL;
 
 	//Reset capture points for tile.
+	//Reset minion's cap status
 	Board[oldX][oldY].capturePoints = 20;
+	selectedMinion->isCapturing = false;
 
 	//"Move" the minion to the new location.
 	selectedMinion->locationX = inputX;
@@ -1792,6 +1906,13 @@ int MasterBoard::moveMinion(int inputX, int inputY)
 	cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
 
 	cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
+
+
+	if(didTrapHappen == 1)
+	{ 
+		InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
+	}
+
 	deselectMinion();
 
 	setVisionField(playerFlag);
@@ -1904,7 +2025,7 @@ int MasterBoard::dropOffMinion()
 	return 0;
 }
 
-std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer)
+std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer, int  observerNumber)
 {
 	int previousOwner = inputTile->controller;
 
@@ -1919,6 +2040,9 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 	int pointsToTake = int(std::round(inputMinion->health / 10));
 	inputTile->capturePoints -= pointsToTake;
 	inputMinion->isCapturing = true;
+
+	InputLayer->captureGraphics(this, observerNumber, inputMinion, inputMinion->locationX, inputMinion->locationY);
+
 
 	if (inputTile->capturePoints <= 0)
 	{
@@ -1940,7 +2064,11 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 		textToReturn += inputTile->description;
 		textToReturn += " CAPTURED!";
 
+		inputTile->mySprite.setTextureRect(rectArray[inputTile->textureRectAnchorX + inputTile->controller][inputTile->textureRectAnchorY]);
+		inputTile->myFogSprite.setTextureRect(rectArray[inputTile->textureRectAnchorX + inputTile->controller][inputTile->textureRectAnchorY + 1]);
+
 	}
+
 
 	inputMinion->status = hasfired;
 
@@ -1986,7 +2114,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 	InputLayer->printPlayerDefeat(losingPlayer, this);
 	
 	int playersLeft = 0;
-	//If this was the final defeat, change to main menu.
+	//Determine if this was the last player alive
 	for (int i = 1; i < playerRoster.size(); i++) 
 	{
 		if (playerRoster[i].stillAlive == true)
@@ -2010,13 +2138,20 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 
 		InputLayer->printPlayerVictory(winningPlayer, this);
 
-		InputLayer->exitToMainMenu(this);
+		if(missionFlag == false || playerRoster[winningPlayer].playerType == computerPlayer)
+			InputLayer->exitToMainMenu(this);	
+		else
+		{
+			InputLayer->NextMission(this);
+		}
+
 		gameOver = true;
 	}
 
 	//Then increment turn if appropriate (Died during player turn, game is not over yet.)
 	if (losingPlayer == playerFlag && gameOver == false)
 	{
+		//Observer will be next player
 		endTurn(InputLayer);
 	}
 
@@ -2045,13 +2180,21 @@ int MasterBoard::deselectMinion()
 
 //Additionally, can only attack once. If artillery, cannot have moved or be adjacent.
 //If hybrid, different attack based on if you have moved or not.
-int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
+int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber)
 {
 
 
 	//Simplify by finding shorthand values first.
 	Minion* attackingMinion = cursor.selectMinionPointer;
 	Minion* defendingMinion = Board[inputX][inputY].minionOnTop;
+
+	if (attackingMinion == NULL || defendingMinion == NULL)
+	{
+		std::cout << "Couldn't attack, one of the minions doesn't exist!" << std::endl;
+		return -1;
+	}
+
+
 	bool isAmmoUsed = false;
 	int weaponUsed = 0;
 	bool ignoreRealMapLimitations = false;
@@ -2078,17 +2221,25 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 
 	//If artillery type, cannot attack adjacent (Minimum range)
 	if ((attackingMinion->rangeType == rangedFire)
-		&& (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
+		&& (isAdjacent(defendingMinion->locationX, attackingMinion->locationX, defendingMinion->locationY, attackingMinion->locationY)))
 	{
 		return 1;
 	}
 
-	//Also, if artillery type, cannot attack if it's actually moved that turn.				
+	//Also, if artillery type, cannot attack if it's actually moved that turn.		
+	//Why is this just floating? Not sure
 
+	//Combat graphics for attacker
+	InputLayer->combatGraphics(this, observerNumber,& Board[attackingMinion->locationX][attackingMinion->locationY],& Board[inputX][inputY]);
 
 	isAmmoUsed = false;
 	//Decrease defender's health by attack value. Decrease ammo as needed.
-	defendingMinion->health -= calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+	int randomFactor = (rand() % 10) - 5;
+	int damageDealt = randomFactor + calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+	if (damageDealt < 0)
+		damageDealt = 0;
+	defendingMinion->health -= damageDealt;
+		
 	if (isAmmoUsed == true)
 	{
 		if (weaponUsed == 1)
@@ -2105,20 +2256,26 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 		int defendingPlayer = defendingMinion->team;
 		destroyMinion(defendingMinion, printMessage, InputLayer, false);
 		defenderAlive = false;
-		if (attackingMinion->veterancy <= 3)
+		if (attackingMinion->veterancy < 3)
 		{
 			attackingMinion->veterancy++;
 		}
 		setVisionField(defendingPlayer);	//Change vision field to account for dead minion.
 	}
 	else	//Cannot be artillery type. Cannot be non-Artillery if artillery was attacking.
-		if ((defendingMinion->rangeType == directFire || defendingMinion->rangeType == hybridRange) && (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
+		if (   (attackingMinion->rangeType == directFire || attackingMinion->rangeType == hybridRange  ) 
+			&&	(defendingMinion->rangeType == directFire || defendingMinion->rangeType == hybridRange) 
+			&& (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
 		{
 			//If defender still alive, then perform defensive counterfire.
 			//Same calculations as above - includes veterancy
 			isAmmoUsed = false;
 
-			attackingMinion->health -= calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+			int randomFactor = (rand() % 10 ) - 5;
+			int damageDealt = randomFactor + calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+			if (damageDealt < 0)
+				damageDealt = 0;
+			attackingMinion->health -= damageDealt;
 
 			if (isAmmoUsed == true)
 			{
@@ -2128,6 +2285,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 					attackingMinion->currentSecAmmo--;
 			}
 
+			//Combat graphics for defender
+			if(damageDealt > 0)
+				InputLayer->combatGraphics(this, observerNumber, &Board[inputX][inputY], &Board[attackingMinion->locationX][attackingMinion->locationY]);
 
 		}
 
@@ -2153,7 +2313,13 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer)
 }
 
 int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill)
-{	
+{
+	if (inputMinion == NULL)
+	{
+		std::cout << "Could not destroy mininion, it doesn't exist." << std::endl;
+		return 1;
+	}
+
 	int minionController = inputMinion->team;
 
 	//If carrying a guy, kill that guy too.
@@ -2224,8 +2390,7 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 			}
 	} while (playerRoster[playerFlag].stillAlive == false);
 
-	//Set minionToBuy to the default null value.
-	InputLayer->requestedMinionToBuy = '\n';
+
 
 	//Reset every minion's status.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -2238,19 +2403,21 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 
 	//Shouldn't matter if local or not as long as it's not singleplayer
 	//If it is singleplayer we want to remain in map mode.
-	if (isItSinglePlayerGame == false) 
+	if (isItSinglePlayerGame == false)
 	{
 		InputLayer->status = waitingForNextLocalPlayer;
 	}
 
-	upkeep(InputLayer);
+
+	
 
 	return gameTurnIncrement;
 
 }
 
 //Upkeep
-int MasterBoard::upkeep(inputLayer* InputLayer)
+//Upkeep always collects income. It is only called on the first turn of a new game, or at the end of a turn.
+int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 {
 	//Set vision field for current player
 	setVisionField(playerFlag);
@@ -2263,7 +2430,9 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 		{
 			if (Board[x][y].controller == playerFlag)
 			{
+				//Provide income
 				playerRoster[playerFlag].treasury += Board[x][y].production;
+				
 				if (Board[x][y].symbol == 'Q')
 				{
 					cursor.relocate(x, y);
@@ -2273,9 +2442,9 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 		}
 	}
 
-	repairMinions();
+	repairMinions(InputLayer, observerNumber);
 
-	resupplyMinions();
+	resupplyMinions(InputLayer, observerNumber);
 
 
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -2316,8 +2485,10 @@ int MasterBoard::upkeep(inputLayer* InputLayer)
 	return 0;
 }
 
-int MasterBoard::repairMinions()
+int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 {
+	std::cout << "Repair ALL MINIONS" << std::endl;
+
 	//This was terminating "early" since it would hit a NULL spot so minions wouldn't get seen to be healed.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
@@ -2330,6 +2501,7 @@ int MasterBoard::repairMinions()
 			{
 				if (minionRoster[i]->health < 100)
 				{
+					InputLayer->repairGraphics(this, observerNumber, minionRoster[i], minionRoster[i]->locationX, minionRoster[i]->locationY);
 
 					//silent repair
 					if (minionRoster[i]->health > 94)
@@ -2362,7 +2534,7 @@ int MasterBoard::repairMinions()
 	return 0;
 }
 
-int MasterBoard::resupplyMinions()
+int MasterBoard::resupplyMinions(inputLayer* InputLayer, int observerNumber)
 {
 
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -2374,14 +2546,22 @@ int MasterBoard::resupplyMinions()
 			//If it is on a player controlled tile, and that tile is a "repairing/resupplying" tile for the given unit.
 			if (tileToExamine->controller == playerFlag && consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) != -1)
 			{
+				//Check to see if resupply is even necessary
+				if(minionRoster[i]->currentFuel != minionRoster[i]->maxFuel	
+					|| minionRoster[i]->currentPriAmmo != minionRoster[i]->maxPriAmmo 
+					|| minionRoster[i]->currentSecAmmo != minionRoster[i]->maxSecAmmo)
+				{ 
 				minionRoster[i]->currentFuel = minionRoster[i]->maxFuel;
 				minionRoster[i]->currentPriAmmo = minionRoster[i]->maxPriAmmo;
 				minionRoster[i]->currentSecAmmo = minionRoster[i]->maxSecAmmo;
+				cursor.relocate(minionRoster[i]->locationX, minionRoster[i]->locationY);
+				InputLayer->supplyGraphics(this, observerNumber, minionRoster[i], minionRoster[i]->locationX, minionRoster[i]->locationY);
+				}
 			}
 
 			if (minionRoster[i]->type == 'P')
 			{
-				individualResupply(minionRoster[i], true);
+				individualResupply(minionRoster[i], true, InputLayer, observerNumber);
 			}
 
 		}

@@ -42,10 +42,13 @@ class MasterBoard
 {
 public:
 	
-	MasterBoard();
+	MasterBoard(sf::Texture* inputTexture);
 	int NUMBEROFPLAYERS = 2;
-	int BOARD_WIDTH = 15;
-	int BOARD_HEIGHT = 20;
+	int BOARD_WIDTH = 12;
+	int BOARD_HEIGHT = 10;
+	int WINDOW_HEIGHT = 10;
+	int WINDOW_WIDTH = 12;
+
 	int buildPath(bool isItInitialCall, int x, int y, char minionType, std::vector<std::vector<pathSquare>> & pathMapPointer);
 	int buildApparentPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
 	int buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
@@ -57,27 +60,27 @@ public:
 	int setVisionField(int observerNumber);
 	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool & wouldAmmoBeUsed, int & weaponUsed, bool ignoreLimitations);
 	int selectMinion(int inputX, int inputY);
-	int moveMinion(int inputX, int inputY);
+	int moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber);
 	int deselectMinion();
 	int attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam);
 	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
 	int endTurn(inputLayer* InputLayer);
-	int upkeep(inputLayer* InputLayer);
-	int attackMinion(int inputX, int inputY, inputLayer* InputLayer);
+	int upkeep(inputLayer* InputLayer, int observerNumber);
+	int attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill);
 	int pickUpMinion(int inputX, int inputY);
-	int validatePath(int & inputX, int&  inputY);
+	int validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching);
 	int setCursorPath(bool firstTime, int inputX, int inputY);
-	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep);
+	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber);
 	int dropOffMinion();
 	int checkWindow();
-	int repairMinions();
-	int resupplyMinions();
+	int repairMinions(inputLayer* InputLayer, int observerNumber);
+	int resupplyMinions(inputLayer* InputLayer, int observerNumber);
 	int clearBoard(inputLayer* InputLayer);
 	int consultMinionCostChart(char minionType, char propertyType);
 	int playerDefeat(int playerNumber, int winningPlayer, inputLayer* InputLayer);
 
-	std::string captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer);
+	std::string captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer,  int  observerNumber);
 	Minion* minionRoster[GLOBALSUPPLYCAP];
 	Cursor cursor;
 
@@ -91,9 +94,15 @@ public:
 	int playerFlag;
 	int totalNumberOfMinions;
 	bool isItSinglePlayerGame = false;
+	bool interruptFlag = false;
+
+	//GRAPHICS	////////////////////////////////
+	sf::Texture * myTexture;
+	//GRAPHICS	///////////////////////////////
 
 
 	//MissionInfo///////////////////////////////
+	bool fogOfWar = false;
 	bool missionFlag= false;
 	std::string campaignName = "_";
 	std::string scenarioOrMissionName = "_";
