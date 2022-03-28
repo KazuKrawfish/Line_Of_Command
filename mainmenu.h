@@ -14,6 +14,8 @@ enum interactionMethod {unchosen, localSkirmish, localCampaign, remote};
 //Forward declare global utilities
 char playCharInput(sf::RenderWindow* myWindow);
 
+
+
 class mainMenu
 {
 public:

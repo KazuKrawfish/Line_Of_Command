@@ -96,7 +96,7 @@ public:
 	//SFML Objects		/////////////////////////
 	std::vector <sf::Sound> * soundEffects;
 	bool soundsOn = false;
-	int speedFactor = 10;
+	int speedFactor = 5;		//1 is normal. 10 is ultra fast.
 	sf::Texture* inputLayerTexture;
 	sf::Font* inputLayerFont;
 	sf::RenderWindow* inputLayerWindow;

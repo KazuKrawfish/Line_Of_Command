@@ -1558,13 +1558,16 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 	{
 		menuCursor = 0;
 
+
 		if (boardToInput->cursor.selectMinionFlag == true)
 			boardToInput->deselectMinion();
 		int incrementGameTurn = boardToInput->endTurn(this);
 		//If we advanced a gameTurn, mainMenu will keep track of it.
 		MainMenu->gameTurn += incrementGameTurn;
+
 		//Have to always keep an autosave!
 		MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
+
 		
 		//If multiplayer, push to remote server and queue "waiting"
 		//mainmenu's playGame will keep the player waiting.
@@ -1575,7 +1578,6 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 			MainMenu->menuStatus = waitingForRemotePlayer;
 		}
 
-		//status = gameBoard;
 
 	}
 	else

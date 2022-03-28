@@ -1338,7 +1338,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 		for (int i = 0; i < compieMinionRoster.size(); i++)
 		{
-			if (compieMinionRoster[i] != NULL)
+			if (compieMinionRoster[i] != NULL && compieMinionRoster[i]->taskingStatus != taskingExecuted)
 
 			{
 				//Move cursor, then select minion
@@ -1389,6 +1389,9 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 		determineProduction(boardToUse);
 
+		//Have to always keep an autosave!
+		menuPointer->gameSave(".\\savegames\\Auto_save.txt", boardToUse);
+
 		   
 		int incrementGameTurn = boardToUse->endTurn(InputLayer);
 		
@@ -1414,8 +1417,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 		//If we advanced a gameTurn, mainMenu will keep track of it.
 		menuPointer->gameTurn += incrementGameTurn;
-		//Have to always keep an autosave!
-		menuPointer->gameSave(".\\savegames\\Auto_save.txt", boardToUse);
+
 	}
 
 	return 1;
