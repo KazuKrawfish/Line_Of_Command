@@ -14,11 +14,8 @@
 #include "compie.hpp"
 #include <filesystem>
 
-
-
 class inputLayer;
 class MasterBoard;
-
 
 
 //Because we're having difficulty getting strings to work, we're leaving this for now.

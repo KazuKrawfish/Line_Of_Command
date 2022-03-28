@@ -1676,14 +1676,14 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		status = gameBoard;
 		menuCursor = 0;
 	}
-
+	else
 	//Exit menu
 	if (menuCursor == 5 && *Input == 't')
 	{
 		status = gameBoard;
 		menuCursor = 0;
 	}
-
+	else
 	//Exit to main menu
 	if (menuCursor == 2 &&  *Input == 't')
 	{
@@ -1691,6 +1691,21 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput) {
 		menuCursor = 0;
 		exitToMainMenu(boardToInput);
 		
+	}
+	else
+	if (menuCursor == 6 && *Input == 't') 
+	{
+		if (soundsOn == false)
+			soundsOn = true;
+		else soundsOn = false;
+
+	}
+	else 
+	if (menuCursor == 7 && *Input == 't') 
+	{
+		if (speedFactor == 1)
+			speedFactor = 3;
+		else speedFactor = 1;
 	}
 
 	return 0;
