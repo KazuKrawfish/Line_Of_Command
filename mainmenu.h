@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	mainMenu.h
+//
+
 #ifndef MAINMENU_HPP__
 #define MAINMENU_HPP__
 

@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	Minion.cpp
+//
+
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
 

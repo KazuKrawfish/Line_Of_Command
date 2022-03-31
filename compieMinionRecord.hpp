@@ -1,3 +1,8 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	compieMinionRecord.hpp
+//
+
 #ifndef COMPIE_MINION_RECORD_H__
 #define COMPIE_MINION_RECORD_H__
 

@@ -1,25 +1,26 @@
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	compie.cpp
+//
+
 #include "compie.hpp"
 #include <thread>
 #include <iostream>
 #include "mainmenu.h"
 
-//Need to have all "singlePlayer" status elements be based in masterboard, otherwise will be very confusing to view/update.
-
 //Compie calculates its closest objective by using buildPath and finding potential objective that has the best distance.
 //Then it builds a compie pathMap again on that objective
 //SelectMinion now builds an apparentPathMap that overrides the initial one. Shouldn't matter for strategic considerations.
 
+
 //Below functions are "utilities" that need to find a home.
-
-
-
-
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
 {
 	return abs(inputX1 - inputX2) + abs(inputY1 - inputY2);
 
 }
 //Above functions are "utilities" that need to find a home.
+
 int compie::statusUpdate(MasterBoard* boardToUse) 
 {
 	double totalPropertiesCompieOwns = 0;
