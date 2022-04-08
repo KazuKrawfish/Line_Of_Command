@@ -1,6 +1,9 @@
-//Crisis Front (Project X)
-//Or maybe call it Line of Command
-//Copyright 2021, Park Family Software Laboratory (ParkLab)
+//Copyright 2022, Supercontinent Software Ltd.
+//
+//	main.cpp
+//
+//Line of Command - Tactical turn based wargame. Inspired by the classic Gameboy Advance game Advance Wars.
+//Built with SFML library.
 
 
 #include <iostream>
@@ -30,8 +33,6 @@
 */
 
 
-
-
 //Global for the moment to support faster production
 //Everyone needs access to this at all times so it seems reasonable
 const int rectArrayWidth = 38;
@@ -40,28 +41,50 @@ std::vector <std::vector<sf::IntRect>> rectArray;
 
 
 
+int initializeTextureArray(std::string directory, std::vector <std::string> imageList, std::vector <sf::Texture>& buttonTextureArray)
+{
+	sf::Image newImage;
+	sf::Texture newTexture;
+
+	//Need longer list of actual buttons
+
+	for (int i = 0; i < imageList.size(); i++)
+	{
+		if (!newImage.loadFromFile(directory + "/" + imageList[i] + ".png"))
+		{
+			std::cout << "Couldn't load button!" << std::endl;
+			newTexture.loadFromImage(newImage);
+			buttonTextureArray.push_back(newTexture);
+		}
+	
+	}
+	return 0;
+}
 
 int main()
 {
 
 	sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
 
-	//Load textures
+	//Load topMenuButton textures
+	std::vector <std::string> imageList = { "button_New_Game", "button_Load_Game", "button_Editor_Mode", "button_New_Campaign", "button_Load_Campaign" };
+	std::vector <sf::Texture> topMenuButtonTextureArray;
+	initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
+
+	//Load gameMenuButton textures
+	std::vector <std::string> gameMenuButtonImageList = { "save_Game", "exit_To_Main_Menu", "end_Turn", "toggle_Sound", "restart", "load_Game" , "resume_Play", "toggle_Speed" };
+	std::vector <sf::Texture> gameMenuButtonTextureArray;
+	initializeTextureArray("menuButtons", gameMenuButtonImageList, gameMenuButtonTextureArray);
+
+	std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox" };
+	std::vector <sf::Texture> otherTextureArray;
+	initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
+
 	sf::Texture mainTexture;
 	sf::Image mainImage;
-	sf::Texture warshipTexture;
-	sf::Image warshipsImage;
-	sf::Image troopsImage;
-	sf::Texture troopsTexture;
-	sf::Image topMenuImage;
-	sf::Texture topMenuTexture;
-	sf::Image startScreenImage;
-	sf::Texture startScreenTexture;
 
 	//Load Sounds/Music
 	sf::Music introMusic;
-
-	
 
 	//Initialize Sounds Array
 	const int numberOfSoundEffects = 20;
@@ -70,12 +93,12 @@ int main()
 	std::vector <sf::Sound> soundEffects;
 	soundEffects.resize(numberOfSoundEffects + 1);
 
-		
+
 	//Initialize intRect grid
-	rectArray.resize(rectArrayWidth+1);
+	rectArray.resize(rectArrayWidth + 1);
 	for (int i = 0; i < rectArrayWidth; i++)
 	{
-		rectArray[i].resize(rectArrayHeight+1);
+		rectArray[i].resize(rectArrayHeight + 1);
 		for (int j = 0; j < rectArrayHeight; j++)
 		{
 
@@ -85,7 +108,7 @@ int main()
 			rectArray[i][j].width = 50;
 		}
 	}
-	
+
 	sf::Font cour;
 	//Load up image and use to initiate texture
 	//Also set white to transparent
@@ -93,27 +116,11 @@ int main()
 	{
 		std::cout << "Couldn't load image!" << std::endl;
 	}
-	if (!troopsImage.loadFromFile("troops.png"))
-	{
-		std::cout << "Couldn't load image!" << std::endl;
-	}
-	if (!warshipsImage.loadFromFile("warships.png"))
-	{
-		std::cout << "Couldn't load image!" << std::endl;
-	}
-	if (!topMenuImage.loadFromFile("topMenu.png"))
-	{
-		std::cout << "Couldn't load image!" << std::endl;
-	}
-	if (!startScreenImage.loadFromFile("startScreenStatement.png"))
-	{
-		std::cout << "Couldn't load image!" << std::endl;
-	}
 	if (!introMusic.openFromFile("soundEffects\\introTheme.wav"))
 	{
 		std::cout << "Couldn't load intro theme!" << std::endl;
 	}
-	
+
 	//Init sound effect buffer and sound arrays
 	soundEffectBuffers.resize(soundEffectNames.size() + 1);
 	for (int i = 0; i < soundEffectNames.size(); i++)
@@ -121,7 +128,7 @@ int main()
 		std::string fileName = "soundEffects\\" + soundEffectNames[i] + ".wav";
 		if (!soundEffectBuffers[i].loadFromFile(fileName))
 		{
-			std::cout << "Couldn't load" << soundEffectNames[i]<< std::endl;
+			std::cout << "Couldn't load" << soundEffectNames[i] << std::endl;
 		}
 		//Transfer Sound Buffer to Sounds
 
@@ -129,13 +136,8 @@ int main()
 	}
 
 	sf::Color colorWhite;
-	
+
 	//Transfer Images to Textures
-	warshipTexture.loadFromImage(warshipsImage);
-	troopsTexture.loadFromImage(troopsImage);
-	topMenuTexture.loadFromImage(topMenuImage);
-	startScreenTexture.loadFromImage(startScreenImage);
-	
 	mainImage.createMaskFromColor(colorWhite.White);
 	mainTexture.loadFromImage(mainImage);
 
@@ -143,12 +145,10 @@ int main()
 	{
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
-	
 
+	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, topMenuButtonTextureArray, gameMenuButtonTextureArray, otherTextureArray, &introMusic);
 
-	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, &warshipTexture,& troopsTexture, &topMenuTexture, &startScreenTexture , &introMusic);
-	
-	inputLayer InputLayer(&MainMenu, &mainWindow , &mainTexture, &cour, &soundEffects);
+	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &cour, &soundEffects, & MainMenu.gameMenuButtons);
 	MasterBoard GameBoard(&mainTexture);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);

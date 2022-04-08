@@ -11,7 +11,7 @@
 #include "Cursor.hpp"
 #include "MasterBoard.hpp"
 #include <SFML/Audio.hpp>
-
+#include <SFML/System/Vector2.hpp>
 
 enum mainMenuStatus { topmenu,  playingMap, waitingForRemotePlayer };
 enum interactionMethod {unchosen, localSkirmish, localCampaign, remote};
@@ -52,9 +52,8 @@ public:
 	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
 	
 	//CONSTRUCTOR
-	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, 
-		sf::Texture* inputMenuWallpaper, sf::Texture* inputStartWallPaper, sf::Texture* inputTopMenu ,
-		sf::Texture* inputstartScreenStatement, sf::Music* inputIntroMusic);
+	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture> & topMenuButtonTextureArray,
+		std::vector <sf::Texture>& gameMenuButtonTextureArray, std::vector <sf::Texture>& inputOtherTextureArray , sf::Music* inputIntroMusic);
 	//CONSTRUCTOR
 
 	//Multiplayer specific functions
@@ -79,14 +78,15 @@ public:
 
 
 	std::vector <compie> computerPlayerRoster;
+	//Buttons////////////////////////////////////
+	std::vector <Button> gameMenuButtons;
+	std::vector <Button> topMenuButtons;
+	//Buttons////////////////////////////////////
+
 
 	//SFML Objects		/////////////////////////
 	sf::RenderWindow* mywindow;
 	sf::Texture* myTexture;
-	sf::Texture* menuWallPaper;
-	sf::Texture* startWallPaper;
-	sf::Texture* startScreenStatement;
-	sf::Texture* topMenuTexture;
 	sf::Font* myFont;
 
 	sf::Music* introMusic;

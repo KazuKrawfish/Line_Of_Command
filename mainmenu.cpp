@@ -14,6 +14,7 @@
 #include "compie.hpp"
 #include <filesystem>
 
+
 class inputLayer;
 class MasterBoard;
 
@@ -90,15 +91,10 @@ char playCharInput(sf::RenderWindow* myWindow)
 	return inputChar;
 } 
 
-mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, 
-	sf::Texture* inputMenuWallpaper, sf::Texture* inputStartWallPaper, sf::Texture* inputTopMenu,
-	sf::Texture* inputstartScreenStatement, sf::Music* inputIntroMusic)
+mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>& topMenuButtonTextureArray,
+	std::vector  <sf::Texture>& inputGameMenuButtonTextureArray, std::vector <sf::Texture>& inputOtherTextureArray, sf::Music* inputIntroMusic)
 {
 	myTexture = gameTexture;
-	menuWallPaper = inputMenuWallpaper;
-	startWallPaper = inputStartWallPaper;
-	topMenuTexture = inputTopMenu;
-	startScreenStatement = inputstartScreenStatement;
 	introMusic = inputIntroMusic;
 	myFont = cour;
 	mywindow = myWindow;
@@ -106,7 +102,32 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	
 	//Initialize the clearField sprite used for player string input
 
+	//Assume existence of 2 separate Button vectors within mainMenu already. One for game menu, one for top menu.
+	//Overall menu area is:
+	int menuTop = 200;
+	int menuLeft = 400;
+
+	//Offset for first button and between buttons.
+	int topMargin = 50;
+	int leftMargin = 30;
+	int betweenMargin = 50;
+	sf::Vector2u textureSize = inputGameMenuButtonTextureArray[0].getSize(); 	//Buttons must all be same height, so use the first button's height
+	int buttonHeight = textureSize.y;
+
+	//For each input texture, create new button and push_back.
+	for (int i = 0; i < inputGameMenuButtonTextureArray.size(); i++)
+	{
+		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i, inputGameMenuButtonTextureArray[i]);
+	}
+
+
+	//Still must create buttons for top menu.
+
+
 }
+
+
+
 //Gameplay note:
 //As currently constructed, host for a new scenario must be player 1. Anyone join will play the turn assigned based on their player name.
 //Thus host never says "his" player name, because that is the first one inputted!
