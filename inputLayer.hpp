@@ -13,7 +13,7 @@ when necessary, ie. when game ends or player wants to leave the current game.
 
 #include "compie.hpp"
 #include <SFML/Audio.hpp>
-#include "button.hpp"
+
 
 //Fwd dec
 class compie;

@@ -91,6 +91,7 @@ char playCharInput(sf::RenderWindow* myWindow)
 	return inputChar;
 } 
 
+//mainmenu.cpp changes
 mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>& topMenuButtonTextureArray,
 	std::vector  <sf::Texture>& inputGameMenuButtonTextureArray, std::vector <sf::Texture>& inputOtherTextureArray, sf::Music* inputIntroMusic)
 {
@@ -99,7 +100,7 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	myFont = cour;
 	mywindow = myWindow;
 	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
-	
+
 	//Initialize the clearField sprite used for player string input
 
 	//Assume existence of 2 separate Button vectors within mainMenu already. One for game menu, one for top menu.
@@ -120,9 +121,18 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i, inputGameMenuButtonTextureArray[i]);
 	}
 
+	//Main menu buttons
+	sf::Vector2u topMenuTextureSize = topMenuButtonTextureArray[0].getSize();
+	int topButtonHeight = topMenuTextureSize.y;
+	for (int i = 0; i < topMenuButtonTextureArray.size(); i++)
+	{
+		topMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (topButtonHeight + betweenMargin) * i, i, topMenuButtonTextureArray[i]);
+	}
 
 	//Still must create buttons for top menu.
 
+	//Take in other required textures
+	otherGameTextures = inputOtherTextureArray;
 
 }
 
@@ -134,56 +144,6 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 //Similarly, if you host for a loaded game, you are playing as whose turn it was, so you should only host for whose turn was current when saved.
 //Finally, for host, you currently must start with a unique session name, and they will be cleared every day to start.
  
-//Messes up minions!
-//Still need to add them after.
-//This lumps all the terrain at the end, need to find a way to count neighbors and based on those, distribute tiles.
-int mainMenu::scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer)
-{
-	int BOARD_SIZE = LoadBoard->BOARD_WIDTH * LoadBoard->BOARD_HEIGHT;
-	LoadBoard->clearBoard(InputLayer);
-
-	int numberOfHillsAndMountains = BOARD_SIZE / 10;	//Actual amount you want to see.
-	int mountainWeight = numberOfHillsAndMountains;		//This will change throughout function
-	int numberOfForests = BOARD_SIZE / 10;
-	int forestWeight = numberOfForests;
-	int plainsWeight = BOARD_SIZE - numberOfHillsAndMountains - numberOfForests;
-
-	for (int x = 0; x < LoadBoard->BOARD_WIDTH; x++)
-	{
-		for (int y = 0; y < LoadBoard->BOARD_HEIGHT; y++)
-		{
-			LoadBoard->Board[x][y].clearTile();
-			int mountainChance = (rand() % 100) * mountainWeight;
-			int forestChance = (rand() % 100) * forestWeight;
-			int plainsChance = (rand() % 100) * plainsWeight;
-			if (mountainChance > forestChance && mountainChance > plainsChance)
-			{
-				if ((rand() % 100) < 50)
-				{
-					LoadBoard->Board[x][y].symbol = 'M';
-					LoadBoard->Board[x][y].description = "Mountain.";
-					LoadBoard->Board[x][y].defenseFactor = 1.4;
-				}
-				else
-				{
-					LoadBoard->Board[x][y].symbol = '^';
-					LoadBoard->Board[x][y].description = "Hill.";
-					LoadBoard->Board[x][y].defenseFactor = 1.1;
-				}
-				mountainWeight--;
-			}
-			else if (forestChance > plainsChance)
-			{
-				LoadBoard->Board[x][y].symbol = '+';
-				LoadBoard->Board[x][y].description = "Forest.";
-				LoadBoard->Board[x][y].defenseFactor = 1.2;
-				forestWeight--;
-			}
-			else plainsWeight--;
-		}
-	}
-	return 0;
-}
 
 int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 {
@@ -572,21 +532,21 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	return 1;
 }
 
-int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer) 
+int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 
 	sf::Sprite startWallpaperSprite;
-	startWallpaperSprite.setTexture(*startWallPaper);
+	startWallpaperSprite.setTexture(otherGameTextures[0]);
 
 	sf::Sprite startScreenStatementSprite;
-	startScreenStatementSprite.setTexture(*startScreenStatement);
+	startScreenStatementSprite.setTexture(otherGameTextures[2]);
 	startScreenStatementSprite.setPosition(330, 130);
 
 	mywindow->clear();
 
 	introMusic->play();
 
-	mywindow->draw(startWallpaperSprite);	
+	mywindow->draw(startWallpaperSprite);
 	mywindow->draw(startScreenStatementSprite);
 
 	mywindow->display();
@@ -785,10 +745,10 @@ int mainMenu::printTopMenu()
 {
 
 	sf::Sprite topMenuWallpaperSprite;
-	topMenuWallpaperSprite.setTexture(*menuWallPaper);
+	topMenuWallpaperSprite.setTexture(otherGameTextures[1]);
 
 	sf::Sprite topMenuSprite;
-	topMenuSprite.setTexture(*topMenuTexture);
+	topMenuSprite.setTexture(otherGameTextures[3]);
 
 	//MenuCrawler
 	std::string boardMessage = "";
@@ -808,7 +768,7 @@ int mainMenu::printTopMenu()
 		}
 		boardMessage += "\n\n";
 	}
-	
+
 	sf::String sfBoardMessage = boardMessage;
 	sf::Text newText(sfBoardMessage, *myFont, 30);
 
@@ -816,15 +776,15 @@ int mainMenu::printTopMenu()
 
 	mywindow->draw(topMenuWallpaperSprite);
 
-	topMenuSprite.setPosition( 450, 150);
+	topMenuSprite.setPosition(450, 150);
 	mywindow->draw(topMenuSprite);
-	
+
 	newText.setFillColor(sf::Color::Black);
 	newText.setPosition(480, 230);
 	mywindow->draw(newText);
-	
+
 	mywindow->display();
-	
+
 	return 0;
 }
 

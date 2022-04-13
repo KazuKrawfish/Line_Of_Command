@@ -13,8 +13,8 @@
 #include <SFML/Audio.hpp>
 #include <SFML/System/Vector2.hpp>
 
-enum mainMenuStatus { topmenu,  playingMap, waitingForRemotePlayer };
-enum interactionMethod {unchosen, localSkirmish, localCampaign, remote};
+enum mainMenuStatus { topmenu, playingMap, waitingForRemotePlayer };
+enum interactionMethod { unchosen, localSkirmish, localCampaign, remote };
 
 //Forward declare global utilities
 char playCharInput(sf::RenderWindow* myWindow);
@@ -40,20 +40,19 @@ public:
 	bool debugMode = false;
 	std::string sessionName = "localsession";
 	std::string myPlayerName = "~";
-	int scrambleMap(MasterBoard* LoadBoard, inputLayer* InputLayer);
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint);
 	int introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame);
 	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer);
-	
+
 	int printWaitingScreen();
 	int waitForRemotePlayer(MasterBoard* boardToSave, inputLayer* InputLayer);
 	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
-	
+
 	//CONSTRUCTOR
-	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture> & topMenuButtonTextureArray,
-		std::vector <sf::Texture>& gameMenuButtonTextureArray, std::vector <sf::Texture>& inputOtherTextureArray , sf::Music* inputIntroMusic);
+	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>& topMenuButtonTextureArray,
+		std::vector <sf::Texture>& gameMenuButtonTextureArray, std::vector <sf::Texture>& inputOtherTextureArray, sf::Music* inputIntroMusic);
 	//CONSTRUCTOR
 
 	//Multiplayer specific functions
@@ -72,7 +71,7 @@ public:
 	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int menuIterator = 0;
-	std::vector <std::string> topMenuOptions{ "Load Game","New Game","Join Remote Game","Editor Mode"};
+	std::vector <std::string> topMenuOptions{ "Load Game","New Game","Join Remote Game","Editor Mode" };
 	//Main Menu Interface ///////////////////////
 
 
@@ -88,7 +87,7 @@ public:
 	sf::RenderWindow* mywindow;
 	sf::Texture* myTexture;
 	sf::Font* myFont;
-
+	std::vector <sf::Texture> otherGameTextures;
 	sf::Music* introMusic;
 	//SFML Objects end	/////////////////////////
 

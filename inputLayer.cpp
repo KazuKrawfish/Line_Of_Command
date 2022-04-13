@@ -18,6 +18,7 @@ when necessary, ie. when game ends or player wants to leave the current game.
 #include <cmath>
 #include "compie.hpp"
 #include <thread>
+#include "button.hpp"
 
 char playCharInput(sf::RenderWindow* myWindow);
 
@@ -30,7 +31,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	soundEffects = inputSoundEffects;
 	menuButtons = inputMenuButtons;
 
-	//Determine x and y locations for each button
+
 }
 
 int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber, bool withinAnimation)
@@ -605,9 +606,9 @@ int inputLayer::printMenu(MasterBoard* boardToPrint)
 {
 
 	//Draw each button at its offset.
-	for (int i = 0; i < menuButtons.size(); i++)
+	for (int i = 0; i < menuButtons->size(); i++)
 	{
-		inputLayerWindow->draw(menuButtons[i].mySprite);
+		inputLayerWindow->draw ( (*menuButtons)[i].mySprite );
 		
 	}
 
@@ -1516,10 +1517,15 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 //Buttons are currently hard coded, since array is too small to matter.
 int inputLayer::menuInput(char* Input, MasterBoard* boardToInput)
 {
+	//Need mouse input here
+	//
+	//
+	//
+
 	if (mouseClick == true) {
 		//Ends the turn and passes it to the next player.
 		//Autosave every turn.
-		bool withinFirstButton = menuButtons[2].checkWithinButton(mouse.x, mouse.y);
+		bool withinFirstButton = (*menuButtons)[2].checkWithinButton(mouse.x, mouse.y);
 		if (withinFirstButton == true)
 		{
 			if (boardToInput->cursor.selectMinionFlag == true)
@@ -1544,14 +1550,14 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput)
 
 		}
 
-		bool withinSecondButton = menuButtons[4].checkWithinButton(mouse.x, mouse.y);
+		bool withinSecondButton = (*menuButtons)[4].checkWithinButton(mouse.x, mouse.y);
 		if (withinFirstButton == true)
 			//Restart current mission/scenario
 		{
 			restartGame(boardToInput);
 		}
 
-		bool withinLoadGame = menuButtons[5].checkWithinButton(mouse.x, mouse.y);
+		bool withinLoadGame = (*menuButtons)[5].checkWithinButton(mouse.x, mouse.y);
 		//Load a game
 		if (withinFirstButton == true)
 		{
@@ -1602,7 +1608,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput)
 
 		}
 
-		bool withinSaveGame = menuButtons[0].checkWithinButton(mouse.x, mouse.y);
+		bool withinSaveGame = (*menuButtons)[0].checkWithinButton(mouse.x, mouse.y);
 		//Prompt user and save game.
 		if (withinSaveGame == true)
 		{
@@ -1634,7 +1640,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput)
 
 		}
 
-		bool withinReturnToGame = menuButtons[6].checkWithinButton(mouse.x, mouse.y);
+		bool withinReturnToGame = (*menuButtons)[6].checkWithinButton(mouse.x, mouse.y);
 		//Exit menu
 		if (withinReturnToGame == true)
 		{
@@ -1642,7 +1648,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput)
 
 		}
 
-		bool withinMainMenu = menuButtons[1].checkWithinButton(mouse.x, mouse.y);
+		bool withinMainMenu = (*menuButtons)[1].checkWithinButton(mouse.x, mouse.y);
 		//Exit to main menu
 		if (withinMainMenu == true)
 		{
@@ -1651,7 +1657,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput)
 
 		}
 
-		bool withinToggleSound = menuButtons[3].checkWithinButton(mouse.x, mouse.y);
+		bool withinToggleSound = (*menuButtons)[3].checkWithinButton(mouse.x, mouse.y);
 		//Toggle sound 3
 		if (withinToggleSound == true)
 		{
@@ -1661,7 +1667,7 @@ int inputLayer::menuInput(char* Input, MasterBoard* boardToInput)
 
 		}
 
-		bool withinToggleSpeed = menuButtons[7].checkWithinButton(mouse.x, mouse.y);
+		bool withinToggleSpeed = (*menuButtons)[7].checkWithinButton(mouse.x, mouse.y);
 		if (withinToggleSpeed == true)
 			//Toggle speed 7 
 		{
