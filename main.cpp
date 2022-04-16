@@ -50,9 +50,9 @@ int initializeTextureArray(std::string directory, std::vector <std::string> imag
 
 	for (int i = 0; i < imageList.size(); i++)
 	{
-		if (!newImage.loadFromFile(directory + "/" + imageList[i] + ".png"))
+		if (!newImage.loadFromFile(directory + "\\" + imageList[i] + ".png"))
 		{
-			std::cout << "Couldn't load button!" << std::endl;
+			std::cout << "Couldn't load button: "<<imageList[i] << std::endl;
 			newTexture.loadFromImage(newImage);
 			buttonTextureArray.push_back(newTexture);
 		}
@@ -64,34 +64,34 @@ int initializeTextureArray(std::string directory, std::vector <std::string> imag
 int main()
 {
 
-	sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
+		sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
 
-	//Load topMenuButton textures
-	std::vector <std::string> imageList = { "button_New_Game", "button_Load_Game", "button_Editor_Mode", "button_New_Campaign", "button_Load_Campaign" };
-	std::vector <sf::Texture> topMenuButtonTextureArray;
-	initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
+		//Load topMenuButton textures
+		std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode", "top_New_Campaign", "top_Load_Campaign" };
+		std::vector <sf::Texture> topMenuButtonTextureArray;
+		initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
 
-	//Load gameMenuButton textures
-	std::vector <std::string> gameMenuButtonImageList = { "save_Game", "exit_To_Main_Menu", "end_Turn", "toggle_Sound", "restart", "load_Game" , "resume_Play", "toggle_Speed" };
-	std::vector <sf::Texture> gameMenuButtonTextureArray;
-	initializeTextureArray("menuButtons", gameMenuButtonImageList, gameMenuButtonTextureArray);
+		//Load gameMenuButton textures
+		std::vector <std::string> gameMenuButtonImageList = { "save_Game", "exit_To_Main_Menu", "end_Turn", "toggle_Sound", "restart", "load_Game" , "resume_Play", "toggle_Speed" };
+		std::vector <sf::Texture> gameMenuButtonTextureArray;
+		initializeTextureArray("menuButtons", gameMenuButtonImageList, gameMenuButtonTextureArray);
 
-	std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox" };
-	std::vector <sf::Texture> otherTextureArray;
-	initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
+		std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox" };
+		std::vector <sf::Texture> otherTextureArray;
+		initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
 
-	sf::Texture mainTexture;
-	sf::Image mainImage;
+		sf::Texture mainTexture;
+		sf::Image mainImage;
 
-	//Load Sounds/Music
-	sf::Music introMusic;
+		//Load Sounds/Music
+		sf::Music introMusic;
 
-	//Initialize Sounds Array
-	const int numberOfSoundEffects = 20;
-	std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "antiAircraftCannon", "infantryMove", "vehicleMove", "buildUnit", "capture", "resupply", "repair", "trapped" };
-	std::vector <sf::SoundBuffer > soundEffectBuffers;
-	std::vector <sf::Sound> soundEffects;
-	soundEffects.resize(numberOfSoundEffects + 1);
+		//Initialize Sounds Array
+		const int numberOfSoundEffects = 20;
+		std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "antiAircraftCannon", "infantryMove", "vehicleMove", "buildUnit", "capture", "resupply", "repair", "trapped" };
+		std::vector <sf::SoundBuffer > soundEffectBuffers;
+		std::vector <sf::Sound> soundEffects;
+		soundEffects.resize(numberOfSoundEffects + 1);
 
 
 	//Initialize intRect grid
@@ -109,7 +109,7 @@ int main()
 		}
 	}
 
-	sf::Font cour;
+	sf::Font gameFont;
 	//Load up image and use to initiate texture
 	//Also set white to transparent
 	if (!mainImage.loadFromFile("tilesAndUnits.png"))
@@ -141,17 +141,19 @@ int main()
 	mainImage.createMaskFromColor(colorWhite.White);
 	mainTexture.loadFromImage(mainImage);
 
-	if (!cour.loadFromFile("times.ttf"))
+	if (!gameFont.loadFromFile("times.ttf"))
 	{
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
 
-	mainMenu MainMenu(&mainWindow, &mainTexture, &cour, topMenuButtonTextureArray, gameMenuButtonTextureArray, otherTextureArray, &introMusic);
+	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, topMenuButtonTextureArray, gameMenuButtonTextureArray, otherTextureArray, &introMusic);
 
-	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &cour, &soundEffects, & MainMenu.gameMenuButtons);
+	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, & MainMenu.gameMenuButtons);
 	MasterBoard GameBoard(&mainTexture);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);
+
+
 
 }
 

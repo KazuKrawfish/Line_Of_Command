@@ -12,6 +12,7 @@
 #include "MasterBoard.hpp"
 #include <SFML/Audio.hpp>
 #include <SFML/System/Vector2.hpp>
+#include "button.hpp"
 
 enum mainMenuStatus { topmenu, playingMap, waitingForRemotePlayer };
 enum interactionMethod { unchosen, localSkirmish, localCampaign, remote };

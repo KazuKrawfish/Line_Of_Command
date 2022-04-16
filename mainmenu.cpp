@@ -118,18 +118,16 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	//For each input texture, create new button and push_back.
 	for (int i = 0; i < inputGameMenuButtonTextureArray.size(); i++)
 	{
-		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i, inputGameMenuButtonTextureArray[i]);
+		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i, &inputGameMenuButtonTextureArray[i]);
 	}
 
-	//Main menu buttons
+	//Top menu buttons
 	sf::Vector2u topMenuTextureSize = topMenuButtonTextureArray[0].getSize();
 	int topButtonHeight = topMenuTextureSize.y;
 	for (int i = 0; i < topMenuButtonTextureArray.size(); i++)
 	{
-		topMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (topButtonHeight + betweenMargin) * i, i, topMenuButtonTextureArray[i]);
+		topMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (topButtonHeight + betweenMargin) * i, i, &topMenuButtonTextureArray[i]);
 	}
-
-	//Still must create buttons for top menu.
 
 	//Take in other required textures
 	otherGameTextures = inputOtherTextureArray;
@@ -577,22 +575,32 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 	
 	char Input = '~';
+	sf::Event playerInput;
 
 	//Run as long as the user wants. Infinite while loop.
 	while (true)		
 	{
-		sf::Event playerInput;
+		while (mywindow->pollEvent(playerInput))
+		{
 
-		//This is a utility function to prevent "hanging" screens
+
+
 		if (skipOneInput == true) 
 		{
 			skipOneInput = false;
-			Input = '~';
+			Input = '~';			//'~' represents "pass-one-round"
 		}
 		else 
-		{
-		Input = playCharInput(mywindow);
-		}
+			if (playerInput.type == playerInput.KeyReleased)
+			{
+				Input = char (playerInput.key.code);
+			}
+			else 
+				if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) 
+				{
+					Input = '`';	//'`' represents mouseclick placeholder
+				}
+		
 
 		//If we're still on top menu, do that instead of game/inputLayer.
 		if (menuStatus == topmenu)
@@ -601,7 +609,6 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			topMenuInput(&Input, boardToPlay, InputLayer);
 		}
 		else
-
 		//If we are waiting for remote, do that instead of game/inputLayer.
 		if (menuStatus == waitingForRemotePlayer)
 		{
@@ -609,60 +616,61 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			waitForRemotePlayer(boardToPlay, InputLayer);
 		}
 		else
-		
-		if (menuStatus == playingMap)
-		{
-			//Only call upkeep before play commences if it is a new game AND very first turn
-			//And not compie. Compie performs upkeep in its own function.
-			if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == humanPlayer)
-			{		
-				boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
-				veryFirstTurn = false;
-			}
+			if (menuStatus == playingMap)
+			{
+				//Only call upkeep before play commences if it is a new game AND very first turn
+				//And not compie. Compie performs upkeep in its own function.
+				if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == humanPlayer)
+				{		
+					boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
+					veryFirstTurn = false;
+				}
 
-			if (InputLayer->status == gameBoard)
-			{
-				InputLayer->gameBoardInput(&Input, boardToPlay);
-			}
-			else if (InputLayer->status == minionAction)
-			{
-				InputLayer->minionInput(&Input, boardToPlay);
-			}
-			else if (InputLayer->status == menu)
-			{
-				InputLayer->menuInput(&Input, boardToPlay);
-			}
-			else if (InputLayer->status == propertyAction)
-			{
-				InputLayer->propertyMenuInput(&Input, boardToPlay);
-			}
-			else if (InputLayer->status == waitingForNextLocalPlayer)
-			{
-				InputLayer->waitingScreenInput(boardToPlay);
-			}
-			else if (InputLayer->status == insertMinion)
-			{
-				InputLayer->insertMinionInput(&Input, boardToPlay);
-			}
-			else if (InputLayer->status == insertTile)
-			{
-				InputLayer->insertTileInput(&Input, boardToPlay);
-			}
+				if (InputLayer->status == gameBoard)
+				{
+					InputLayer->gameBoardInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == minionAction)
+				{
+					InputLayer->minionInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == menu)
+				{
+					InputLayer->menuInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == propertyAction)
+				{
+					InputLayer->propertyMenuInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == waitingForNextLocalPlayer)
+				{
+					InputLayer->waitingScreenInput(boardToPlay);
+				}
+				else if (InputLayer->status == insertMinion)
+				{
+					InputLayer->insertMinionInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == insertTile)
+				{
+					InputLayer->insertTileInput(&Input, boardToPlay);
+				}
 
-			//Computer takes turn if it is his turn to do so.
-			//Note that this doesn't deal with "status".
-			if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && boardToPlay->playerRoster[boardToPlay->playerFlag].stillAlive == true)
-			{
-				computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
+				//Computer takes turn if it is his turn to do so.
+				//Note that this doesn't deal with "status".
+				if ( boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && boardToPlay->playerRoster[boardToPlay->playerFlag].stillAlive == true)
+				{
+					computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
 				
+				}
+
+				//This prints the screen AFTER the latest input has taken effect.
+				//Is this messing with remote play? Not sure.
+				boardToPlay->checkWindow();
+
+				InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
+
 			}
-
-			//This prints the screen AFTER the latest input has taken effect.
-			//Is this messing with remote play? Not sure.
-			boardToPlay->checkWindow();
-
-			InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
-
+		
 		}
 	
 	}
@@ -1111,7 +1119,6 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	return 0;
 }
-
 
 int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 { 
