@@ -75,14 +75,14 @@ public:
 
 	//Non-Print Functions:////////////////////////////////////////////////////
 	//Inputs
-	int insertMinionInput(char* Input, MasterBoard* boardToInput);
+	int insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
 	int deleteMinionInput(MasterBoard* boardToInput);
-	int insertTileInput(char* Input, MasterBoard* boardToInput);
-	int gameBoardInput(char* Input, MasterBoard* boardToInput);
-	int menuInput(char* Input, MasterBoard* boardToInput);
+	int insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
+	int gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
+	int menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
 	int waitingScreenInput(MasterBoard* boardToInput);
-	int propertyMenuInput(char* Input, MasterBoard* boardToInput);
-	int minionInput(char* Input, MasterBoard* boardToInput);
+	int propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
+	int minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
 
 
 	//Interconnex

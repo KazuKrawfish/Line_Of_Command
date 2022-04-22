@@ -19,7 +19,7 @@ class Cursor
 {	public:
 	
 	//Obviously this needs to move to cursor.cpp but I can't get the thing to work yet.
-	int move(char* Input);
+	int move(sf::Keyboard::Key* Input);
 	int initialize(sf::Texture * inputTexture, MasterBoard* inputBoardToPlay);
 
 	//GRAPHICS ///////////////////////////

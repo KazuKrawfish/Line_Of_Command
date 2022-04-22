@@ -92,8 +92,8 @@ char playCharInput(sf::RenderWindow* myWindow)
 } 
 
 //mainmenu.cpp changes
-mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>& topMenuButtonTextureArray,
-	std::vector  <sf::Texture>& inputGameMenuButtonTextureArray, std::vector <sf::Texture>& inputOtherTextureArray, sf::Music* inputIntroMusic)
+mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
+	std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic)
 {
 	myTexture = gameTexture;
 	introMusic = inputIntroMusic;
@@ -112,21 +112,21 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	int topMargin = 50;
 	int leftMargin = 30;
 	int betweenMargin = 50;
-	sf::Vector2u textureSize = inputGameMenuButtonTextureArray[0].getSize(); 	//Buttons must all be same height, so use the first button's height
+	sf::Vector2u textureSize = (*inputGameMenuButtonTextureArray).at(0).getSize(); 	//Buttons must all be same height, so use the first button's height
 	int buttonHeight = textureSize.y;
 
 	//For each input texture, create new button and push_back.
-	for (int i = 0; i < inputGameMenuButtonTextureArray.size(); i++)
+	for (int i = 0; i < inputGameMenuButtonTextureArray->size(); i++)
 	{
-		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i, &inputGameMenuButtonTextureArray[i]);
+		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i, &(inputGameMenuButtonTextureArray->at(i))  );
 	}
 
 	//Top menu buttons
-	sf::Vector2u topMenuTextureSize = topMenuButtonTextureArray[0].getSize();
+	sf::Vector2u topMenuTextureSize = (*topMenuButtonTextureArray).at(0).getSize();
 	int topButtonHeight = topMenuTextureSize.y;
-	for (int i = 0; i < topMenuButtonTextureArray.size(); i++)
+	for (int i = 0; i < topMenuButtonTextureArray->size(); i++)
 	{
-		topMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (topButtonHeight + betweenMargin) * i, i, &topMenuButtonTextureArray[i]);
+		topMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (topButtonHeight + betweenMargin) * i, i, &(topMenuButtonTextureArray->at(i))  );
 	}
 
 	//Take in other required textures
@@ -534,10 +534,10 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 
 	sf::Sprite startWallpaperSprite;
-	startWallpaperSprite.setTexture(otherGameTextures[0]);
+	startWallpaperSprite.setTexture( (otherGameTextures->at(0)) );
 
 	sf::Sprite startScreenStatementSprite;
-	startScreenStatementSprite.setTexture(otherGameTextures[2]);
+	startScreenStatementSprite.setTexture(otherGameTextures->at(2));
 	startScreenStatementSprite.setPosition(330, 130);
 
 	mywindow->clear();
@@ -554,7 +554,7 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	while (validInput == false)
 	{
 		mywindow->waitEvent(throwAwayEvent);
-		if (throwAwayEvent.type == sf::Event::EventType::KeyPressed)
+		if (throwAwayEvent.type == sf::Event::EventType::KeyPressed || throwAwayEvent.type == sf::Event::EventType::MouseButtonReleased)
 		{
 			validInput = true;
 			skipOneInput = true;
@@ -574,39 +574,49 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 	
-	char Input = '~';
+	//char Input = '~';
+	enum sf::Keyboard::Key Input;
 	sf::Event playerInput;
 
 	//Run as long as the user wants. Infinite while loop.
 	while (true)		
 	{
-		while (mywindow->pollEvent(playerInput))
-		{
-
-
-
-		if (skipOneInput == true) 
+		//This is to skip if we are coming from another context like a new game.
+		if (skipOneInput == true)
 		{
 			skipOneInput = false;
-			Input = '~';			//'~' represents "pass-one-round"
+			Input = sf::Keyboard::Tilde;	//'~' represents "pass-one-round"
 		}
-		else 
-			if (playerInput.type == playerInput.KeyReleased)
+		else
+		{
+			//Keep polling until a legit player input, not just mouse movement.
+			bool validInput = false;
+			while (mywindow->waitEvent(playerInput) && validInput == false)
 			{
-				Input = char (playerInput.key.code);
-			}
-			else 
-				if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) 
+
+				if (playerInput.type == sf::Event::KeyPressed)
 				{
-					Input = '`';	//'`' represents mouseclick placeholder
+					Input = playerInput.key.code;
+					validInput = true;
 				}
-		
+				else
+					if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left)
+					{
+						Input = sf::Keyboard::Quote;	//'`' represents mouseclick placeholder
+						validInput = true;
+					}
+
+			}
+			validInput == false;	//Reset for next round of player inputs.
+		}
+
 
 		//If we're still on top menu, do that instead of game/inputLayer.
 		if (menuStatus == topmenu)
 		{
 			printTopMenu();
-			topMenuInput(&Input, boardToPlay, InputLayer);
+			char alpha = 'a';
+			topMenuInput(&alpha, boardToPlay, InputLayer);
 		}
 		else
 		//If we are waiting for remote, do that instead of game/inputLayer.
@@ -671,13 +681,13 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 			}
 		
-		}
 	
 	}
 	return 0;
 }
 
-int mainMenu::topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
+//For later: int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
+int mainMenu::topMenuInput(char * Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 	sf::Event playerInput;
 	mywindow->waitEvent(playerInput);
@@ -753,10 +763,10 @@ int mainMenu::printTopMenu()
 {
 
 	sf::Sprite topMenuWallpaperSprite;
-	topMenuWallpaperSprite.setTexture(otherGameTextures[1]);
+	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
 
 	sf::Sprite topMenuSprite;
-	topMenuSprite.setTexture(otherGameTextures[3]);
+	topMenuSprite.setTexture(otherGameTextures->at(3));
 
 	//MenuCrawler
 	std::string boardMessage = "";

@@ -1183,7 +1183,7 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 	return 0;
 }
 
-int inputLayer::insertMinionInput(char* Input, MasterBoard* boardToInput)
+int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 {
 	Cursor* myCursor = &boardToInput->cursor;
 	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
@@ -1239,7 +1239,7 @@ int inputLayer::deleteMinionInput(MasterBoard* boardToInput)
 
 }
 
-int inputLayer::insertTileInput(char* Input, MasterBoard* boardToInput)
+int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 {
 	Cursor* myCursor = &boardToInput->cursor;
 	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
@@ -1280,30 +1280,30 @@ int inputLayer::insertTileInput(char* Input, MasterBoard* boardToInput)
 
 }
 
-int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
+int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 {
-	if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
+	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
 	{
 		boardToInput->cursor.move(Input);
 	}
 
-	if (*Input == 'x' && MainMenu->debugMode == true)
+	if (*Input == sf::Keyboard::Key::X && MainMenu->debugMode == true)
 	{
 		status = insertMinion;
 	}
 
-	if (*Input == 'z' && MainMenu->debugMode == true)
+	if (*Input == sf::Keyboard::Key::Z && MainMenu->debugMode == true)
 	{
 		deleteMinionInput(boardToInput);
 	}
 
-	if (*Input == 'q' && MainMenu->debugMode == true)
+	if (*Input == sf::Keyboard::Key::Q && MainMenu->debugMode == true)
 	{
 		status = insertTile;
 	}
 
 	//Need char for shift
-	if (*Input == '0')
+	if (*Input == sf::Keyboard::Key::Num0)
 	{
 		if (minionVisibleStatus == hideMinions)
 		{
@@ -1316,7 +1316,7 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 	}
 
 	//Select minion or property.
-	if (*Input == 't')
+	if (*Input == sf::Keyboard::Key::T)
 	{
 		//If minion is not selected, select it.Must be successful to set flag.
 		if (boardToInput->cursor.selectMinionFlag == false //This is probably not needed since it's always true/false in conj. with inputLayer.
@@ -1339,7 +1339,7 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 
 	}
 
-	if (*Input == 'm')
+	if (*Input == sf::Keyboard::Key::M)
 	{
 		status = menu;
 	}
@@ -1347,18 +1347,18 @@ int inputLayer::gameBoardInput(char* Input, MasterBoard* boardToInput)
 	return 0;
 }
 
-int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
+int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput) {
 
 	//This tracks who may lose after an action. Only one player can lose per action, so only need one number.
 	int playerPotentiallyDefeated = 0;
 
-	if (*Input == 'a' || *Input == 'd' || *Input == 's' || *Input == 'w')
+	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
 	{
 		boardToInput->cursor.move(Input);
 	}
 
 	//Need char for shift
-	if (*Input == '0')
+	if (*Input == sf::Keyboard::Key::Num0)
 	{
 		if (minionVisibleStatus == hideMinions)
 		{
@@ -1371,7 +1371,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	}
 
 	//Deselect
-	if (*Input == 't')
+	if (*Input == sf::Keyboard::Key::T)
 	{
 		if (boardToInput->cursor.selectMinionFlag == true)
 		{
@@ -1383,7 +1383,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	//Move minion command
 	//If minion selected and hasn't moved or fired, attempt to move.
 	//The moveMinion function will check if we are on top of ourselves or another minion.
-	if (*Input == 'm' && boardToInput->cursor.selectMinionFlag == true
+	if (*Input == sf::Keyboard::Key::M && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
 	{
 		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop
@@ -1404,7 +1404,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	//'i' is supply
 	//Must have minion selected.
 	//Must be APC, hasn't taken second action, cursor is on minion, and regardless of transport status.
-	if (*Input == 'i' && boardToInput->cursor.selectMinionFlag == true
+	if (*Input == sf::Keyboard::Key::I && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->type == 'P'
 		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
 		&& boardToInput->cursor.getX() == boardToInput->cursor.selectMinionPointer->locationX
@@ -1419,7 +1419,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	//Must have minion selected.
 	//Must be transport, hasn't taken second action, has a minion to drop, and tile within range, and not blocked by another minion.
 	//Also must not be impassable.
-	if (*Input == 'o' && boardToInput->cursor.selectMinionFlag == true
+	if (*Input == sf::Keyboard::Key::O && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->specialtyGroup == transport
 		&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 			boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
@@ -1434,7 +1434,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 
 	bool lastMinionDestroyed = false;
 	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
-	if (*Input == 'r' && boardToInput->cursor.selectMinionFlag == true && boardToInput->cursor.selectMinionPointer->type != transport)
+	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && boardToInput->cursor.selectMinionPointer->type != transport)
 		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
 			if ((boardToInput->cursor.getX() != boardToInput->cursor.selectMinionPointer->locationX) || (boardToInput->cursor.getY() != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
 				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
@@ -1454,7 +1454,7 @@ int inputLayer::minionInput(char* Input, MasterBoard* boardToInput) {
 	//First, minion must be available.
 	//Also, must be infantry type.
 
-	if (*Input == 'c' && boardToInput->cursor.selectMinionFlag == true)
+	if (*Input == sf::Keyboard::Key::C && boardToInput->cursor.selectMinionFlag == true)
 		if ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired
 			|| boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
 			&& boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry)
@@ -1515,7 +1515,7 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 
 //Checks mouse input against various buttons.
 //Buttons are currently hard coded, since array is too small to matter.
-int inputLayer::menuInput(char* Input, MasterBoard* boardToInput)
+int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 {
 	//Must be mouse click
 	if (*Input == '`' ) 
@@ -1775,7 +1775,7 @@ int inputLayer::NextMission(MasterBoard* boardToInput)
 
 }
 
-int inputLayer::propertyMenuInput(char* Input, MasterBoard* boardToInput) {
+int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput) {
 
 	tile* myTile = &boardToInput->Board[boardToInput->cursor.XCoord][boardToInput->cursor.YCoord];
 	char requestedPurchase = '~';

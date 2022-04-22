@@ -22,34 +22,34 @@ int Cursor::initialize(sf::Texture* inputTexture, MasterBoard* inputBoardToPlay)
 	return 0;
 }
 
-int Cursor::move(char* Input)
+int Cursor::move(sf::Keyboard::Key* Input)
 {
 int didItMove = 1;
 
 //Take user input and move cursor around.
 
-if (*Input == 'a')
+if (*Input == sf::Keyboard::Key::A)
 if (getX() > 0)
 {
 	XCoord--;
 	didItMove = 0;
 }
 
-if (*Input == 'd')
+if (*Input == sf::Keyboard::Key::D)
 if (getX() < boardToPlay->BOARD_WIDTH - 1)
 {
 	XCoord++;
 	didItMove = 0;
 }
 
-if (*Input == 's')
+if (*Input == sf::Keyboard::Key::S)
 if (getY() < boardToPlay->BOARD_HEIGHT - 1)
 {
 	YCoord++;
 	didItMove = 0;
 }
 
-if (*Input == 'w')
+if (*Input == sf::Keyboard::Key::W)
 if (getY() > 0)
 {
 	YCoord--;

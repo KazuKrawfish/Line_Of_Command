@@ -41,22 +41,18 @@ std::vector <std::vector<sf::IntRect>> rectArray;
 
 
 
-int initializeTextureArray(std::string directory, std::vector <std::string> imageList, std::vector <sf::Texture>& buttonTextureArray)
+int initializeTextureArray(std::string directory, std::vector <std::string> imageNameList, std::vector <sf::Texture>& buttonTextureArray ) //, std::vector <sf::Image> & imageList)
 {
-	sf::Image newImage;
-	sf::Texture newTexture;
-
 	//Need longer list of actual buttons
 
-	for (int i = 0; i < imageList.size(); i++)
+	for (int i = 0; i < buttonTextureArray.size(); i++)
 	{
-		if (!newImage.loadFromFile(directory + "\\" + imageList[i] + ".png"))
+		if (!buttonTextureArray[i].loadFromFile(directory + "/" + imageNameList[i] + ".png"))
 		{
-			std::cout << "Couldn't load button: "<<imageList[i] << std::endl;
-			newTexture.loadFromImage(newImage);
-			buttonTextureArray.push_back(newTexture);
+			std::cout << "Couldn't load button: "<< imageNameList[i] << std::endl;
+
 		}
-	
+	//	buttonTextureArray[i].loadFromImage(imageList[i]);
 	}
 	return 0;
 }
@@ -69,15 +65,19 @@ int main()
 		//Load topMenuButton textures
 		std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode", "top_New_Campaign", "top_Load_Campaign" };
 		std::vector <sf::Texture> topMenuButtonTextureArray;
+		topMenuButtonTextureArray.resize(imageList.size());
 		initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
 
 		//Load gameMenuButton textures
 		std::vector <std::string> gameMenuButtonImageList = { "save_Game", "exit_To_Main_Menu", "end_Turn", "toggle_Sound", "restart", "load_Game" , "resume_Play", "toggle_Speed" };
 		std::vector <sf::Texture> gameMenuButtonTextureArray;
+		gameMenuButtonTextureArray.resize(gameMenuButtonImageList.size());
 		initializeTextureArray("menuButtons", gameMenuButtonImageList, gameMenuButtonTextureArray);
 
+		//Load other textures
 		std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox" };
 		std::vector <sf::Texture> otherTextureArray;
+		otherTextureArray.resize(otherImagesList.size());
 		initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
 
 		sf::Texture mainTexture;
@@ -145,8 +145,8 @@ int main()
 	{
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
-
-	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, topMenuButtonTextureArray, gameMenuButtonTextureArray, otherTextureArray, &introMusic);
+	
+	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &introMusic);
 
 	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, & MainMenu.gameMenuButtons);
 	MasterBoard GameBoard(&mainTexture);

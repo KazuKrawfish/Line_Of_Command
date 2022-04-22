@@ -52,8 +52,8 @@ public:
 	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
 
 	//CONSTRUCTOR
-	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>& topMenuButtonTextureArray,
-		std::vector <sf::Texture>& gameMenuButtonTextureArray, std::vector <sf::Texture>& inputOtherTextureArray, sf::Music* inputIntroMusic);
+	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
+		std::vector <sf::Texture>* gameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic);
 	//CONSTRUCTOR
 
 	//Multiplayer specific functions
@@ -88,7 +88,7 @@ public:
 	sf::RenderWindow* mywindow;
 	sf::Texture* myTexture;
 	sf::Font* myFont;
-	std::vector <sf::Texture> otherGameTextures;
+	std::vector <sf::Texture> *  otherGameTextures;
 	sf::Music* introMusic;
 	//SFML Objects end	/////////////////////////
 
