@@ -34,8 +34,6 @@ class Button
 
 
 public:
-	std::string label = "---";
-	bool visible = false;
 	buttonType myType;
 
 	//GRAPHICS ///////////////////////////
@@ -47,8 +45,8 @@ public:
 	Button(int inputXCoord, int inputYCoord, int inputButtonType, sf::Texture* inputTexture)
 	{
 		//Assign values to members
-		int xCoord = inputXCoord;
-		int yCoord = inputYCoord;
+		xCoord = inputXCoord;
+		yCoord = inputYCoord;
 
 		myType = buttonType (inputButtonType );
 		myTexture = inputTexture;
@@ -56,9 +54,9 @@ public:
 		mySprite.setPosition(xCoord, yCoord);
 
 		sf::Vector2u dimensions = myTexture->getSize();
-		int width = dimensions.x;
-		int height = dimensions.y;
-		bool visible = false;
+		width = dimensions.x;
+		height = dimensions.y;
+		
 	}
 
 	bool checkWithinButton(int inputXCoord, int inputYCoord)

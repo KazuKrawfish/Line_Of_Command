@@ -115,10 +115,13 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	sf::Vector2u textureSize = (*inputGameMenuButtonTextureArray).at(0).getSize(); 	//Buttons must all be same height, so use the first button's height
 	int buttonHeight = textureSize.y;
 
+	//See button.h - offset helps keep the enum alligned with button type
+	int buttonTypeOffset = 7;
+		
 	//For each input texture, create new button and push_back.
 	for (int i = 0; i < inputGameMenuButtonTextureArray->size(); i++)
 	{
-		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i, &(inputGameMenuButtonTextureArray->at(i))  );
+		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i+buttonTypeOffset, &(inputGameMenuButtonTextureArray->at(i))  );
 	}
 
 	//Top menu buttons
@@ -573,14 +576,14 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
-	
-	//char Input = '~';
-	enum sf::Keyboard::Key Input;
-	sf::Event playerInput;
+
 
 	//Run as long as the user wants. Infinite while loop.
 	while (true)		
 	{
+		sf::Event playerInput;
+		enum sf::Keyboard::Key Input = sf::Keyboard::Tilde;
+
 		//This is to skip if we are coming from another context like a new game.
 		if (skipOneInput == true)
 		{
@@ -590,24 +593,19 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		else
 		{
 			//Keep polling until a legit player input, not just mouse movement.
-			bool validInput = false;
-			while (mywindow->waitEvent(playerInput) && validInput == false)
+			mywindow->waitEvent(playerInput);
+
+			if (playerInput.type == sf::Event::KeyPressed)
 			{
-
-				if (playerInput.type == sf::Event::KeyPressed)
-				{
-					Input = playerInput.key.code;
-					validInput = true;
-				}
-				else
-					if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left)
-					{
-						Input = sf::Keyboard::Quote;	//'`' represents mouseclick placeholder
-						validInput = true;
-					}
-
+				Input = playerInput.key.code;
 			}
-			validInput == false;	//Reset for next round of player inputs.
+			else  //Trying this out even though it is mixing types of event handling
+				if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left) //sf::Mouse::isButtonPressed(sf::Mouse::Left)) //
+				{
+					Input = sf::Keyboard::Quote;	//'`' represents mouseclick placeholder
+				}
+		
+
 		}
 
 
@@ -921,18 +919,17 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		}
 		else if (gameType == localCampaign) 
 		{
+			//Edited to only have one campaign, this saves the player from having to "decide" when there is only one available for the foreseeable future.
 			mywindow->clear();
-			anotherTopMenuNewString = "Choose which campaign to start (Case sensitive): \n";
-			
+
 			sf::String sfCampaignName = "";
 			sf::Event event;
-			sfCampaignName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset);	//Homebrew function
 
-			std::string newCampaignName = sfCampaignName;
+			std::string newCampaignName = "Ormosa";
 			std::string newMission = "";
-			
+
 			std::ifstream newCampaign;
-			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\"+ newCampaignName +".txt");
+			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\" + newCampaignName + ".txt");
 			
 			if (newCampaign.is_open())
 			{

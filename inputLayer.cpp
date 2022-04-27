@@ -725,6 +725,8 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	//Wait for one input.
 	playCharInput(inputLayerWindow);
 
+	inputLayerWindow->pollEvent(event);
+
 	return 0;
 
 }
@@ -1518,10 +1520,10 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 {
 	//Must be mouse click
-	if (*Input == '`' ) 
+	if (*Input == sf::Keyboard::Quote ) 
 	{
 
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(*MainMenu->mywindow);
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
 		bool withinFirstButton = false;
 
 		withinFirstButton = (*menuButtons)[2].checkWithinButton(mousePosition.x, mousePosition.y);
