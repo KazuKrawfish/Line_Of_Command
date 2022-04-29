@@ -15,10 +15,10 @@
 
 
 
-//These aren't very useful for now, since we refer to the buttons within inputLayer and mainMenu by simple number for array access.
+//change in button.h:19
 enum buttonType {
 	newGame, loadGame, toggleEditor, newCampaign, newSkirmish, loadCampaign, loadSkirmish,
-	saveGame, exitToMainMenu, endTurn, toggleSound, restart, loadGameFromGame, resume_Play, toggle_Speed
+	exitToMainMenu, saveGame, loadGameFromGame, restart, soundOn, soundOff, speedNormal, speedFast, endTurn, resumePlay
 };
 
 

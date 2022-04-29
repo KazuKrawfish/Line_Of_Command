@@ -69,7 +69,7 @@ int main()
 		initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
 
 		//Load gameMenuButton textures
-		std::vector <std::string> gameMenuButtonImageList = { "save_Game", "exit_To_Main_Menu", "end_Turn", "toggle_Sound", "restart", "load_Game" , "resume_Play", "toggle_Speed" };
+		std::vector <std::string> gameMenuButtonImageList = { "exit_To_Main_Menu", "save_Game", "load_Game" , "restart", "sound_On", "sound_Off", "speed_Normal", "speed_Fast",  "end_Turn", "resume_Play", };
 		std::vector <sf::Texture> gameMenuButtonTextureArray;
 		gameMenuButtonTextureArray.resize(gameMenuButtonImageList.size());
 		initializeTextureArray("menuButtons", gameMenuButtonImageList, gameMenuButtonTextureArray);

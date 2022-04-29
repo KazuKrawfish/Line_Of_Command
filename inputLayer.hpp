@@ -102,7 +102,6 @@ public:
 	std::vector <Button> * menuButtons;
 	////////NEW//////////
 	int menuCursor = 0;
-	std::vector <std::string> menuOptions{ "End Turn","Save Game","Main Menu","Load Game","Restart Map","Return to Game", "Toggle Sound", "Toggle Speed" };
 	std::vector <std::string> factoryOptions{ "Infantry\t1000", "Specialist\t3000", "Cavalry\t4000","APC\t5000","Artillery\t6000", "Armor\t7000",
 												"Anti-Aircraft\t8000", "Rocket Artillery\t15000", "Heavy Armor\t16000" };
 	std::vector <std::string> airbaseOptions{ "Transport Copter\t5000", "Attack Copter\t9000", "Interceptor\t15000", "Bomber\t18000" };

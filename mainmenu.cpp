@@ -105,23 +105,41 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 
 	//Assume existence of 2 separate Button vectors within mainMenu already. One for game menu, one for top menu.
 	//Overall menu area is:
-	int menuTop = 200;
+	int menuTop = 100;
 	int menuLeft = 400;
 
 	//Offset for first button and between buttons.
 	int topMargin = 50;
 	int leftMargin = 30;
-	int betweenMargin = 50;
+	int betweenMargin = 20;
 	sf::Vector2u textureSize = (*inputGameMenuButtonTextureArray).at(0).getSize(); 	//Buttons must all be same height, so use the first button's height
 	int buttonHeight = textureSize.y;
 
 	//See button.h - offset helps keep the enum alligned with button type
 	int buttonTypeOffset = 7;
-		
+	int buttonPlacement = 0;
+
 	//For each input texture, create new button and push_back.
 	for (int i = 0; i < inputGameMenuButtonTextureArray->size(); i++)
 	{
-		gameMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (buttonHeight + betweenMargin) * i, i+buttonTypeOffset, &(inputGameMenuButtonTextureArray->at(i))  );
+		int buttonType = i + buttonTypeOffset;
+		int y = 0;
+
+		//For soundOff and speedFast, they have the same y-coord as the previous button, soundOn and speedNormal.
+		if (buttonType == soundOff || buttonType == speedFast)
+		{
+			y = menuTop + topMargin + (buttonHeight + betweenMargin) * (buttonPlacement - 1);
+		}
+		else 
+		{ 
+			y = menuTop + topMargin + (buttonHeight + betweenMargin) * buttonPlacement;
+			//Only advance button position if it's a "unique" button. Not a sound/speed alternate button.
+			buttonPlacement++;
+		}
+
+		gameMenuButtons.emplace_back(menuLeft + leftMargin, y, buttonType, &(inputGameMenuButtonTextureArray->at(i)));
+
+
 	}
 
 	//Top menu buttons

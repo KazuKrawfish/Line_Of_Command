@@ -606,10 +606,43 @@ int inputLayer::printMenu(MasterBoard* boardToPrint)
 {
 
 	//Draw each button at its offset.
+	//Button must be active, so no sound means soundOn is not drawn
 	for (int i = 0; i < menuButtons->size(); i++)
 	{
-		inputLayerWindow->draw ( (*menuButtons)[i].mySprite );
-		
+		bool printThisButton = false;
+
+		switch ((menuButtons->at(i)).myType)
+		{
+		case (soundOn):
+		{	
+			if (soundsOn == true)
+				printThisButton = true;
+			break;
+		}
+		case (soundOff):
+		{
+			if (soundsOn == false)
+				printThisButton = true;
+			break;
+		}
+		case (speedNormal):
+		{
+			if (speedFactor == 1)
+				printThisButton = true;
+			break;
+		}
+		case(speedFast):
+		{
+			if (speedFactor != 1)
+				printThisButton = true;
+			break;
+		}
+		default:
+			printThisButton = true;
+		}
+
+		if(printThisButton == true)
+			inputLayerWindow->draw((*menuButtons)[i].mySprite);
 	}
 
 	return 0;
@@ -1520,49 +1553,58 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 {
 	//Must be mouse click
-	if (*Input == sf::Keyboard::Quote ) 
+	if (*Input == sf::Keyboard::Quote)
 	{
 
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
-		bool withinFirstButton = false;
 
-		withinFirstButton = (*menuButtons)[2].checkWithinButton(mousePosition.x, mousePosition.y);
-		//Ends the turn and passes it to the next player.
-		//Autosave every turn.
-		if (withinFirstButton == true)
+
+		bool withinMainMenuButton = (*menuButtons)[0].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Exit to main menu
+		if (withinMainMenuButton == true)
 		{
-			if (boardToInput->cursor.selectMinionFlag == true)
-				boardToInput->deselectMinion();
-			int incrementGameTurn = boardToInput->endTurn(this);
-			//If we advanced a gameTurn, mainMenu will keep track of it.
-			MainMenu->gameTurn += incrementGameTurn;
-
-			//Have to always keep an autosave!
 			MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
-
-
-			//If multiplayer, push to remote server and queue "waiting"
-			//mainmenu's playGame will keep the player waiting.
-			if (MainMenu->gameType == remote)
-			{
-				MainMenu->skipOneInput = true;
-				MainMenu->multiplayerPushSaveGame(boardToInput);
-				MainMenu->menuStatus = waitingForRemotePlayer;
-			}
-
+			exitToMainMenu(boardToInput);
 
 		}
 
-		bool withinSecondButton = (*menuButtons)[4].checkWithinButton(mousePosition.x, mousePosition.y);
-		if (withinFirstButton == true)
-			//Restart current mission/scenario
+
+		bool withinSaveGameButton = (*menuButtons)[1].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Prompt user and save game.
+		if (withinSaveGameButton == true)
 		{
-			restartGame(boardToInput);
+			int lineOffset = 1;
+			inputLayerWindow->clear();
+			sf::String savePrompt = "Choose a name to save your game.\n";
+			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset);
+
+			std::string stdSaveGameName = ".\\savegames\\";
+			stdSaveGameName += saveGameName;
+			stdSaveGameName += "_save.txt";
+
+			MainMenu->gameSave(stdSaveGameName, boardToInput);
+
+			inputLayerWindow->clear();
+
+			sf::String successSave = "Game saved. Press any key to continue.\n";
+			sf::Text newText(successSave, *inputLayerFont, MainMenu->menuTextSize);
+			inputLayerWindow->draw(newText);
+			inputLayerWindow->display();
+
+			//Flush event queue to clear out "Enter" and other rifraf
+			sf::Event throwAwayEvent;
+			while (inputLayerWindow->pollEvent(throwAwayEvent));
+
+			playCharInput(inputLayerWindow);
+
+			status = gameBoard;
+
 		}
 
-		bool withinLoadGame = (*menuButtons)[5].checkWithinButton(mousePosition.x, mousePosition.y);
+
+		bool withinLoadGameButton = (*menuButtons)[2].checkWithinButton(mousePosition.x, mousePosition.y);
 		//Load a game
-		if (withinFirstButton == true)
+		if (withinLoadGameButton == true)
 		{
 			//Load the actual save game
 			std::ifstream loadGameSave;
@@ -1597,7 +1639,6 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 				}
 			}
-
 			//Actually load scenario. Initialize board, etc.
 			MainMenu->gameLoad(boardToInput, this, &loadGameSave);
 			//Flush event queue to clear out "Enter" and other rifraf
@@ -1607,76 +1648,70 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			playCharInput(inputLayerWindow);
 
 			status = gameBoard;
-
-
 		}
 
-		bool withinSaveGame = (*menuButtons)[0].checkWithinButton(mousePosition.x, mousePosition.y);
-		//Prompt user and save game.
-		if (withinSaveGame == true)
+
+		bool withinRestartButton = (*menuButtons)[3].checkWithinButton(mousePosition.x, mousePosition.y);
+		if (withinRestartButton == true)
+			//Restart current mission/scenario
 		{
-			int lineOffset = 1;
-			inputLayerWindow->clear();
-			sf::String savePrompt = "Choose a name to save your game.\n";
-			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset);
-
-			std::string stdSaveGameName = ".\\savegames\\";
-			stdSaveGameName += saveGameName;
-			stdSaveGameName += "_save.txt";
-
-			MainMenu->gameSave(stdSaveGameName, boardToInput);
-
-			inputLayerWindow->clear();
-
-			sf::String successSave = "Game saved. Press any key to continue.\n";
-			sf::Text newText(successSave, *inputLayerFont, MainMenu->menuTextSize);
-			inputLayerWindow->draw(newText);
-			inputLayerWindow->display();
-
-			//Flush event queue to clear out "Enter" and other rifraf
-			sf::Event throwAwayEvent;
-			while (inputLayerWindow->pollEvent(throwAwayEvent));
-
-			playCharInput(inputLayerWindow);
-
-			status = gameBoard;
-
+			restartGame(boardToInput);
 		}
 
-		bool withinReturnToGame = (*menuButtons)[6].checkWithinButton(mousePosition.x, mousePosition.y);
-		//Exit menu
-		if (withinReturnToGame == true)
-		{
-			status = gameBoard;
 
+		bool withinSoundButton = (*menuButtons)[4].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Toggle sound based on current sound output.
+		if (withinSoundButton == true && soundsOn == true)
+		{
+			soundsOn = false;
+		}
+		else if (withinSoundButton == true && soundsOn == false)
+		{
+			soundsOn = true;
 		}
 
-		bool withinMainMenu = (*menuButtons)[1].checkWithinButton(mousePosition.x, mousePosition.y);
-		//Exit to main menu
-		if (withinMainMenu == true)
+		//Toggle speed based on current speed factor.
+		bool withinToggleSpeedButton = (*menuButtons)[6].checkWithinButton(mousePosition.x, mousePosition.y);
+		if (withinToggleSpeedButton == true && speedFactor == 1)	 
 		{
+			speedFactor = 3;
+		}
+		else if (withinToggleSpeedButton == true && speedFactor == 3)
+		{
+			speedFactor = 1;
+		}
+
+		bool withinEndTurnButton = (*menuButtons)[8].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Ends the turn and passes it to the next player.
+		//Autosave every turn.
+		if (withinEndTurnButton == true)
+		{
+			if (boardToInput->cursor.selectMinionFlag == true)
+				boardToInput->deselectMinion();
+			int incrementGameTurn = boardToInput->endTurn(this);
+			//If we advanced a gameTurn, mainMenu will keep track of it.
+			MainMenu->gameTurn += incrementGameTurn;
+
+			//Have to always keep an autosave!
 			MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
-			exitToMainMenu(boardToInput);
 
+
+			//If multiplayer, push to remote server and queue "waiting"
+			//mainmenu's playGame will keep the player waiting.
+			if (MainMenu->gameType == remote)
+			{
+				MainMenu->skipOneInput = true;
+				MainMenu->multiplayerPushSaveGame(boardToInput);
+				MainMenu->menuStatus = waitingForRemotePlayer;
+			}
 		}
 
-		bool withinToggleSound = (*menuButtons)[3].checkWithinButton(mousePosition.x, mousePosition.y);
-		//Toggle sound 3
-		if (withinToggleSound == true)
+		bool withinReturnToGameButton = (*menuButtons)[9].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Exit menu
+		if (withinReturnToGameButton == true)
 		{
-			if (soundsOn == false)
-				soundsOn = true;
-			else soundsOn = false;
+			status = gameBoard;
 
-		}
-
-		bool withinToggleSpeed = (*menuButtons)[7].checkWithinButton(mousePosition.x, mousePosition.y);
-		if (withinToggleSpeed == true)
-			//Toggle speed 7 
-		{
-			if (speedFactor == 1)
-				speedFactor = 3;
-			else speedFactor = 1;
 		}
 
 	}
