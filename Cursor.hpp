@@ -10,7 +10,7 @@
 
 //Max window size is the physical size of the window:
 const int MAX_WINDOW_HEIGHT = 14;
-const int MAX_WINDOW_WIDTH = 16;
+const int MAX_WINDOW_WIDTH = 16;	//50*16=800 total pixel width
 
 
 class MasterBoard;

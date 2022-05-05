@@ -33,6 +33,7 @@
 */
 
 
+
 //Global for the moment to support faster production
 //Everyone needs access to this at all times so it seems reasonable
 const int rectArrayWidth = 38;
@@ -75,7 +76,7 @@ int main()
 		initializeTextureArray("menuButtons", gameMenuButtonImageList, gameMenuButtonTextureArray);
 
 		//Load other textures
-		std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox" };
+		std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox", "Sidebar" };
 		std::vector <sf::Texture> otherTextureArray;
 		otherTextureArray.resize(otherImagesList.size());
 		initializeTextureArray("otherImages", otherImagesList, otherTextureArray);

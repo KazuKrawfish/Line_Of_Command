@@ -115,7 +115,7 @@ public:
 	sf::Texture* inputLayerTexture;
 	sf::Font* inputLayerFont;
 	sf::RenderWindow* inputLayerWindow;
-	int menuLineTracker = 0;
+	int menuLineTracker = 1;	//Starts at offset of one.
 	//SFML Objects end	/////////////////////////
 
 

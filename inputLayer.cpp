@@ -318,6 +318,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 {
+	int spacingConstant = 4;
 	tile* currentTile = &boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
 
 	//Need string pointer since addstr giving grief about printing strings, and same with snprintf.
@@ -361,7 +362,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 			tileDescription += pointerToPrint;
 			sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, (menuLineTracker * MainMenu->menuTextSize) + 4);
+			newText.setPosition(MAX_WINDOW_WIDTH * 52, (menuLineTracker * MainMenu->menuTextSize) + spacingConstant);
+			newText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(newText);
 			if (MainMenu->debugMode == true)
 				menuLineTracker += 4;
@@ -371,7 +373,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		else
 		{
 			sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 4);
+			newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+			newText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(newText);
 			menuLineTracker += 1;
 		}
@@ -385,7 +388,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			snprintf(pointerToPrint, 100, " Capture Points Left: %d ", currentTile->capturePoints);
 
 			sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 4);
+			newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+			newText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(newText);
 			menuLineTracker += 1;
 		}
@@ -400,7 +404,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			minionDescription += &currentMinion->description[0];
 
 			sf::Text newText(minionDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 4);
+			newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+			newText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(newText);
 			menuLineTracker += 1;
 
@@ -432,7 +437,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 				else
 					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): %d/None\n", currentMinion->currentFuel, currentMinion->currentPriAmmo);
 			}
-			else //if (currentMinion->maxSecAmmo == -1 && currentMinion->maxPriAmmo == -1)		//No weapons. Used as catch all for debug.
+			else //No weapons. Used as catch all for debug.
 			{
 				if (MainMenu->debugMode == true)
 					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nNo weapons\n", int(currentMinion->health), currentMinion->currentFuel);
@@ -442,7 +447,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 			sf::String minionStatus = pointerToPrint;
 			sf::Text minionStatusText(minionStatus, *inputLayerFont, MainMenu->menuTextSize);
-			minionStatusText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 4);
+			minionStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+			minionStatusText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(minionStatusText);
 			menuLineTracker += 2;
 
@@ -479,7 +485,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 						}
 
 			sf::Text secondMinionStatusText(minionStatus, *inputLayerFont, MainMenu->menuTextSize);
-			secondMinionStatusText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 8);
+			secondMinionStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant*2);
+			secondMinionStatusText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(secondMinionStatusText);
 			menuLineTracker += 1;
 
@@ -496,7 +503,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	playerStatus += pointerToPrint;
 	playerStatus += &eventText[0];
 	sf::Text playerStatuText(playerStatus, *inputLayerFont, MainMenu->menuTextSize);
-	playerStatuText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 8);
+	playerStatuText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant*2);
+	playerStatuText.setFillColor(sf::Color::Black);
 	inputLayerWindow->draw(playerStatuText);
 	menuLineTracker += 3;
 
@@ -529,7 +537,9 @@ int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 2);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 2);
+
+	newText.setFillColor(sf::Color::Black);
 
 	inputLayerWindow->draw(newText);
 
@@ -545,7 +555,9 @@ int inputLayer::printBoardMenu(MasterBoard* boardToPrint) {
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+
+	newText.setFillColor(sf::Color::Black);
 
 	inputLayerWindow->draw(newText);
 
@@ -593,7 +605,9 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 	sf::String sfBoardMessage = boardMessage;
 	sf::Text newText(sfBoardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+
+	newText.setFillColor(sf::Color::Black);
 
 	inputLayerWindow->draw(newText);
 
@@ -651,6 +665,13 @@ int inputLayer::printMenu(MasterBoard* boardToPrint)
 
 int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) {
 
+	//First draw the background for status area
+	sf::Sprite statusBox;
+	statusBox.setTexture(MainMenu->otherGameTextures->at(4));
+	statusBox.setPosition(MAX_WINDOW_WIDTH * 50, 0);
+	inputLayerWindow->draw(statusBox);
+
+	//Then write whatever status message
 	if (boardToPrint->playerFlag == observerNumber)
 	{
 		if (status == gameBoard)
@@ -703,7 +724,9 @@ int inputLayer::printInsertMinion(MasterBoard* boardToPrint)
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+
+	newText.setFillColor(sf::Color::Black);
 
 	inputLayerWindow->draw(newText);
 
@@ -719,7 +742,9 @@ int inputLayer::printInsertTile(MasterBoard* boardToPrint)
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(boardToPrint->WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+
+	newText.setFillColor(sf::Color::Black);
 
 	inputLayerWindow->draw(newText);
 
@@ -747,8 +772,7 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	boardMessage += "\n\nPress any key to continue.";
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-
-
+	   
 	inputLayerWindow->draw(newText);
 	inputLayerWindow->display();
 
@@ -1185,7 +1209,7 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 	else printWaitingScreen(boardToPrint);
 
 	//Reset line tracker after each print.
-	menuLineTracker = 0;
+	menuLineTracker = 1;
 
 	return 0;
 }
