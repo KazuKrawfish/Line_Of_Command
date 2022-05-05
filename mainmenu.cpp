@@ -108,17 +108,18 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	int menuTop = 100;
 	int menuLeft = 400;
 
+
+	//See button.h - offset helps keep the enum alligned with button type
+	int buttonTypeOffset = 8;
+	int buttonPlacement = 0;
+
 	//Offset for first button and between buttons.
 	int topMargin = 50;
 	int leftMargin = 30;
 	int betweenMargin = 20;
-	sf::Vector2u textureSize = (*inputGameMenuButtonTextureArray).at(0).getSize(); 	//Buttons must all be same height, so use the first button's height
+	sf::Vector2u textureSize = (*inputGameMenuButtonTextureArray).at(buttonTypeOffset).getSize(); 	//Buttons must all be same height, so use the first button's height
 	int buttonHeight = textureSize.y;
-
-	//See button.h - offset helps keep the enum alligned with button type
-	int buttonTypeOffset = 7;
-	int buttonPlacement = 0;
-
+	
 	//For each input texture, create new button and push_back.
 	for (int i = 0; i < inputGameMenuButtonTextureArray->size(); i++)
 	{
@@ -142,12 +143,45 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 
 	}
 
+
+	//Top menu button numbers
+	//Overall menu area is:
+	int TopMenuTop = 200;
+	int TopMenuLeft = 470;
+
+	//Offset for first button and between buttons.
+	int TopTopMargin = 50;
+	int TopLeftMargin = 30;
+	int TopBetweenMargin = 60;
+
+	//Top menu buttons are larger, so get new size number.
+	sf::Vector2u TopTextureSize = (*inputGameMenuButtonTextureArray).at(0).getSize(); 	//Buttons must all be same height, so use the first button's height
+	int TopButtonHeight = TopTextureSize.y;
+
+	//Reset button placement index
+	buttonPlacement = 0;
+
+
 	//Top menu buttons
 	sf::Vector2u topMenuTextureSize = (*topMenuButtonTextureArray).at(0).getSize();
 	int topButtonHeight = topMenuTextureSize.y;
 	for (int i = 0; i < topMenuButtonTextureArray->size(); i++)
 	{
-		topMenuButtons.emplace_back(menuLeft + leftMargin, menuTop + topMargin + (topButtonHeight + betweenMargin) * i, i, &(topMenuButtonTextureArray->at(i))  );
+		int y = 0;
+
+		//For editModeOn, it has the same y-coord as the previous button, editModeOff.
+		if (i == editorModeOn)
+		{
+			y = TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * (i - 1);
+		}
+		else
+		{
+			y = TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * i;
+			//Only advance button position if it's a "unique" button. Not a editMode alternate button.
+			buttonPlacement++;
+		}
+
+		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y , i, &(topMenuButtonTextureArray->at(i))  );
 	}
 
 	//Take in other required textures
@@ -631,8 +665,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		if (menuStatus == topmenu)
 		{
 			printTopMenu();
-			char alpha = 'a';
-			topMenuInput(&alpha, boardToPlay, InputLayer);
+			topMenuInput(&Input, boardToPlay, InputLayer);
 		}
 		else
 		//If we are waiting for remote, do that instead of game/inputLayer.
@@ -703,75 +736,53 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 }
 
 //For later: int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
-int mainMenu::topMenuInput(char * Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
+int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
-	sf::Event playerInput;
-	mywindow->waitEvent(playerInput);
-
-	*Input = playCharInput(mywindow);
-
-	//Move cursor up and down
-	if (*Input == 's')
+	//If valid mouse click
+	if (*Input == sf::Keyboard::Quote) 
 	{
-		menuIterator++;
-		skipOneInput = true;
-		if (menuIterator >= topMenuOptions.size())
-			menuIterator = 0;
-	}
-	else
-		if (*Input == 'w')
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
+
+		//Start new game
+		bool withinNewButton = (topMenuButtons)[0].checkWithinButton(mousePosition.x, mousePosition.y);
+		if (withinNewButton == true)
 		{
-			menuIterator--;
+			char placeholder = 'a';
+			int goBack = topMenuNew(&placeholder, boardToPlay, InputLayer);
+			if (goBack == 0)
+			{
+
+				InputLayer->status = gameBoard;
+			}
 			skipOneInput = true;
-			if (menuIterator < 0)
-				menuIterator = topMenuOptions.size() - 1;
 		}
-		else
-			//Load game
-			if (menuIterator == 0 && *Input == 't')
-			{
-				int goBack = topMenuLoad(Input, boardToPlay, InputLayer);
-				if (goBack == 0)
-				{
-					InputLayer->status = gameBoard;
-				}
-				skipOneInput = true;
-			}
-			else
-			//Start new game
-			if (menuIterator == 1 && *Input == 't')
-			{
-				int goBack = topMenuNew(Input, boardToPlay, InputLayer);
-				if (goBack == 0)
-				{
 
-					InputLayer->status = gameBoard;
-				}
-				skipOneInput = true;
-			}	
-			else
-			//Join a remote game
-			if (menuIterator == 2 && *Input == 't')
+		//Load game
+		bool withinLoadButton = (topMenuButtons)[1].checkWithinButton(mousePosition.x, mousePosition.y);
+		if (withinLoadButton == true)
+		{
+			char placeholder = 'a';
+			int goBack = topMenuLoad(&placeholder, boardToPlay, InputLayer);
+			if (goBack == 0)
 			{
-				int goBack = topMenuJoin(boardToPlay, InputLayer);
-				if (goBack == 0)
-				{
-
-					InputLayer->status = gameBoard;
-				}
-				skipOneInput = true;
+				InputLayer->status = gameBoard;
 			}
-			else
-			//Toggle debug mode.
-			if (menuIterator == 3 && *Input == 't')
-			{
-				if (debugMode == false)
-					debugMode = true;
-				else if (debugMode == true)
-					debugMode = false;
-				skipOneInput = true;
-			}
+			skipOneInput = true;
+		}
 
+
+		bool withinEditorButton = (topMenuButtons)[2].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Toggle sound based on current sound output.
+		if (withinEditorButton == true && debugMode == true)
+		{
+			debugMode = false;
+		}
+		else if (withinEditorButton == true && debugMode == false)
+		{
+			debugMode = true;
+		}
+
+	}
 	return 0;
 }
 
@@ -784,28 +795,6 @@ int mainMenu::printTopMenu()
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(otherGameTextures->at(3));
 
-	//MenuCrawler
-	std::string boardMessage = "";
-
-	for (int i = 0; i < topMenuOptions.size(); i++)
-	{
-		if (menuIterator == i)
-			boardMessage += "*";
-		else boardMessage += "  ";
-		boardMessage += topMenuOptions[i];
-		if (topMenuOptions[i] == "Editor Mode")
-		{
-			if (debugMode == true)
-				boardMessage += " On";
-			else
-				boardMessage += " Off";
-		}
-		boardMessage += "\n\n";
-	}
-
-	sf::String sfBoardMessage = boardMessage;
-	sf::Text newText(sfBoardMessage, *myFont, 30);
-
 	mywindow->clear();
 
 	mywindow->draw(topMenuWallpaperSprite);
@@ -813,10 +802,19 @@ int mainMenu::printTopMenu()
 	topMenuSprite.setPosition(450, 150);
 	mywindow->draw(topMenuSprite);
 
-	newText.setFillColor(sf::Color::Black);
-	newText.setPosition(480, 230);
-	mywindow->draw(newText);
-
+	//Draw three buttons for top menu
+	for (int i = 0; i < 2; i++)
+	{
+		mywindow->draw(topMenuButtons.at(i).mySprite);
+	}
+	if (debugMode == false)
+	{
+		mywindow->draw(topMenuButtons.at(2).mySprite);
+	}
+	else {
+		mywindow->draw(topMenuButtons.at(3).mySprite);
+	}
+	
 	mywindow->display();
 
 	return 0;

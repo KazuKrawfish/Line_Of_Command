@@ -67,12 +67,10 @@ public:
 
 	//Main Menu Interface ///////////////////////
 	int printTopMenu();
-	int topMenuInput(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
+	int topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int topMenuJoin(MasterBoard* boardToPlay, inputLayer* InputLayer);
-	int menuIterator = 0;
-	std::vector <std::string> topMenuOptions{ "Load Game","New Game","Join Remote Game","Editor Mode" };
 	//Main Menu Interface ///////////////////////
 
 

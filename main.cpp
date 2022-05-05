@@ -53,7 +53,6 @@ int initializeTextureArray(std::string directory, std::vector <std::string> imag
 			std::cout << "Couldn't load button: "<< imageNameList[i] << std::endl;
 
 		}
-	//	buttonTextureArray[i].loadFromImage(imageList[i]);
 	}
 	return 0;
 }
@@ -64,7 +63,7 @@ int main()
 		sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
 
 		//Load topMenuButton textures
-		std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode", "top_New_Campaign", "top_Load_Campaign" };
+		std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off", "top_Editor_Mode_On", "top_New_Campaign", "top_Load_Campaign" };
 		std::vector <sf::Texture> topMenuButtonTextureArray;
 		topMenuButtonTextureArray.resize(imageList.size());
 		initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
@@ -153,9 +152,7 @@ int main()
 	MasterBoard GameBoard(&mainTexture);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);
-
-
-
+	   
 }
 
 
