@@ -110,7 +110,7 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 
 
 	//See button.h - offset helps keep the enum alligned with button type
-	int buttonTypeOffset = 8;
+	int buttonTypeOffset = 9;
 	int buttonPlacement = 0;
 
 	//Offset for first button and between buttons.
@@ -162,10 +162,12 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	buttonPlacement = 0;
 
 
-	//Top menu buttons
+	
 	sf::Vector2u topMenuTextureSize = (*topMenuButtonTextureArray).at(0).getSize();
 	int topButtonHeight = topMenuTextureSize.y;
-	for (int i = 0; i < topMenuButtonTextureArray->size(); i++)
+	
+	//Top menu buttons new game, load game, toggle editor mode
+	for (int i = 0; i < 4; i++)
 	{
 		int y = 0;
 
@@ -184,6 +186,16 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y , i, &(topMenuButtonTextureArray->at(i))  );
 	}
 
+	//Top menu buttons - new skirmish, new campaign, go back
+	int y = 0;
+	//Reset button placement index
+	buttonPlacement = 0;
+	for (int i = 4; i < 7; i++)
+	{
+		y = TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * buttonPlacement;
+		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y, i, &(topMenuButtonTextureArray->at(i)));
+		buttonPlacement++;
+	}
 	//Take in other required textures
 	otherGameTextures = inputOtherTextureArray;
 
@@ -744,7 +756,7 @@ int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, i
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
 
 		//Start new game
-		bool withinNewButton = (topMenuButtons)[0].checkWithinButton(mousePosition.x, mousePosition.y);
+		bool withinNewButton = (topMenuButtons)[newGame].checkWithinButton(mousePosition.x, mousePosition.y);
 		if (withinNewButton == true)
 		{
 			char placeholder = 'a';
@@ -758,7 +770,7 @@ int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, i
 		}
 
 		//Load game
-		bool withinLoadButton = (topMenuButtons)[1].checkWithinButton(mousePosition.x, mousePosition.y);
+		bool withinLoadButton = (topMenuButtons)[loadGame].checkWithinButton(mousePosition.x, mousePosition.y);
 		if (withinLoadButton == true)
 		{
 			char placeholder = 'a';
@@ -771,7 +783,7 @@ int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, i
 		}
 
 
-		bool withinEditorButton = (topMenuButtons)[2].checkWithinButton(mousePosition.x, mousePosition.y);
+		bool withinEditorButton = (topMenuButtons)[editorModeOff].checkWithinButton(mousePosition.x, mousePosition.y);
 		//Toggle sound based on current sound output.
 		if (withinEditorButton == true && debugMode == true)
 		{
@@ -840,49 +852,71 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	sf::Event playerInput;
 
 
-	//Determine if game is remote or local.
+	//First draw out buttons, then take in input from mouse.
+	sf::Sprite topMenuWallpaperSprite;
+	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
+
+	sf::Sprite topMenuSprite;
+	topMenuSprite.setTexture(otherGameTextures->at(3));
+
 	mywindow->clear();
-	sf::String topMenuNewString("New Game Selected. \nLocal skirmish (s), local campaign (c), or remote (r) game? \n");
-	sf::Text text(topMenuNewString, *myFont, menuTextSize);
-	mywindow->draw(text);
+
+	mywindow->draw(topMenuWallpaperSprite);
+
+	topMenuSprite.setPosition(450, 150);
+	mywindow->draw(topMenuSprite);
+
+	//Draw two buttons for top menu new
+	for (int i = 4; i < 7; i++)
+	{
+		mywindow->draw(topMenuButtons.at(i).mySprite);
+	}
 	mywindow->display();
+
+
+	//Determine if game is remote or local.
 	gameType = unchosen;
+
 	while (gameType == unchosen)
 	{
-		*Input = playCharInput(mywindow);
+		
+		sf::Event playerInput;
+		mywindow->waitEvent(playerInput);
+		
+		//Keep polling until a legit player input, not just mouse movement.
+		if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left)	//Must be mouse click
+		{
+			//Get mouse position
+			sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
 
+			sf::String nextTopMenuNewString;
+			bool withinSkirmishButton = (topMenuButtons)[newSkirmish].checkWithinButton(mousePosition.x, mousePosition.y);
+			if (withinSkirmishButton == true)
+			{
+				mywindow->clear();
+				nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
+				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
+				mywindow->draw(newText);
+				mywindow->display();
+				gameType = localSkirmish;
+			}
+			
+			bool withinCampaignButton = (topMenuButtons)[newCampaign].checkWithinButton(mousePosition.x, mousePosition.y);
+			if (withinCampaignButton == true)
+			{
+				mywindow->clear();
+				nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
+				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
+				mywindow->draw(newText);
+				mywindow->display();
+				gameType = localCampaign;
+			}
 
-		sf::String nextTopMenuNewString;
-		if (*Input == 's')
-		{
-			mywindow->clear();
-			nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
-			sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-			mywindow->draw(newText);
-			mywindow->display();
-			gameType = localSkirmish;
-		}
-		else if (*Input == 'r') 
-		{
-			mywindow->clear();
-			nextTopMenuNewString = "Remote game selected. Press any key to continue.\n";
-			sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-			mywindow->draw(newText);
-			mywindow->display();
-			gameType = remote;
-		}
-		else if (*Input == 'c')
-		{
-			mywindow->clear();
-			nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
-			sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-			mywindow->draw(newText);
-			mywindow->display();
-			gameType = localCampaign;
-		}
-		else if(*Input == 'b')
-		{
-			return 1;
+			bool withinBackButton = (topMenuButtons)[topBack1].checkWithinButton(mousePosition.x, mousePosition.y);
+			if (withinBackButton == true)
+			{
+				return 1;
+			}
 		}
 	}
 	
@@ -1010,6 +1044,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	std::ifstream loadSession;
 	bool sessionCreationSuccessful = false;
+	sf::String topMenuNewString;
 	//Prompt user for session name and ensure it is unique:
 	//IF IT IS REMOTE
 	while (gameType == remote && sessionCreationSuccessful == false)

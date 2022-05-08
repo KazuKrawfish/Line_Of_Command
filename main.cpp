@@ -63,7 +63,7 @@ int main()
 		sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
 
 		//Load topMenuButton textures
-		std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off", "top_Editor_Mode_On", "top_New_Campaign", "top_Load_Campaign" };
+		std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off", "top_Editor_Mode_On", "top_New_Campaign", "top_New_Skirmish", "top_Back", "top_Load_Campaign"};
 		std::vector <sf::Texture> topMenuButtonTextureArray;
 		topMenuButtonTextureArray.resize(imageList.size());
 		initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
