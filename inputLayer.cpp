@@ -1431,7 +1431,7 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 
 	}
 
-	if (*Input == sf::Keyboard::Key::M)
+	if (*Input == sf::Keyboard::Key::M || * Input == sf::Keyboard::Key::Comma)
 	{
 		status = menu;
 	}
@@ -1448,12 +1448,13 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	{
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
 
-		//If mouse click is within map, 
+		//Get mouse click information
 		int windowX = mousePosition.x / 50;
 		int windowY = mousePosition.y / 50;
 		int tileX = windowX + boardToInput->windowLocationX;
 		int tileY = windowY + boardToInput->windowLocationY;
 
+		//If mouse click is within map, 
 		if (tileX < boardToInput->BOARD_WIDTH && tileX > 0 && tileY < boardToInput->BOARD_HEIGHT && tileY > 0)
 		{
 			//And mouse click not within cursor, move cursor there.
@@ -1465,20 +1466,33 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				//If mouse click IS within cursor 
 				if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
 				{
-					//If cursor is on top of selected minion, deselect that tile.
+					//If cursor is on top of selected minion,
 					if(boardToInput->cursor.XCoord == boardToInput->cursor.selectMinionPointer->locationX &&
 						boardToInput->cursor.YCoord == boardToInput->cursor.selectMinionPointer->locationY)
 					{
-						*Input = sf::Keyboard::Key::T; //Deselect that tile.
+						//If minion is infantry, attempt to capture
+						if(boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry)
+							*Input = sf::Keyboard::Key::C; 
 					}
-					else
-						//Otherwise attempt to move there.
+					else //If enemy minion, attempt to attack there.
+						if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true &&
+							boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->playerFlag)
+						{
+							*Input = sf::Keyboard::Key::R;
+						}
+					else   //Otherwise attempt to move there.
 					{
 						*Input = sf::Keyboard::Key::M;
 					}
 				}
 		}
 
+	}
+
+	//If right click occurred, deselect
+	if (*Input == sf::Keyboard::Comma)
+	{
+		*Input = sf::Keyboard::Key::T;
 	}
 
 	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
@@ -1808,6 +1822,12 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 		}
 
+	}
+
+	//Right click to exit menu
+	if (*Input == sf::Keyboard::Comma)
+	{
+		status = gameBoard;
 	}
 
 	return 0;

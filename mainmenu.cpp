@@ -75,11 +75,16 @@ char playCharInput(sf::RenderWindow* myWindow)
 	while (validInput == false)
 	{
 		myWindow->waitEvent(event);
-		if (event.type == sf::Event::EventType::TextEntered)
+		if (event.type == sf::Event::EventType::TextEntered )
 		{
 		validInput = true;
 		inputChar = event.text.unicode;
 		}
+		else
+			if (event.type == sf::Event::EventType::MouseButtonPressed) 
+			{
+				validInput = true;
+			}
 		else
 		{
 			NULL;
@@ -663,10 +668,14 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			{
 				Input = playerInput.key.code;
 			}
-			else  //Trying this out even though it is mixing types of event handling
+			else 
 				if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left) //sf::Mouse::isButtonPressed(sf::Mouse::Left)) //
 				{
 					Input = sf::Keyboard::Quote;	//'`' represents mouseclick placeholder
+				}
+				else if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Right)	//Right click
+				{
+					Input = sf::Keyboard::Comma;	//This is right click indicator
 				}
 		
 
