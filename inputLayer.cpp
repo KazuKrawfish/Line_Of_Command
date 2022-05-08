@@ -1341,6 +1341,39 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 
 int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 {
+	//Must be mouse click
+
+	if (*Input == sf::Keyboard::Quote)
+	{
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+	
+		//If mouse click is within map, 
+
+		int windowX = mousePosition.x / 50;
+		int windowY = mousePosition.y / 50;
+		int tileX = windowX + boardToInput->windowLocationX;
+		int tileY = windowY + boardToInput->windowLocationY;
+
+		if (tileX < boardToInput->BOARD_WIDTH && tileX > 0 && tileY < boardToInput->BOARD_HEIGHT && tileY > 0)
+		{
+			//And mouse click not within cursor, move cursor there.
+			if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord) 
+			{
+				boardToInput->cursor.relocate(tileX, tileY);	//Move cursor to where mouse click occurred.
+			}
+			else
+			//If mouse click IS within cursor, change input to "select" tile.
+			if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
+			{
+				*Input = sf::Keyboard::Key::T; //Select that tile.
+			}
+		}	
+	
+	}
+
+
+	//The below inputs will also occur based on mouse clicks setting the input to such.
+
 	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
 	{
 		boardToInput->cursor.move(Input);
@@ -1410,6 +1443,43 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 	//This tracks who may lose after an action. Only one player can lose per action, so only need one number.
 	int playerPotentiallyDefeated = 0;
+
+	if (*Input == sf::Keyboard::Quote)
+	{
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+
+		//If mouse click is within map, 
+		int windowX = mousePosition.x / 50;
+		int windowY = mousePosition.y / 50;
+		int tileX = windowX + boardToInput->windowLocationX;
+		int tileY = windowY + boardToInput->windowLocationY;
+
+		if (tileX < boardToInput->BOARD_WIDTH && tileX > 0 && tileY < boardToInput->BOARD_HEIGHT && tileY > 0)
+		{
+			//And mouse click not within cursor, move cursor there.
+			if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord)
+			{
+				boardToInput->cursor.relocate(tileX, tileY);	//Move cursor to where mouse click occurred.
+			}
+			else
+				//If mouse click IS within cursor 
+				if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
+				{
+					//If cursor is on top of selected minion, deselect that tile.
+					if(boardToInput->cursor.XCoord == boardToInput->cursor.selectMinionPointer->locationX &&
+						boardToInput->cursor.YCoord == boardToInput->cursor.selectMinionPointer->locationY)
+					{
+						*Input = sf::Keyboard::Key::T; //Deselect that tile.
+					}
+					else
+						//Otherwise attempt to move there.
+					{
+						*Input = sf::Keyboard::Key::M;
+					}
+				}
+		}
+
+	}
 
 	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
 	{
