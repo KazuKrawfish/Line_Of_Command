@@ -58,13 +58,6 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 			y++;
 		}
 	}
-
-
-//'h', 'v', 'f', 'b' };								///"Transport Copter\t5000", "Attack Copter\t9000", "Interceptor\t15000", "Bomber\t18000" };
-// 'G', 'C', 'L', 'U', 'V' };
-
-	//Each button has unique sprite
-	//"Infantry\t1000", "Specialist\t3000", "Cavalry\t4000","APC\t5000","Artillery\t6000", "Armor\t7000",
 	factoryButtons.at(0).mySprite.setTextureRect(rectArray[0][4]);	//i
 	factoryButtons.at(1).mySprite.setTextureRect(rectArray[1][4]);	//s
 	factoryButtons.at(2).mySprite.setTextureRect(rectArray[2][4]);  //c
@@ -74,6 +67,48 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	factoryButtons.at(6).mySprite.setTextureRect(rectArray[7][4]);  //A
 	factoryButtons.at(7).mySprite.setTextureRect(rectArray[8][4]);  //R
 	factoryButtons.at(8).mySprite.setTextureRect(rectArray[6][4]);  //T
+
+	//Airbase buttons
+	y = 0;	//Reset counters
+	x = 0;
+	for (int i = 0; i < airbaseOptions.size(); i++)
+	{
+		airbaseButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, airbaseButton, gameTexture);
+		airbaseButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
+		x++;
+		if (x == numberOfButtonsPerRow)
+		{
+			x = 0;
+			y++;
+		}
+	}
+	airbaseButtons.at(0).mySprite.setTextureRect(rectArray[10][4]);  //h
+	airbaseButtons.at(1).mySprite.setTextureRect(rectArray[9][4]);  //v
+	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[11][4]);  //f
+	airbaseButtons.at(3).mySprite.setTextureRect(rectArray[12][4]);  //b
+
+	//Naval buttons
+	y = 0;	//Reset counters
+	x = 0;
+	for (int i = 0; i < portOptions.size(); i++)
+	{
+		portButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, portButton, gameTexture);
+		portButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
+		x++;
+		if (x == numberOfButtonsPerRow)
+		{
+			x = 0;
+			y++;
+		}
+	}
+	portButtons.at(0).mySprite.setTextureRect(rectArray[16][4]);  //G
+	portButtons.at(1).mySprite.setTextureRect(rectArray[14][4]);  //C
+	portButtons.at(2).mySprite.setTextureRect(rectArray[15][4]);  //L
+	portButtons.at(3).mySprite.setTextureRect(rectArray[18][4]);  //U
+	portButtons.at(4).mySprite.setTextureRect(rectArray[13][4]);  //B
+	portButtons.at(5).mySprite.setTextureRect(rectArray[17][4]);  //V
+
+	return;
 }
 
 int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber, bool withinAnimation)
@@ -633,6 +668,8 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 		for (int i = 0; i < portButtons.size(); i++)
 		{
 			inputLayerWindow->draw(portButtons.at(i).mySprite);
+			effectsSprite.setPosition(portButtons.at(i).mySprite.getPosition());
+			inputLayerWindow->draw(effectsSprite);
 		}
 	}
 
@@ -641,6 +678,8 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 		for (int i = 0; i < airbaseButtons.size(); i++)
 		{
 			inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
+			effectsSprite.setPosition(airbaseButtons.at(i).mySprite.getPosition());
+			inputLayerWindow->draw(effectsSprite);
 		}
 	}
 
@@ -1983,55 +2022,67 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 
 	int buttonNumber = -1;
 
-	if (*Input == sf::Keyboard::Quote && myTile->symbol == 'h')
+	if (*Input == sf::Keyboard::Quote)
 	{
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
-		
-		
-		for (int i = 0; i < factoryButtons.size(); i++)
+
+
+		if (myTile->symbol == 'h') 
 		{
-			bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+
+			for (int i = 0; i < factoryButtons.size(); i++)
+			{
+				bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+				//Prompt user and save game.
+				if (withinButton == true)
+				{
+					buttonNumber = i;
+				}
+			}
+
+			switch (buttonNumber)
+			{
+			case 0:
+				requestedPurchase = 'i';
+				break;
+			case 1:
+				requestedPurchase = 's';
+				break;
+			case 2:
+				requestedPurchase = 'c';
+				break;
+			case 3:
+				requestedPurchase = 'P';
+				break;
+			case 4:
+				requestedPurchase = 'r';
+				break;
+			case 5:
+				requestedPurchase = 'a';
+				break;
+			case 6:
+				requestedPurchase = 'A';
+				break;
+			case 7:
+				requestedPurchase = 'R';
+				break;
+			case 8:
+				requestedPurchase = 'T';
+				break;
+			}
+		}
+	
+	if(myTile->symbol == 'P')
+	{
+		for (int i = 0; i < portButtons.size(); i++)
+		{
+			bool withinButton = portButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
 			//Prompt user and save game.
 			if (withinButton == true)
 			{
 				buttonNumber = i;
 			}
 		}
-	
-		switch (buttonNumber) 
-		{
-		case 0:
-			requestedPurchase = 'i';
-			break;
-		case 1:
-			requestedPurchase = 's';
-			break;
-		case 2:
-			requestedPurchase = 'c';
-			break;
-		case 3:
-			requestedPurchase = 'P';
-			break;
-		case 4:
-			requestedPurchase = 'r';
-			break;
-		case 5:
-			requestedPurchase = 'a';
-			break;
-		case 6:
-			requestedPurchase = 'A';
-			break;
-		case 7:
-			requestedPurchase = 'R';
-			break;
-		case 8:
-			requestedPurchase = 'T';
-			break;
-		}
-	}
-
-	if (*Input == 't' && myTile->symbol == 'P')
-	{
 
 		if (buttonNumber == 0)
 			requestedPurchase = 'G';
@@ -2046,11 +2097,19 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 		if (buttonNumber == 5)
 			requestedPurchase = 'V';
 
-
 	}
-
-	if (*Input == 't' && myTile->symbol == 'A')
+	
+	if( myTile->symbol == 'A')
 	{
+		for (int i = 0; i < airbaseButtons.size(); i++)
+		{
+			bool withinButton = airbaseButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+			//Prompt user and save game.
+			if (withinButton == true)
+			{
+				buttonNumber = i;
+			}
+		}
 
 		if (buttonNumber == 0)
 			requestedPurchase = 'h';
@@ -2061,6 +2120,9 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 		if (buttonNumber == 3)
 			requestedPurchase = 'b';
 
+
+	}
+	
 	}
 
 
