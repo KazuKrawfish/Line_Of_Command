@@ -32,6 +32,48 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	menuButtons = inputMenuButtons;
 
 
+	//Create buttons for property menus using the gameTexture
+
+	//Overall property menu area is:
+	int menuTop = 100;
+	int menuLeft = MAX_WINDOW_WIDTH * 50 + 20;
+
+	//Button dimensions
+	int buttonHeight = 50;
+	int buttonWidth = 50;
+	int numberOfButtonsPerRow = 4;
+
+	int y = 0;
+	int x = 0;
+
+	//For each minion that can be purchased, create new button and push_back.
+	for (int i = 0; i < factoryOptions.size(); i++)
+	{
+		factoryButtons.emplace_back(menuLeft + x*50, menuTop + y*50 , factoryButton, gameTexture);
+		factoryButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
+		x++;
+		if (x == numberOfButtonsPerRow)
+		{
+			x = 0;
+			y++;
+		}
+	}
+
+
+//'h', 'v', 'f', 'b' };								///"Transport Copter\t5000", "Attack Copter\t9000", "Interceptor\t15000", "Bomber\t18000" };
+// 'G', 'C', 'L', 'U', 'V' };
+
+	//Each button has unique sprite
+	//"Infantry\t1000", "Specialist\t3000", "Cavalry\t4000","APC\t5000","Artillery\t6000", "Armor\t7000",
+	factoryButtons.at(0).mySprite.setTextureRect(rectArray[0][4]);	//i
+	factoryButtons.at(1).mySprite.setTextureRect(rectArray[1][4]);	//s
+	factoryButtons.at(2).mySprite.setTextureRect(rectArray[2][4]);  //c
+	factoryButtons.at(3).mySprite.setTextureRect(rectArray[4][4]);  //P
+	factoryButtons.at(4).mySprite.setTextureRect(rectArray[5][4]);  //r	
+	factoryButtons.at(5).mySprite.setTextureRect(rectArray[3][4]);  //a
+	factoryButtons.at(6).mySprite.setTextureRect(rectArray[7][4]);  //A
+	factoryButtons.at(7).mySprite.setTextureRect(rectArray[8][4]);  //R
+	factoryButtons.at(8).mySprite.setTextureRect(rectArray[6][4]);  //T
 }
 
 int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber, bool withinAnimation)
@@ -569,49 +611,38 @@ int inputLayer::printBoardMenu(MasterBoard* boardToPrint) {
 int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 
 	tile* myTile = &boardToPrint->Board[boardToPrint->cursor.XCoord][boardToPrint->cursor.YCoord];
+	
+	//Black border box
+	sf::Sprite effectsSprite;
+	effectsSprite.setTexture(*inputLayerTexture);
+	effectsSprite.setTextureRect(rectArray[25][4]);
 
-
-
-	//First determine size of property menu we are using.
-	int propertyMenuSize = 0;
 	if (myTile->symbol == 'h')
-		propertyMenuSize = factoryOptions.size();
-	if (myTile->symbol == 'P')
-		propertyMenuSize = portOptions.size();
-	if (myTile->symbol == 'A')
-		propertyMenuSize = airbaseOptions.size();
-
-
-	//MenuCrawler
-	std::string boardMessage = "";
-
-	for (int i = 0; i < propertyMenuSize; i++)
 	{
-		if (menuCursor == i)
-			boardMessage += "*";
-		else boardMessage += " ";
+		for (int i = 0 ; i < factoryButtons.size(); i++ )
+		{
+			inputLayerWindow->draw(factoryButtons.at(i).mySprite);
+			effectsSprite.setPosition(factoryButtons.at(i).mySprite.getPosition());
+			inputLayerWindow->draw(effectsSprite);
 
-		if (myTile->symbol == 'P')
-			boardMessage += portOptions[i];
-		if (myTile->symbol == 'A')
-			boardMessage += airbaseOptions[i];
-		if (myTile->symbol == 'h')
-			boardMessage += factoryOptions[i];
-
-		boardMessage += "\n";
+		}
 	}
-	boardMessage += "Press (p) to deselect property.";
 
-	sf::String sfBoardMessage = boardMessage;
-	sf::Text newText(sfBoardMessage, *inputLayerFont, MainMenu->menuTextSize);
+	if (myTile->symbol == 'P')
+	{
+		for (int i = 0; i < portButtons.size(); i++)
+		{
+			inputLayerWindow->draw(portButtons.at(i).mySprite);
+		}
+	}
 
-	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
-
-	newText.setFillColor(sf::Color::Black);
-
-	inputLayerWindow->draw(newText);
-
-	menuLineTracker += propertyMenuSize + 2;
+	if (myTile->symbol == 'A')
+	{
+		for (int i = 0; i < airbaseButtons.size(); i++)
+		{
+			inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
+		}
+	}
 
 	return 0;
 }
@@ -1947,83 +1978,69 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 		return 0;
 	}
 
+	int buttonNumber = -1;
 
-	//First determine size of property menu we are using.
-	int propertyMenuSize = 0;
-	if (myTile->symbol == 'h')
-		propertyMenuSize = factoryOptions.size();
-	if (myTile->symbol == 'P')
-		propertyMenuSize = portOptions.size();
-	if (myTile->symbol == 'A')
-		propertyMenuSize = airbaseOptions.size();
-
-	//Move cursor up/down
-	if (*Input == 's')
+	if (*Input == sf::Keyboard::Quote && myTile->symbol == 'h')
 	{
-		menuCursor++;
-
-		if (menuCursor >= propertyMenuSize)
-			menuCursor = 0;
-	}
-	else
-		if (*Input == 'w')
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+		
+		
+		for (int i = 0; i < factoryButtons.size(); i++)
 		{
-			menuCursor--;
-			if (menuCursor < 0)
-				menuCursor = propertyMenuSize - 1;
-		}
-		else
-			if (*Input == 'p')
+			bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+			//Prompt user and save game.
+			if (withinButton == true)
 			{
-				menuCursor = 0;
-				status = gameBoard;
-				return 0;
+				buttonNumber = i;
 			}
-
-	//Attempted purchase of minion
-	//Factory first
-	if (*Input == 't' && myTile->symbol == 'h')
-	{
-
-
-		if (menuCursor == 0)
+		}
+	
+		switch (buttonNumber) 
+		{
+		case 0:
 			requestedPurchase = 'i';
-		if (menuCursor == 1)
+			break;
+		case 1:
 			requestedPurchase = 's';
-		if (menuCursor == 2)
+			break;
+		case 2:
 			requestedPurchase = 'c';
-		if (menuCursor == 3)
+			break;
+		case 3:
 			requestedPurchase = 'P';
-		if (menuCursor == 4)
+			break;
+		case 4:
 			requestedPurchase = 'r';
-		if (menuCursor == 5)
+			break;
+		case 5:
 			requestedPurchase = 'a';
-		if (menuCursor == 6)
+			break;
+		case 6:
 			requestedPurchase = 'A';
-		if (menuCursor == 7)
+			break;
+		case 7:
 			requestedPurchase = 'R';
-		if (menuCursor == 8)
+			break;
+		case 8:
 			requestedPurchase = 'T';
-
-
-
-
+			break;
+		}
 	}
 
 	if (*Input == 't' && myTile->symbol == 'P')
 	{
 
-		if (menuCursor == 0)
+		if (buttonNumber == 0)
 			requestedPurchase = 'G';
-		if (menuCursor == 1)
+		if (buttonNumber == 1)
 			requestedPurchase = 'C';
-		if (menuCursor == 2)
+		if (buttonNumber == 2)
 			requestedPurchase = 'L';
-		if (menuCursor == 3)
+		if (buttonNumber == 3)
 			requestedPurchase = 'U';
-		if (menuCursor == 4)
+		if (buttonNumber == 4)
 			requestedPurchase = 'B';
-		if (menuCursor == 5)
+		if (buttonNumber == 5)
 			requestedPurchase = 'V';
 
 
@@ -2032,19 +2049,16 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 	if (*Input == 't' && myTile->symbol == 'A')
 	{
 
-		if (menuCursor == 0)
+		if (buttonNumber == 0)
 			requestedPurchase = 'h';
-		if (menuCursor == 1)
+		if (buttonNumber == 1)
 			requestedPurchase = 'v';
-		if (menuCursor == 2)
+		if (buttonNumber == 2)
 			requestedPurchase = 'f';
-		if (menuCursor == 3)
+		if (buttonNumber == 3)
 			requestedPurchase = 'b';
 
-
-
 	}
-
 
 
 	//Consult cost table:
@@ -2060,7 +2074,6 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 			//Confirm purchase
 			boardToInput->attemptPurchaseMinion(requestedPurchase, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag);
 			status = gameBoard;
-			menuCursor = 0;
 		}
 	}
 

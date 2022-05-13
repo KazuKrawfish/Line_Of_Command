@@ -98,14 +98,16 @@ public:
 	mainMenu* MainMenu;
 
 	//MenuCrawlerObjects /////////////////////////
-	////////NEW//////////
 	std::vector <Button> * menuButtons;
-	////////NEW//////////
-	int menuCursor = 0;
-	std::vector <std::string> factoryOptions{ "Infantry\t1000", "Specialist\t3000", "Cavalry\t4000","APC\t5000","Artillery\t6000", "Armor\t7000",
-												"Anti-Aircraft\t8000", "Rocket Artillery\t15000", "Heavy Armor\t16000" };
-	std::vector <std::string> airbaseOptions{ "Transport Copter\t5000", "Attack Copter\t9000", "Interceptor\t15000", "Bomber\t18000" };
-	std::vector <std::string> portOptions{ "Gunboat\t6000", "Cruiser\t14000", "Landing Ship\t12000", "Submarine\t18000", "Battleship\t25000", "Aircraft Carrier\t25000" };
+	std::vector <char> factoryOptions{ 'i', 's', 'c', 'P', 'r', 'a','A','R', 'T' };			//"Infantry\t1000", "Specialist\t3000", "Cavalry\t4000","APC\t5000","Artillery\t6000", "Armor\t7000",
+																							//	"Anti-Aircraft\t8000", "Rocket Artillery\t15000", "Heavy Armor\t16000" };
+	std::vector <Button> factoryButtons;
+
+	std::vector <char> airbaseOptions{	'h', 'v', 'f', 'b'};								///"Transport Copter\t5000", "Attack Copter\t9000", "Interceptor\t15000", "Bomber\t18000" };
+	std::vector <Button> airbaseButtons;
+	
+	std::vector <char> portOptions{ 'G', 'C', 'L', 'U', 'V' };								//"Gunboat\t6000", "Cruiser\t14000", "Landing Ship\t12000", "Submarine\t18000", "Battleship\t25000", "Aircraft Carrier\t25000" };
+	std::vector <Button> portButtons;
 	//MenuCrawlerObjects /////////////////////////
 
 	//SFML Objects		/////////////////////////
