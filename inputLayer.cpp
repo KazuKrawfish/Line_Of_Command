@@ -1501,9 +1501,12 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 					if(boardToInput->cursor.XCoord == boardToInput->cursor.selectMinionPointer->locationX &&
 						boardToInput->cursor.YCoord == boardToInput->cursor.selectMinionPointer->locationY)
 					{
-						//If minion is infantry, attempt to capture
-						if(boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry)
+						//If minion is infantry that has already moved, attempt to capture
+						if(boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry && 
+							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+							boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)   )
 							*Input = sf::Keyboard::Key::C; 
+						else 	*Input = sf::Keyboard::Key::M;	//Otherwise attempt to move there.
 					}
 					else //If enemy minion, attempt to attack there.
 						if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true &&
