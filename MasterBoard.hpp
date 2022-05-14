@@ -79,7 +79,7 @@ public:
 	int upkeep(inputLayer* InputLayer, int observerNumber);
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill);
-	int pickUpMinion(int inputX, int inputY);
+	int pickUpMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber);
 	int validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching);
 	int setCursorPath(bool firstTime, int inputX, int inputY);
 	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber);

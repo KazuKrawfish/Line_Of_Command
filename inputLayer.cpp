@@ -51,6 +51,8 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	{
 		factoryButtons.emplace_back(menuLeft + x*50, menuTop + y*50 , factoryButton, gameTexture);
 		factoryButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
+		factoryButtons.at(i).width = 50;
+		factoryButtons.at(i).height = 50;
 		x++;
 		if (x == numberOfButtonsPerRow)
 		{
@@ -75,6 +77,8 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	{
 		airbaseButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, airbaseButton, gameTexture);
 		airbaseButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
+		factoryButtons.at(i).width = 50;
+		factoryButtons.at(i).height = 50;
 		x++;
 		if (x == numberOfButtonsPerRow)
 		{
@@ -94,6 +98,8 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	{
 		portButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, portButton, gameTexture);
 		portButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
+		factoryButtons.at(i).width = 50;
+		factoryButtons.at(i).height = 50;
 		x++;
 		if (x == numberOfButtonsPerRow)
 		{
@@ -1545,7 +1551,18 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 							boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)   )
 							*Input = sf::Keyboard::Key::C; 
-						else 	*Input = sf::Keyboard::Key::M;	//Otherwise attempt to move there.
+						else
+							//If minion is transport that already moved, attempt to supply.
+							if (boardToInput->cursor.selectMinionPointer->specialtyGroup == transport &&
+								(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+									boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)) 
+							{
+								*Input = sf::Keyboard::Key::I;
+							}
+							else 
+							{
+								*Input = sf::Keyboard::Key::M;	//Otherwise attempt to move there.
+							}
 					}
 					else //If enemy minion, attempt to attack there.
 						if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true &&
@@ -1553,10 +1570,17 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 						{
 							*Input = sf::Keyboard::Key::R;
 						}
-					else   //Otherwise attempt to move there.
-					{
-						*Input = sf::Keyboard::Key::M;
-					}
+						//If empty space and this is a transport that already moved, attempt to drop there.
+						else	if (boardToInput->cursor.selectMinionPointer->specialtyGroup == transport &&
+								(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+									boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)) 
+									{
+										*Input = sf::Keyboard::Key::O;
+									}
+									else  //Otherwise attempt to move there.
+										{
+											*Input = sf::Keyboard::Key::M;
+										}
 				}
 		}
 
@@ -1602,19 +1626,27 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	if (*Input == sf::Keyboard::Key::M && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
 	{
-		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop
-			&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->minionBeingTransported == NULL
-			&& boardToInput->pickUpMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+		//If there is a minion on top
+		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
 		{
-			//Change status if successful pickup occurred
-			status = gameBoard;
+			//If that minion is an empty transport
+			if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->specialtyGroup == transport &&
+				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->minionBeingTransported == NULL)
+			{
+				status = gameBoard;	//Regardless of pickup outcome - either successful or trap, we are deselecting minion.
+									//If we do not set status to gameboard, it will segfault when it prints minion status during move, during validatePath.
+				boardToInput->pickUpMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag);
+				//Need new validatePath function that accounts for pickup graphics. Right now it thinks the minion is getting trapped and does graphics accordingly.
+
+			}
 		}
-		else
+		else //If no minion on top attempt to move there
 			if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag) == 0)
 			{
 				//Change status appropriately for successful movement.
 				status = gameBoard;
 			}
+
 	}
 
 	//'i' is supply
@@ -2141,6 +2173,13 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 			status = gameBoard;
 		}
 	}
+
+	//Right click to exit menu
+	if (*Input == sf::Keyboard::Comma)
+	{
+		status = gameBoard;
+	}
+
 
 	return 0;
 }

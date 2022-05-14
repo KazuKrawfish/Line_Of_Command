@@ -1886,49 +1886,51 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 	{
 		cursor.selectMinionPointer->status = hasmovedhasntfired;
 		deselectMinion();
-		return 0;
 	}
+	else
+	{
+		//Otherwise move.
 
-	//Otherwise move.
+		//Find old address of the minion
+		int oldX = selectedMinion->locationX;
+		int oldY = selectedMinion->locationY;
 
-	//Find old address of the minion
-	int oldX = selectedMinion->locationX;
-	int oldY = selectedMinion->locationY;
+		//Clear the old tile, set the new tile.
+		Board[oldX][oldY].hasMinionOnTop = false;
+		Board[inputX][inputY].hasMinionOnTop = true;
 
-	//Clear the old tile, set the new tile.
-	Board[oldX][oldY].hasMinionOnTop = false;
-	Board[inputX][inputY].hasMinionOnTop = true;
+		Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+		Board[oldX][oldY].minionOnTop = NULL;
 
-	Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
-	Board[oldX][oldY].minionOnTop = NULL;
+		//Reset capture points for tile.
+		//Reset minion's cap status
+		Board[oldX][oldY].capturePoints = 20;
+		selectedMinion->isCapturing = false;
 
-	//Reset capture points for tile.
-	//Reset minion's cap status
-	Board[oldX][oldY].capturePoints = 20;
-	selectedMinion->isCapturing = false;
+		//"Move" the minion to the new location.
+		selectedMinion->locationX = inputX;
+		selectedMinion->locationY = inputY;
 
-	//"Move" the minion to the new location.
-	selectedMinion->locationX = inputX;
-	selectedMinion->locationY = inputY;
+		cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
 
-	cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
+		cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
 
-	cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
-
+		deselectMinion();
+	}
 
 	if(didTrapHappen == 1)
 	{ 
 		InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
 	}
 
-	deselectMinion();
+
 
 	setVisionField(playerFlag);
 
 	return 0;
 }
 
-int MasterBoard::pickUpMinion(int inputX, int inputY)
+int MasterBoard::pickUpMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber)
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
 
@@ -1952,40 +1954,60 @@ int MasterBoard::pickUpMinion(int inputX, int inputY)
 			&& cursor.selectMinionPointer->locationY == cursor.getY()))
 	{
 		//Must be transport type, and selected minion must be infantry.
-		//Transport cannot already have an infantry.
 		if (selectedMinion->specialtyGroup == infantry && Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == transport)
 		{
 			//Transport can't be carrying someone already.
 			if (Board[cursor.getX()][cursor.getY()].minionOnTop->minionBeingTransported == NULL)
 			{
-				//Put the minion in the transport.
-				Board[cursor.getX()][cursor.getY()].minionOnTop->minionBeingTransported = selectedMinion;
-				selectedMinion->transporter = Board[cursor.getX()][cursor.getY()].minionOnTop;
+				//Now validaate path and then either successfully load, or do trap movement
+				//If it appears movable, but has a minion, you get trapped.
+				//validatePath will actually move the minion, so we need to return afterwards.
+				int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber);
 
-				//Find old address of the minion
-				int oldX = selectedMinion->locationX;
-				int oldY = selectedMinion->locationY;
+				//If the inputX has not changed, that means we got trapped and have to stand in place. 
+				//Still counts as moving.
+				if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY)
+				{
+					cursor.selectMinionPointer->status = hasmovedhasntfired;
+					deselectMinion();
 
-				//Clear the old tile, set the new tile.
-				Board[oldX][oldY].hasMinionOnTop = false;
-				Board[oldX][oldY].minionOnTop = NULL;
+				}
+				else 
+				{
 
-				//Reset capture points for tile.
-				Board[oldX][oldY].capturePoints = 20;
+					//Put the minion in the transport.
+					Board[cursor.getX()][cursor.getY()].minionOnTop->minionBeingTransported = selectedMinion;
+					selectedMinion->transporter = Board[cursor.getX()][cursor.getY()].minionOnTop;
 
-				//"Move" the minion to the new location.
-				//This is for "debugging", pretty bad but it needs to be invalid.
-				selectedMinion->locationX = -1;
-				selectedMinion->locationY = -1;
+					//Find old address of the minion
+					int oldX = selectedMinion->locationX;
+					int oldY = selectedMinion->locationY;
 
-				cursor.selectMinionPointer->status = hasmovedhasntfired;
-				deselectMinion();
+					//Clear the old tile, set the new tile.
+					Board[oldX][oldY].hasMinionOnTop = false;
+					Board[oldX][oldY].minionOnTop = NULL;
+
+					//Reset capture points for tile.
+					Board[oldX][oldY].capturePoints = 20;
+
+					//"Move" the minion to the new location.
+					//This is for "debugging", pretty bad but it needs to be invalid.
+					selectedMinion->locationX = -1;
+					selectedMinion->locationY = -1;
+
+					cursor.selectMinionPointer->status = hasmovedhasntfired;
+					deselectMinion();
+
+
+				}
 
 				setVisionField(playerFlag);
+
+				if (didTrapHappen == 1)
+				{
+					InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
+				}
 			}
-
-
-
 
 			return 0;
 

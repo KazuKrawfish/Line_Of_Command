@@ -27,7 +27,7 @@ enum buttonType {
 
 class Button
 {
-	//Shouldn't be needed as public, only referenced in checking if mouse is within button.
+public:
 	int xCoord = 0;
 	int yCoord = 0;
 	int width = 0;
