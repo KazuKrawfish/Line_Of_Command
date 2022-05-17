@@ -1195,72 +1195,18 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 		computerPlayerRoster.clear();
 	}
 
-	//Determine if game is remote or local.
-	mywindow->clear();
-	sf::String topMenuNewString("Local skirmish (s), local campaign (c), or remote (r) game? Or Back (b)\n");
-	sf::Text text(topMenuNewString, *myFont, menuTextSize);
-	mywindow->draw(text);
-	mywindow->display();
-	gameType = unchosen;
-	while (gameType == unchosen)
-	{
-		*Input = playCharInput(mywindow);
-
-		if (*Input == 'c')
-		{
-			gameType = localCampaign;
-		}
-		else if (*Input == 'r')
-		{
-			gameType = remote;
-		}
-		else if (*Input == 's')
-		{
-			gameType = localSkirmish;
-		}
-		else if (*Input == 'b')
-		{
-			return 1;
-		}
-	}
-
 	//Load the actual save game
 	//This garbage is necessary because for some reason, getstr will not play with strings, even if you provide & and [0]
 	std::ifstream loadGameSave;
 
 	bool loadsuccessful = false;
-
+	sf::String topMenuNewString;
+	mywindow->clear();
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
 
-		mywindow->clear();
-		if (gameType == localSkirmish)
-		{
-
-			topMenuNewString = "Local skirmish selected.\n";
-			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
-			mywindow->draw(newText);
-			mywindow->display();
-		}
-		else if (gameType == remote)
-		{
-			topMenuNewString = "Remote game selected.\n";
-			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
-			mywindow->draw(newText);
-			mywindow->display();
-		}
-		else if (gameType == localCampaign)
-		{
-			topMenuNewString = "Local campaign selected.\n";
-			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
-			mywindow->draw(newText);
-			mywindow->display();
-		}
-
-		mywindow->clear();
 		topMenuNewString = "Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
-
 
 		sf::String scenarioName = playerInputString(mywindow, myFont, topMenuNewString, 1);
 		std::string saveToLoad = scenarioName;

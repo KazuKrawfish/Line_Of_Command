@@ -13,7 +13,7 @@ TurnLimit_Or_0_ForOff
 Who_wins_after_turn_limit
 2
 Name_of_next_mission_(Same_Directory)
-Done
+Conquest_Of_Ormosa
 Mission_Briefing 6 Ormosa is outraged by the brutal treatment of their citizens by the "unknown" assailants. Although
 Redonia publicly denies any responsibility, the Ormosans have responded by amassing troops at the only
 major bridge across the Prospect River. Their people cry for revenge. Redonia finally has the war she
@@ -31,6 +31,8 @@ Ormosan_Army
 0
 Game_turn_below:
 1
+Fog_Of_War
+0
 Map_width_below:
 20
 Map_height_below:
