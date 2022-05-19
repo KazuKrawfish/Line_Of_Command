@@ -223,7 +223,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 		//Will only print  "selection" effects if human player's turn, or debug mode 
 		//AND if not in the middle of animation - indicated by the invisible flag on minion for movement
 		//AND indicated by the withinAnimation flag, for attacks and such.
-		if ((boardToPrint->playerFlag == playerNumber || MainMenu->debugMode == true)
+		if ((boardToPrint->playerFlag == playerNumber || MainMenu->editorMode == true)
 			&& boardToPrint->cursor.selectMinionPointer != NULL
 			&& boardToPrint->cursor.selectMinionPointer->invisible == false
 			&& withinAnimation == false)
@@ -278,7 +278,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 	//Always draw cursor
 	if (boardToPrint->cursor.XCoord == actualX && boardToPrint->cursor.YCoord == actualY
 		&& (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType != computerPlayer
-			|| MainMenu->debugMode == true))
+			|| MainMenu->editorMode == true))
 	{
 		boardToPrint->cursor.mySprite.setPosition(screenX * 50, screenY * 50);
 		inputLayerWindow->draw(boardToPrint->cursor.mySprite);
@@ -423,7 +423,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			tileDescription = descriptionPointer;
 		}
 
-		if (MainMenu->debugMode == true)
+		if (MainMenu->editorMode == true)
 		{
 			if (boardToPrint->cursor.selectMinionPointer != NULL)
 			{
@@ -448,7 +448,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			newText.setPosition(MAX_WINDOW_WIDTH * 52, (menuLineTracker * MainMenu->menuTextSize) + spacingConstant);
 			newText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(newText);
-			if (MainMenu->debugMode == true)
+			if (MainMenu->editorMode == true)
 				menuLineTracker += 4;
 			else menuLineTracker += 2;
 
@@ -494,35 +494,35 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 			if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo > 0)		//Both pri/sec have ammo
 			{
-				if (MainMenu->debugMode == true)
+				if (MainMenu->editorMode == true)
 					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): %d/%d\n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentPriAmmo, currentMinion->currentSecAmmo);
 				else
 					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): %d/%d\n", currentMinion->currentFuel, currentMinion->currentPriAmmo, currentMinion->currentSecAmmo);
 			}
 			else if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo == 0)		//Infinte sec ammo
 			{
-				if (MainMenu->debugMode == true)
+				if (MainMenu->editorMode == true)
 					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): %d/Infinite\n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentPriAmmo);
 				else
 					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): %d/Infinite\n", currentMinion->currentFuel, currentMinion->currentPriAmmo);
 			}
 			else if (currentMinion->maxSecAmmo == 0 && currentMinion->maxPriAmmo == -1)	//No pri, infinite sec.
 			{
-				if (MainMenu->debugMode == true)
+				if (MainMenu->editorMode == true)
 					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): None/Infinite\n", int(currentMinion->health), currentMinion->currentFuel);
 				else
 					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): None/Infinite\n", currentMinion->currentFuel);
 			}
 			else if (currentMinion->maxSecAmmo == -1 && currentMinion->maxPriAmmo > 0)	//Primary with no sec.
 			{
-				if (MainMenu->debugMode == true)
+				if (MainMenu->editorMode == true)
 					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): %d/None\n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentPriAmmo);
 				else
 					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): %d/None\n", currentMinion->currentFuel, currentMinion->currentPriAmmo);
 			}
 			else //No weapons. Used as catch all for debug.
 			{
-				if (MainMenu->debugMode == true)
+				if (MainMenu->editorMode == true)
 					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nNo weapons\n", int(currentMinion->health), currentMinion->currentFuel);
 				else
 					snprintf(pointerToPrint, 100, "Fuel: %d \nNo weapons\n", currentMinion->currentFuel);
@@ -1296,7 +1296,7 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 	status = gameBoard;
 
 	if (boardToInput->playerRoster[boardToInput->playerFlag].playerType == humanPlayer) {
-		if (MainMenu->debugMode == true)	//If debug, see from 0's perspective.
+		if (MainMenu->editorMode == true)	//If debug, see from 0's perspective.
 		{
 			boardToInput->upkeep(this, 0);
 		}
@@ -1455,17 +1455,17 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 		boardToInput->cursor.move(Input);
 	}
 
-	if (*Input == sf::Keyboard::Key::X && MainMenu->debugMode == true)
+	if (*Input == sf::Keyboard::Key::X && MainMenu->editorMode == true)
 	{
 		status = insertMinion;
 	}
 
-	if (*Input == sf::Keyboard::Key::Z && MainMenu->debugMode == true)
+	if (*Input == sf::Keyboard::Key::Z && MainMenu->editorMode == true)
 	{
 		deleteMinionInput(boardToInput);
 	}
 
-	if (*Input == sf::Keyboard::Key::Q && MainMenu->debugMode == true)
+	if (*Input == sf::Keyboard::Key::Q && MainMenu->editorMode == true)
 	{
 		status = insertTile;
 	}
@@ -1628,10 +1628,19 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	{
 		//If there is a minion on top
 		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
-		{
-			//If that minion is an empty transport
+		{	
+			//If minion on top is this minion, do hold position movement.
+			if (boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX()
+				&& boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY())
+			{
+				boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag);
+				status = gameBoard;
+			}
+			else
+			//If that minion is an empty transport and is same team
 			if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->specialtyGroup == transport &&
-				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->minionBeingTransported == NULL)
+				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->minionBeingTransported == NULL
+				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team == boardToInput->cursor.selectMinionPointer->team)
 			{
 				status = gameBoard;	//Regardless of pickup outcome - either successful or trap, we are deselecting minion.
 									//If we do not set status to gameboard, it will segfault when it prints minion status during move, during validatePath.
@@ -1907,16 +1916,6 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 			//Have to always keep an autosave!
 			MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
-
-
-			//If multiplayer, push to remote server and queue "waiting"
-			//mainmenu's playGame will keep the player waiting.
-			if (MainMenu->gameType == remote)
-			{
-				MainMenu->skipOneInput = true;
-				MainMenu->multiplayerPushSaveGame(boardToInput);
-				MainMenu->menuStatus = waitingForRemotePlayer;
-			}
 		}
 
 		bool withinReturnToGameButton = (*menuButtons)[9].checkWithinButton(mousePosition.x, mousePosition.y);
