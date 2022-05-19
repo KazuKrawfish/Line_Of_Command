@@ -313,8 +313,8 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			inputLayerWindow->draw(effectsSprite);
 		}
 
-		//If minion has only movement and can still attack, grey triangle at top
-		if (minionToPrint->status == hasmovedhasntfired && minionToPrint->rangeType != rangedFire)
+		//If minion has only moved and can still attack/capture, grey triangle at top
+		if ((minionToPrint->status == hasmovedhasntfired || minionToPrint->status == gaveupmovehasntfired)  && minionToPrint->rangeType != rangedFire)
 		{
 			effectsSprite.setTextureRect(rectArray[5][0]);
 			inputLayerWindow->draw(effectsSprite);
