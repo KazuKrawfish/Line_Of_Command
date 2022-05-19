@@ -313,8 +313,8 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			inputLayerWindow->draw(effectsSprite);
 		}
 
-		//If minion has only moved and can still attack/capture, grey triangle at top
-		if ((minionToPrint->status == hasmovedhasntfired || minionToPrint->status == gaveupmovehasntfired)  && minionToPrint->rangeType != rangedFire)
+		//If minion has only moved/held position and can still attack/capture, grey triangle at top
+		if ((minionToPrint->status == hasmovedhasntfired  && minionToPrint->rangeType != rangedFire) || minionToPrint->status == gaveupmovehasntfired)
 		{
 			effectsSprite.setTextureRect(rectArray[5][0]);
 			inputLayerWindow->draw(effectsSprite);
@@ -835,6 +835,10 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	inputLayerWindow->clear();
 	sf::String boardMessage;
 
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(9));
+	inputLayerWindow->draw(backgroundSprite);
+
 	if (boardToInput->missionFlag == true)
 	{
 		boardMessage = boardToInput->campaignName;
@@ -848,7 +852,9 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	boardMessage += "\n\nPress any key to continue.";
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-	   
+	newText.setPosition(250, 200);
+	newText.setFillColor(sf::Color::Black);
+
 	inputLayerWindow->draw(newText);
 	inputLayerWindow->display();
 
@@ -890,6 +896,11 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 	{
 		inputLayerWindow->clear();
 		char buffer[100];
+
+		sf::Sprite backgroundSprite;
+		backgroundSprite.setTexture(MainMenu->otherGameTextures->at(8));
+		inputLayerWindow->draw(backgroundSprite);
+
 		sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
 		announceString += "'s turn. Press any key to begin.  \n";
 		sf::Text newText(announceString, *inputLayerFont, 20);
@@ -1292,6 +1303,8 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 
 int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 {
+	playCharInput(inputLayerWindow);
+
 	//Only lasts one input.
 	status = gameBoard;
 
@@ -1798,7 +1811,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			int lineOffset = 1;
 			inputLayerWindow->clear();
 			sf::String savePrompt = "Choose a name to save your game.\n";
-			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset);
+			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset , "save");
 
 			std::string stdSaveGameName = ".\\savegames\\";
 			stdSaveGameName += saveGameName;
@@ -1808,8 +1821,14 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 			inputLayerWindow->clear();
 
+			sf::Sprite backgroundSprite;
+			backgroundSprite.setTexture(MainMenu->otherGameTextures->at(7));
+			inputLayerWindow->draw(backgroundSprite);
+
 			sf::String successSave = "Game saved. Press any key to continue.\n";
 			sf::Text newText(successSave, *inputLayerFont, MainMenu->menuTextSize);
+			newText.setFillColor(sf::Color::Black);
+			newText.setPosition(300, 200);
 			inputLayerWindow->draw(newText);
 			inputLayerWindow->display();
 
@@ -1836,9 +1855,9 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			int lineOffset = 1;
 			while (loadsuccessful == false)
 			{
-				inputLayerWindow->clear();
+
 				sf::String loadPrompt = "Choose which save game to load (Case sensitive): \n";
-				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset);
+				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset , "load");
 				sf::Event event;
 
 				std::string stdloadGameName = loadGameName;
@@ -1847,7 +1866,14 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				{
 					inputLayerWindow->clear();
 					sf::String successful = "Successfully loaded! Press any key to continue.\n";
+					
+					sf::Sprite backgroundSprite;
+					backgroundSprite.setTexture(MainMenu->otherGameTextures->at(5));
+					inputLayerWindow->draw(backgroundSprite);
+
 					sf::Text newText(successful, *inputLayerFont, MainMenu->menuTextSize);
+					newText.setPosition(300, 200);
+					newText.setFillColor(sf::Color::Black);
 					inputLayerWindow->draw(newText);
 					inputLayerWindow->display();
 
@@ -1855,8 +1881,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				}
 				else
 				{
-					inputLayerWindow->clear();
-					sf::String loadPrompt = "Could not load scenario.\nPlease check that it exists and the right spelling was used.\n";
+					sf::String loadPrompt = "Could not load save game. Please check that it exists and the right spelling was used.\nChoose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
 					lineOffset = 2;
 
 				}

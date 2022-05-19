@@ -22,15 +22,38 @@ class MasterBoard;
 //Because we're having difficulty getting strings to work, we're leaving this for now.
 //Linenumber indicates offset for input field.
 //If you provide an announcement string with 2 lines, LineNumber should be 3.
-sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber)
+sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber, std::string backgroundType)
 {
 	sf::String inputString = "";
 	sf::Event event;
 	bool stringFinished = false;
 
 	myWindow->clear();
+
+	int boxType = 0;
+	if (backgroundType == "load") 
+	{
+		boxType = 5;
+	}
+	else if (backgroundType == "new")
+	{
+		boxType = 6;
+	}
+	else if (backgroundType == "save") 
+	{
+		boxType = 7;
+	}
+
+	//Load or new game box
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(otherGameTextures->at(boxType));
+	mywindow->draw(backgroundSprite);
+
 	sf::Text announceText(AnnouncementString, *inputFont, menuTextSize);
+	announceText.setFillColor(sf::Color::Black);
+	announceText.setPosition(300, 200);
 	myWindow->draw(announceText);
+	
 	myWindow->display();
 
 	while (stringFinished == false)
@@ -40,12 +63,14 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 		{
 
 			inputString += event.text.unicode;
-			sf::Text text(inputString, *inputFont, menuTextSize);
-			text.setPosition(0, (menuTextSize + 1) * LineNumber);
+			sf::Text inputText(inputString, *inputFont, menuTextSize);
+			inputText.setPosition(300, (menuTextSize+10) * (LineNumber) + 200);	//Position for strings for announcements and such
+			inputText.setFillColor(sf::Color::Black);
 
 			myWindow->clear();
+			mywindow->draw(backgroundSprite);
 			myWindow->draw(announceText);
-			myWindow->draw(text);
+			myWindow->draw(inputText);
 			myWindow->display();
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
@@ -896,8 +921,16 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			if (withinSkirmishButton == true)
 			{
 				mywindow->clear();
+
+				sf::Sprite backgroundSprite;
+				backgroundSprite.setTexture(otherGameTextures->at(6));
+				mywindow->draw(backgroundSprite);
+
 				nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
 				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
+				newText.setPosition(300, 200);
+				newText.setFillColor(sf::Color::Black);
+
 				mywindow->draw(newText);
 				mywindow->display();
 				gameType = localSkirmish;
@@ -907,8 +940,16 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			if (withinCampaignButton == true)
 			{
 				mywindow->clear();
+
+				sf::Sprite backgroundSprite;
+				backgroundSprite.setTexture(otherGameTextures->at(6));
+				mywindow->draw(backgroundSprite);
+
 				nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
 				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
+				newText.setPosition(430, 200);
+				newText.setFillColor(sf::Color::Black);
+
 				mywindow->draw(newText);
 				mywindow->display();
 				gameType = localCampaign;
@@ -943,7 +984,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		{
 			mywindow->clear();
 			anotherTopMenuNewString += "Choose which scenario to load (Case sensitive): \n";
-			sf::String scenarioName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset);
+			sf::String scenarioName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset, "new");
 			sf::Event event;
 
 			std::string newScenario = scenarioName;
@@ -951,8 +992,16 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			if (newGameMap.is_open())
 			{
 				mywindow->clear();
+
+				sf::Sprite backgroundSprite;
+				backgroundSprite.setTexture(otherGameTextures->at(6));
+				mywindow->draw(backgroundSprite);
+
 				anotherTopMenuNewString = "Successfully loaded!\n";
 				sf::Text newText(anotherTopMenuNewString, *myFont, menuTextSize);
+				newText.setPosition(300, 200);
+				newText.setFillColor(sf::Color::Black);
+
 				mywindow->draw(newText);
 				mywindow->display();
 
@@ -1005,7 +1054,14 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				//Draw it out
 				mywindow->clear();
+
+				sf::Sprite backgroundSprite;
+				backgroundSprite.setTexture(otherGameTextures->at(6));
+				mywindow->draw(backgroundSprite);
+
 				sf::Text newText(CampaignBriefing, *myFont, menuTextSize);
+				newText.setPosition(200, 200);
+				newText.setFillColor(sf::Color::Black);
 				mywindow->draw(newText);
 				mywindow->display();
 
@@ -1058,7 +1114,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			char buffer[100];
 			snprintf(buffer, 100, "Input Player %d's name: \n", i);
 			sf::String announceString = buffer;
-			inputName = playerInputString(mywindow, myFont, announceString, 1);
+			inputName = playerInputString(mywindow, myFont, announceString, 1, "new" );
 
 			boardToPlay->playerRoster[i].name = inputName;
 
@@ -1070,8 +1126,17 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				char playerTypeInput = ' ';
 				topMenuNewString = "Is this player human (h) or computer (c)? \n";
 				sf::Text anotherText(topMenuNewString, *myFont, menuTextSize);
+				anotherText.setPosition(300, 200);
+				anotherText.setFillColor(sf::Color::Black);
+
 				mywindow->clear();
+
+				sf::Sprite backgroundSprite;
+				backgroundSprite.setTexture(otherGameTextures->at(6));
+			
+				mywindow->draw(backgroundSprite);
 				mywindow->draw(anotherText);
+
 				mywindow->display();
 
 				playerTypeInput = playCharInput(mywindow);
@@ -1098,7 +1163,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		mywindow->clear();
 		topMenuNewString = "Input Player 1's name: \n";
 
-		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1);
+		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1 , "new");
 		boardToPlay->playerRoster[1].name = inputName;
 
 		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
@@ -1132,7 +1197,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 }
 
 int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
-{
+{	
+	mywindow->clear();
+	
 	//Clear out the old roster. Then we can make new one.
 	if (computerPlayerRoster.empty() == false)
 	{
@@ -1140,19 +1207,19 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	}
 
 	//Load the actual save game
-	//This garbage is necessary because for some reason, getstr will not play with strings, even if you provide & and [0]
 	std::ifstream loadGameSave;
 
 	bool loadsuccessful = false;
 	sf::String topMenuNewString;
-	mywindow->clear();
+	int announcementLength = 1;
+
+	topMenuNewString = "Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
+		
 
-		topMenuNewString = "Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
-
-		sf::String scenarioName = playerInputString(mywindow, myFont, topMenuNewString, 1);
+		sf::String scenarioName = playerInputString(mywindow, myFont, topMenuNewString, announcementLength, "load");
 		std::string saveToLoad = scenarioName;
 
 		saveToLoad += "_save.txt";
@@ -1160,19 +1227,27 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 		if (loadGameSave.is_open())
 		{
 			mywindow->clear();
-			topMenuNewString = "Save game successfully loaded!\n";
+			topMenuNewString = "Save game successfully loaded! Press any key to continue.\n";
+			
 			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			newText.setFillColor(sf::Color::Black);
+			newText.setPosition(300, 200);
+
+			sf::Sprite backgroundSprite;
+			backgroundSprite.setTexture(otherGameTextures->at(5));
+
+			mywindow->draw(backgroundSprite);
 			mywindow->draw(newText);
 			mywindow->display();
+
 			loadsuccessful = true;
+
+			playCharInput(mywindow);
 		}
 		else
 		{
-			mywindow->clear();
-			topMenuNewString = "Could not load save game. Please check that it exists and the right spelling was used.\n";
-			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
-			mywindow->draw(newText);
-			mywindow->display();
+			topMenuNewString = "Could not load save game. Please check that it exists and the right spelling was used.\nChoose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
+			announcementLength = 2;
 		}
 
 	}

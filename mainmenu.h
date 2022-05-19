@@ -52,7 +52,7 @@ public:
 
 	//Other functions///////////////////////////
 	int printWaitingScreen();
-	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber);
+	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber, std::string backgroundType);
 	//Other functions///////////////////////////
 
 	const int menuTextSize = 20;

@@ -57,6 +57,7 @@ if (getY() > 0)
 }
 
 boardToPlay->setCursorPath(true, XCoord, YCoord);
+boardToPlay->checkWindow();
 
 return didItMove;
 	
