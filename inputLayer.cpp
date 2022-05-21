@@ -598,6 +598,9 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 
+	if (boardToPrint->cursor.selectMinionPointer == NULL)
+		return 0;
+
 	minionStatus mystatus = boardToPrint->cursor.selectMinionPointer->status;
 
 	sf::String boardMessage;
@@ -904,6 +907,8 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 		sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
 		announceString += "'s turn. Press any key to begin.  \n";
 		sf::Text newText(announceString, *inputLayerFont, 20);
+		newText.setPosition(300, 200);
+		newText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(newText);
 		inputLayerWindow->display();
 	}
@@ -1555,20 +1560,21 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				//If mouse click IS within cursor 
 				if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
 				{
+					Minion* myMinion = boardToInput->cursor.selectMinionPointer;
+					tile* targetedTile = &boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()];
+
 					//If cursor is on top of selected minion,
-					if(boardToInput->cursor.XCoord == boardToInput->cursor.selectMinionPointer->locationX &&
-						boardToInput->cursor.YCoord == boardToInput->cursor.selectMinionPointer->locationY)
+					if(boardToInput->cursor.XCoord == myMinion->locationX &&
+						boardToInput->cursor.YCoord == myMinion->locationY)
 					{
 						//If minion is infantry that has already moved, attempt to capture
-						if(boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry && 
-							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
-							boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)   )
+						if(myMinion->specialtyGroup == infantry &&
+							(myMinion->status == hasmovedhasntfired ||	myMinion->status == gaveupmovehasntfired)   )
 							*Input = sf::Keyboard::Key::C; 
 						else
 							//If minion is transport that already moved, attempt to supply.
-							if (boardToInput->cursor.selectMinionPointer->specialtyGroup == transport &&
-								(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
-									boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)) 
+							if (myMinion->specialtyGroup == transport &&
+								(myMinion->status == hasmovedhasntfired ||	myMinion->status == gaveupmovehasntfired))
 							{
 								*Input = sf::Keyboard::Key::I;
 							}
@@ -1577,9 +1583,16 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 								*Input = sf::Keyboard::Key::M;	//Otherwise attempt to move there.
 							}
 					}
-					else //If enemy minion, attempt to attack there.
-						if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true &&
-							boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->playerFlag)
+					else //If we are direct/hybrid attack, and have already moved, attempt to attack there. Must be in range and visible.
+						 //Or if we are indirect/hybrid attack that held position, attempt to attack there. Must be in range and visible.
+						if (targetedTile->hasMinionOnTop == true &&	targetedTile->minionOnTop->team != boardToInput->playerFlag && 
+							targetedTile->withinRange == true && targetedTile->withinVision[myMinion->team] == true &&
+							( ((myMinion->rangeType == directFire || myMinion->rangeType == hybridRange) &&
+								(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
+								|| ((myMinion->rangeType == rangedFire || myMinion->rangeType == hybridRange) &&
+								( myMinion->status == gaveupmovehasntfired)) )
+							)
+
 						{
 							*Input = sf::Keyboard::Key::R;
 						}
@@ -1639,8 +1652,9 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	if (*Input == sf::Keyboard::Key::M && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
 	{
-		//If there is a minion on top
-		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
+		//If there is a minion on top and that minion is visible to the minion's owner
+		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true
+			&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinVision[boardToInput->cursor.selectMinionPointer->team] == true)
 		{	
 			//If minion on top is this minion, do hold position movement.
 			if (boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX()

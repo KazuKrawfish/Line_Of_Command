@@ -79,7 +79,7 @@ public:
 	int setCursorPath(bool firstTime, int inputX, int inputY);
 	int deselectMinion();
 	int moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber);
-	int validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching);
+	int validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching, bool transportMove);
 	//Select and Move Functions////////////////
 
 	//Combat Functions/////////////////////////

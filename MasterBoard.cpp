@@ -1039,7 +1039,7 @@ double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defend
 
 	//Calculate defense factor. If air unit it remains 1.
 	double defenseFactor = 1;
-	if (defendingMinion->domain != air && defendingMinion->domain != helo)
+	if (defendingMinion->domain != air )
 	{
 		defenseFactor = Board[defendingMinion->locationX][defendingMinion->locationY].defenseFactor;
 	}
@@ -1663,12 +1663,11 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 }
 
 
-//Must find the closest valid tile where we can move, other than inputX/inputY.
+//Must find the closest valid tile where we can move, starting with inputX/inputY.
 //Return 0 means successfully made it to location
-//Return 1 means we dropped prematurely at this input location.
-//Return 2 means we were blocked AND had to return without dropping at all.
+//Return 1 means we dropped prematurely at this input location (Could be where we started).
 //ValidatePath also prints its own graphics, indicating the path of movement.
-int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching)
+int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching, bool transportMove)
 {
 	bool madeItToTheEnd = false;
 	bool hitEnemy = false;
@@ -1700,10 +1699,11 @@ int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer* graphicsLaye
 		graphicsLayer->movementGraphics(this, whoIsWatching, selectedMinion, currentX, currentY);
 
 		//If we have reached the cursor, do final evaluation.
-		//If there is a minion here, even though we reached end, we are "trapped", and we need to go back to potential drop.
 		if (cursor.getX() == currentX && cursor.getY() == currentY)
 		{
-			if (Board[currentX][currentY].hasMinionOnTop == true)
+			//If there is a minion here, even though we reached end, we are "trapped", and we need to go back to potential drop.
+			//Must also NOT be a transport move - i.e. a normal move. Otherwise no trap occurred.
+			if (Board[currentX][currentY].hasMinionOnTop == true && transportMove == false)
 				hitEnemy = true;
 			else
 				madeItToTheEnd = true;
@@ -1821,18 +1821,19 @@ int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer* graphicsLaye
 	{
 		inputX = cursor.getX();
 		inputY = cursor.getY();
-		return 0;
+		return 0;       //No trap, made it to objective tile.
 	}
-	else
+	else    //If a trap occurred, set outbound input values to the last good drop point.
 	{
 		inputX = potentialDropX;
 		inputY = potentialDropY;
-		return 1;
+		return 1;       //Trapped. May have moved some, may not have moved at all.
 	}
 
 
 
 }
+
 //Note re observerNumber: Don't know a better way to "know" who is supposed to watch, since the prints are supposed to be "interrupts"
 //Unfortunately it makes a rather circular input of observerNumber- it depends on input layer/compie functions, then transmits to inputlayer functions.
 int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber)
@@ -1878,10 +1879,11 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 	inputY = selectedMinion->locationY;
 
 	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
-	//validatePath will actually move the minion, so we need to return afterwards.
-	int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber);
+	//validatePath will potentially change inputX and inputY.
+	bool loadMove = false;
+	int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber, loadMove);
 
-	//If the inputX has not changed, that means we got trapped and have to stand in place. 
+	//If the inputX/inputY has not changed, that means we got trapped and couldn't move at all.
 	//Still counts as moving.
 	if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY)
 	{
@@ -1914,11 +1916,11 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 
 		cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
 
-		cursor.selectMinionPointer->status = hasmovedhasntfired;	//I think this is doubletap.
-
+		cursor.selectMinionPointer->status = hasmovedhasntfired;
 		deselectMinion();
 	}
 
+	//A trap may have happened, even if we moved. 
 	if (didTrapHappen == 1)
 	{
 		InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
@@ -1962,21 +1964,55 @@ int MasterBoard::pickUpMinion(int inputX, int inputY, inputLayer* InputLayer, in
 			//Transport can't be carrying someone already.
 			if (Board[cursor.getX()][cursor.getY()].minionOnTop->minionBeingTransported == NULL)
 			{
-				//Now validaate path and then either successfully load, or do trap movement
+				inputX = selectedMinion->locationX;
+				inputY = selectedMinion->locationY;
+
+				//Now validate path and then either successfully load, or do trap movement
 				//If it appears movable, but has a minion, you get trapped.
-				//validatePath will actually move the minion, so we need to return afterwards.
-				int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber);
+				//validatePath will potentially change inputX and inputY.
+				bool loadMove = true;
+				int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber, loadMove);
 
 				//If the inputX has not changed, that means we got trapped and have to stand in place. 
 				//Still counts as moving.
-				if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY)
+				if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY && didTrapHappen == 1)
 				{
 					cursor.selectMinionPointer->status = hasmovedhasntfired;
 					deselectMinion();
+					InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
 
 				}
-				else
-				{
+				else if (didTrapHappen == 1)
+				{    //We moved but got trapped before able to load. Execute move.
+
+					//Find old address of the minion
+					int oldX = selectedMinion->locationX;
+					int oldY = selectedMinion->locationY;
+
+					//Clear the old tile, set the new tile.
+					Board[oldX][oldY].hasMinionOnTop = false;
+					Board[inputX][inputY].hasMinionOnTop = true;
+
+					Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+					Board[oldX][oldY].minionOnTop = NULL;
+
+					//Reset capture points for tile.
+					//Reset minion's cap status
+					Board[oldX][oldY].capturePoints = 20;
+					selectedMinion->isCapturing = false;
+
+					//"Move" the minion to the new location.
+					selectedMinion->locationX = inputX;
+					selectedMinion->locationY = inputY;
+
+					cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
+
+					cursor.selectMinionPointer->status = hasmovedhasntfired;
+					deselectMinion();
+					InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
+				}
+				else if (didTrapHappen == 0)
+				{   //Successful load occurred.
 
 					//Put the minion in the transport.
 					Board[cursor.getX()][cursor.getY()].minionOnTop->minionBeingTransported = selectedMinion;
@@ -2005,11 +2041,6 @@ int MasterBoard::pickUpMinion(int inputX, int inputY, inputLayer* InputLayer, in
 				}
 
 				setVisionField(playerFlag);
-
-				if (didTrapHappen == 1)
-				{
-					InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
-				}
 			}
 
 			return 0;
@@ -2485,15 +2516,6 @@ int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 		//If it's a minion you own and it's not being transported
 		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->transporter == NULL)
 		{
-			if (minionRoster[i]->domain == helo && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'A')
-			{
-				minionRoster[i]->currentFuel -= 2;
-				if (minionRoster[i]->currentFuel <= 0)
-				{
-					destroyMinion(minionRoster[i], "No fuel", InputLayer, false);
-				}
-			}
-			else
 				if (minionRoster[i]->domain == air && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'A')
 				{
 					minionRoster[i]->currentFuel -= 5;

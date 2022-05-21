@@ -252,7 +252,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		
 		mySprite.setTextureRect(rectArray[9][inputTeam + 4]);
 		maxFuel = 80;
-		domain = helo;
+		domain = air;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
 
@@ -270,7 +270,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		specialtyGroup = transport;
 		mySprite.setTextureRect(rectArray[10][inputTeam + 4]);
 		maxFuel = 80;
-		domain = helo;
+		domain = air;
 
 
 		myMoveSound = vehicleMove;
