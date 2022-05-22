@@ -676,13 +676,13 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	while (true)
 	{
 		sf::Event playerInput;
-		enum sf::Keyboard::Key Input = sf::Keyboard::Tilde;
+		enum sf::Keyboard::Key Input = sf::Keyboard::F1;
 
 		//This is to skip if we are coming from another context like a new game.
 		if (skipOneInput == true)
 		{
 			skipOneInput = false;
-			Input = sf::Keyboard::Tilde;	//'~' represents "pass-one-round"
+			Input = sf::Keyboard::F1;	//F1 represents "pass-one-round"
 		}
 		else
 		{

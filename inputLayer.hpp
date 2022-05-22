@@ -95,7 +95,9 @@ public:
 
 	gameInputLayer status = gameBoard;
 	specialKey minionVisibleStatus = showMinions;
+	bool capsLockOn = false;
 	mainMenu* MainMenu;
+
 
 	//MenuCrawlerObjects /////////////////////////
 	std::vector <Button> * menuButtons;

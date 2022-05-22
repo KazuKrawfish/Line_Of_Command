@@ -1341,24 +1341,175 @@ int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 	Cursor* myCursor = &boardToInput->cursor;
 	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
 
+	//Shift must be used like Caps Lock
+	if (*Input == sf::Keyboard::Key::LShift || *Input == sf::Keyboard::Key::RShift)
+	{
+		if (capsLockOn == false)
+			capsLockOn = true;
+		else if (capsLockOn == true)
+			capsLockOn = false;
+
+		return 1;
+	}
+
 
 	//Return to gameBoard if player presses 'x'.
-	if (*Input == 'x')
+	if (*Input == sf::Keyboard::Key::X)
 	{
 		status = gameBoard;
 		return 1;
 	}
 
+
+	//Convert valid keyboard input to char
+	char convertedInput = '~';
+
+	if (capsLockOn == false)
+	{
+		//Lower case letters
+		switch (*Input)
+		{
+			case sf::Keyboard::I:
+			{
+				convertedInput = 'i';
+				break;
+			}
+
+			case(sf::Keyboard::S):
+			{
+				convertedInput = 's';
+				break;
+			}
+
+			case(sf::Keyboard::A):
+			{
+				convertedInput = 'a';
+				break;
+			}
+
+			case(sf::Keyboard::T):
+			{
+				convertedInput = 'T';
+				break;
+			}
+
+			case(sf::Keyboard::R):
+			{
+				convertedInput = 'r';
+				break;
+			}
+
+			case(sf::Keyboard::C):
+			{
+				convertedInput = 'c';
+				break;
+			}
+
+			case(sf::Keyboard::K):
+			{
+				convertedInput = 'K';
+				break;
+			}
+
+			case(sf::Keyboard::V):
+			{
+				convertedInput = 'v';
+				break;
+			}
+
+			case(sf::Keyboard::H):
+			{
+				convertedInput = 'h';
+				break;
+			}
+
+			case(sf::Keyboard::P):
+			{
+				convertedInput = 'P';
+				break;
+			}
+
+			case(sf::Keyboard::F):
+			{
+				convertedInput = 'f';
+				break;
+			}
+
+			case(sf::Keyboard::B):
+			{
+				convertedInput = 'b';
+				break;
+			}
+
+			case(sf::Keyboard::G):
+			{
+				convertedInput = 'G';
+				break;
+			}
+
+			case(sf::Keyboard::L):
+			{
+				convertedInput = 'L';
+				break;
+			}
+
+			case(sf::Keyboard::U):
+			{
+				convertedInput = 'U';
+				break;
+			}
+
+		}
+	}
+	else //Shift-required characters
+	{
+		switch (*Input)
+		{
+			case(sf::Keyboard::A):
+			{
+				convertedInput = 'A';
+				break;
+			}
+			case(sf::Keyboard::V):
+			{	
+				convertedInput = 'V';
+				break;
+			}
+
+			case(sf::Keyboard::R):
+			{
+				convertedInput = 'R';
+				break;
+			}
+			case(sf::Keyboard::B):
+			{
+			
+				convertedInput = 'B';
+				break;
+			}
+			case(sf::Keyboard::C):
+			{	
+				convertedInput = 'C';
+				break;
+			}
+			case(sf::Keyboard::S):	
+			{
+				convertedInput = 'S';
+				break;
+			}
+		}
+	}
+
 	//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
-	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart(*Input, myTile->symbol) == 99)
+	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart(convertedInput, myTile->symbol) == 99)
 		return 1;
 
-	int requestedUnitPrice = boardToInput->consultMinionCostChart(*Input, '~');
+	int requestedUnitPrice = boardToInput->consultMinionCostChart(convertedInput, '~');
 
 	//If it is real minion, then price > 0
 	if (requestedUnitPrice > 0)
 	{
-		boardToInput->createMinion(*Input, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1, -1);
+		boardToInput->createMinion(convertedInput, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1, -1);
 		status = gameBoard;
 		return 0;
 	}
@@ -1373,7 +1524,6 @@ int inputLayer::deleteMinionInput(MasterBoard* boardToInput)
 {
 	Cursor* myCursor = &boardToInput->cursor;
 	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
-
 
 
 	if (myTile->hasMinionOnTop != true)
@@ -1398,24 +1548,106 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
 
 	//Return to gameBoard if player presses 'q'.
-	if (*Input == 'q')
+	if (*Input == sf::Keyboard::Key::Q)
 	{
 		status = gameBoard;
 		return 1;
 	}
 
+	//Shift must be used like Caps Lock
+	if (*Input == sf::Keyboard::Key::LShift || *Input == sf::Keyboard::Key::RShift)
+	{
+		if (capsLockOn == false)
+			capsLockOn = true;
+		else if (capsLockOn == true)
+			capsLockOn = false;
+
+		return 1;
+	}
+
+	
+	//Convert to char before analyzing
+	char inputChar = '!';
+
+	if (capsLockOn == false)
+	{
+		//Lower case letters
+		switch (*Input)
+		{
+			case sf::Keyboard::Period:
+				inputChar = '.';
+				break;
+			case(sf::Keyboard::Add):
+				inputChar = '+';
+				break; 
+			case(sf::Keyboard::M):
+				inputChar = 'm';
+				break;
+			case(sf::Keyboard::N):
+				inputChar = 'n';
+				break;
+			case(sf::Keyboard::H):
+				inputChar = 'h';
+				break;
+			case(sf::Keyboard::Equal):
+				inputChar = '=';
+				break;
+			case(sf::Keyboard::Dash):
+				inputChar = '-';
+				break;
+		}
+	}
+	else 
+	{
+		//Upper case letters
+		switch (*Input)
+		{
+			case(sf::Keyboard::Add):
+			case(sf::Keyboard::Equal):		//Test okay
+				inputChar = '+';
+				break;
+			case(sf::Keyboard::Num6):
+				inputChar = '^';
+				break;
+			case(sf::Keyboard::M):
+				inputChar = 'M';
+				break;
+			case(sf::Keyboard::H):
+				inputChar = 'H';
+				break;
+			case(sf::Keyboard::A):
+				inputChar = 'A';
+				break;
+			case(sf::Keyboard::P):
+				inputChar = 'P';
+				break;
+			case(sf::Keyboard::Num8):
+			case(sf::Keyboard::Multiply):		//Test okay
+				inputChar = '*';
+				break;
+			case(sf::Keyboard::Subtract):	//Test okay
+				inputChar = '-';
+				break;
+			case(sf::Keyboard::Q):
+				inputChar = 'Q';
+				break;			
+			case(sf::Keyboard::Tilde):	//Test needed
+				inputChar = '~';
+				break;
+		}
+	}
+
 	//If input tile symbol is invalid, return 1.
-	if (myTile->consultMovementChart('i', *Input) == -1)
+	if (myTile->consultMovementChart('i', inputChar) == -1)
 		return 1;
 
-	//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
-	if (myTile->hasMinionOnTop == true && myTile->consultMovementChart(myTile->minionOnTop->type, *Input) == 99)
+	//Prevent terrain from being somewhere that minion couldn't actually move.
+	if (myTile->hasMinionOnTop == true && myTile->consultMovementChart(myTile->minionOnTop->type, inputChar) == 99)
 		return 1;
 
 	//If it is real tile, change the underlying tile.
-	//May break things....
+	myTile->symbol = inputChar;	
 	myTile->capturePoints = 20;
-	myTile->symbol = *Input;
 
 	if (myTile->checkForProperty(myTile->symbol) == true)
 	{
@@ -1448,7 +1680,7 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 		int tileX = windowX + boardToInput->windowLocationX;
 		int tileY = windowY + boardToInput->windowLocationY;
 
-		if (tileX < boardToInput->BOARD_WIDTH && tileX > 0 && tileY < boardToInput->BOARD_HEIGHT && tileY > 0)
+		if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
 		{
 			//And mouse click not within cursor, move cursor there.
 			if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord) 
