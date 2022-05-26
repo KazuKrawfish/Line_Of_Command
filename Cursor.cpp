@@ -79,5 +79,7 @@ int Cursor::relocate(int inputX, int inputY) //Returns 1 on fail
 
 	boardToPlay->setCursorPath(true, XCoord, YCoord);
 
+	boardToPlay->checkWindow();
+
 	return 0;
 }

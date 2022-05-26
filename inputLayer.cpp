@@ -1781,7 +1781,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		int tileY = windowY + boardToInput->windowLocationY;
 
 		//If mouse click is within map, 
-		if (tileX < boardToInput->BOARD_WIDTH && tileX > 0 && tileY < boardToInput->BOARD_HEIGHT && tileY > 0)
+		if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
 		{
 			//And mouse click not within cursor, move cursor there.
 			if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord)
