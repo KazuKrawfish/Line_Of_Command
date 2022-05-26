@@ -1765,12 +1765,18 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 	return 0;
 }
 
+//Update minionInput:
+//Left click to select and deselect. Right click to move.
+
 int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput) {
 
 	//This tracks who may lose after an action. Only one player can lose per action, so only need one number.
 	int playerPotentiallyDefeated = 0;
 
-	if (*Input == sf::Keyboard::Quote)
+	//If right click occurred, may move, may not move.
+	//This is to avoid accidentally moving in place after selecting a minion.
+	//Requires left, then right click, to move in place.
+	if (*Input == sf::Keyboard::Comma)
 	{
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
 
@@ -1796,56 +1802,56 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 					tile* targetedTile = &boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()];
 
 					//If cursor is on top of selected minion,
-					if(boardToInput->cursor.XCoord == myMinion->locationX &&
+					if (boardToInput->cursor.XCoord == myMinion->locationX &&
 						boardToInput->cursor.YCoord == myMinion->locationY)
 					{
 						//If minion is infantry that has already moved, attempt to capture
-						if(myMinion->specialtyGroup == infantry &&
-							(myMinion->status == hasmovedhasntfired ||	myMinion->status == gaveupmovehasntfired)   )
-							*Input = sf::Keyboard::Key::C; 
+						if (myMinion->specialtyGroup == infantry &&
+							(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
+							* Input = sf::Keyboard::Key::C;
 						else
 							//If minion is transport that already moved, attempt to supply.
 							if (myMinion->specialtyGroup == transport &&
-								(myMinion->status == hasmovedhasntfired ||	myMinion->status == gaveupmovehasntfired))
+								(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
 							{
 								*Input = sf::Keyboard::Key::I;
 							}
-							else 
+							else
 							{
 								*Input = sf::Keyboard::Key::M;	//Otherwise attempt to move there.
 							}
 					}
 					else //If we are direct/hybrid attack, and have already moved, attempt to attack there. Must be in range and visible.
 						 //Or if we are indirect/hybrid attack that held position, attempt to attack there. Must be in range and visible.
-						if (targetedTile->hasMinionOnTop == true &&	targetedTile->minionOnTop->team != boardToInput->playerFlag && 
+						if (targetedTile->hasMinionOnTop == true && targetedTile->minionOnTop->team != boardToInput->playerFlag &&
 							targetedTile->withinRange == true && targetedTile->withinVision[myMinion->team] == true &&
-							( ((myMinion->rangeType == directFire || myMinion->rangeType == hybridRange) &&
-								(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
+							(((myMinion->rangeType == directFire || myMinion->rangeType == hybridRange) &&
+							(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
 								|| ((myMinion->rangeType == rangedFire || myMinion->rangeType == hybridRange) &&
-								( myMinion->status == gaveupmovehasntfired)) )
+								(myMinion->status == gaveupmovehasntfired)))
 							)
 
 						{
 							*Input = sf::Keyboard::Key::R;
 						}
-						//If empty space and this is a transport that already moved, attempt to drop there.
+					//If empty space and this is a transport that already moved, attempt to drop there.
 						else	if (boardToInput->cursor.selectMinionPointer->specialtyGroup == transport &&
-								(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
-									boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)) 
-									{
-										*Input = sf::Keyboard::Key::O;
-									}
-									else  //Otherwise attempt to move there.
-										{
-											*Input = sf::Keyboard::Key::M;
-										}
+							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+								boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
+						{
+							*Input = sf::Keyboard::Key::O;
+						}
+						else  //Otherwise attempt to move there.
+						{
+							*Input = sf::Keyboard::Key::M;
+						}
 				}
 		}
 
 	}
 
-	//If right click occurred, deselect
-	if (*Input == sf::Keyboard::Comma)
+	//If left click, deselect.	
+	if (*Input == sf::Keyboard::Quote)
 	{
 		*Input = sf::Keyboard::Key::T;
 	}

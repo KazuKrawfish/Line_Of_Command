@@ -2298,7 +2298,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 
 	isAmmoUsed = false;
 	//Decrease defender's health by attack value. Decrease ammo as needed.
-	int randomFactor = (rand() % 10) - 5;
+	int randomFactor = (rand() % 10);       //Rand now adds between 0-9.
 	int damageDealt = randomFactor + calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
 	if (damageDealt < 0)
 		damageDealt = 0;
@@ -2335,10 +2335,16 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 			//Same calculations as above - includes veterancy
 			isAmmoUsed = false;
 
-			int randomFactor = (rand() % 10) - 5;
-			int damageDealt = randomFactor + calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
-			if (damageDealt < 0)
-				damageDealt = 0;
+			//Determine base damage to see if unit actually does ANY damage.
+			int randomFactor = (rand() % 10);       //Rand now adds between 0-9.
+			int baseDamage = calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+			int damageDealt = 0;
+
+			//If base damage is above 0, add random factor and move on.
+			if (baseDamage > 0)
+				damageDealt = randomFactor + baseDamage;
+			else damageDealt = 0;       //If not above 0, then damagedealt is 0.
+
 			attackingMinion->health -= damageDealt;
 
 			if (isAmmoUsed == true)
