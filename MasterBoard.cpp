@@ -2471,14 +2471,12 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 		}
 	}
 
-	//Shouldn't matter if local or not as long as it's not singleplayer
-	//If it is singleplayer we want to remain in map mode.
-	if (isItSinglePlayerGame == false)
+	//If single player, remain in gameBoard mode. If not, change mode.
+	if (isItSinglePlayerGame == true)
 	{
-		InputLayer->status = waitingForNextLocalPlayer;
+		InputLayer->status = gameBoard;
 	}
-
-
+	else InputLayer->status = waitingForNextLocalPlayer;
 
 
 	return gameTurnIncrement;

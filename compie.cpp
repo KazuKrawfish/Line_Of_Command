@@ -1423,6 +1423,9 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 	}
 
+	//Regardless of if this was first turn, set to false. Now it's not!
+	menuPointer->veryFirstTurn = false;
+
 	return 1;
 }
 

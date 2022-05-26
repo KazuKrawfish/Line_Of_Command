@@ -997,13 +997,16 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				backgroundSprite.setTexture(otherGameTextures->at(6));
 				mywindow->draw(backgroundSprite);
 
-				anotherTopMenuNewString = "Successfully loaded!\n";
+				anotherTopMenuNewString = "Successfully loaded. Press any key to continue.\n";
 				sf::Text newText(anotherTopMenuNewString, *myFont, menuTextSize);
 				newText.setPosition(300, 200);
 				newText.setFillColor(sf::Color::Black);
 
 				mywindow->draw(newText);
 				mywindow->display();
+
+				//Wait for one input.
+				playCharInput(mywindow);
 
 				loadsuccessful = true;
 			}

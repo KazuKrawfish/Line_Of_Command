@@ -750,6 +750,7 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) 
 	statusBox.setPosition(MAX_WINDOW_WIDTH * 50, 0);
 	inputLayerWindow->draw(statusBox);
 
+
 	//Then write whatever status message
 	if (boardToPrint->playerFlag == observerNumber)
 	{
@@ -2193,6 +2194,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 			//Have to always keep an autosave!
 			MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
+
 		}
 
 		bool withinReturnToGameButton = (*menuButtons)[9].checkWithinButton(mousePosition.x, mousePosition.y);
