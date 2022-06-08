@@ -1172,19 +1172,13 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 		}
 	}
-	else	//If campaign game we just give player 1's name AND initialize all other players as compie
+	else	//If campaign game we just give player 1's name, and compie has already been initialized.
 	{
 		mywindow->clear();
 		topMenuNewString = "Input Player 1's name: \n";
 
 		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1 , "new");
 		boardToPlay->playerRoster[1].name = inputName;
-
-		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
-		{
-			if (boardToPlay->playerRoster[i].playerType == computerPlayer)
-				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
-		}
 
 	}
 

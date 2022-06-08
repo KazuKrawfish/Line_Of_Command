@@ -323,7 +323,7 @@ int compie::analyzeMap(MasterBoard* boardToUse)
 	}
 
 	//One for each land mass, one for 0 index, and one extra because it weirdly fails on me.
-	compieLandMassMap.roster.resize(nextLandMassNumber);
+	compieLandMassMap.roster.resize(nextLandMassNumber + 1);
 
 	//Iterate through board and analyze any landmasses that have not been analyzed.
 	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
