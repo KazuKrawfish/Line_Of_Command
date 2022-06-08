@@ -1717,6 +1717,12 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 		status = insertTile;
 	}
 
+	//Add'l advance to next game via loadNextGame for inputLayer:
+	if (*Input == sf::Keyboard::Key::V && MainMenu->editorMode == true)
+	{
+		NextMission(boardToInput);
+	}
+	
 	//Need char for shift
 	if (*Input == sf::Keyboard::Key::Num0)
 	{
@@ -2294,8 +2300,6 @@ int inputLayer::NextMission(MasterBoard* boardToInput)
 
 	//We don't always print mission briefing but we do here
 	printMissionBriefing(boardToInput);
-
-
 
 	status = gameBoard;
 

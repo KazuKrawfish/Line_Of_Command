@@ -623,6 +623,17 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 	}
 
+	//Initialize all compies at this stage if a mission (We are certain who is a compie)
+	if (boardToPrint->missionFlag == true) 
+	{
+		computerPlayerRoster.resize(boardToPrint->NUMBEROFPLAYERS + 1);
+		for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
+		{
+			if (boardToPrint->playerRoster[i].playerType == computerPlayer)
+				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPrint);
+		}
+	}
+
 	saveGame->close();
 	return 1;
 }
@@ -1261,7 +1272,6 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	std::ifstream loadSession;
 	bool sessionCreationSuccessful = false;
 
-	computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
 	//Determines if they print or not.
 	int numberOfHumanPlayers = 0;
 	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
@@ -1270,11 +1280,6 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 		{
 			numberOfHumanPlayers++;
 		}
-		else if (boardToPlay->playerRoster[i].playerType == computerPlayer)
-		{
-			computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
-		}
-
 	}
 
 	if (numberOfHumanPlayers < 2)
