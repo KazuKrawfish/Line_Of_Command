@@ -80,6 +80,13 @@ int main()
 		otherTextureArray.resize(otherImagesList.size());
 		initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
 
+		//Load status indicators
+		std::vector <std::string> statusTextureList = { "statusBar_HealthBox", "statusBar_FuelBox", "statusBar_AmmoBox", "statusBar_CaptureBox", "statusBar_DefenseBonusBox", "statusBar_ProductionBox", "statusBar_MoveState" };
+		std::vector <sf::Texture> statusTexturesArray;
+		statusTexturesArray.resize(statusTextureList.size());
+		initializeTextureArray("otherImages", statusTextureList, statusTexturesArray);
+
+
 		sf::Texture mainTexture;
 		sf::Image mainImage;
 
@@ -148,7 +155,7 @@ int main()
 	
 	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &introMusic);
 
-	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, & MainMenu.gameMenuButtons);
+	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, & MainMenu.gameMenuButtons, &statusTexturesArray);
 	MasterBoard GameBoard(&mainTexture);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);

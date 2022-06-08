@@ -22,7 +22,7 @@ when necessary, ie. when game ends or player wants to leave the current game.
 
 char playCharInput(sf::RenderWindow* myWindow);
 
-inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons)
+inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures)
 {
 	inputLayerTexture = gameTexture;
 	inputLayerFont = cour;
@@ -31,9 +31,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	soundEffects = inputSoundEffects;
 	menuButtons = inputMenuButtons;
 
-
 	//Create buttons for property menus using the gameTexture
-
 	//Overall property menu area is:
 	int menuTop = 100;
 	int menuLeft = MAX_WINDOW_WIDTH * 50 + 20;
@@ -49,7 +47,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	//For each minion that can be purchased, create new button and push_back.
 	for (int i = 0; i < factoryOptions.size(); i++)
 	{
-		factoryButtons.emplace_back(menuLeft + x*50, menuTop + y*50 , factoryButton, gameTexture);
+		factoryButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, factoryButton, gameTexture);
 		factoryButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
 		factoryButtons.at(i).width = 50;
 		factoryButtons.at(i).height = 50;
@@ -113,6 +111,33 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	portButtons.at(3).mySprite.setTextureRect(rectArray[18][4]);  //U
 	portButtons.at(4).mySprite.setTextureRect(rectArray[13][4]);  //B
 	portButtons.at(5).mySprite.setTextureRect(rectArray[17][4]);  //V
+
+	
+	//Create status indicator buttons
+	//Overall status area is same as above
+	//Button dimensions
+	sf::Vector2u statusHeightWidth = statusTextures->at(0).getSize();
+	int statusButtonHeight = statusHeightWidth.x;
+	int statusButtonWidth = statusHeightWidth.y ;
+	numberOfButtonsPerRow = 3;
+
+	y = 0;
+	x = 0;
+
+	//For each status element, create new button and push back.
+	for (int i = 0; i < statusTextures->size(); i++)
+	{
+		statusButtons.emplace_back(menuLeft + x * (statusButtonWidth + 10), menuTop + y * (statusButtonHeight + 10), int(statusButton), & (statusTextures->at(i) ) );
+
+		//Put certain number of buttons on each row, then go to next row.
+		x++;
+		if (x == numberOfButtonsPerRow)
+		{
+			x = 0;
+			y++;
+		}
+	}
+
 
 	return;
 }
@@ -398,7 +423,9 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 	return 1;
 }
-
+//This will assume the existence of buttons for status, which must be initialized in input layer constructor.
+//			inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
+//inputLayer.cpp
 int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 {
 	int spacingConstant = 4;
@@ -409,6 +436,22 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	char* descriptionPointer = &currentTile->description[0];
 	char* playerName = &(boardToPrint->playerRoster[currentTile->controller].name[0]);
 	sf::String tileDescription;
+
+	//Print current player.
+	sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
+
+	//Add treasury and potential event text.
+	snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+	playerStatus += pointerToPrint;
+	playerStatus += &eventText[0];
+
+	//Convert and print.
+	sf::Text playerStatusText(playerStatus, *inputLayerFont, MainMenu->menuTextSize);
+	playerStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant * 2);
+	playerStatusText.setFillColor(sf::Color::Black);
+	inputLayerWindow->draw(playerStatusText);
+
+	eventText = "";
 
 	if (observerNumber == boardToPrint->playerFlag)
 	{
@@ -423,178 +466,131 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			tileDescription = descriptionPointer;
 		}
 
-		if (MainMenu->editorMode == true)
-		{
-			if (boardToPrint->cursor.selectMinionPointer != NULL)
-			{
-				snprintf(pointerToPrint, 100, "\nTrue MP/Apparent/Terrain: %d/%d/%d, \nCursor X/Y: %d/%d\n",
-					boardToPrint->cursor.selectMinionPointer->truePathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion,
-					boardToPrint->cursor.selectMinionPointer->apparentPathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion,
-					boardToPrint->cursor.selectMinionPointer->terrainOnlyPathMap[currentTile->locationX][currentTile->locationY].distanceFromMinion,
-					boardToPrint->cursor.XCoord,
-					boardToPrint->cursor.YCoord);
+		//No longer need debug printouts on editMode.
+		sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
+		newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+		newText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(newText);
+		menuLineTracker += 1;
+	}
 
-			}
-			else
-			{
-				snprintf(pointerToPrint, 100, "\nCursor X/Y: %d/%d\n",
-					boardToPrint->cursor.XCoord,
-					boardToPrint->cursor.YCoord);
-
-			}
-
-			tileDescription += pointerToPrint;
-			sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(MAX_WINDOW_WIDTH * 52, (menuLineTracker * MainMenu->menuTextSize) + spacingConstant);
-			newText.setFillColor(sf::Color::Black);
-			inputLayerWindow->draw(newText);
-			if (MainMenu->editorMode == true)
-				menuLineTracker += 4;
-			else menuLineTracker += 2;
-
-		}
-		else
-		{
-			sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
-			newText.setFillColor(sf::Color::Black);
-			inputLayerWindow->draw(newText);
-			menuLineTracker += 1;
-		}
-
-
-
+	if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber])
+	{
 
 		//If tile is undergoing capture, let us know.
 		if (currentTile->capturePoints != 20)
 		{
-			snprintf(pointerToPrint, 100, " Capture Points Left: %d ", currentTile->capturePoints);
-
-			sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+			//First draw box for capture status
+			inputLayerWindow->draw(statusButtons.at(3).mySprite);
+			snprintf(pointerToPrint, 100, "%d", currentTile->capturePoints);
+			sf::Text newText(pointerToPrint, *inputLayerFont, MainMenu->menuTextSize);
+			newText.setPosition(statusButtons.at(3).xCoord + 10, statusButtons.at(3).yCoord + 10);
 			newText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(newText);
 			menuLineTracker += 1;
 		}
 
-		if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber])
+		Minion* currentMinion = currentTile->minionOnTop;
+
+		//Print out basic minion status.
+		sf::String minionDescription = &(boardToPrint->playerRoster[currentMinion->team].name[0]);
+		minionDescription += "'s ";
+		minionDescription += &currentMinion->description[0];
+
+		sf::Text newText(minionDescription, *inputLayerFont, MainMenu->menuTextSize);
+		newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+		newText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(newText);
+		menuLineTracker += 1;
+
+		//Print health:
+		//First draw box 
+		inputLayerWindow->draw(statusButtons.at(0).mySprite);
+		//Then print actual number
+		snprintf(pointerToPrint, 100, "%d", int(currentMinion->health));
+		sf::String healthNumberString = pointerToPrint;
+		sf::Text healthNumberText(healthNumberString, *inputLayerFont, MainMenu->menuTextSize);
+		healthNumberText.setPosition(statusButtons.at(0).xCoord + 10, statusButtons.at(0).yCoord + 10);
+		healthNumberText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(healthNumberText);
+
+		//Print ammo box:
+		//First draw box 
+		inputLayerWindow->draw(statusButtons.at(2).mySprite);
+
+		//Then determine combo of pri/sec ammo:
+		if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo > 0)		//Both pri/sec have ammo
+			snprintf(pointerToPrint, 100, "%d/%d, %d/%d", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo, currentMinion->currentSecAmmo, currentMinion->maxSecAmmo);
+		else if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo == 0)		//Infinte sec ammo
+			snprintf(pointerToPrint, 100, "%d/%d, INF", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo);
+		else if (currentMinion->maxSecAmmo == 0 && currentMinion->maxPriAmmo == -1)	//No pri, infinite sec. 
+			snprintf(pointerToPrint, 100, "NONE, INF");
+		else if (currentMinion->maxSecAmmo == -1 && currentMinion->maxPriAmmo > 0)	//Primary with no sec.
+			snprintf(pointerToPrint, 100, "%d/%d, NONE", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo);
+		else //No weapons.
+			snprintf(pointerToPrint, 100, "NONE, NONE");
+
+		//Then print out actual values
+		sf::String ammoNumberString = pointerToPrint;
+		sf::Text ammoNumberText(ammoNumberString, *inputLayerFont, MainMenu->menuTextSize);
+		ammoNumberText.setPosition(statusButtons.at(2).xCoord + 10, statusButtons.at(2).yCoord + 10);
+		ammoNumberText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(ammoNumberText);
+		//Then print fuel, etc.
+		//TODOTODOTODO
+
+
+		//Move state
+		inputLayerWindow->draw(statusButtons.at(6).mySprite);
+		sf::Sprite effectsSprite;
+		effectsSprite.setTexture(*inputLayerTexture);
+		effectsSprite.setPosition(statusButtons.at(6).xCoord, statusButtons.at(6).yCoord);
+		if (currentMinion->status == gaveupmovehasntfired)
 		{
-			Minion* currentMinion = currentTile->minionOnTop;
-
-			//Print out basic minion status.
-			sf::String minionDescription = &(boardToPrint->playerRoster[currentMinion->team].name[0]);
-			minionDescription += "'s ";
-			minionDescription += &currentMinion->description[0];
-
-			sf::Text newText(minionDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
-			newText.setFillColor(sf::Color::Black);
-			inputLayerWindow->draw(newText);
-			menuLineTracker += 1;
-
-			if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo > 0)		//Both pri/sec have ammo
+			//Print yellow pause image
+			effectsSprite.setTextureRect(rectArray[15][1]);
+			inputLayerWindow->draw(effectsSprite);
+		}
+		else
+			if (currentMinion->status == hasmovedhasntfired)
 			{
-				if (MainMenu->editorMode == true)
-					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): %d/%d\n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentPriAmmo, currentMinion->currentSecAmmo);
-				else
-					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): %d/%d\n", currentMinion->currentFuel, currentMinion->currentPriAmmo, currentMinion->currentSecAmmo);
-			}
-			else if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo == 0)		//Infinte sec ammo
-			{
-				if (MainMenu->editorMode == true)
-					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): %d/Infinite\n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentPriAmmo);
-				else
-					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): %d/Infinite\n", currentMinion->currentFuel, currentMinion->currentPriAmmo);
-			}
-			else if (currentMinion->maxSecAmmo == 0 && currentMinion->maxPriAmmo == -1)	//No pri, infinite sec.
-			{
-				if (MainMenu->editorMode == true)
-					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): None/Infinite\n", int(currentMinion->health), currentMinion->currentFuel);
-				else
-					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): None/Infinite\n", currentMinion->currentFuel);
-			}
-			else if (currentMinion->maxSecAmmo == -1 && currentMinion->maxPriAmmo > 0)	//Primary with no sec.
-			{
-				if (MainMenu->editorMode == true)
-					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nAmmo(P/S): %d/None\n", int(currentMinion->health), currentMinion->currentFuel, currentMinion->currentPriAmmo);
-				else
-					snprintf(pointerToPrint, 100, "Fuel: %d \nAmmo(P/S): %d/None\n", currentMinion->currentFuel, currentMinion->currentPriAmmo);
-			}
-			else //No weapons. Used as catch all for debug.
-			{
-				if (MainMenu->editorMode == true)
-					snprintf(pointerToPrint, 100, "Health: %d | Fuel: %d \nNo weapons\n", int(currentMinion->health), currentMinion->currentFuel);
-				else
-					snprintf(pointerToPrint, 100, "Fuel: %d \nNo weapons\n", currentMinion->currentFuel);
-			}
+				if (currentMinion->rangeType == rangedFire)
+				{
+					//Print red octagon -- 15, 2
+					effectsSprite.setTextureRect(rectArray[15][2]);
+					inputLayerWindow->draw(effectsSprite);
 
-			sf::String minionStatus = pointerToPrint;
-			sf::Text minionStatusText(minionStatus, *inputLayerFont, MainMenu->menuTextSize);
-			minionStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
-			minionStatusText.setFillColor(sf::Color::Black);
-			inputLayerWindow->draw(minionStatusText);
-			menuLineTracker += 2;
+				}
+				if (currentMinion->rangeType == directFire)
+				{
+					//Print yellow pause image -- 15, 1
+					effectsSprite.setTextureRect(rectArray[15][1]);
+					inputLayerWindow->draw(effectsSprite);
 
-			if (currentMinion->status == gaveupmovehasntfired)
-			{
-				minionStatus = "Holding position. Ready to attack.\n";
-
+				}
 			}
 			else
-				if (currentMinion->status == hasmovedhasntfired)
+				if (currentMinion->status == hasfired)
 				{
-					minionStatus = "Has already moved this turn. ";
-
-					if (currentMinion->rangeType == rangedFire)
-					{
-						minionStatus += "Cannot attack after moving. \n";
-
-					}
-					if (currentMinion->rangeType == directFire)
-					{
-						minionStatus += "Ready to attack.\n";
-
-					}
+					//Print red octagon -- 15, 2
+					effectsSprite.setTextureRect(rectArray[15][2]);
+					inputLayerWindow->draw(effectsSprite);
 				}
 				else
-					if (currentMinion->status == hasfired)
+					if (currentMinion->status == hasntmovedorfired)
 					{
-						minionStatus = "Has already moved this turn. Has attacked this turn. \n";
+						//Print green triangle -- 15,0
+						effectsSprite.setTextureRect(rectArray[15][0]);
+						inputLayerWindow->draw(effectsSprite);
 					}
-					else
-						if (currentMinion->status == hasntmovedorfired)
-						{
-							minionStatus = "Ready to move. Ready to attack. \n";
-						}
-
-			sf::Text secondMinionStatusText(minionStatus, *inputLayerFont, MainMenu->menuTextSize);
-			secondMinionStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant*2);
-			secondMinionStatusText.setFillColor(sf::Color::Black);
-			inputLayerWindow->draw(secondMinionStatusText);
-			menuLineTracker += 1;
-
-		}
-
 
 	}
 
 
-	//Print current turn.
-
-	sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-	snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
-	playerStatus += pointerToPrint;
-	playerStatus += &eventText[0];
-	sf::Text playerStatuText(playerStatus, *inputLayerFont, MainMenu->menuTextSize);
-	playerStatuText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant*2);
-	playerStatuText.setFillColor(sf::Color::Black);
-	inputLayerWindow->draw(playerStatuText);
-	menuLineTracker += 3;
-
-	eventText = "";
 
 	return 0;
 }
+
 
 int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 
