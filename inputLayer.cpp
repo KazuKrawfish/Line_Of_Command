@@ -33,7 +33,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 
 	//Create buttons for property menus using the gameTexture
 	//Overall property menu area is:
-	int menuTop = 100;
+	int menuTop = 150;
 	int menuLeft = MAX_WINDOW_WIDTH * 50 + 20;
 
 	//Button dimensions
@@ -117,8 +117,8 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	//Overall status area is same as above
 	//Button dimensions
 	sf::Vector2u statusHeightWidth = statusTextures->at(0).getSize();
-	int statusButtonHeight = statusHeightWidth.x;
-	int statusButtonWidth = statusHeightWidth.y ;
+	int statusButtonHeight = statusHeightWidth.y;
+	int statusButtonWidth = statusHeightWidth.x ;
 	numberOfButtonsPerRow = 3;
 
 	y = 0;
@@ -423,9 +423,8 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 	return 1;
 }
-//This will assume the existence of buttons for status, which must be initialized in input layer constructor.
-//			inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
-//inputLayer.cpp
+
+//Updated printStatus
 int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 {
 	int spacingConstant = 4;
@@ -437,20 +436,20 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	char* playerName = &(boardToPrint->playerRoster[currentTile->controller].name[0]);
 	sf::String tileDescription;
 
-	//Print current player.
+	//Print current player, with treasury and potential event text.
 	sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-
-	//Add treasury and potential event text.
 	snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	playerStatus += pointerToPrint;
 	playerStatus += &eventText[0];
 
 	//Convert and print.
 	sf::Text playerStatusText(playerStatus, *inputLayerFont, MainMenu->menuTextSize);
-	playerStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant * 2);
+	playerStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
 	playerStatusText.setFillColor(sf::Color::Black);
 	inputLayerWindow->draw(playerStatusText);
+	menuLineTracker += 2;
 
+	//Reset event text
 	eventText = "";
 
 	if (observerNumber == boardToPrint->playerFlag)
@@ -484,10 +483,9 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			inputLayerWindow->draw(statusButtons.at(3).mySprite);
 			snprintf(pointerToPrint, 100, "%d", currentTile->capturePoints);
 			sf::Text newText(pointerToPrint, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(statusButtons.at(3).xCoord + 10, statusButtons.at(3).yCoord + 10);
+			newText.setPosition(statusButtons.at(3).xCoord + 60, statusButtons.at(3).yCoord + 10);
 			newText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(newText);
-			menuLineTracker += 1;
 		}
 
 		Minion* currentMinion = currentTile->minionOnTop;
@@ -496,7 +494,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		sf::String minionDescription = &(boardToPrint->playerRoster[currentMinion->team].name[0]);
 		minionDescription += "'s ";
 		minionDescription += &currentMinion->description[0];
-
 		sf::Text newText(minionDescription, *inputLayerFont, MainMenu->menuTextSize);
 		newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
 		newText.setFillColor(sf::Color::Black);
@@ -510,9 +507,20 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		snprintf(pointerToPrint, 100, "%d", int(currentMinion->health));
 		sf::String healthNumberString = pointerToPrint;
 		sf::Text healthNumberText(healthNumberString, *inputLayerFont, MainMenu->menuTextSize);
-		healthNumberText.setPosition(statusButtons.at(0).xCoord + 10, statusButtons.at(0).yCoord + 10);
+		healthNumberText.setPosition(statusButtons.at(0).xCoord + 60, statusButtons.at(0).yCoord + 10);
 		healthNumberText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(healthNumberText);
+
+		//Print out fuel status
+		//Start with box
+		inputLayerWindow->draw(statusButtons.at(1).mySprite);
+		//Then print actual number
+		snprintf(pointerToPrint, 100, "%d/%d", currentMinion->currentFuel, currentMinion->maxFuel);
+		sf::String fuelNumberString = pointerToPrint;
+		sf::Text fuelNumberText(fuelNumberString, *inputLayerFont, MainMenu->menuTextSize);
+		fuelNumberText.setPosition(statusButtons.at(1).xCoord + 60, statusButtons.at(1).yCoord + 10);
+		fuelNumberText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(fuelNumberText);
 
 		//Print ammo box:
 		//First draw box 
@@ -530,25 +538,22 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		else //No weapons.
 			snprintf(pointerToPrint, 100, "NONE, NONE");
 
-		//Then print out actual values
+		//Then print out actual values of ammo
 		sf::String ammoNumberString = pointerToPrint;
 		sf::Text ammoNumberText(ammoNumberString, *inputLayerFont, MainMenu->menuTextSize);
-		ammoNumberText.setPosition(statusButtons.at(2).xCoord + 10, statusButtons.at(2).yCoord + 10);
+		ammoNumberText.setPosition(statusButtons.at(2).xCoord + 60, statusButtons.at(2).yCoord + 10);
 		ammoNumberText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(ammoNumberText);
-		//Then print fuel, etc.
-		//TODOTODOTODO
 
-
-		//Move state
+		//Print move state of minion
 		inputLayerWindow->draw(statusButtons.at(6).mySprite);
 		sf::Sprite effectsSprite;
 		effectsSprite.setTexture(*inputLayerTexture);
-		effectsSprite.setPosition(statusButtons.at(6).xCoord, statusButtons.at(6).yCoord);
+		effectsSprite.setPosition(statusButtons.at(6).xCoord + 60, statusButtons.at(6).yCoord + 10);
 		if (currentMinion->status == gaveupmovehasntfired)
 		{
 			//Print yellow pause image
-			effectsSprite.setTextureRect(rectArray[15][1]);
+			effectsSprite.setTextureRect(rectArray[1][15]);
 			inputLayerWindow->draw(effectsSprite);
 		}
 		else
@@ -557,14 +562,14 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 				if (currentMinion->rangeType == rangedFire)
 				{
 					//Print red octagon -- 15, 2
-					effectsSprite.setTextureRect(rectArray[15][2]);
+					effectsSprite.setTextureRect(rectArray[2][15]);
 					inputLayerWindow->draw(effectsSprite);
 
 				}
 				if (currentMinion->rangeType == directFire)
 				{
 					//Print yellow pause image -- 15, 1
-					effectsSprite.setTextureRect(rectArray[15][1]);
+					effectsSprite.setTextureRect(rectArray[1][15]);
 					inputLayerWindow->draw(effectsSprite);
 
 				}
@@ -573,17 +578,43 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 				if (currentMinion->status == hasfired)
 				{
 					//Print red octagon -- 15, 2
-					effectsSprite.setTextureRect(rectArray[15][2]);
+					effectsSprite.setTextureRect(rectArray[2][15]);
 					inputLayerWindow->draw(effectsSprite);
 				}
 				else
 					if (currentMinion->status == hasntmovedorfired)
 					{
 						//Print green triangle -- 15,0
-						effectsSprite.setTextureRect(rectArray[15][0]);
+						effectsSprite.setTextureRect(rectArray[0][15]);
 						inputLayerWindow->draw(effectsSprite);
 					}
 
+	}
+
+	//Printout defense bonus status for tile
+	//Start with box
+	inputLayerWindow->draw(statusButtons.at(4).mySprite);
+	//Then print actual number
+	snprintf(pointerToPrint, 100, "%d", int ((currentTile->defenseFactor - 1.0 )* 10));
+	sf::String defenseBonusNumber = pointerToPrint;
+	sf::Text defenseBonusText(defenseBonusNumber, *inputLayerFont, MainMenu->menuTextSize);
+	defenseBonusText.setPosition(statusButtons.at(4).xCoord + 60, statusButtons.at(4).yCoord + 10);
+	defenseBonusText.setFillColor(sf::Color::Black);
+	inputLayerWindow->draw(defenseBonusText);
+
+	//Printout production status for tile if it exists
+	if (currentTile->production > 0)
+	{
+		//Print out production status
+		//Start with box
+		inputLayerWindow->draw(statusButtons.at(5).mySprite);
+		//Then print actual number
+		snprintf(pointerToPrint, 100, "%d", currentTile->production);
+		sf::String productionNumberString = pointerToPrint;
+		sf::Text productionNumberText(productionNumberString, *inputLayerFont, MainMenu->menuTextSize);
+		productionNumberText.setPosition(statusButtons.at(5).xCoord + 60, statusButtons.at(5).yCoord + 10);
+		productionNumberText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(productionNumberText);
 	}
 
 
