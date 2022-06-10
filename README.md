@@ -10,7 +10,9 @@ A variety of new units have been introduced. Additionally, the air combat system
 ## New Campaign
 An exciting new campaign features battles across Redonia, a land divided amongst warring factions.
 
-### Licensing
+## Licensing
+Copyright 2022, Supercontinent Software Ltd. You may not redistribute this software without prior consent of Supercontinent Software.
+
 Music is provided by Advent Chamber Orchestra, under the Creative Commons Attribution-ShareAlike License. See https://creativecommons.org/licenses/by-sa/3.0/us/ for more information.
 Album Source: https://freemusicarchive.org/music/Advent_Chamber_Orchestra/Selections_from_the_2005-2006_Season
 

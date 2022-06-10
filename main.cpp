@@ -123,7 +123,7 @@ int main()
 	{
 		std::cout << "Couldn't load image!" << std::endl;
 	}
-	if (!introMusic.openFromFile("soundEffects\\introTheme.wav"))
+	if (!introMusic.openFromFile("music\\01_ACO-Bach-BrandenburgConcertono3mvt3allegro.wav"))
 	{
 		std::cout << "Couldn't load intro theme!" << std::endl;
 	}

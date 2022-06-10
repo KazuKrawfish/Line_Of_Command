@@ -670,7 +670,7 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	}
 	mywindow->clear();
 
-	introMusic->stop();
+	//introMusic->stop();
 
 
 	playGame(boardToPlay, InputLayer);
