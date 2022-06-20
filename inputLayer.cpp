@@ -112,13 +112,13 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	portButtons.at(4).mySprite.setTextureRect(rectArray[13][4]);  //B
 	portButtons.at(5).mySprite.setTextureRect(rectArray[17][4]);  //V
 
-	
+
 	//Create status indicator buttons
 	//Overall status area is same as above
 	//Button dimensions
 	sf::Vector2u statusHeightWidth = statusTextures->at(0).getSize();
 	int statusButtonHeight = statusHeightWidth.y;
-	int statusButtonWidth = statusHeightWidth.x ;
+	int statusButtonWidth = statusHeightWidth.x;
 	numberOfButtonsPerRow = 3;
 
 	y = 0;
@@ -127,7 +127,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	//For each status element, create new button and push back.
 	for (int i = 0; i < statusTextures->size(); i++)
 	{
-		statusButtons.emplace_back(menuLeft + x * (statusButtonWidth + 10), menuTop + y * (statusButtonHeight + 10), int(statusButton), & (statusTextures->at(i) ) );
+		statusButtons.emplace_back(menuLeft + x * (statusButtonWidth + 10), menuTop + y * (statusButtonHeight + 10), int(statusButton), &(statusTextures->at(i)));
 
 		//Put certain number of buttons on each row, then go to next row.
 		x++;
@@ -280,7 +280,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 					else if (tileToPrint->withinRange == true		//Attack and transport square 
 						&& (boardToPrint->cursor.selectMinionPointer->status == gaveupmovehasntfired
 							|| boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired)
-						&& boardToPrint->cursor.selectMinionPointer->specialtyGroup == transport)
+						&& (boardToPrint->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToPrint->cursor.selectMinionPointer->specialtyGroup == largeTransport))
 					{
 						//If this tile is within range for drop off
 						effectsSprite.setTextureRect(rectArray[4][2]);
@@ -325,7 +325,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			effectsSprite.setTextureRect(rectArray[5][3]);
 			inputLayerWindow->draw(effectsSprite);
 		}
-		else if (minionToPrint->minionBeingTransported != NULL)
+		else if (minionToPrint->firstMinionBeingTransported != NULL || minionToPrint->secondMinionBeingTransported != NULL)
 		{
 			effectsSprite.setTextureRect(rectArray[5][2]);
 			inputLayerWindow->draw(effectsSprite);
@@ -339,7 +339,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 		}
 
 		//If minion has only moved/held position and can still attack/capture, grey triangle at top
-		if ((minionToPrint->status == hasmovedhasntfired  && minionToPrint->rangeType != rangedFire) || minionToPrint->status == gaveupmovehasntfired)
+		if ((minionToPrint->status == hasmovedhasntfired && minionToPrint->rangeType != rangedFire) || minionToPrint->status == gaveupmovehasntfired)
 		{
 			effectsSprite.setTextureRect(rectArray[5][0]);
 			inputLayerWindow->draw(effectsSprite);
@@ -595,7 +595,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	//Start with box
 	inputLayerWindow->draw(statusButtons.at(4).mySprite);
 	//Then print actual number
-	snprintf(pointerToPrint, 100, "%d", int ((currentTile->defenseFactor - 1.0 )* 10));
+	snprintf(pointerToPrint, 100, "%d", int((currentTile->defenseFactor - 1.0) * 10));
 	sf::String defenseBonusNumber = pointerToPrint;
 	sf::Text defenseBonusText(defenseBonusNumber, *inputLayerFont, MainMenu->menuTextSize);
 	defenseBonusText.setPosition(statusButtons.at(4).xCoord + 60, statusButtons.at(4).yCoord + 10);
@@ -682,7 +682,7 @@ int inputLayer::printBoardMenu(MasterBoard* boardToPrint) {
 int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 
 	tile* myTile = &boardToPrint->Board[boardToPrint->cursor.XCoord][boardToPrint->cursor.YCoord];
-	
+
 	//Black border box
 	sf::Sprite effectsSprite;
 	effectsSprite.setTexture(*inputLayerTexture);
@@ -690,7 +690,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) {
 
 	if (myTile->symbol == 'h')
 	{
-		for (int i = 0 ; i < factoryButtons.size(); i++ )
+		for (int i = 0; i < factoryButtons.size(); i++)
 		{
 			inputLayerWindow->draw(factoryButtons.at(i).mySprite);
 			effectsSprite.setPosition(factoryButtons.at(i).mySprite.getPosition());
@@ -734,7 +734,7 @@ int inputLayer::printMenu(MasterBoard* boardToPrint)
 		switch ((menuButtons->at(i)).myType)
 		{
 		case (soundOn):
-		{	
+		{
 			if (soundsOn == true)
 				printThisButton = true;
 			break;
@@ -761,7 +761,7 @@ int inputLayer::printMenu(MasterBoard* boardToPrint)
 			printThisButton = true;
 		}
 
-		if(printThisButton == true)
+		if (printThisButton == true)
 			inputLayerWindow->draw((*menuButtons)[i].mySprite);
 	}
 
@@ -1397,95 +1397,95 @@ int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 		//Lower case letters
 		switch (*Input)
 		{
-			case sf::Keyboard::I:
-			{
-				convertedInput = 'i';
-				break;
-			}
+		case sf::Keyboard::I:
+		{
+			convertedInput = 'i';
+			break;
+		}
 
-			case(sf::Keyboard::S):
-			{
-				convertedInput = 's';
-				break;
-			}
+		case(sf::Keyboard::S):
+		{
+			convertedInput = 's';
+			break;
+		}
 
-			case(sf::Keyboard::A):
-			{
-				convertedInput = 'a';
-				break;
-			}
+		case(sf::Keyboard::A):
+		{
+			convertedInput = 'a';
+			break;
+		}
 
-			case(sf::Keyboard::T):
-			{
-				convertedInput = 'T';
-				break;
-			}
+		case(sf::Keyboard::T):
+		{
+			convertedInput = 'T';
+			break;
+		}
 
-			case(sf::Keyboard::R):
-			{
-				convertedInput = 'r';
-				break;
-			}
+		case(sf::Keyboard::R):
+		{
+			convertedInput = 'r';
+			break;
+		}
 
-			case(sf::Keyboard::C):
-			{
-				convertedInput = 'c';
-				break;
-			}
+		case(sf::Keyboard::C):
+		{
+			convertedInput = 'c';
+			break;
+		}
 
-			case(sf::Keyboard::K):
-			{
-				convertedInput = 'K';
-				break;
-			}
+		case(sf::Keyboard::K):
+		{
+			convertedInput = 'K';
+			break;
+		}
 
-			case(sf::Keyboard::V):
-			{
-				convertedInput = 'v';
-				break;
-			}
+		case(sf::Keyboard::V):
+		{
+			convertedInput = 'v';
+			break;
+		}
 
-			case(sf::Keyboard::H):
-			{
-				convertedInput = 'h';
-				break;
-			}
+		case(sf::Keyboard::H):
+		{
+			convertedInput = 'h';
+			break;
+		}
 
-			case(sf::Keyboard::P):
-			{
-				convertedInput = 'P';
-				break;
-			}
+		case(sf::Keyboard::P):
+		{
+			convertedInput = 'P';
+			break;
+		}
 
-			case(sf::Keyboard::F):
-			{
-				convertedInput = 'f';
-				break;
-			}
+		case(sf::Keyboard::F):
+		{
+			convertedInput = 'f';
+			break;
+		}
 
-			case(sf::Keyboard::B):
-			{
-				convertedInput = 'b';
-				break;
-			}
+		case(sf::Keyboard::B):
+		{
+			convertedInput = 'b';
+			break;
+		}
 
-			case(sf::Keyboard::G):
-			{
-				convertedInput = 'G';
-				break;
-			}
+		case(sf::Keyboard::G):
+		{
+			convertedInput = 'G';
+			break;
+		}
 
-			case(sf::Keyboard::L):
-			{
-				convertedInput = 'L';
-				break;
-			}
+		case(sf::Keyboard::L):
+		{
+			convertedInput = 'L';
+			break;
+		}
 
-			case(sf::Keyboard::U):
-			{
-				convertedInput = 'U';
-				break;
-			}
+		case(sf::Keyboard::U):
+		{
+			convertedInput = 'U';
+			break;
+		}
 
 		}
 	}
@@ -1493,38 +1493,38 @@ int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 	{
 		switch (*Input)
 		{
-			case(sf::Keyboard::A):
-			{
-				convertedInput = 'A';
-				break;
-			}
-			case(sf::Keyboard::V):
-			{	
-				convertedInput = 'V';
-				break;
-			}
+		case(sf::Keyboard::A):
+		{
+			convertedInput = 'A';
+			break;
+		}
+		case(sf::Keyboard::V):
+		{
+			convertedInput = 'V';
+			break;
+		}
 
-			case(sf::Keyboard::R):
-			{
-				convertedInput = 'R';
-				break;
-			}
-			case(sf::Keyboard::B):
-			{
-			
-				convertedInput = 'B';
-				break;
-			}
-			case(sf::Keyboard::C):
-			{	
-				convertedInput = 'C';
-				break;
-			}
-			case(sf::Keyboard::S):	
-			{
-				convertedInput = 'S';
-				break;
-			}
+		case(sf::Keyboard::R):
+		{
+			convertedInput = 'R';
+			break;
+		}
+		case(sf::Keyboard::B):
+		{
+
+			convertedInput = 'B';
+			break;
+		}
+		case(sf::Keyboard::C):
+		{
+			convertedInput = 'C';
+			break;
+		}
+		case(sf::Keyboard::S):
+		{
+			convertedInput = 'S';
+			break;
+		}
 		}
 	}
 
@@ -1593,7 +1593,7 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 		return 1;
 	}
 
-	
+
 	//Convert to char before analyzing
 	char inputChar = '!';
 
@@ -1602,66 +1602,66 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 		//Lower case letters
 		switch (*Input)
 		{
-			case sf::Keyboard::Period:
-				inputChar = '.';
-				break;
-			case(sf::Keyboard::Add):
-				inputChar = '+';
-				break; 
-			case(sf::Keyboard::M):
-				inputChar = 'm';
-				break;
-			case(sf::Keyboard::N):
-				inputChar = 'n';
-				break;
-			case(sf::Keyboard::H):
-				inputChar = 'h';
-				break;
-			case(sf::Keyboard::Equal):
-				inputChar = '=';
-				break;
-			case(sf::Keyboard::Dash):
-				inputChar = '-';
-				break;
+		case sf::Keyboard::Period:
+			inputChar = '.';
+			break;
+		case(sf::Keyboard::Add):
+			inputChar = '+';
+			break;
+		case(sf::Keyboard::M):
+			inputChar = 'm';
+			break;
+		case(sf::Keyboard::N):
+			inputChar = 'n';
+			break;
+		case(sf::Keyboard::H):
+			inputChar = 'h';
+			break;
+		case(sf::Keyboard::Equal):
+			inputChar = '=';
+			break;
+		case(sf::Keyboard::Dash):
+			inputChar = '-';
+			break;
 		}
 	}
-	else 
+	else
 	{
 		//Upper case letters
 		switch (*Input)
 		{
-			case(sf::Keyboard::Add):
-			case(sf::Keyboard::Equal):		//Test okay
-				inputChar = '+';
-				break;
-			case(sf::Keyboard::Num6):
-				inputChar = '^';
-				break;
-			case(sf::Keyboard::M):
-				inputChar = 'M';
-				break;
-			case(sf::Keyboard::H):
-				inputChar = 'H';
-				break;
-			case(sf::Keyboard::A):
-				inputChar = 'A';
-				break;
-			case(sf::Keyboard::P):
-				inputChar = 'P';
-				break;
-			case(sf::Keyboard::Num8):
-			case(sf::Keyboard::Multiply):		//Test okay
-				inputChar = '*';
-				break;
-			case(sf::Keyboard::Subtract):	//Test okay
-				inputChar = '-';
-				break;
-			case(sf::Keyboard::Q):
-				inputChar = 'Q';
-				break;			
-			case(sf::Keyboard::Tilde):	//Test needed
-				inputChar = '~';
-				break;
+		case(sf::Keyboard::Add):
+		case(sf::Keyboard::Equal):		//Test okay
+			inputChar = '+';
+			break;
+		case(sf::Keyboard::Num6):
+			inputChar = '^';
+			break;
+		case(sf::Keyboard::M):
+			inputChar = 'M';
+			break;
+		case(sf::Keyboard::H):
+			inputChar = 'H';
+			break;
+		case(sf::Keyboard::A):
+			inputChar = 'A';
+			break;
+		case(sf::Keyboard::P):
+			inputChar = 'P';
+			break;
+		case(sf::Keyboard::Num8):
+		case(sf::Keyboard::Multiply):		//Test okay
+			inputChar = '*';
+			break;
+		case(sf::Keyboard::Subtract):	//Test okay
+			inputChar = '-';
+			break;
+		case(sf::Keyboard::Q):
+			inputChar = 'Q';
+			break;
+		case(sf::Keyboard::Tilde):	//Test needed
+			inputChar = '~';
+			break;
 		}
 	}
 
@@ -1674,7 +1674,7 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 		return 1;
 
 	//If it is real tile, change the underlying tile.
-	myTile->symbol = inputChar;	
+	myTile->symbol = inputChar;
 	myTile->capturePoints = 20;
 
 	if (myTile->checkForProperty(myTile->symbol) == true)
@@ -1700,7 +1700,7 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 	if (*Input == sf::Keyboard::Quote)
 	{
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
-	
+
 		//If mouse click is within map, 
 
 		int windowX = mousePosition.x / 50;
@@ -1711,18 +1711,18 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 		if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
 		{
 			//And mouse click not within cursor, move cursor there.
-			if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord) 
+			if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord)
 			{
 				boardToInput->cursor.relocate(tileX, tileY);	//Move cursor to where mouse click occurred.
 			}
 			else
-			//If mouse click IS within cursor, change input to "select" tile.
-			if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
-			{
-				*Input = sf::Keyboard::Key::T; //Select that tile.
-			}
-		}	
-	
+				//If mouse click IS within cursor, change input to "select" tile.
+				if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
+				{
+					*Input = sf::Keyboard::Key::T; //Select that tile.
+				}
+		}
+
 	}
 
 
@@ -1753,7 +1753,7 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 	{
 		NextMission(boardToInput);
 	}
-	
+
 	//Need char for shift
 	if (*Input == sf::Keyboard::Key::Num0)
 	{
@@ -1791,7 +1791,7 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 
 	}
 
-	if (*Input == sf::Keyboard::Key::M || * Input == sf::Keyboard::Key::Comma)
+	if (*Input == sf::Keyboard::Key::M || *Input == sf::Keyboard::Key::Comma)
 	{
 		status = menu;
 	}
@@ -1845,7 +1845,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							* Input = sf::Keyboard::Key::C;
 						else
 							//If minion is transport that already moved, attempt to supply.
-							if (myMinion->specialtyGroup == transport &&
+							if ((myMinion->specialtyGroup == smallTransport || myMinion->specialtyGroup == largeTransport) &&
 								(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
 							{
 								*Input = sf::Keyboard::Key::I;
@@ -1869,7 +1869,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							*Input = sf::Keyboard::Key::R;
 						}
 					//If empty space and this is a transport that already moved, attempt to drop there.
-						else	if (boardToInput->cursor.selectMinionPointer->specialtyGroup == transport &&
+						else	if ((boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport) &&
 							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 								boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
 						{
@@ -1927,7 +1927,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		//If there is a minion on top and that minion is visible to the minion's owner
 		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true
 			&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinVision[boardToInput->cursor.selectMinionPointer->team] == true)
-		{	
+		{
 			//If minion on top is this minion, do hold position movement.
 			if (boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX()
 				&& boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY())
@@ -1936,17 +1936,19 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				status = gameBoard;
 			}
 			else
-			//If that minion is an empty transport and is same team
-			if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->specialtyGroup == transport &&
-				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->minionBeingTransported == NULL
-				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team == boardToInput->cursor.selectMinionPointer->team)
-			{
-				status = gameBoard;	//Regardless of pickup outcome - either successful or trap, we are deselecting minion.
-									//If we do not set status to gameboard, it will segfault when it prints minion status during move, during validatePath.
-				boardToInput->pickUpMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag);
-				//Need new validatePath function that accounts for pickup graphics. Right now it thinks the minion is getting trapped and does graphics accordingly.
+				//If that minion is a transport and is same team
+				if ((boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->specialtyGroup == smallTransport ||
+					boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->specialtyGroup == largeTransport)
+					&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team == boardToInput->cursor.selectMinionPointer->team)
+				{
+					status = gameBoard;	//Set status to gameboard to make it through pickupMinion
+										//If we do not set status to gameboard, it will segfault when it prints minion status during move, during validatePath.
+					int success = boardToInput->pickUpMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag);
 
-			}
+					//If failed to actually move at all (invalid move attempt), set back to minion action, since we didn't deselect within pickupMinion.
+					if (success == 1)
+						status = minionAction;
+				}
 		}
 		else //If no minion on top attempt to move there
 			if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag) == 0)
@@ -1976,13 +1978,13 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	//Must be transport, hasn't taken second action, has a minion to drop, and tile within range, and not blocked by another minion.
 	//Also must not be impassable.
 	if (*Input == sf::Keyboard::Key::O && boardToInput->cursor.selectMinionFlag == true
-		&& boardToInput->cursor.selectMinionPointer->specialtyGroup == transport
+		&& (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport)
 		&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 			boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-			&& boardToInput->cursor.selectMinionPointer->minionBeingTransported != NULL)
+			&& (boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL || boardToInput->cursor.selectMinionPointer->secondMinionBeingTransported != NULL))
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true
-		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].consultMovementChart(boardToInput->cursor.selectMinionPointer->minionBeingTransported->type, boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol) != 99)
+		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol) != 99)
 	{
 		if (boardToInput->dropOffMinion() == 0)
 			status = gameBoard;
@@ -1990,7 +1992,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 	bool lastMinionDestroyed = false;
 	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
-	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && boardToInput->cursor.selectMinionPointer->type != transport)
+	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport))
 		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
 			if ((boardToInput->cursor.getX() != boardToInput->cursor.selectMinionPointer->locationX) || (boardToInput->cursor.getY() != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
 				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
@@ -2097,7 +2099,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			int lineOffset = 1;
 			inputLayerWindow->clear();
 			sf::String savePrompt = "Choose a name to save your game.\n";
-			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset , "save");
+			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset, "save");
 
 			std::string stdSaveGameName = ".\\savegames\\";
 			stdSaveGameName += saveGameName;
@@ -2143,7 +2145,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			{
 
 				sf::String loadPrompt = "Choose which save game to load (Case sensitive): \n";
-				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset , "load");
+				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset, "load");
 				sf::Event event;
 
 				std::string stdloadGameName = loadGameName;
@@ -2152,7 +2154,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				{
 					inputLayerWindow->clear();
 					sf::String successful = "Successfully loaded! Press any key to continue.\n";
-					
+
 					sf::Sprite backgroundSprite;
 					backgroundSprite.setTexture(MainMenu->otherGameTextures->at(5));
 					inputLayerWindow->draw(backgroundSprite);
@@ -2205,7 +2207,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 		//Toggle speed based on current speed factor.
 		bool withinToggleSpeedButton = (*menuButtons)[6].checkWithinButton(mousePosition.x, mousePosition.y);
-		if (withinToggleSpeedButton == true && speedFactor == 1)	 
+		if (withinToggleSpeedButton == true && speedFactor == 1)
 		{
 			speedFactor = 3;
 		}
@@ -2368,7 +2370,7 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
 
 
-		if (myTile->symbol == 'h') 
+		if (myTile->symbol == 'h')
 		{
 
 			for (int i = 0; i < factoryButtons.size(); i++)
@@ -2412,58 +2414,58 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 				break;
 			}
 		}
-	
-	if(myTile->symbol == 'P')
-	{
-		for (int i = 0; i < portButtons.size(); i++)
+
+		if (myTile->symbol == 'P')
 		{
-			bool withinButton = portButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
-			//Prompt user and save game.
-			if (withinButton == true)
+			for (int i = 0; i < portButtons.size(); i++)
 			{
-				buttonNumber = i;
+				bool withinButton = portButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+				//Prompt user and save game.
+				if (withinButton == true)
+				{
+					buttonNumber = i;
+				}
 			}
+
+			if (buttonNumber == 0)
+				requestedPurchase = 'G';
+			if (buttonNumber == 1)
+				requestedPurchase = 'C';
+			if (buttonNumber == 2)
+				requestedPurchase = 'L';
+			if (buttonNumber == 3)
+				requestedPurchase = 'U';
+			if (buttonNumber == 4)
+				requestedPurchase = 'B';
+			if (buttonNumber == 5)
+				requestedPurchase = 'V';
+
 		}
 
-		if (buttonNumber == 0)
-			requestedPurchase = 'G';
-		if (buttonNumber == 1)
-			requestedPurchase = 'C';
-		if (buttonNumber == 2)
-			requestedPurchase = 'L';
-		if (buttonNumber == 3)
-			requestedPurchase = 'U';
-		if (buttonNumber == 4)
-			requestedPurchase = 'B';
-		if (buttonNumber == 5)
-			requestedPurchase = 'V';
-
-	}
-	
-	if( myTile->symbol == 'A')
-	{
-		for (int i = 0; i < airbaseButtons.size(); i++)
+		if (myTile->symbol == 'A')
 		{
-			bool withinButton = airbaseButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
-			//Prompt user and save game.
-			if (withinButton == true)
+			for (int i = 0; i < airbaseButtons.size(); i++)
 			{
-				buttonNumber = i;
+				bool withinButton = airbaseButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+				//Prompt user and save game.
+				if (withinButton == true)
+				{
+					buttonNumber = i;
+				}
 			}
+
+			if (buttonNumber == 0)
+				requestedPurchase = 'h';
+			if (buttonNumber == 1)
+				requestedPurchase = 'v';
+			if (buttonNumber == 2)
+				requestedPurchase = 'f';
+			if (buttonNumber == 3)
+				requestedPurchase = 'b';
+
+
 		}
 
-		if (buttonNumber == 0)
-			requestedPurchase = 'h';
-		if (buttonNumber == 1)
-			requestedPurchase = 'v';
-		if (buttonNumber == 2)
-			requestedPurchase = 'f';
-		if (buttonNumber == 3)
-			requestedPurchase = 'b';
-
-
-	}
-	
 	}
 
 

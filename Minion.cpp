@@ -60,7 +60,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		if (Environment->Board[inputX][inputY].hasMinionOnTop != NULL)
 		{
 			transporter = Environment->Board[inputX][inputY].minionOnTop;
-			Environment->Board[inputX][inputY].minionOnTop->minionBeingTransported = this;
+			if(Environment->Board[inputX][inputY].minionOnTop->firstMinionBeingTransported == NULL)
+				Environment->Board[inputX][inputY].minionOnTop->firstMinionBeingTransported = this;
+			else Environment->Board[inputX][inputY].minionOnTop->secondMinionBeingTransported = this;
 		}
 		else std::cout << "Bad transport, minion doesn't exist!!" << std::endl;
 
@@ -267,7 +269,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 0;
 		visionRange = 2;
 		rangeType = directFire;
-		specialtyGroup = transport;
+		specialtyGroup = smallTransport;
 		mySprite.setTextureRect(rectArray[10][inputTeam + 4]);
 		maxFuel = 80;
 		domain = air;
@@ -283,7 +285,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 0;
 		visionRange = 2;
 		rangeType = directFire;
-		specialtyGroup = transport;
+		specialtyGroup = smallTransport;
 		mySprite.setTextureRect(rectArray[4][inputTeam + 4]);
 		maxFuel = 70;
 
@@ -371,7 +373,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 1;
 		visionRange = 3;
 		rangeType = directFire;
-		specialtyGroup = normal;
+		specialtyGroup = smallTransport;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[16][inputTeam + 4]);
 		maxFuel = 70;
@@ -385,7 +387,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 0;
 		visionRange = 2;
 		rangeType = directFire;
-		specialtyGroup = transport;
+		specialtyGroup = largeTransport;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[15][inputTeam + 4]);
 		maxFuel = 80;
@@ -412,7 +414,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		attackRange = 0;
 		visionRange = 3;
 		rangeType = directFire;
-		specialtyGroup = transport;
+		specialtyGroup = smallTransport;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[17][inputTeam + 4]);
 		maxFuel = 80;

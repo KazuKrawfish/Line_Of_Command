@@ -9,7 +9,6 @@ classes as subordinate supporting classes. NB: It is understood that public memb
 development, and since this is almost entirely a solo effort.
 */
 
-
 #include "MasterBoard.hpp"
 #include "Cursor.hpp"
 #include <string>
@@ -1039,7 +1038,7 @@ double MasterBoard::calculateDamageDealt(Minion* attackingMinion, Minion* defend
 
 	//Calculate defense factor. If air unit it remains 1.
 	double defenseFactor = 1;
-	if (defendingMinion->domain != air )
+	if (defendingMinion->domain != air)
 	{
 		defenseFactor = Board[defendingMinion->locationX][defendingMinion->locationY].defenseFactor;
 	}
@@ -1428,7 +1427,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 	//Transport cannot attack so its attack field is 0.
 	//If out of ammo for both weapons, and neither weapon is infinite (Maxammo = 0), return.
-	if (cursor.selectMinionPointer->type == transport ||
+	if ( (cursor.selectMinionPointer->type == smallTransport || cursor.selectMinionPointer->type == largeTransport) ||
 		(cursor.selectMinionPointer->currentPriAmmo <= 0 && cursor.selectMinionPointer->maxPriAmmo != 0
 			&& cursor.selectMinionPointer->currentSecAmmo <= 0 && cursor.selectMinionPointer->maxSecAmmo != 0))
 	{
@@ -1529,30 +1528,30 @@ int MasterBoard::setDropField(int inputX, int inputY)
 {
 
 	//If not transport its drop field is zero.
-	if (cursor.selectMinionPointer->specialtyGroup != transport)
+	if (cursor.selectMinionPointer->specialtyGroup != smallTransport && cursor.selectMinionPointer->specialtyGroup != largeTransport)
 	{
 		return 1;
 	}
 
 
 	//Must have a dude onboard
-	if (cursor.selectMinionPointer->minionBeingTransported == NULL)
+	if (cursor.selectMinionPointer->firstMinionBeingTransported == NULL)
 	{
 		return 1;
 	}
 
 
 	//Check each adjacent tile, if it is not impassible or off map, put in range for transport.
-	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].consultMovementChart(cursor.selectMinionPointer->minionBeingTransported->type, Board[inputX + 1][inputY].symbol) != 99)
+	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type, Board[inputX + 1][inputY].symbol) != 99)
 		Board[inputX + 1][inputY].withinRange = true;
 
-	if (inputX > 0 && Board[inputX - 1][inputY].consultMovementChart(cursor.selectMinionPointer->minionBeingTransported->type, Board[inputX - 1][inputY].symbol) != 99)
+	if (inputX > 0 && Board[inputX - 1][inputY].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type, Board[inputX - 1][inputY].symbol) != 99)
 		Board[inputX - 1][inputY].withinRange = true;
 
-	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].consultMovementChart(cursor.selectMinionPointer->minionBeingTransported->type, Board[inputX][inputY + 1].symbol) != 99)
+	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type, Board[inputX][inputY + 1].symbol) != 99)
 		Board[inputX][inputY + 1].withinRange = true;
 
-	if (inputY > 0 && Board[inputX][inputY - 1].consultMovementChart(cursor.selectMinionPointer->minionBeingTransported->type, Board[inputX][inputY - 1].symbol) != 99)
+	if (inputY > 0 && Board[inputX][inputY - 1].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type, Board[inputX][inputY - 1].symbol) != 99)
 		Board[inputX][inputY - 1].withinRange = true;
 
 	return 0;
@@ -1638,23 +1637,24 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 		}
 		else //If minion has moved but hasn't fired, and is direct combat, display attack range.
 			//And is not transport
-			if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire || cursor.selectMinionPointer->rangeType == hybridRange) && cursor.selectMinionPointer->specialtyGroup != transport)
+			if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire 
+				|| cursor.selectMinionPointer->rangeType == hybridRange) && cursor.selectMinionPointer->specialtyGroup != largeTransport && cursor.selectMinionPointer->specialtyGroup != smallTransport )
 			{
 				setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 				return 0;
 			}
 
 			else //If minion stood in place and hasn't fired, display attack range.
-				if (cursor.selectMinionPointer->status == gaveupmovehasntfired && cursor.selectMinionPointer->specialtyGroup != transport)
+				if (cursor.selectMinionPointer->status == gaveupmovehasntfired && cursor.selectMinionPointer->specialtyGroup != smallTransport && cursor.selectMinionPointer->specialtyGroup != largeTransport)
 				{
 					setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 					return 0;
 				}		//If transport that either moved or stood in place, we still select. But may not display drop field.
 				else if ((cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)
-					&& cursor.selectMinionPointer->specialtyGroup == transport)
+					&& cursor.selectMinionPointer->specialtyGroup != largeTransport && cursor.selectMinionPointer->specialtyGroup != smallTransport )
 				{
 					//If minion is transport and has a guy embarked, show drop field.
-					if (cursor.selectMinionPointer->minionBeingTransported != NULL)
+					if (cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
 						setDropField(inputX, inputY);
 					return 0;
 				}
@@ -1958,93 +1958,105 @@ int MasterBoard::pickUpMinion(int inputX, int inputY, inputLayer* InputLayer, in
 		&& !(cursor.selectMinionPointer->locationX == cursor.getX()
 			&& cursor.selectMinionPointer->locationY == cursor.getY()))
 	{
-		//Must be transport type, and selected minion must be infantry.
-		if (selectedMinion->specialtyGroup == infantry && Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == transport)
+		//Potential ways this can work:
+		//Infantry with small transport, with first slot empty.
+		//Any land unit with large transport, with first or second slot empty
+		if ((selectedMinion->specialtyGroup == infantry && Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == smallTransport && Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported == NULL)
+			|| (selectedMinion->domain == land && Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == largeTransport && (Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported == NULL || Board[cursor.getX()][cursor.getY()].minionOnTop->secondMinionBeingTransported == NULL)))
 		{
-			//Transport can't be carrying someone already.
-			if (Board[cursor.getX()][cursor.getY()].minionOnTop->minionBeingTransported == NULL)
+			inputX = selectedMinion->locationX;
+			inputY = selectedMinion->locationY;
+
+			//Now validate path and then either successfully load, or do trap movement
+			//If it appears movable, but has a minion, you get trapped.
+			//validatePath will potentially change inputX and inputY.
+			bool loadMove = true;
+			int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber, loadMove);
+
+			//If the inputX has not changed, that means we got trapped and have to stand in place. 
+			//Still counts as moving.
+			if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY && didTrapHappen == 1)
 			{
-				inputX = selectedMinion->locationX;
-				inputY = selectedMinion->locationY;
+				cursor.selectMinionPointer->status = hasmovedhasntfired;
+				deselectMinion();
+				InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
 
-				//Now validate path and then either successfully load, or do trap movement
-				//If it appears movable, but has a minion, you get trapped.
-				//validatePath will potentially change inputX and inputY.
-				bool loadMove = true;
-				int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber, loadMove);
+			}
+			else if (didTrapHappen == 1)
+			{    //We moved but got trapped before able to load. Execute move.
 
-				//If the inputX has not changed, that means we got trapped and have to stand in place. 
-				//Still counts as moving.
-				if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY && didTrapHappen == 1)
+				//Find old address of the minion
+				int oldX = selectedMinion->locationX;
+				int oldY = selectedMinion->locationY;
+
+				//Clear the old tile, set the new tile.
+				Board[oldX][oldY].hasMinionOnTop = false;
+				Board[inputX][inputY].hasMinionOnTop = true;
+
+				Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+				Board[oldX][oldY].minionOnTop = NULL;
+
+				//Reset capture points for tile.
+				//Reset minion's cap status
+				Board[oldX][oldY].capturePoints = 20;
+				selectedMinion->isCapturing = false;
+
+				//"Move" the minion to the new location.
+				selectedMinion->locationX = inputX;
+				selectedMinion->locationY = inputY;
+
+				cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
+
+				cursor.selectMinionPointer->status = hasmovedhasntfired;
+				deselectMinion();
+				InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
+			}
+			else if (didTrapHappen == 0)
+			{   //Successful load occurred.
+
+				//Put the minion in the transport.
+				//If small transport, can only do first slot.
+				//Otherwise, choose whichever slot is empty.
+				if (Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == smallTransport)
 				{
-					cursor.selectMinionPointer->status = hasmovedhasntfired;
-					deselectMinion();
-					InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
-
+					Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported = selectedMinion;
 				}
-				else if (didTrapHappen == 1)
-				{    //We moved but got trapped before able to load. Execute move.
-
-					//Find old address of the minion
-					int oldX = selectedMinion->locationX;
-					int oldY = selectedMinion->locationY;
-
-					//Clear the old tile, set the new tile.
-					Board[oldX][oldY].hasMinionOnTop = false;
-					Board[inputX][inputY].hasMinionOnTop = true;
-
-					Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
-					Board[oldX][oldY].minionOnTop = NULL;
-
-					//Reset capture points for tile.
-					//Reset minion's cap status
-					Board[oldX][oldY].capturePoints = 20;
-					selectedMinion->isCapturing = false;
-
-					//"Move" the minion to the new location.
-					selectedMinion->locationX = inputX;
-					selectedMinion->locationY = inputY;
-
-					cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
-
-					cursor.selectMinionPointer->status = hasmovedhasntfired;
-					deselectMinion();
-					InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
-				}
-				else if (didTrapHappen == 0)
-				{   //Successful load occurred.
-
-					//Put the minion in the transport.
-					Board[cursor.getX()][cursor.getY()].minionOnTop->minionBeingTransported = selectedMinion;
-					selectedMinion->transporter = Board[cursor.getX()][cursor.getY()].minionOnTop;
-
-					//Find old address of the minion
-					int oldX = selectedMinion->locationX;
-					int oldY = selectedMinion->locationY;
-
-					//Clear the old tile, set the new tile.
-					Board[oldX][oldY].hasMinionOnTop = false;
-					Board[oldX][oldY].minionOnTop = NULL;
-
-					//Reset capture points for tile.
-					Board[oldX][oldY].capturePoints = 20;
-
-					//"Move" the minion to the new location.
-					//This is for "debugging", pretty bad but it needs to be invalid.
-					selectedMinion->locationX = -1;
-					selectedMinion->locationY = -1;
-
-					cursor.selectMinionPointer->status = hasmovedhasntfired;
-					deselectMinion();
-
-
+				else if (Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == largeTransport)
+				{
+					if (Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported == NULL)
+						Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported = selectedMinion;
+					else
+						Board[cursor.getX()][cursor.getY()].minionOnTop->secondMinionBeingTransported = selectedMinion;
 				}
 
-				setVisionField(playerFlag);
+
+				selectedMinion->transporter = Board[cursor.getX()][cursor.getY()].minionOnTop;
+
+				//Find old address of the minion
+				int oldX = selectedMinion->locationX;
+				int oldY = selectedMinion->locationY;
+
+				//Clear the old tile, set the new tile.
+				Board[oldX][oldY].hasMinionOnTop = false;
+				Board[oldX][oldY].minionOnTop = NULL;
+
+				//Reset capture points for tile.
+				Board[oldX][oldY].capturePoints = 20;
+
+				//"Move" the minion to the new location.
+				//This is for "debugging", pretty bad but it needs to be invalid.
+				selectedMinion->locationX = -1;
+				selectedMinion->locationY = -1;
+
+				cursor.selectMinionPointer->status = hasmovedhasntfired;
+				deselectMinion();
+
+
 			}
 
-			return 0;
+			setVisionField(playerFlag);
 
+			return 0;
 		}
 
 
@@ -2069,11 +2081,23 @@ int MasterBoard::dropOffMinion()
 	}
 
 	//Otherwise drop off minion.
-	//Also reset the transport to no longer carrying a guy.
 	Board[cursor.getX()][cursor.getY()].hasMinionOnTop = true;
-	Board[cursor.getX()][cursor.getY()].minionOnTop = cursor.selectMinionPointer->minionBeingTransported;
 
-	cursor.selectMinionPointer->minionBeingTransported = NULL;
+	//Small transport drops off its first guy and stops.
+	if (Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == smallTransport)
+	{
+		Board[cursor.getX()][cursor.getY()].minionOnTop = cursor.selectMinionPointer->firstMinionBeingTransported;
+		cursor.selectMinionPointer->firstMinionBeingTransported = NULL;
+	}
+	//Large trans. drops off first guy and the moves second to first.
+	else if (Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == largeTransport)
+	{
+		Board[cursor.getX()][cursor.getY()].minionOnTop = cursor.selectMinionPointer->firstMinionBeingTransported;
+		cursor.selectMinionPointer->firstMinionBeingTransported = cursor.selectMinionPointer->secondMinionBeingTransported;
+		cursor.selectMinionPointer->secondMinionBeingTransported = NULL;
+
+	}
+
 	Board[cursor.getX()][cursor.getY()].minionOnTop->transporter = NULL;
 	Board[cursor.getX()][cursor.getY()].minionOnTop->status = hasfired;
 
@@ -2082,8 +2106,12 @@ int MasterBoard::dropOffMinion()
 	Board[cursor.getX()][cursor.getY()].minionOnTop->locationY = cursor.getY();
 
 
-	cursor.selectMinionPointer->status = hasfired;
-	deselectMinion();
+	//If this was the last minion transported, this minion is done moving.
+	if (cursor.selectMinionPointer->firstMinionBeingTransported == NULL && cursor.selectMinionPointer->secondMinionBeingTransported == NULL)
+	{
+		cursor.selectMinionPointer->status = hasfired;
+		deselectMinion();
+	}
 
 	setVisionField(playerFlag);
 	return 0;
@@ -2393,9 +2421,14 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 	int minionController = inputMinion->team;
 
 	//If carrying a guy, kill that guy too.
-	if (inputMinion->minionBeingTransported != NULL)
+	if (inputMinion->firstMinionBeingTransported != NULL)
 	{
-		destroyMinion(inputMinion->minionBeingTransported, printMessage, InputLayer, AdminKill);
+		destroyMinion(inputMinion->firstMinionBeingTransported, printMessage, InputLayer, AdminKill);
+	}
+
+	if (inputMinion->secondMinionBeingTransported != NULL)
+	{
+		destroyMinion(inputMinion->secondMinionBeingTransported, printMessage, InputLayer, AdminKill);
 	}
 
 	//If minion is being transported, then do not attmept to deselect or talk to its location.
@@ -2520,23 +2553,23 @@ int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 		//If it's a minion you own and it's not being transported
 		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->transporter == NULL)
 		{
-				if (minionRoster[i]->domain == air && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'A')
+			if (minionRoster[i]->domain == air && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'A')
+			{
+				minionRoster[i]->currentFuel -= 5;
+				if (minionRoster[i]->currentFuel <= 0)
 				{
-					minionRoster[i]->currentFuel -= 5;
+					destroyMinion(minionRoster[i], "No fuel", InputLayer, false);
+				}
+			}
+			else
+				if (minionRoster[i]->domain == sea && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'P')
+				{
+					minionRoster[i]->currentFuel -= 2;
 					if (minionRoster[i]->currentFuel <= 0)
 					{
 						destroyMinion(minionRoster[i], "No fuel", InputLayer, false);
 					}
 				}
-				else
-					if (minionRoster[i]->domain == sea && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'P')
-					{
-						minionRoster[i]->currentFuel -= 2;
-						if (minionRoster[i]->currentFuel <= 0)
-						{
-							destroyMinion(minionRoster[i], "No fuel", InputLayer, false);
-						}
-					}
 		}
 	}
 
