@@ -14,11 +14,10 @@ Who_wins_after_turn_limit
 2
 Name_of_next_mission_(Same_Directory)
 Mountains_Of_Discontent		   
-Mission_Briefing 5 After blunting the initial Ormosan attack, the time has come to take the fight into the 
-Ormosan interior. High command is pleased with your performance and has promoted you to General. 
-You will now have access to squadrons of the Redonian Air Force.
-Tactical Advisor: Ormosa's capital is protected by a series of fixed artillery, bunkers, and anti-air
-missiles. Beware of their firepower, and try to out-flank them if you can.
+Mission_Briefing 4 After blunting the initial Ormosan attack, the time has come to take the fight into the Ormosan 
+interior. This assault will be supported by squadrons of the Redonian Air Force.
+Tactical Advisor: Ormosa's capital is protected by a series of fixed artillery emplacements and anti-
+air missiles. Beware of their firepower, and try to out-flank them if you can.
 Player_Data:_Name_PlayerType_StillAlive_Treasury
 ~
 0

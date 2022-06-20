@@ -1651,7 +1651,7 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 					return 0;
 				}		//If transport that either moved or stood in place, we still select. But may not display drop field.
 				else if ((cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)
-					&& cursor.selectMinionPointer->specialtyGroup != largeTransport && cursor.selectMinionPointer->specialtyGroup != smallTransport )
+					&& (cursor.selectMinionPointer->specialtyGroup == largeTransport || cursor.selectMinionPointer->specialtyGroup == smallTransport) )
 				{
 					//If minion is transport and has a guy embarked, show drop field.
 					if (cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
@@ -2084,13 +2084,13 @@ int MasterBoard::dropOffMinion()
 	Board[cursor.getX()][cursor.getY()].hasMinionOnTop = true;
 
 	//Small transport drops off its first guy and stops.
-	if (Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == smallTransport)
+	if (cursor.selectMinionPointer->specialtyGroup == smallTransport)
 	{
 		Board[cursor.getX()][cursor.getY()].minionOnTop = cursor.selectMinionPointer->firstMinionBeingTransported;
 		cursor.selectMinionPointer->firstMinionBeingTransported = NULL;
 	}
 	//Large trans. drops off first guy and the moves second to first.
-	else if (Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == largeTransport)
+	else if (cursor.selectMinionPointer->specialtyGroup == largeTransport)
 	{
 		Board[cursor.getX()][cursor.getY()].minionOnTop = cursor.selectMinionPointer->firstMinionBeingTransported;
 		cursor.selectMinionPointer->firstMinionBeingTransported = cursor.selectMinionPointer->secondMinionBeingTransported;
@@ -2110,8 +2110,10 @@ int MasterBoard::dropOffMinion()
 	if (cursor.selectMinionPointer->firstMinionBeingTransported == NULL && cursor.selectMinionPointer->secondMinionBeingTransported == NULL)
 	{
 		cursor.selectMinionPointer->status = hasfired;
-		deselectMinion();
 	}
+
+	//If we made it this far we did a successful drop, so deselect transport
+	deselectMinion();
 
 	setVisionField(playerFlag);
 	return 0;

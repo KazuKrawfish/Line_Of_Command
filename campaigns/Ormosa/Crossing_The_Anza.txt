@@ -1,0 +1,109 @@
+Savegame_YesNo
+0
+Number_of_players_below:
+2
+Mission_On_Off
+1
+Campaign_Name
+Ormosa
+ScenarioOrMissionName
+Crossing_The_Anza
+TurnLimit_Or_0_ForOff
+0
+Who_wins_after_turn_limit
+2
+Name_of_next_mission_(Same_Directory)
+ENDENDEND
+Mission_Briefing 6 Now that Ormosa has been pacified, Redonian High Commmand has turned its sights to the South. Two 
+decades after the first civil war divided Redonia in two, the time has come to destroy the southern 
+Royalists once and for all, and unite our peoples. 
+Tactical Advisor: The river is strongly fortified with artillery emplacements. Use landers to cross 
+the river safely and seize a factor on the opposite bank. This will give us a beachhed which we can 
+expand later.
+Player_Data:_Name_PlayerType_StillAlive_Treasury
+~
+0
+1
+0
+South_Redonian_Army
+1
+1
+0
+Game_turn_below:
+1
+Fog_Of_War:
+1
+Map_width_below:
+20
+Map_height_below:
+14
+Player_whose_turn_it_is_below:
+1
+Map_terrain_below:
+.+++.....-++.===h...
+...=+++.+-.+..+=n...
+.++=....+-+....=.+.n
+====....~~.=========
+Qnn=..+.~~.++=..+.nQ
+..+=....~~.===......
+..+..++.~~...=....==
+........~~n+.=+..+=+
+===...*~~n..+.....=.
+.n=...*~~*+....+++=.
++.=..*~~~*++++.====.
+.+...*~~~*+...+h++++
+.+++.~~~*nH..+++..+.
+..++.~~~..+++++...++
+Property_controller_number_below:
+00000000000000002000
+00000000000000002000
+00000000000000000002
+00000000000000000000
+11100000000000000022
+00000000000000000000
+00000000000000000000
+00000000002000000000
+00000000020000000000
+01000000000000000000
+00000000000000000000
+00000000000000000000
+00000000022000000000
+00000000000000000000
+Total_minions_below:
+35
+Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,Ammo):
+i 10 0 2 0 0 100 0 20 0 70 -1 0 
+i 10 2 2 1 0 100 0 20 0 70 -1 0 
+i 10 12 2 2 0 100 0 20 0 70 -1 0 
+c 12 10 2 3 0 100 0 20 0 70 -1 0 
+i 9 8 2 4 0 100 0 20 0 70 -1 0 
+s 10 1 2 5 0 100 0 20 0 70 3 0 
+K 10 3 2 6 0 100 0 20 0 10 0 -1 
+K 12 0 2 7 0 100 0 20 0 10 0 -1 
+K 10 5 2 8 0 100 0 20 0 10 0 -1 
+r 11 0 2 9 0 100 0 20 0 50 6 -1 
+K 12 2 2 10 0 100 0 20 0 10 0 -1 
+s 11 1 2 11 0 100 0 20 0 70 3 0 
+i 2 4 1 12 0 100 0 20 0 70 -1 0 
+c 8 2 1 13 0 100 0 20 0 70 -1 0 
+i 6 1 1 14 0 100 0 20 0 70 -1 0 
+K 4 5 1 15 0 100 0 20 0 10 0 -1 
+K 4 1 1 16 0 100 0 20 0 10 0 -1 
+i 8 1 1 17 0 100 0 20 0 70 -1 0 
+L 5 11 1 18 0 100 0 20 0 80 -1 -1 
+L 6 9 1 19 0 100 0 20 0 80 -1 -1 
+i 5 9 1 20 0 100 0 20 0 70 -1 0 
+i 5 8 1 21 0 100 0 20 0 70 -1 0 
+s 4 11 1 22 0 100 0 20 0 70 3 0 
+a 3 11 1 23 0 100 0 20 0 70 9 0 
+a 4 9 1 24 0 100 0 20 0 70 9 0 
+r 4 8 1 25 0 100 0 20 0 50 6 -1 
+a 4 10 1 26 0 100 0 20 0 70 9 0 
+G 5 10 1 27 0 100 0 20 0 70 1 -1 
+B 7 11 1 28 0 100 0 20 0 80 6 -1 
+i 6 6 1 29 0 100 0 20 0 70 -1 0 
+a 15 1 2 31 0 100 0 20 0 70 9 0 
+r 15 0 2 32 0 100 0 20 0 50 6 -1 
+i 17 2 2 33 0 100 0 20 0 70 -1 0 
+s 18 2 2 34 0 100 0 20 0 70 3 0 
+s 17 1 2 35 0 100 0 20 0 70 3 0 

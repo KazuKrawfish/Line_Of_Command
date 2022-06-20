@@ -1981,7 +1981,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		&& (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport)
 		&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 			boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-			&& (boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL || boardToInput->cursor.selectMinionPointer->secondMinionBeingTransported != NULL))
+			&& boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL )
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol) != 99)
@@ -1992,7 +1992,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 	bool lastMinionDestroyed = false;
 	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
-	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport))
+	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && (boardToInput->cursor.selectMinionPointer->specialtyGroup != smallTransport && boardToInput->cursor.selectMinionPointer->specialtyGroup != largeTransport))
 		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
 			if ((boardToInput->cursor.getX() != boardToInput->cursor.selectMinionPointer->locationX) || (boardToInput->cursor.getY() != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
 				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
