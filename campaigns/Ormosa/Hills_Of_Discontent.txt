@@ -16,13 +16,13 @@ Name_of_next_mission_(Same_Directory)
 Dire_Range
 Mission_Briefing 9 Unfortunately, the capture of the Ormosan capital has not ended the war. The bulk of the ARNR has
 redeployed to the South Redonian border in anticipation of future conflicts, but Ormosan patriots are
-banding together to form partisan groups in the mountains of their homeland. They have begun ambushing 
-the fragile supply lines of Redonia's occupation force, and now threaten to capture several outlying 
-settlements. Command a relief force that will resupply the beleaguered mountain garrisons, and capture 
-the guerilla base.
-Tactical Advisor: Move quickly to protect the headquarters before the rebels can bring their own heavy 
-weapons to bear on it. Additionally, all three garrisons have armored units that are low on fuel and 
-ammunition. If you can reach them with APCs in time, it may turn the tide of the battle.
+banding together to form partisan groups in the mountains of their homeland. They have begun 
+ambushing the fragile supply lines of Redonia's occupation force, and now threaten to capture several 
+outlying settlements. Command a relief force that will resupply the beleaguered mountain garrisons, 
+and capture the guerilla base.
+Tactical Advisor: Move quickly to protect the headquarters before the rebels can bring their own 
+heavy weapons to bear on it. Additionally, all three garrisons have armored units that are low on 
+fuel and ammunition. If you can reach them with APCs in time, it may turn the tide of the battle.
 Player_Data:_Name_PlayerType_StillAlive_Treasury
 ~
 0

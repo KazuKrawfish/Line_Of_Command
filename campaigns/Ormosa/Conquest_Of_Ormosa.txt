@@ -13,7 +13,7 @@ TurnLimit_Or_0_ForOff
 Who_wins_after_turn_limit
 2
 Name_of_next_mission_(Same_Directory)
-Mountains_Of_Discontent		   
+Hills_Of_Discontent		   
 Mission_Briefing 4 After blunting the initial Ormosan attack, the time has come to take the fight into the Ormosan 
 interior. This assault will be supported by squadrons of the Redonian Air Force.
 Tactical Advisor: Ormosa's capital is protected by a series of fixed artillery emplacements and anti-

@@ -17,8 +17,8 @@ Prospect_River_Conflict
 Mission_Briefing 5 The Ormosans are not foolish enough to start a war on their own accord. A provocation is necessary 
 to force their government's hand. You will lead a crack team  across the border river into the disputed 
 Prospect Valley in a daring night raid and capture the provincial headquarters. Take no prisoners.
-Tactical Advisor: Use the southern troops as a diversion to draw the enemy security south, allowing your 
-strike force to penetrate the enemy headquarters.
+Tactical Advisor: Use the southern troops as a diversion to draw the enemy security south, allowing 
+your strike force to penetrate the enemy headquarters.
 Player_Data:_Name_PlayerType_StillAlive_Treasury
 ~
 0

@@ -15,11 +15,11 @@ Who_wins_after_turn_limit
 Name_of_next_mission_(Same_Directory)
 Conquest_Of_Ormosa
 Mission_Briefing 6 Ormosa is outraged by the brutal treatment of their citizens by the "unknown" assailants. Although
-Redonia publicly denies any responsibility, the Ormosans have responded by amassing troops at the only
-major bridge across the Prospect River. Their people cry for revenge. Redonia finally has the war she
-so desperately wants. 
-Tactical Advisor: Use your infantry to block the Ormosan columns, and artillery to destroy them while they 
-are exposed on the bridge and roads.
+Redonia publicly denies any responsibility, the Ormosans have responded by amassing troops at the 
+only major bridge across the Prospect River. Their people cry for revenge. Redonia finally has the war 
+she so desperately wants. 
+Tactical Advisor: Use your infantry to block the Ormosan columns, and artillery to destroy them while 
+they are exposed on the bridge and roads.
 Player_Data:_Name_PlayerType_StillAlive_Treasury
 ~
 0

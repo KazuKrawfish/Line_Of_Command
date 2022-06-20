@@ -17,8 +17,8 @@ Crossing_The_Anza
 Mission_Briefing 5 The Ormosan guerillas have gathered for a final desperate assault on their occupied capital. Although 
 their troops are poorly equipped, they are numerous, and gaining more support every day. Protect the 
 occupied capital at all costs until help can arrive.
-Tactical Advisor: You must hold out for seven turns to achieve victory. Use your air force without mercy- 
-the enemy lacks any AA cover whatsoever.
+Tactical Advisor: You must hold out for seven turns to achieve victory. Use your air force without 
+mercy- the enemy lacks any AA cover whatsoever.
 Player_Data:_Name_PlayerType_StillAlive_Treasury
 ~
 0
