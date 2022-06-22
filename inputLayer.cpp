@@ -601,7 +601,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		//Start with box
 		inputLayerWindow->draw(statusButtons.at(0).mySprite);
 		//Then print actual number
-		snprintf(pointerToPrint, 100, "%d", int((currentTile->defenseFactor - 1.0) * 10));
+		snprintf(pointerToPrint, 100, "%d", int(round ((currentTile->defenseFactor - 1.0)*10) ) );
 		sf::String defenseBonusNumber = pointerToPrint;
 		sf::Text defenseBonusText(defenseBonusNumber, *inputLayerFont, MainMenu->menuTextSize + 6);
 		defenseBonusText.setPosition(statusButtons.at(0).xCoord + 80, statusButtons.at(0).yCoord + 18);
