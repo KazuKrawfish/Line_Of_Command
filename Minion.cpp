@@ -259,7 +259,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxSecAmmo = 0;
 
 		myAttackSound = cannon;
-		myMoveSound = vehicleMove;
+		myMoveSound = aircraftMove;
 		break;
 	}
 	case('h'):
@@ -275,7 +275,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		domain = air;
 
 
-		myMoveSound = vehicleMove;
+		myMoveSound = aircraftMove;
 		break;
 	}
 	case('P'):
@@ -308,8 +308,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxPriAmmo = 3;
 		maxSecAmmo = -1;
 
-		
-		myMoveSound = vehicleMove;
+		myAttackSound = rpg;
+		myMoveSound = aircraftMove;
 		break;
 	}
 	case('b'):
@@ -327,7 +327,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxPriAmmo = 3;
 
 		myAttackSound = cannon;
-		myMoveSound = vehicleMove;
+		myMoveSound = aircraftMove;
 		break;
 	}
 	case('B'):

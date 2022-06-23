@@ -95,7 +95,7 @@ int main()
 
 		//Initialize Sounds Array
 		const int numberOfSoundEffects = 20;
-		std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "antiAircraftCannon", "infantryMove", "vehicleMove", "buildUnit", "capture", "resupply", "repair", "trapped" };
+		std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "antiAircraftCannon", "infantryMove", "vehicleMove", "aircraftMove", "buildUnit", "capture", "resupply", "repair", "trapped" };
 		std::vector <sf::SoundBuffer > soundEffectBuffers;
 		std::vector <sf::Sound> soundEffects;
 		soundEffects.resize(numberOfSoundEffects + 1);

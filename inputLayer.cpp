@@ -1004,7 +1004,7 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	//Reset animation sprite
 	boardToPrint->Board[locationX][locationY].animationSprite = NULL;
 
-	if (soundsOn == true)
+	if (soundsOn == true && minionToMove->myMoveSound != aircraftMove)
 	{
 		(*soundEffects)[minionToMove->myMoveSound].stop();
 	}
