@@ -31,7 +31,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 	myWindow->clear();
 
 	int boxType = 0;
-	if (backgroundType == "load") 
+	if (backgroundType == "load")
 	{
 		boxType = 5;
 	}
@@ -39,7 +39,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 	{
 		boxType = 6;
 	}
-	else if (backgroundType == "save") 
+	else if (backgroundType == "save")
 	{
 		boxType = 7;
 	}
@@ -53,7 +53,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 	announceText.setFillColor(sf::Color::Black);
 	announceText.setPosition(300, 200);
 	myWindow->draw(announceText);
-	
+
 	myWindow->display();
 
 	while (stringFinished == false)
@@ -64,7 +64,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 
 			inputString += event.text.unicode;
 			sf::Text inputText(inputString, *inputFont, menuTextSize);
-			inputText.setPosition(300, (menuTextSize+10) * (LineNumber) + 200);	//Position for strings for announcements and such
+			inputText.setPosition(300, (menuTextSize + 10) * (LineNumber)+200);	//Position for strings for announcements and such
 			inputText.setFillColor(sf::Color::Black);
 
 			myWindow->clear();
@@ -121,7 +121,6 @@ char playCharInput(sf::RenderWindow* myWindow)
 	return inputChar;
 }
 
-//mainmenu.cpp changes
 mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
 	std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic)
 {
@@ -360,12 +359,28 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 		saveGame << std::endl;
 	}
 
+	//Save minion ban list. Start with number of banned minion types.
+	//Number of banned types
+	int numberOfBannedTypes = boardToPrint->banList.size();
+
+	saveGame << "Number_Of_Banned_Minions";
+	int numberOfBannedTypes = 0;
+	saveGame << numberOfBannedTypes;
+
+	saveGame << "Banned_Minion_List";
+	//Then write out ban list
+	for (int i = 0; i < numberOfBannedTypes; i++)
+	{
+		saveGame << boardToPrint->banList.at(i) << std::endl;
+	}
+
+
 	//Note the number of minions:
 	saveGame << "Total_minions_below:" << std::endl;
 	saveGame << boardToPrint->totalNumberOfMinions << std::endl;
 
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
-	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,Ammo):" << std::endl;
+	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,PriAmmo,SecAmmo):" << std::endl;
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		//First cycle through all non transported minions and do them
@@ -583,6 +598,21 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	//After team data is loaded, set property characteristics.
 	setCharacteristics(boardToPrint);
 
+	//Load minion ban list. Start with number of banned minion types.
+	//Number of banned types
+	*saveGame >> ThrowawayString;
+	int numberOfBannedTypes = 0;
+	*saveGame >> numberOfBannedTypes;
+
+	*saveGame >> ThrowawayString;
+	//Then create ban list
+	for (int i = 0; i < numberOfBannedTypes; i++)
+	{
+		char bannedMinionType;
+		*saveGame >> bannedMinionType;
+		boardToPrint->banList.push_back(bannedMinionType);
+	}
+
 
 	//Then load minion data:
 	*saveGame >> ThrowawayString;
@@ -624,7 +654,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	}
 
 	//Initialize all compies at this stage if a mission (We are certain who is a compie)
-	if (boardToPrint->missionFlag == true) 
+	if (boardToPrint->missionFlag == true)
 	{
 		computerPlayerRoster.resize(boardToPrint->NUMBEROFPLAYERS + 1);
 		for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
@@ -724,61 +754,61 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			printTopMenu();
 			topMenuInput(&Input, boardToPlay, InputLayer);
 		}
-			else
-				if (menuStatus == playingMap)
+		else
+			if (menuStatus == playingMap)
+			{
+				//Only call upkeep before play commences if it is a new game AND very first turn
+				//And not compie. Compie performs upkeep in its own function.
+				if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == humanPlayer)
 				{
-					//Only call upkeep before play commences if it is a new game AND very first turn
-					//And not compie. Compie performs upkeep in its own function.
-					if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == humanPlayer)
-					{
-						boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
-						veryFirstTurn = false;
-					}
+					boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
+					veryFirstTurn = false;
+				}
 
-					if (InputLayer->status == gameBoard)
-					{
-						InputLayer->gameBoardInput(&Input, boardToPlay);
-					}
-					else if (InputLayer->status == minionAction)
-					{
-						InputLayer->minionInput(&Input, boardToPlay);
-					}
-					else if (InputLayer->status == menu)
-					{
-						InputLayer->menuInput(&Input, boardToPlay);
-					}
-					else if (InputLayer->status == propertyAction)
-					{
-						InputLayer->propertyMenuInput(&Input, boardToPlay);
-					}
-					else if (InputLayer->status == waitingForNextLocalPlayer)
-					{
-						InputLayer->waitingScreenInput(boardToPlay);
-					}
-					else if (InputLayer->status == insertMinion)
-					{
-						InputLayer->insertMinionInput(&Input, boardToPlay);
-					}
-					else if (InputLayer->status == insertTile)
-					{
-						InputLayer->insertTileInput(&Input, boardToPlay);
-					}
+				if (InputLayer->status == gameBoard)
+				{
+					InputLayer->gameBoardInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == minionAction)
+				{
+					InputLayer->minionInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == menu)
+				{
+					InputLayer->menuInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == propertyAction)
+				{
+					InputLayer->propertyMenuInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == waitingForNextLocalPlayer)
+				{
+					InputLayer->waitingScreenInput(boardToPlay);
+				}
+				else if (InputLayer->status == insertMinion)
+				{
+					InputLayer->insertMinionInput(&Input, boardToPlay);
+				}
+				else if (InputLayer->status == insertTile)
+				{
+					InputLayer->insertTileInput(&Input, boardToPlay);
+				}
 
-					//Computer takes turn if it is his turn to do so.
-					//Note that this doesn't deal with "status".
-					if (boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && boardToPlay->playerRoster[boardToPlay->playerFlag].stillAlive == true)
-					{
-						computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
-
-					}
-
-					//This prints the screen AFTER the latest input has taken effect.
-					//Is this messing with remote play? Not sure.
-					boardToPlay->checkWindow();
-
-					InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
+				//Computer takes turn if it is his turn to do so.
+				//Note that this doesn't deal with "status".
+				if (boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && boardToPlay->playerRoster[boardToPlay->playerFlag].stillAlive == true)
+				{
+					computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
 
 				}
+
+				//This prints the screen AFTER the latest input has taken effect.
+				//Is this messing with remote play? Not sure.
+				boardToPlay->checkWindow();
+
+				InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
+
+			}
 
 
 	}
@@ -1128,7 +1158,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			char buffer[100];
 			snprintf(buffer, 100, "Input Player %d's name: \n", i);
 			sf::String announceString = buffer;
-			inputName = playerInputString(mywindow, myFont, announceString, 1, "new" );
+			inputName = playerInputString(mywindow, myFont, announceString, 1, "new");
 
 			boardToPlay->playerRoster[i].name = inputName;
 
@@ -1147,7 +1177,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				sf::Sprite backgroundSprite;
 				backgroundSprite.setTexture(otherGameTextures->at(6));
-			
+
 				mywindow->draw(backgroundSprite);
 				mywindow->draw(anotherText);
 
@@ -1177,7 +1207,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		mywindow->clear();
 		topMenuNewString = "Input Player 1's name: \n";
 
-		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1 , "new");
+		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1, "new");
 		boardToPlay->playerRoster[1].name = inputName;
 
 	}
@@ -1205,9 +1235,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 }
 
 int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
-{	
+{
 	mywindow->clear();
-	
+
 	//Clear out the old roster. Then we can make new one.
 	if (computerPlayerRoster.empty() == false)
 	{
@@ -1225,7 +1255,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
-		
+
 
 		sf::String scenarioName = playerInputString(mywindow, myFont, topMenuNewString, announcementLength, "load");
 		std::string saveToLoad = scenarioName;
@@ -1236,7 +1266,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 		{
 			mywindow->clear();
 			topMenuNewString = "Save game successfully loaded! Press any key to continue.\n";
-			
+
 			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
 			newText.setFillColor(sf::Color::Black);
 			newText.setPosition(300, 200);

@@ -17,6 +17,7 @@ development, and since this is almost entirely a solo effort.
 #include "compie.hpp"
 #include <cmath>
 #include "mainmenu.h"
+#include <algorithm>
 
 int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2);
 
@@ -1053,7 +1054,9 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
-
+	
+	//Wipe out ban list
+	banList.clear();
 
 	//Initialize MinionRoster to NULL AND kill all minions.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
@@ -1427,7 +1430,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 	//Transport cannot attack so its attack field is 0.
 	//If out of ammo for both weapons, and neither weapon is infinite (Maxammo = 0), return.
-	if ( (cursor.selectMinionPointer->type == smallTransport || cursor.selectMinionPointer->type == largeTransport) ||
+	if ((cursor.selectMinionPointer->type == smallTransport || cursor.selectMinionPointer->type == largeTransport) ||
 		(cursor.selectMinionPointer->currentPriAmmo <= 0 && cursor.selectMinionPointer->maxPriAmmo != 0
 			&& cursor.selectMinionPointer->currentSecAmmo <= 0 && cursor.selectMinionPointer->maxSecAmmo != 0))
 	{
@@ -1557,9 +1560,17 @@ int MasterBoard::setDropField(int inputX, int inputY)
 	return 0;
 }
 
+//attemptResult should return 1 if unsuccessful
+//Or 0 if successful
 int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam)
 {
 	int attemptResult = 1;
+
+	//First verify that this unit is not on banList. If it is, return 1.
+	if (std::find(banList.begin(), banList.end(), inputType) != banList.end())
+		return attemptResult;
+
+
 	if (playerRoster[playerFlag].treasury >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
 	{
 		attemptResult = createMinion(inputType, inputX, inputY, playerFlag, 100, hasfired, 0, 0, -1, -1, -1);
@@ -1637,8 +1648,8 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 		}
 		else //If minion has moved but hasn't fired, and is direct combat, display attack range.
 			//And is not transport
-			if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire 
-				|| cursor.selectMinionPointer->rangeType == hybridRange) && cursor.selectMinionPointer->specialtyGroup != largeTransport && cursor.selectMinionPointer->specialtyGroup != smallTransport )
+			if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire
+				|| cursor.selectMinionPointer->rangeType == hybridRange) && cursor.selectMinionPointer->specialtyGroup != largeTransport && cursor.selectMinionPointer->specialtyGroup != smallTransport)
 			{
 				setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 				return 0;
@@ -1651,7 +1662,7 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 					return 0;
 				}		//If transport that either moved or stood in place, we still select. But may not display drop field.
 				else if ((cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)
-					&& (cursor.selectMinionPointer->specialtyGroup == largeTransport || cursor.selectMinionPointer->specialtyGroup == smallTransport) )
+					&& (cursor.selectMinionPointer->specialtyGroup == largeTransport || cursor.selectMinionPointer->specialtyGroup == smallTransport))
 				{
 					//If minion is transport and has a guy embarked, show drop field.
 					if (cursor.selectMinionPointer->firstMinionBeingTransported != NULL)

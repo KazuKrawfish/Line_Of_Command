@@ -1509,7 +1509,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			int availableTreasury = boardToUse->playerRoster[boardToUse->playerFlag].treasury + 1000 - totalFactoriesLeft * 1000;
 
 			//This can be tweaked. 
-			//If game turn is after turn 4, we do not need as many infantry, so we we set availableTreasury to arbitrarily large
+			//If game turn is after turn 2, we do not need as many infantry, so we we set availableTreasury to arbitrarily large
 			//Every  factory amount will be "enough"
 			if (menuPointer->gameTurn > 2)
 				availableTreasury += 100000;
@@ -1518,44 +1518,57 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
 
-
 				//If we have a proper proportion of tanks, buy cavalry.
+				//Must not be banned.
 				if (int(numberOfTanks / 3) > numberOfCavalry
 					&& boardToUse->consultMinionCostChart('c', 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('c', 'h'))
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('c', 'h')
+					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'c') != boardToUse->banList.end())
 				{
 					//Must be able to actually afford the unit.				
-					boardToUse->attemptPurchaseMinion('c', x, y, boardToUse->playerFlag);
-					numberOfCavalry++;
-					totalFactoriesLeft--;
-
-				}
-				else	//If we have enough cav, buy rocket
-					if (int(numberOfTanks / 2) > numberOfRanged
-						&& boardToUse->consultMinionCostChart('R', 'h') <= availableTreasury
-						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('R', 'h'))
+					int success = boardToUse->attemptPurchaseMinion('c', x, y, boardToUse->playerFlag);
+					if (success == 0)
 					{
-						//Must be able to actually afford the unit.				
-						boardToUse->attemptPurchaseMinion('R', x, y, boardToUse->playerFlag);
 						numberOfCavalry++;
 						totalFactoriesLeft--;
+					}
+
+				}
+				else	//If we have enough cav, buy rocket if not banned
+					if (int(numberOfTanks / 2) > numberOfRanged
+						&& boardToUse->consultMinionCostChart('R', 'h') <= availableTreasury
+						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('R', 'h')
+						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'R') != boardToUse->banList.end())
+					{
+						//Must be able to actually afford the unit.				
+						int success = boardToUse->attemptPurchaseMinion('R', x, y, boardToUse->playerFlag);
+						if (success == 0)
+						{
+							numberOfRanged++;
+							totalFactoriesLeft--;
+						}
 
 					}
-					else	//If we can't afford rocket, maybe we can afford arty
+					else	//If we can't afford rocket, maybe we can afford arty (If not banned)
 						if (int(numberOfTanks / 2) > numberOfRanged
 							&& boardToUse->consultMinionCostChart('r', 'h') <= availableTreasury
-							&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('r', 'h'))
+							&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('r', 'h')
+							&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'r') != boardToUse->banList.end())
 						{
 							//Must be able to actually afford the unit.				
-							boardToUse->attemptPurchaseMinion('r', x, y, boardToUse->playerFlag);
-							numberOfCavalry++;
-							totalFactoriesLeft--;
+							int success = boardToUse->attemptPurchaseMinion('r', x, y, boardToUse->playerFlag);
+							if (success == 0)
+							{
+								numberOfRanged++;
+								totalFactoriesLeft--;
+							}
 
 						}
 						else		//Infantry and specialists have a similar proportion.
 							if (int(numberOfInfantry / 3) > numberOfSpecialists
 								&& boardToUse->consultMinionCostChart('s', 'h') <= availableTreasury
 								&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('s', 'h')
+								&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 's') != boardToUse->banList.end()
 								&&
 								(compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
 									compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
@@ -1563,38 +1576,52 @@ int compie::determineProduction(MasterBoard* boardToUse)
 							{
 								//Must be able to actually afford the unit.
 
-								boardToUse->attemptPurchaseMinion('s', x, y, boardToUse->playerFlag);
-								numberOfSpecialists++;
-								totalFactoriesLeft--;
-							}
-							else
-								if (boardToUse->consultMinionCostChart('T', 'h') <= availableTreasury
-									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('T', 'h'))
+								int success = boardToUse->attemptPurchaseMinion('s', x, y, boardToUse->playerFlag);
+								if (success == 0)
 								{
-									//Must be able to actually afford the unit.
-									boardToUse->attemptPurchaseMinion('T', x, y, boardToUse->playerFlag);
-									numberOfTanks++;
+									numberOfSpecialists++;
 									totalFactoriesLeft--;
 								}
-								else if (boardToUse->consultMinionCostChart('a', 'h') <= availableTreasury
-									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('a', 'h'))
+							}
+							else    //Otherwise just buy other frontline units
+								if (boardToUse->consultMinionCostChart('T', 'h') <= availableTreasury
+									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('T', 'h')
+									&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'T') != boardToUse->banList.end())
 								{
-									//Must be able to actually afford the unit.
-									boardToUse->attemptPurchaseMinion('a', x, y, boardToUse->playerFlag);
-									numberOfTanks++;
-									totalFactoriesLeft--;
+									//Must be able to actually afford the unit, and must not be banned.
+									int success = boardToUse->attemptPurchaseMinion('T', x, y, boardToUse->playerFlag);
+									if (success == 0)
+									{
+										numberOfTanks++;
+										totalFactoriesLeft--;
+									}
+								}
+								else if (boardToUse->consultMinionCostChart('a', 'h') <= availableTreasury
+									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('a', 'h')
+									&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'a') != boardToUse->banList.end())
+								{
+									//Must be able to actually afford the unit, and must not be banned.
+									int success = boardToUse->attemptPurchaseMinion('a', x, y, boardToUse->playerFlag);
+									if (success == 0)
+									{
+										numberOfTanks++;
+										totalFactoriesLeft--;
+									}
 								}
 								else if (boardToUse->consultMinionCostChart('i', 'h') <= availableTreasury
 									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('i', 'h')
 									&& (compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
 										compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
+									&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'i') != boardToUse->banList.end()
 									)
 								{
-
-									//Must be able to actually afford the unit.
-									boardToUse->attemptPurchaseMinion('i', x, y, boardToUse->playerFlag);
-									numberOfInfantry++;
-									totalFactoriesLeft--;
+									//Must be able to actually afford the unit, and must not be banned.
+									int success = boardToUse->attemptPurchaseMinion('i', x, y, boardToUse->playerFlag);
+									if (success == 0)
+									{
+										numberOfInfantry++;
+										totalFactoriesLeft--;
+									}
 								}
 
 			}
@@ -1607,11 +1634,15 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			{
 				if (int(numberOfTanks / 3) > numberOfBombers
 					&& boardToUse->consultMinionCostChart('b', 'A') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('b', 'A'))
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('b', 'A')
+					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'b') != boardToUse->banList.end())
 				{
 					//Must be able to actually afford the unit.
-					boardToUse->attemptPurchaseMinion('b', x, y, boardToUse->playerFlag);
-					numberOfBombers++;
+					int success = boardToUse->attemptPurchaseMinion('b', x, y, boardToUse->playerFlag);
+					if (success == 0)
+					{
+						numberOfBombers++;
+					}
 				}
 			}
 
@@ -1621,11 +1652,15 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			{
 				if (int(numberOfTanks / 3) > numberOfBombers
 					&& boardToUse->consultMinionCostChart('v', 'A') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('v', 'A'))
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('v', 'A')
+					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'v') != boardToUse->banList.end())
 				{
 					//Must be able to actually afford the unit.
-					boardToUse->attemptPurchaseMinion('v', x, y, boardToUse->playerFlag);
-					numberOfBombers++;
+					int success = boardToUse->attemptPurchaseMinion('v', x, y, boardToUse->playerFlag);
+					if (success == 0)
+					{
+						numberOfBombers++;
+					}
 				}
 			}
 

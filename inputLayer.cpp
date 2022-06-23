@@ -85,7 +85,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 		}
 	}
 	airbaseButtons.at(0).mySprite.setTextureRect(rectArray[10][4]);  //h
-	airbaseButtons.at(1).mySprite.setTextureRect(rectArray[9][4]);  //v
+	airbaseButtons.at(1).mySprite.setTextureRect(rectArray[9][4]);   //v
 	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[11][4]);  //f
 	airbaseButtons.at(3).mySprite.setTextureRect(rectArray[12][4]);  //b
 
@@ -451,14 +451,14 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	playerStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
 	playerStatusText.setFillColor(sf::Color::Black);
 	inputLayerWindow->draw(playerStatusText);
-	
+
 
 	//Reset event text
 	eventText = "";
 
 	//Do not print out status boxes for property menu
 	//Do not print status for compie moves
-	if (status != propertyAction  && boardToPrint->playerRoster[boardToPrint->playerFlag].playerType != computerPlayer)
+	if (status != propertyAction && boardToPrint->playerRoster[boardToPrint->playerFlag].playerType != computerPlayer)
 	{
 
 		if (observerNumber == boardToPrint->playerFlag)
@@ -541,7 +541,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			//Then print out actual values of ammo
 			sf::String ammoNumberString = pointerToPrint;
 			sf::Text ammoNumberText(ammoNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80, statusButtons.at(5).yCoord + 15	);
+			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80, statusButtons.at(5).yCoord + 15);
 			ammoNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(ammoNumberText);
 
@@ -601,7 +601,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		//Start with box
 		inputLayerWindow->draw(statusButtons.at(0).mySprite);
 		//Then print actual number
-		snprintf(pointerToPrint, 100, "%d", int(round ((currentTile->defenseFactor - 1.0)*10) ) );
+		snprintf(pointerToPrint, 100, "%d", int(round((currentTile->defenseFactor - 1.0) * 10)));
 		sf::String defenseBonusNumber = pointerToPrint;
 		sf::Text defenseBonusText(defenseBonusNumber, *inputLayerFont, MainMenu->menuTextSize + 6);
 		defenseBonusText.setPosition(statusButtons.at(0).xCoord + 80, statusButtons.at(0).yCoord + 18);
@@ -685,7 +685,7 @@ int inputLayer::printBoardMenu(MasterBoard* boardToPrint) {
 	return 0;
 }
 
-int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint) 
+int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 {
 	sf::String boardMessage = "Select a minion to purchase\nDeselect property (t)\n";
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
@@ -704,9 +704,47 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 	{
 		for (int i = 0; i < factoryButtons.size(); i++)
 		{
-			inputLayerWindow->draw(factoryButtons.at(i).mySprite);
-			effectsSprite.setPosition(factoryButtons.at(i).mySprite.getPosition());
-			inputLayerWindow->draw(effectsSprite);
+			//Ungainly method to convert button number to minion type, to check if it's banned
+			char unitToShow;
+			switch (i)
+			{
+			case 0:
+				unitToShow = 'i';
+				break;
+			case 1:
+				unitToShow = 's';
+				break;
+			case 2:
+				unitToShow = 'c';
+				break;
+			case 3:
+				unitToShow = 'P';
+				break;
+			case 4:
+				unitToShow = 'r';
+				break;
+			case 5:
+				unitToShow = 'a';
+				break;
+			case 6:
+				unitToShow = 'A';
+				break;
+			case 7:
+				unitToShow = 'R';
+				break;
+			case 8:
+				unitToShow = 'T';
+				break;
+			}
+
+			//Check if minion type is on ban-list
+			//Must NOT be on ban list in order to print
+			if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), unitToShow) == boardToPrint->banList.end())
+			{
+				inputLayerWindow->draw(factoryButtons.at(i).mySprite);
+				effectsSprite.setPosition(factoryButtons.at(i).mySprite.getPosition());
+				inputLayerWindow->draw(effectsSprite);
+			}
 
 		}
 	}
@@ -715,9 +753,29 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 	{
 		for (int i = 0; i < portButtons.size(); i++)
 		{
-			inputLayerWindow->draw(portButtons.at(i).mySprite);
-			effectsSprite.setPosition(portButtons.at(i).mySprite.getPosition());
-			inputLayerWindow->draw(effectsSprite);
+			char unitToShow;
+			if (i == 0)
+				unitToShow = 'G';
+			if (i == 1)
+				unitToShow = 'C';
+			if (i == 2)
+				unitToShow = 'L';
+			if (i == 3)
+				unitToShow = 'U';
+			if (i == 4)
+				unitToShow = 'B';
+			if (i == 5)
+				unitToShow = 'V';
+
+
+			//Check if minion type is on ban-list
+			//Must NOT be on ban list in order to print
+			if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), unitToShow) == boardToPrint->banList.end())
+			{
+				inputLayerWindow->draw(portButtons.at(i).mySprite);
+				effectsSprite.setPosition(portButtons.at(i).mySprite.getPosition());
+				inputLayerWindow->draw(effectsSprite);
+			}
 		}
 	}
 
@@ -725,9 +783,25 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 	{
 		for (int i = 0; i < airbaseButtons.size(); i++)
 		{
-			inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
-			effectsSprite.setPosition(airbaseButtons.at(i).mySprite.getPosition());
-			inputLayerWindow->draw(effectsSprite);
+			char unitToShow;
+			if (i == 0)
+				unitToShow = 'h';
+			if (i == 1)
+				unitToShow = 'v';
+			if (i == 2)
+				unitToShow = 'f';
+			if (i == 3)
+				unitToShow = 'b';
+
+
+			//Check if minion type is on ban-list
+			//Must NOT be on ban list in order to print
+			if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), unitToShow) == boardToPrint->banList.end())
+			{
+				inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
+				effectsSprite.setPosition(airbaseButtons.at(i).mySprite.getPosition());
+				inputLayerWindow->draw(effectsSprite);
+			}
 		}
 	}
 
@@ -1997,7 +2071,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		&& (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport)
 		&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 			boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-			&& boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL )
+			&& boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true
 		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol) != 99)
@@ -2051,12 +2125,21 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 {
+	inputLayerWindow->clear();
+	sf::String boardMessage;
+
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(9));
+	inputLayerWindow->draw(backgroundSprite);
 
 	inputLayerWindow->clear();
-	sf::String topMenuJoinString = boardToPrint->playerRoster[playerDefeated].name;
-	topMenuJoinString += " was defeated. Press any key to continue.  \n";
-	sf::Text newText(topMenuJoinString, *inputLayerFont, MainMenu->menuTextSize);
-	MainMenu->mywindow->draw(newText);
+	sf::String defeatMessage = boardToPrint->playerRoster[playerDefeated].name;
+	defeatMessage += " was defeated. Press any key to continue.  \n";
+
+	sf::Text defeatText(defeatMessage, *inputLayerFont, MainMenu->menuTextSize);
+	defeatText.setPosition(250, 200);
+	defeatText.setFillColor(sf::Color::Black);
+	MainMenu->mywindow->draw(defeatText);
 	inputLayerWindow->display();
 
 	sf::Event event;
@@ -2072,10 +2155,18 @@ int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint)
 {
 	inputLayerWindow->clear();
-	sf::String topMenuJoinString = boardToPrint->playerRoster[playerVictorious].name;
-	topMenuJoinString += " was victorious! Press any key to continue.  \n";
-	sf::Text newText(topMenuJoinString, *inputLayerFont, MainMenu->menuTextSize);
-	MainMenu->mywindow->draw(newText);
+
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(9));
+	inputLayerWindow->draw(backgroundSprite);
+
+	sf::String victoryMessage = boardToPrint->playerRoster[playerVictorious].name;
+	victoryMessage += " was victorious! Press any key to continue.  \n";
+
+	sf::Text victoryText(victoryMessage, *inputLayerFont, MainMenu->menuTextSize);
+	victoryText.setPosition(250, 200);
+	victoryText.setFillColor(sf::Color::Black);
+	MainMenu->mywindow->draw(victoryText);
 	inputLayerWindow->display();
 
 	sf::Event event;
@@ -2496,8 +2587,11 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 		if (requestedUnitPrice <= treasury)
 		{
 			//Confirm purchase
-			boardToInput->attemptPurchaseMinion(requestedPurchase, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag);
-			status = gameBoard;
+			int result = boardToInput->attemptPurchaseMinion(requestedPurchase, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag);
+
+			//Only leave if successfuly bought minion
+			if (result == 0)
+				status = gameBoard;
 		}
 	}
 

@@ -152,6 +152,7 @@ public:
 	std::string scenarioOrMissionName = "_";
 	int missionTurnLength = 0;	//Turn limit, or 0 if no turn limit.
 	int whoHoldsOut = 0;		//0 If missionLength is not on, otherwise indicates who wins if turns run out.
+	std::vector <char> banList;
 	//MissionInfo///////////////////////////////
 
 private:
