@@ -2129,15 +2129,15 @@ int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 	sf::String boardMessage;
 
 	sf::Sprite backgroundSprite;
-	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(9));
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
 	inputLayerWindow->draw(backgroundSprite);
 
-	inputLayerWindow->clear();
+
 	sf::String defeatMessage = boardToPrint->playerRoster[playerDefeated].name;
 	defeatMessage += " was defeated. Press any key to continue.  \n";
 
-	sf::Text defeatText(defeatMessage, *inputLayerFont, MainMenu->menuTextSize);
-	defeatText.setPosition(250, 200);
+	sf::Text defeatText(defeatMessage, *inputLayerFont, MainMenu->menuTextSize+5);
+	defeatText.setPosition(380, 100);
 	defeatText.setFillColor(sf::Color::Black);
 	MainMenu->mywindow->draw(defeatText);
 	inputLayerWindow->display();
@@ -2157,14 +2157,14 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 	inputLayerWindow->clear();
 
 	sf::Sprite backgroundSprite;
-	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(9));
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
 	inputLayerWindow->draw(backgroundSprite);
 
 	sf::String victoryMessage = boardToPrint->playerRoster[playerVictorious].name;
 	victoryMessage += " was victorious! Press any key to continue.  \n";
 
-	sf::Text victoryText(victoryMessage, *inputLayerFont, MainMenu->menuTextSize);
-	victoryText.setPosition(250, 200);
+	sf::Text victoryText(victoryMessage, *inputLayerFont, MainMenu->menuTextSize+5);
+	victoryText.setPosition(380, 100);
 	victoryText.setFillColor(sf::Color::Black);
 	MainMenu->mywindow->draw(victoryText);
 	inputLayerWindow->display();

@@ -79,6 +79,9 @@ Property_controller_number_below:
 00000000000000000000
 00000000000000010000
 00000000000001010000
+Number_Of_Banned_Minion_Types
+0
+List_Of_Banned_Minion_Types
 Total_minions_below:
 47
 Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,Ammo):
