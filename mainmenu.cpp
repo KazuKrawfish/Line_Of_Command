@@ -363,10 +363,10 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 	//Number of banned types
 	int numberOfBannedTypes = boardToPrint->banList.size();
 
-	saveGame << "Number_Of_Banned_Minions";
-	saveGame << numberOfBannedTypes;
+	saveGame << "Number_Of_Banned_Minions" << std::endl;
+	saveGame << numberOfBannedTypes << std::endl;
 
-	saveGame << "Banned_Minion_List";
+	saveGame << "Banned_Minion_List" << std::endl;
 	//Then write out ban list
 	for (int i = 0; i < numberOfBannedTypes; i++)
 	{
