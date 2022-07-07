@@ -36,6 +36,38 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 	}
 }
 
+//Returns if the observer has any minions adjacent to the indicated XY combo.
+bool MasterBoard::hasAdjacentMinion(int inputX, int inputY, int observerNumber)
+{
+	bool adjacentMinionExists = false;
+
+	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].hasMinionOnTop == true
+		&& Board[inputX + 1][inputY].minionOnTop->team == observerNumber)
+	{
+		adjacentMinionExists = true;
+	}
+	else
+		if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].hasMinionOnTop == true
+			&& Board[inputX][inputY + 1].minionOnTop->team == observerNumber)
+		{
+			adjacentMinionExists = true;
+		}
+		else
+			if (inputY > 0 && Board[inputX][inputY - 1].hasMinionOnTop == true
+				&& Board[inputX][inputY - 1].minionOnTop->team == observerNumber)
+			{
+				adjacentMinionExists = true;
+			}
+			else
+				if (inputX > 0 && Board[inputX - 1][inputY].hasMinionOnTop == true
+					&& Board[inputX - 1][inputY].minionOnTop->team == observerNumber)
+				{
+					adjacentMinionExists = true;
+				}
+
+	return adjacentMinionExists;
+}
+
 int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber)
 {
 
@@ -43,7 +75,7 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, i
 	int y = SupplyUnit->locationY;
 
 	//Unit must be APC
-	if (SupplyUnit->type != 'P')
+	if (SupplyUnit->type != "APC")
 		return 1;
 
 	//Check each surrounding tile for a ground or sea unit and resupply them.
@@ -108,52 +140,52 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, i
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
-//														i     s     a     r     c     R     T     A     v	  h		P  	  f		b	  L		B	  C	    G	  U		V		K		S
-const double ATTACK_VALUES_MATRIX[21][21] = {	/*i*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*s*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0,	0,	  0,    0,	  0,	0,		0.2,	0.2,
-/*a*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0.25,	0,	  0,    0.25, 0,	0,		0.2,	0.2,
-/*r*/	0.90, 0.85, 0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70, 0,	0,	  0.30,	0.30, 0.35, 0.45, 0,	0.30,	0.4,	0.4,
-/*c*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,    0,	  0,	0,		0,		0,
-/*R*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.60, 0.40, 0.50, 0.70, 0,	0.40,	0.5,	0.5,
-/*T*/	0.0,  0.00, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.00, 0.00, 0.90, 0,	0,	  0.15, 0,	  0,	0.15, 0,	0,		0.55,	0.55,
-/*A*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0,		0,
-/*v*/	0.00, 0.00, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.00, 0.00, 0.60, 0,	0,	  0.35,	0.25, 0.30, 0.35, 0,	0.25,	0.35,	0.35,
-/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.80, 1.0,	0,	  0.60,	0.70, 0,	0,	  0,	0,	  0,	0,		0,		0,
-/*b*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.80,	0.50, 0.60, 0.85, 0,	0.50,	0.5,	0.5,
-/*L*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*B*/	1.0,  0.95, 0.85, 0.90, 0.90, 0.90, 0.60, 0.90, 0,	  0,	0.90, 0,	0,	  0.70,	0.50, 0.60, 0.75, 0,	0.50, 	0.6,	0.6,
-/*C*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0,		0,
-/*G*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0.60, 0.40, 0.50, 0.60, 0,	0.40,	0,		0,
-/*U*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0.75,	0.40, 0.70, 0.95, 0.50,	0.40,	0,		0,
-/*V*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,    0,	  0,	0, 		0,		0,
-/*K*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.60, 0.40, 0.50, 0.70, 0,	0.40,	0.5,	0.5,
-/*S*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0,		0 };
+//														i     s     a     r     c     R     T     A     v	  h		P  	  f		b	  L		B	  C	    G	  U		V		K/S
+const double ATTACK_VALUES_MATRIX[21][20] = {	/*i*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*s*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0,	0,	  0,    0,	  0,	0,		0.2,
+/*a*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0.25,	0,	  0,    0.25, 0,	0,		0.2,
+/*r*/	0.90, 0.85, 0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70, 0,	0,	  0.30,	0.30, 0.35, 0.45, 0,	0.30,	0.4,
+/*c*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,    0,	  0,	0,		0,
+/*R*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.60, 0.40, 0.50, 0.70, 0,	0.40,	0.5,
+/*T*/	0.0,  0.00, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.00, 0.00, 0.90, 0,	0,	  0.15, 0,	  0,	0.15, 0,	0,		0.55,
+/*A*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0,
+/*v*/	0.00, 0.00, 0.50, 0.50, 0.60, 0.70, 0.35, 0.50, 0.00, 0.00, 0.60, 0,	0,	  0.35,	0.25, 0.30, 0.35, 0,	0.25,	0.35,
+/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.80, 1.0,	0,	  0.60,	0.70, 0,	0,	  0,	0,	  0,	0,		0,
+/*b*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.80,	0.50, 0.60, 0.85, 0,	0.50,	0.5,
+/*L*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*B*/	1.0,  0.95, 0.85, 0.90, 0.90, 0.90, 0.60, 0.90, 0,	  0,	0.90, 0,	0,	  0.70,	0.50, 0.60, 0.75, 0,	0.50, 	0.6,
+/*C*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0,
+/*G*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0.60, 0.40, 0.50, 0.60, 0,	0.40,	0,
+/*U*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0.75,	0.40, 0.70, 0.95, 0.50,	0.40,	0,
+/*V*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,    0,	  0,	0, 		0,
+/*K*/	0.95, 0.90, 0.80, 0.85, 0.85, 0.85, 0.50, 0.85, 0,	  0,	0.80, 0,	0,	  0.60, 0.40, 0.50, 0.70, 0,	0.40,	0.5,
+/*S*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.95, 1.00, 0, 	  0.60, 0.70, 0,	0,	  0,	0,	  0,	0,		0 };
 
 
-//		i     s     a     r     c     R     T     A     v     h     P	  f		b	  L		B	  C	    G	  U		V		K		S
-const double SECONDARY_ATTACK_VALUES_MATRIX[21][21] = {	/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.01,	0.01,
-/*s*/	0.60, 0.55, 0.08, 0.12, 0.18, 0.30, 0.02, 0.08, 0.08, 0.12, 0.12, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.02,	0.02,
-/*a*/	0.70, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.05,
-/*r*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.05,
-/*R*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*T*/	0.85, 0.80, 0.15, 0.25, 0.40, 0.50, 0.10, 0.20, 0.15, 0.25, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.1,	0.1,
-/*A*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.05,
-/*v*/	0.65, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.55, 0.75, 0.35, 0,	0,	  0.05,	0.05, 0.05,	0.05, 0,	0.05,	0.05,	0.05,
-/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.40, 0.5,	0,	  0.30,	0.35, 0,	0,	  0,	0,	  0,	0,		0,		0,
-/*b*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*L*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*B*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*C*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0.60, 0.40, 0.50, 0.60, 0.50,	0.40,	0,		0,
-/*G*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*U*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*V*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,    0,	  0,	0 ,		0,		0,
-/*K*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,
-/*S*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0 ,		0 };
+//		i     s     a     r     c     R     T     A     v     h     P	  f		b	  L		B	  C	    G	  U		V		K/S
+const double SECONDARY_ATTACK_VALUES_MATRIX[21][20] = {	/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.01,
+/*s*/	0.60, 0.55, 0.08, 0.12, 0.18, 0.30, 0.02, 0.08, 0.08, 0.12, 0.12, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.02,
+/*a*/	0.70, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,
+/*r*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*c*/	0.75, 0.70, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,
+/*R*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*T*/	0.85, 0.80, 0.15, 0.25, 0.40, 0.50, 0.10, 0.20, 0.15, 0.25, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.1,
+/*A*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.95, 1.00, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,
+/*v*/	0.65, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.55, 0.75, 0.35, 0,	0,	  0.05,	0.05, 0.05,	0.05, 0,	0.05,	0.05,
+/*h*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*P*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*f*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.40, 0.5,	0,	  0.30,	0.35, 0,	0,	  0,	0,	  0,	0,		0,
+/*b*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,	0,		0,
+/*L*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*B*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*C*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0.60, 0.40, 0.50, 0.60, 0.50,	0.40,	0,
+/*G*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*U*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*V*/	0,    0,    0,    0,    0,    0,    0,	  0,	0,	  0,	0, 	  0,	0,	  0,	0,	  0,    0,	  0,	0 ,		0,
+/*K*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,
+/*S*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0 };
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Assumes attacking minion is selected. Otherwise withinRange won't work.
@@ -169,139 +201,134 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 	int x = -1;
 	int y = -1;
 
-	switch (defendingMinion.type)
-	{
-	case('i'):
+	
+	if ( defendingMinion.type == "Infantry")
 		x = 0;
-		break;
-	case('s'):
+	else
+	if ( defendingMinion.type == "Specialist")
 		x = 1;
-		break;
-	case('a'):
+	else
+	if ( defendingMinion.type == "Armor")
 		x = 2;
-		break;
-	case('r'):
+	else
+	if ( defendingMinion.type == "Artillery")
 		x = 3;
-		break;
-	case('c'):
+	else
+	if ( defendingMinion.type == "Recon")
 		x = 4;
-		break;
-	case('R'):
+	else
+	if ( defendingMinion.type == "Rocket_Artillery")
 		x = 5;
-		break;
-	case('T'):
+	else
+	if ( defendingMinion.type == "Heavy_Armor")
 		x = 6;
-		break;
-	case('A'):
+	else
+	if ( defendingMinion.type == "Anti-Aircraft")
 		x = 7;
-		break;
-	case('v'):
+	else
+	if ( defendingMinion.type == "Attack_Copter")
 		x = 8;
-		break;
-	case('h'):
+	else
+	if ( defendingMinion.type == "Transport_Copter")
 		x = 9;
-		break;
-	case('P'):
+	else
+	if ( defendingMinion.type == "APC")
 		x = 10;
-		break;
-	case('f'):
+	else
+	if ( defendingMinion.type == "Interceptor")
 		x = 11;
-		break;
-	case('b'):
+	else
+	if ( defendingMinion.type == "Bomber")
 		x = 12;
-		break;
-	case('L'):		//L		B	  C	    G	  U		V
+	else
+	if ( defendingMinion.type == "Lander")
 		x = 13;
-		break;
-	case('B'):
+	else
+	if ( defendingMinion.type == "Battleship")
 		x = 14;
-		break;
-	case('C'):
+	else
+	if ( defendingMinion.type == "Cruiser")
 		x = 15;
-		break;
-	case('G'):
+	else
+	if ( defendingMinion.type == "Gunboat")
 		x = 16;
-		break;
-	case('U'):
+	else
+	if ( defendingMinion.type == "Submarine")
 		x = 17;
-		break;
-	case('V'):
+	else
+	if ( defendingMinion.type == "Aircraft_Carrier")
 		x = 18;
-		break;
-	case('K'):
+	else
+	if ( defendingMinion.type == "Artillery_Emplacement" || defendingMinion.type == "SAM_Site")
 		x = 19;
-		break;
-	case('S'):
-		x = 20;
-		break;
-	}
+	
+	
 
-	switch (attackingMinion.type)
-	{
-	case('i'):
+
+	if ( attackingMinion.type == "Infantry")
 		y = 0;
-		break;
-	case('s'):
+	else
+	if ( attackingMinion.type == "Specialist")
 		y = 1;
-		break;
-	case('a'):
+	else
+	if ( attackingMinion.type == "Armor")
 		y = 2;
-		break;
-	case('r'):
+	else
+	if ( attackingMinion.type == "Artillery")
 		y = 3;
-		break;
-	case('c'):
+	else
+	if ( attackingMinion.type == "Recon")
 		y = 4;
-		break;
-	case('R'):
+	else
+	if ( attackingMinion.type == "Rocket_Artillery")
 		y = 5;
-		break;
-	case('T'):
+	else
+	if ( attackingMinion.type == "Heavy_Armor")
 		y = 6;
-		break;
-	case('A'):
+	else
+	if ( attackingMinion.type == "Anti-Aircraft")
 		y = 7;
-		break;
-	case('v'):
+	else
+	if ( attackingMinion.type == "Attack_Copter")
 		y = 8;
-		break;
-	case('h'):
+	else
+	if ( attackingMinion.type == "Transport_Copter")
 		y = 9;
-		break;
-	case('P'):
+	else
+	if ( attackingMinion.type == "APC")
 		y = 10;
-		break;
-	case('f'):
+	else
+	if ( attackingMinion.type == "Interceptor")
 		y = 11;
-		break;
-	case('b'):
+	else
+	if ( attackingMinion.type == "Bomber")
 		y = 12;
-		break;
-	case('L'):		//L		B	  C	    G	  U		V
+	else
+	if ( attackingMinion.type == "Lander")	
 		y = 13;
-		break;
-	case('B'):
+	else
+	if ( attackingMinion.type == "Battleship")
 		y = 14;
-		break;
-	case('C'):
+	else
+	if ( attackingMinion.type == "Cruiser")
 		y = 15;
-		break;
-	case('G'):
+	else
+	if ( attackingMinion.type == "Gunboat")
 		y = 16;
-		break;
-	case('U'):
+	else
+	if ( attackingMinion.type == "Submarine")
 		y = 17;
-		break;
-	case('V'):
+	else
+	if ( attackingMinion.type == "Aircraft_Carrier")
 		y = 18;
-		break;
-	case('K'):
+	else
+	if ( attackingMinion.type == "Artillery_Emplacement")
 		y = 19;
-		break;
-	case('S'):
+	else
+	if ( attackingMinion.type == "SAM_Site")
 		y = 20;
-		break;
-	}
+	
+
 
 	if (x == -1 || y == -1)
 	{
@@ -467,10 +494,10 @@ double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion
 //Return of -1 indicates the minion requested does not exist, or it can't be bought there.
 //New functionality: Input of '~' for propertyType indicates informational-only use of this function,
 //For instance, to determine if a unit even exists, or what its price is.
-int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
+int MasterBoard::consultMinionCostChart(std::string minionType, char propertyType)
 {
 	//Can't purchase defenses
-	if (minionType == 'K' || minionType == 'S')
+	if (minionType == "Artillery_Emplacement" || minionType == "SAM_Site")
 	{
 		return  100000;
 	}
@@ -482,17 +509,17 @@ int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 		canItBeBoughtHere = true;
 
 	//These represent what that property repairs, not necessarily if you can buy units there. Only h can buy ground troops.
-	if (propertyType == 'A' && (minionType == 'v' || minionType == 'h' || minionType == 'f' || minionType == 'b'))
+	if (propertyType == 'A' && (minionType == "Attack_Copter" || minionType == "Transport_Copter" || minionType == "Interceptor" || minionType == "Bomber"))
 	{
 		canItBeBoughtHere = true;
 	}
 	if ((propertyType == 'n' || propertyType == 'H' || propertyType == 'Q' || propertyType == 'h') &&
-		(minionType == 'i' || minionType == 's' || minionType == 'a' || minionType == 'r' || minionType == 'R'
-			|| minionType == 'T' || minionType == 'A' || minionType == 'c' || minionType == 'P'))
+		(minionType == "Infantry" || minionType == "Specialist" || minionType == "Armor" || minionType == "Artillery" || minionType == "Rocket_Artillery"
+			|| minionType == "Heavy_Armor" || minionType == "Anti-Aircraft" || minionType == "Recon" || minionType == "APC"))
 	{
 		canItBeBoughtHere = true;
 	}
-	if (propertyType == 'P' && (minionType == 'B' || minionType == 'G' || minionType == 'L' || minionType == 'U' || minionType == 'C' || minionType == 'V'))
+	if (propertyType == 'P' && (minionType == "Battleship" || minionType == "Gunboat" || minionType == "Lander" || minionType == "Submarine" || minionType == "Cruiser" || minionType == "Aircraft_Carrier"))
 	{
 		canItBeBoughtHere = true;
 	}
@@ -504,66 +531,64 @@ int MasterBoard::consultMinionCostChart(char minionType, char propertyType)
 
 	int price = -1;
 
-	switch (minionType)
-	{
-	case('i'):
+	if ( minionType == "Infantry")
 		price = 1000;
-		break;
-	case('s'):
+		else
+	if ( minionType == "Specialist")
 		price = 3000;
-		break;
-	case('a'):
+		else
+	if ( minionType == "Armor")
 		price = 7000;
-		break;
-	case('r'):
+		else
+	if ( minionType == "Artillery")
 		price = 6000;
-		break;
-	case('c'):
+		else
+	if ( minionType == "Recon")
 		price = 4000;
-		break;
-	case('R'):
+		else
+	if ( minionType == "Rocket_Artillery")
 		price = 15000;
-		break;
-	case('T'):
+		else
+	if ( minionType == "Heavy_Armor")
 		price = 16000;
-		break;
-	case('A'):
+		else
+	if ( minionType == "Anti-Aircraft")
 		price = 8000;
-		break;
-	case('v'):
+		else
+	if ( minionType == "Attack_Copter")
 		price = 9000;
-		break;
-	case('h'):
+		else
+	if ( minionType == "Transport_Copter")
 		price = 5000;
-		break;
-	case('P'):
+		else
+	if ( minionType == "APC")
 		price = 5000;
-		break;
-	case('f'):
+		else
+	if ( minionType == "Interceptor")
 		price = 15000;
-		break;
-	case('b'):
+		else
+	if ( minionType == "Bomber")
 		price = 18000;
-		break;
-	case('V'):
+		else
+	if ( minionType == "Aircraft_Carrier")
 		price = 25000;
-		break;
-	case('B'):
+		else
+	if ( minionType == "Battleship")
 		price = 25000;
-		break;
-	case('G'):
+		else
+	if ( minionType == "Gunboat")
 		price = 6000;
-		break;
-	case('C'):
+		else
+	if ( minionType == "Cruiser")
 		price = 14000;
-		break;
-	case('U'):
+		else
+	if ( minionType == "Submarine")
 		price = 18000;
-		break;
-	case('L'):
+		else
+	if ( minionType == "Lander")
 		price = 12000;
-		break;
-	}
+		
+	
 
 	return price;
 }
@@ -827,6 +852,8 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 	inputMinion->apparentPathMap[x][y].wasVisited = true;
 
 
+
+
 	//Now call the function for eaching neighbor that is passable (not 99 move cost or off board), and hasn't been visited, or
 	//is passable,  (And has been visited) and has a higher (path score - that place's cost):
 	//This is to either do a first look or to update a square that has a higher current score than ours
@@ -834,54 +861,94 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 	//This does not include air and non-air. They can pass through each other.
 	if (x - 1 >= 0)
 	{
+		//Also need to find if any adjacent friendly minions to this square
+		bool friendlyAdjacentMinion = hasAdjacentMinion(x - 1, y, playerFlag);
+
+		//See if enemy stealth minion here.
+		bool stealthEnemyHere = false;
+		if (Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team != playerFlag
+			&& Board[x - 1][y].minionOnTop->specialtyGroup == stealth)
+			stealthEnemyHere = true;
+
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 && inputMinion->apparentPathMap[x - 1][y].wasVisited != true) ||
 			(Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 &&
 			(inputMinion->apparentPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
 			if (Board[x - 1][y].withinVision[playerFlag] == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team
 				|| (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
-			{
-				buildApparentPathMap(false, x - 1, y, inputMinion);
-			}
+				if (friendlyAdjacentMinion == false || stealthEnemyHere == false)	//Also doesn't have any stealth enemy here, or at least can't see one
+				{
+					buildApparentPathMap(false, x - 1, y, inputMinion);
+				}
 	}
 
 	if (y - 1 >= 0)
 	{
+		//Also need to find if any adjacent friendly minions to this square
+		bool friendlyAdjacentMinion = hasAdjacentMinion(x, y - 1, playerFlag);
+
+		//See if enemy stealth minion here.
+		bool stealthEnemyHere = false;
+		if (Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->team != playerFlag
+			&& Board[x][y - 1].minionOnTop->specialtyGroup == stealth)
+			stealthEnemyHere = true;
+
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && inputMinion->apparentPathMap[x][y - 1].wasVisited != true) ||
 			(Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 &&
 			(inputMinion->apparentPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
 			if (Board[x][y - 1].withinVision[playerFlag] == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team
 				|| (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
-			{
-				buildApparentPathMap(false, x, y - 1, inputMinion);
-			}
+				if (friendlyAdjacentMinion == false || stealthEnemyHere == false)	//Also doesn't have any stealth enemy here, or at least can't see one
+				{
+					buildApparentPathMap(false, x, y - 1, inputMinion);
+				}
 	}
 
 	if (x + 1 < BOARD_WIDTH)
 	{
+		//Also need to find if any adjacent friendly minions to this square
+		bool friendlyAdjacentMinion = hasAdjacentMinion(x + 1, y, playerFlag);
+
+		//See if enemy stealth minion here.
+		bool stealthEnemyHere = false;
+		if (Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team != playerFlag
+			&& Board[x + 1][y].minionOnTop->specialtyGroup == stealth)
+			stealthEnemyHere = true;
+
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
 			&& inputMinion->apparentPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
 				&& (inputMinion->apparentPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
 			if (Board[x + 1][y].withinVision[playerFlag] == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air
 				&& Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
-			{
-				buildApparentPathMap(false, x + 1, y, inputMinion);
-			}
+				if (friendlyAdjacentMinion == false || stealthEnemyHere == false)	//Also doesn't have any stealth enemy here, or at least can't see one
+				{
+					buildApparentPathMap(false, x + 1, y, inputMinion);
+				}
 	}
 
 	if (y + 1 < BOARD_HEIGHT)
 	{
+		//Also need to find if any adjacent friendly minions to this square
+		bool friendlyAdjacentMinion = hasAdjacentMinion(x, y + 1, playerFlag);
+
+		//See if enemy stealth minion here.
+		bool stealthEnemyHere = false;
+		if (Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->team != playerFlag
+			&& Board[x][y + 1].minionOnTop->specialtyGroup == stealth)
+			stealthEnemyHere = true;
+
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 && inputMinion->apparentPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 &&
 			(inputMinion->apparentPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
 			if (Board[x][y + 1].withinVision[playerFlag] == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team ||
 				(cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air)
 				|| (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
-			{
-				buildApparentPathMap(false, x, y + 1, inputMinion);
-			}
+				if (friendlyAdjacentMinion == false || stealthEnemyHere == false)	//Also doesn't have any stealth enemy here, or at least can't see one
+				{
+					buildApparentPathMap(false, x, y + 1, inputMinion);
+				}
 	}
 
 
@@ -889,7 +956,7 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 }
 
 
-int MasterBoard::buildPath(bool isItInitialCall, int x, int y, char minionType, std::vector<std::vector<pathSquare>>& pathMapPointer)
+int MasterBoard::buildPath(bool isItInitialCall, int x, int y, std::string minionType, std::vector<std::vector<pathSquare>>& pathMapPointer)
 {
 
 	//If this is first call, reset myPathMap
@@ -1054,7 +1121,7 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
-	
+
 	//Wipe out ban list
 	banList.clear();
 
@@ -1166,9 +1233,6 @@ int MasterBoard::setRangeField(int inputX, int inputY)
 			//May also be different domain
 			//Also must be within range
 			//Also must have enough fuel
-			if (x == 6 && y == 2 && myMinion->type == 'c')
-				std::cout << "gothim" << std::endl;
-
 			if (myMinion->truePathMap[x][y].distanceFromMinion != -1 && myMinion->truePathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->movementRange
 				&& myMinion->truePathMap[x][y].distanceFromMinion <= cursor.selectMinionPointer->currentFuel)
 				if (Board[x][y].hasMinionOnTop != true || Board[x][y].minionOnTop->team == playerFlag
@@ -1430,7 +1494,7 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 
 	//Transport cannot attack so its attack field is 0.
 	//If out of ammo for both weapons, and neither weapon is infinite (Maxammo = 0), return.
-	if ((cursor.selectMinionPointer->type == smallTransport || cursor.selectMinionPointer->type == largeTransport) ||
+	if ((cursor.selectMinionPointer->specialtyGroup == smallTransport || cursor.selectMinionPointer->specialtyGroup == largeTransport) ||
 		(cursor.selectMinionPointer->currentPriAmmo <= 0 && cursor.selectMinionPointer->maxPriAmmo != 0
 			&& cursor.selectMinionPointer->currentSecAmmo <= 0 && cursor.selectMinionPointer->maxSecAmmo != 0))
 	{
@@ -1562,7 +1626,7 @@ int MasterBoard::setDropField(int inputX, int inputY)
 
 //attemptResult should return 1 if unsuccessful
 //Or 0 if successful
-int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam)
+int MasterBoard::attemptPurchaseMinion(std::string inputType, int inputX, int inputY, int inputTeam)
 {
 	int attemptResult = 1;
 
@@ -1584,7 +1648,7 @@ int MasterBoard::attemptPurchaseMinion(char inputType, int inputX, int inputY, i
 
 }
 
-int MasterBoard::createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo)
+int MasterBoard::createMinion(std::string inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo)
 {
 	//Cannot create minion illegally (On top of another, or in bad location)
 	if (Board[inputX][inputY].hasMinionOnTop == true || Board[inputX][inputY].consultMovementChart(inputType, Board[inputX][inputY].symbol) == 99)
@@ -2664,7 +2728,7 @@ int MasterBoard::resupplyMinions(inputLayer* InputLayer, int observerNumber)
 				}
 			}
 
-			if (minionRoster[i]->type == 'P')
+			if (minionRoster[i]->type == "APC")
 			{
 				individualResupply(minionRoster[i], true, InputLayer, observerNumber);
 			}

@@ -90,6 +90,7 @@ public:
 	int executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int takeMyTurn(MasterBoard* boardToUse);
 	int determineProduction(MasterBoard* boardToUse);
+	tile* findClosestAirbase(MasterBoard* boardToUse, Minion* inputMinion);
 
 	//Analysis tools called at game load.
 	int analyzeMap(MasterBoard* boardToUse);

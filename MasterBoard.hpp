@@ -61,9 +61,10 @@ public:
 	//Board Management Functions//////////////
 
 	//Pathfinding Functions////////////////////
-	int buildPath(bool isItInitialCall, int x, int y, char minionType, std::vector<std::vector<pathSquare>>& pathMapPointer);
+	int buildPath(bool isItInitialCall, int x, int y, std::string minionType, std::vector<std::vector<pathSquare>>& pathMapPointer);
 	int buildApparentPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
 	int buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
+	bool hasAdjacentMinion(int inputX, int inputY, int observerNumber);
 	//Pathfinding Functions////////////////////
 
 	//Field Manipulation Functions/////////////
@@ -96,9 +97,9 @@ public:
 	//Special Action Functions/////////////////
 
 	//Purchase Functions///////////////////////
-	int attemptPurchaseMinion(char inputType, int inputX, int inputY, int inputTeam);
-	int consultMinionCostChart(char minionType, char propertyType);
-	int createMinion(char inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
+	int attemptPurchaseMinion(std::string inputType, int inputX, int inputY, int inputTeam);
+	int consultMinionCostChart(std::string minionType, char propertyType);
+	int createMinion(std::string, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
 	//Purchase Functions///////////////////////
 
 	//Begin/End Turn Functions/////////////////
@@ -152,7 +153,7 @@ public:
 	std::string scenarioOrMissionName = "_";
 	int missionTurnLength = 0;	//Turn limit, or 0 if no turn limit.
 	int whoHoldsOut = 0;		//0 If missionLength is not on, otherwise indicates who wins if turns run out.
-	std::vector <char> banList;
+	std::vector <std::string> banList;
 	//MissionInfo///////////////////////////////
 
 private:

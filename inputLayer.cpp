@@ -233,21 +233,32 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 		}
 	}
 
+	//See if there are adjacent minions that can see a stealth minion
+	bool adjacentObservers = boardToPrint->hasAdjacentMinion(actualX, actualY, playerNumber);
+
 	//We only do minions and associated effects if they are visible
 	if (minionVisibleStatus == showMinions)
 	{
-		//Then print minion if withinVision AND not invisible
+
+		//Then print minion if withinVision AND not invisible AND not hidden
 		if (tileToPrint->hasMinionOnTop == true && tileToPrint->withinVision[playerNumber] == true
 			&& tileToPrint->minionOnTop->invisible == false)
 		{
-			tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50, screenY * 50);
-			inputLayerWindow->draw(tileToPrint->minionOnTop->mySprite);
+
+
+			//Last check - must not be stealth minion and unseen
+			if (tileToPrint->minionOnTop->specialtyGroup != stealth || adjacentObservers == true)
+			{
+				tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50, screenY * 50);
+				inputLayerWindow->draw(tileToPrint->minionOnTop->mySprite);
+			}
 		}
 
 
 		//Will only print  "selection" effects if human player's turn, or debug mode 
 		//AND if not in the middle of animation - indicated by the invisible flag on minion for movement
 		//AND indicated by the withinAnimation flag, for attacks and such.
+		//Don't need to check for stealth, because would already be on compie's turn
 		if ((boardToPrint->playerFlag == playerNumber || MainMenu->editorMode == true)
 			&& boardToPrint->cursor.selectMinionPointer != NULL
 			&& boardToPrint->cursor.selectMinionPointer->invisible == false
@@ -316,7 +327,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 	//Must be visible to see effects!
 	if (tileToPrint->hasMinionOnTop == true && minionToPrint != NULL && tileToPrint->withinVision[playerNumber] == true
-		&& minionVisibleStatus == showMinions && minionToPrint->invisible == false)
+		&& minionVisibleStatus == showMinions && minionToPrint->invisible == false && adjacentObservers == true)
 	{
 
 		//Print if transporting or capturing // Specialty moves
@@ -705,35 +716,35 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 		for (int i = 0; i < factoryButtons.size(); i++)
 		{
 			//Ungainly method to convert button number to minion type, to check if it's banned
-			char unitToShow;
+			std::string unitToShow;
 			switch (i)
 			{
 			case 0:
-				unitToShow = 'i';
+				unitToShow = "Infantry";
 				break;
 			case 1:
-				unitToShow = 's';
+				unitToShow = "Specialist";
 				break;
 			case 2:
-				unitToShow = 'c';
+				unitToShow = "Recon";
 				break;
 			case 3:
-				unitToShow = 'P';
+				unitToShow = "APC";
 				break;
 			case 4:
-				unitToShow = 'r';
+				unitToShow = "Artillery";
 				break;
 			case 5:
-				unitToShow = 'a';
+				unitToShow = "Armor";
 				break;
 			case 6:
-				unitToShow = 'A';
+				unitToShow = "Anti-Aircraft";
 				break;
 			case 7:
-				unitToShow = 'R';
+				unitToShow = "Rocket_Artillery";
 				break;
 			case 8:
-				unitToShow = 'T';
+				unitToShow = "Heavy_Armor";
 				break;
 			}
 
@@ -753,19 +764,19 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 	{
 		for (int i = 0; i < portButtons.size(); i++)
 		{
-			char unitToShow;
+			std::string unitToShow;
 			if (i == 0)
-				unitToShow = 'G';
+				unitToShow = "Gunboat";
 			if (i == 1)
-				unitToShow = 'C';
+				unitToShow = "Cruiser";
 			if (i == 2)
-				unitToShow = 'L';
+				unitToShow = "Lander";
 			if (i == 3)
-				unitToShow = 'U';
+				unitToShow = "Submarine";
 			if (i == 4)
-				unitToShow = 'B';
+				unitToShow = "Battleship";
 			if (i == 5)
-				unitToShow = 'V';
+				unitToShow = "Aircraft_Carrier";
 
 
 			//Check if minion type is on ban-list
@@ -783,15 +794,15 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 	{
 		for (int i = 0; i < airbaseButtons.size(); i++)
 		{
-			char unitToShow;
+			std::string unitToShow;
 			if (i == 0)
-				unitToShow = 'h';
+				unitToShow = "Transport_Copter";
 			if (i == 1)
-				unitToShow = 'v';
+				unitToShow = "Attack_Copter";
 			if (i == 2)
-				unitToShow = 'f';
+				unitToShow = "Interceptor";
 			if (i == 3)
-				unitToShow = 'b';
+				unitToShow = "Bomber";
 
 
 			//Check if minion type is on ban-list
@@ -1048,7 +1059,6 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 		(*soundEffects)[minionToMove->myMoveSound].play();
 	}
 
-
 	//If player controlled, tile the minion moves through will always be visible.
 	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
 	{
@@ -1056,7 +1066,9 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	}
 
 	//If within vision, change specific tile's animationSprite to match the movement graphics.
-	if (boardToPrint->Board[locationX][locationY].withinVision[observerNumber] == true)
+	//Also, must not be a stealth type minion if not our turn
+	if (boardToPrint->Board[locationX][locationY].withinVision[observerNumber] == true
+		&& (minionToMove->team == observerNumber || minionToMove->specialtyGroup != stealth))
 	{
 		boardToPrint->Board[locationX][locationY].animationSprite = &(minionToMove->mySprite);
 	}
@@ -1480,7 +1492,7 @@ int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 
 
 	//Convert valid keyboard input to char
-	char convertedInput = '~';
+	std::string convertedInput = "~";
 
 	if (capsLockOn == false)
 	{
@@ -1489,91 +1501,91 @@ int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 		{
 		case sf::Keyboard::I:
 		{
-			convertedInput = 'i';
+			convertedInput = "Infantry";
 			break;
 		}
 
 		case(sf::Keyboard::S):
 		{
-			convertedInput = 's';
+			convertedInput = "Specialist";
 			break;
 		}
 
 		case(sf::Keyboard::A):
 		{
-			convertedInput = 'a';
+			convertedInput = "Armor";
 			break;
 		}
 
 		case(sf::Keyboard::T):
 		{
-			convertedInput = 'T';
+			convertedInput = "Heavy_Armor";
 			break;
 		}
 
 		case(sf::Keyboard::R):
 		{
-			convertedInput = 'r';
+			convertedInput = "Artillery";
 			break;
 		}
 
 		case(sf::Keyboard::C):
 		{
-			convertedInput = 'c';
+			convertedInput = "Recon";
 			break;
 		}
 
 		case(sf::Keyboard::K):
 		{
-			convertedInput = 'K';
+			convertedInput = "Artillery_Emplacement";
 			break;
 		}
 
 		case(sf::Keyboard::V):
 		{
-			convertedInput = 'v';
+			convertedInput = "Attack_Copter";
 			break;
 		}
 
 		case(sf::Keyboard::H):
 		{
-			convertedInput = 'h';
+			convertedInput = "Transport_Copter";
 			break;
 		}
 
 		case(sf::Keyboard::P):
 		{
-			convertedInput = 'P';
+			convertedInput = "APC";
 			break;
 		}
 
 		case(sf::Keyboard::F):
 		{
-			convertedInput = 'f';
+			convertedInput = "Interceptor";
 			break;
 		}
 
 		case(sf::Keyboard::B):
 		{
-			convertedInput = 'b';
+			convertedInput = "Bomber";
 			break;
 		}
 
 		case(sf::Keyboard::G):
 		{
-			convertedInput = 'G';
+			convertedInput = "Gunboat";
 			break;
 		}
 
 		case(sf::Keyboard::L):
 		{
-			convertedInput = 'L';
+			convertedInput = "Lander";
 			break;
 		}
 
 		case(sf::Keyboard::U):
 		{
-			convertedInput = 'U';
+			convertedInput = "Submarine";
 			break;
 		}
 
@@ -1585,34 +1597,34 @@ int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 		{
 		case(sf::Keyboard::A):
 		{
-			convertedInput = 'A';
+			convertedInput = "Anti-Aircraft";
 			break;
 		}
 		case(sf::Keyboard::V):
 		{
-			convertedInput = 'V';
+			convertedInput = "Aircraft_Carrier";
 			break;
 		}
 
 		case(sf::Keyboard::R):
 		{
-			convertedInput = 'R';
+			convertedInput = "Rocket_Artillery";
 			break;
 		}
 		case(sf::Keyboard::B):
 		{
 
-			convertedInput = 'B';
+			convertedInput = "Battleship";
 			break;
 		}
 		case(sf::Keyboard::C):
 		{
-			convertedInput = 'C';
+			convertedInput = "Cruiser";
 			break;
 		}
 		case(sf::Keyboard::S):
 		{
-			convertedInput = 'S';
+			convertedInput = "SAM_Site";
 			break;
 		}
 		}
@@ -1756,7 +1768,7 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 	}
 
 	//If input tile symbol is invalid, return 1.
-	if (myTile->consultMovementChart('i', inputChar) == -1)
+	if (myTile->consultMovementChart("Infantry", inputChar) == -1)
 		return 1;
 
 	//Prevent terrain from being somewhere that minion couldn't actually move.
@@ -2008,43 +2020,58 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		}
 	}
 
+	int cursorX = boardToInput->cursor.getX();
+	int cursorY = boardToInput->cursor.getY();
+
+	//See if any adjacent friendly minions to this square
+	bool friendlyAdjacentMinion = boardToInput->hasAdjacentMinion(cursorX, cursorY, boardToInput->playerFlag);
+
+	//See if enemy minion here.
+	bool stealthEnemyHere = false;
+	if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true && boardToInput->Board[cursorX][cursorY].minionOnTop->team != boardToInput->playerFlag
+		&& boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == stealth)
+		stealthEnemyHere = true;
+
 	//Move minion command
 	//If minion selected and hasn't moved or fired, attempt to move.
 	//The moveMinion function will check if we are on top of ourselves or another minion.
 	if (*Input == sf::Keyboard::Key::M && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
 	{
+
 		//If there is a minion on top and that minion is visible to the minion's owner
-		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true
-			&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinVision[boardToInput->cursor.selectMinionPointer->team] == true)
+		if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true
+			&& boardToInput->Board[cursorX][cursorY].withinVision[boardToInput->cursor.selectMinionPointer->team] == true)
 		{
 			//If minion on top is this minion, do hold position movement.
-			if (boardToInput->cursor.selectMinionPointer->locationX == boardToInput->cursor.getX()
-				&& boardToInput->cursor.selectMinionPointer->locationY == boardToInput->cursor.getY())
+			if (boardToInput->cursor.selectMinionPointer->locationX == cursorX && boardToInput->cursor.selectMinionPointer->locationY == cursorY)
 			{
-				boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag);
+				boardToInput->moveMinion(cursorX, cursorY, this, boardToInput->playerFlag);
 				status = gameBoard;
 			}
 			else
 				//If that minion is a transport and is same team
-				if ((boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->specialtyGroup == smallTransport ||
-					boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->specialtyGroup == largeTransport)
-					&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team == boardToInput->cursor.selectMinionPointer->team)
+				if ((boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == smallTransport ||
+					boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == largeTransport)
+					&& boardToInput->Board[cursorX][cursorY].minionOnTop->team == boardToInput->cursor.selectMinionPointer->team)
 				{
 					status = gameBoard;	//Set status to gameboard to make it through pickupMinion
 										//If we do not set status to gameboard, it will segfault when it prints minion status during move, during validatePath.
-					int success = boardToInput->pickUpMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag);
+					int success = boardToInput->pickUpMinion(cursorX, cursorY, this, boardToInput->playerFlag);
 
 					//If failed to actually move at all (invalid move attempt), set back to minion action, since we didn't deselect within pickupMinion.
 					if (success == 1)
 						status = minionAction;
 				}
 		}
-		else //If no minion on top attempt to move there
-			if (boardToInput->moveMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag) == 0)
+		else //To attempt to mvoe on tile, must either not have a stealther, or at least doesn't have someone adjacent to see them
+			if (stealthEnemyHere == false || friendlyAdjacentMinion == false)
 			{
-				//Change status appropriately for successful movement.
-				status = gameBoard;
+				if (boardToInput->moveMinion(cursorX, cursorY, this, boardToInput->playerFlag) == 0)
+				{
+					//Change status appropriately for successful movement.
+					status = gameBoard;
+				}
 			}
 
 	}
@@ -2053,10 +2080,10 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	//Must have minion selected.
 	//Must be APC, hasn't taken second action, cursor is on minion, and regardless of transport status.
 	if (*Input == sf::Keyboard::Key::I && boardToInput->cursor.selectMinionFlag == true
-		&& boardToInput->cursor.selectMinionPointer->type == 'P'
+		&& boardToInput->cursor.selectMinionPointer->type == "APC"
 		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-		&& boardToInput->cursor.getX() == boardToInput->cursor.selectMinionPointer->locationX
-		&& boardToInput->cursor.getY() == boardToInput->cursor.selectMinionPointer->locationY)
+		&& cursorX == boardToInput->cursor.selectMinionPointer->locationX
+		&& cursorY == boardToInput->cursor.selectMinionPointer->locationY)
 	{
 		//May not be successful, so not necessarily return 0
 		if (boardToInput->individualResupply(boardToInput->cursor.selectMinionPointer, false, this, boardToInput->playerFlag) == 0)
@@ -2072,9 +2099,9 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 			boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
 			&& boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
-		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false
-		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true
-		&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol) != 99)
+		&& boardToInput->Board[cursorX][cursorY].hasMinionOnTop == false
+		&& boardToInput->Board[cursorX][cursorY].withinRange == true
+		&& boardToInput->Board[cursorX][cursorY].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[cursorX][cursorY].symbol) != 99)
 	{
 		if (boardToInput->dropOffMinion() == 0)
 			status = gameBoard;
@@ -2082,21 +2109,25 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 	bool lastMinionDestroyed = false;
 	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
+	//Also, must not be stealth if we have no one adjacent.
+
+
 	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && (boardToInput->cursor.selectMinionPointer->specialtyGroup != smallTransport && boardToInput->cursor.selectMinionPointer->specialtyGroup != largeTransport))
-		if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
-			if ((boardToInput->cursor.getX() != boardToInput->cursor.selectMinionPointer->locationX) || (boardToInput->cursor.getY() != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
-				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
-					if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].withinRange == true)	//In range
-					{
-						//This is the actual attack portion. Return of 0 indicates successful attack.
-						//Note minion's owner so if they lose we know who lost.
-						playerPotentiallyDefeated = boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].minionOnTop->team;
-						bool attackSuccess = boardToInput->attackMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY(), this, boardToInput->playerFlag);
-						if (attackSuccess == 0)
+		if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true)
+			if ((cursorX != boardToInput->cursor.selectMinionPointer->locationX) || (cursorY != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
+				if (boardToInput->Board[cursorX][cursorY].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
+					if (boardToInput->Board[cursorX][cursorY].withinRange == true)	//In range
+						if (stealthEnemyHere == false || friendlyAdjacentMinion == true)	//Either not a stealther, or we can see them with adjacent minion
 						{
-							status = gameBoard;
+							//This is the actual attack portion. Return of 0 indicates successful attack.
+							//Note minion's owner so if they lose we know who lost.
+							playerPotentiallyDefeated = boardToInput->Board[cursorX][cursorY].minionOnTop->team;
+							bool attackSuccess = boardToInput->attackMinion(cursorX, cursorY, this, boardToInput->playerFlag);
+							if (attackSuccess == 0)
+							{
+								status = gameBoard;
+							}
 						}
-					}
 
 	//Press 'c' to capture property minion is currently on.
 	//First, minion must be available.
@@ -2136,7 +2167,7 @@ int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 	sf::String defeatMessage = boardToPrint->playerRoster[playerDefeated].name;
 	defeatMessage += " was defeated. Press any key to continue.  \n";
 
-	sf::Text defeatText(defeatMessage, *inputLayerFont, MainMenu->menuTextSize+5);
+	sf::Text defeatText(defeatMessage, *inputLayerFont, MainMenu->menuTextSize + 5);
 	defeatText.setPosition(380, 100);
 	defeatText.setFillColor(sf::Color::Black);
 	MainMenu->mywindow->draw(defeatText);
@@ -2163,7 +2194,7 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 	sf::String victoryMessage = boardToPrint->playerRoster[playerVictorious].name;
 	victoryMessage += " was victorious! Press any key to continue.  \n";
 
-	sf::Text victoryText(victoryMessage, *inputLayerFont, MainMenu->menuTextSize+5);
+	sf::Text victoryText(victoryMessage, *inputLayerFont, MainMenu->menuTextSize + 5);
 	victoryText.setPosition(380, 100);
 	victoryText.setFillColor(sf::Color::Black);
 	MainMenu->mywindow->draw(victoryText);
@@ -2452,7 +2483,7 @@ int inputLayer::NextMission(MasterBoard* boardToInput)
 int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput) {
 
 	tile* myTile = &boardToInput->Board[boardToInput->cursor.XCoord][boardToInput->cursor.YCoord];
-	char requestedPurchase = '~';
+	std::string requestedPurchase = "NOBODY";
 	bool purchaseSuccess = false;
 	int treasury = boardToInput->playerRoster[boardToInput->playerFlag].treasury;
 
@@ -2493,31 +2524,31 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 			switch (buttonNumber)
 			{
 			case 0:
-				requestedPurchase = 'i';
+				requestedPurchase = "Infantry";
 				break;
 			case 1:
-				requestedPurchase = 's';
+				requestedPurchase = "Specialist";
 				break;
 			case 2:
-				requestedPurchase = 'c';
+				requestedPurchase = "Recon";
 				break;
 			case 3:
-				requestedPurchase = 'P';
+				requestedPurchase = "APC";
 				break;
 			case 4:
-				requestedPurchase = 'r';
+				requestedPurchase = "Artillery";
 				break;
 			case 5:
-				requestedPurchase = 'a';
+				requestedPurchase = "Armor";
 				break;
 			case 6:
-				requestedPurchase = 'A';
+				requestedPurchase = "Anti-Aircraft";
 				break;
 			case 7:
-				requestedPurchase = 'R';
+				requestedPurchase = "Rocket_Artillery";
 				break;
 			case 8:
-				requestedPurchase = 'T';
+				requestedPurchase = "Heavy_Armor";
 				break;
 			}
 		}
@@ -2535,17 +2566,17 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 			}
 
 			if (buttonNumber == 0)
-				requestedPurchase = 'G';
+				requestedPurchase = "Gunboat";
 			if (buttonNumber == 1)
-				requestedPurchase = 'C';
+				requestedPurchase = "Cruiser";
 			if (buttonNumber == 2)
-				requestedPurchase = 'L';
+				requestedPurchase = "Lander";
 			if (buttonNumber == 3)
-				requestedPurchase = 'U';
+				requestedPurchase = "Submarine";
 			if (buttonNumber == 4)
-				requestedPurchase = 'B';
+				requestedPurchase = "Battleship";
 			if (buttonNumber == 5)
-				requestedPurchase = 'V';
+				requestedPurchase = "Aircraft_Carrier";
 
 		}
 
@@ -2562,13 +2593,13 @@ int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 			}
 
 			if (buttonNumber == 0)
-				requestedPurchase = 'h';
+				requestedPurchase = "Transport_Copter";
 			if (buttonNumber == 1)
-				requestedPurchase = 'v';
+				requestedPurchase = "Attack_Copter";
 			if (buttonNumber == 2)
-				requestedPurchase = 'f';
+				requestedPurchase = "Interceptor";
 			if (buttonNumber == 3)
-				requestedPurchase = 'b';
+				requestedPurchase = "Bomber";
 
 
 		}

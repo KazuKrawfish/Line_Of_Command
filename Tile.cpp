@@ -321,3 +321,168 @@ int tile::determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet)
 	return 0;
 
 }
+
+
+int tile::consultMovementChart(std::string minionType, char terrainType)
+{
+
+	int x = -1;
+	int y = -1;
+
+	if ( minionType == "Infantry")
+		x = 0;
+	else
+	if ( minionType == "Specialist")
+		x = 1;
+	else
+	if ( minionType == "Armor")
+		x = 2;
+	else
+	if ( minionType == "Artillery")
+		x = 3;
+	else
+	if ( minionType == "Recon")
+		x = 4;
+	else
+	if ( minionType == "Rocket_Artillery")
+		x = 5;
+	else
+	if ( minionType == "Heavy_Armor")
+		x = 6;
+	else
+	if ( minionType == "Anti-Aircraft")
+		x = 7;
+	else
+	if ( minionType == "Attack_Copter")
+		x = 8;
+	else
+	if ( minionType == "Transport_Copter")
+		x = 9;
+	else
+	if ( minionType == "APC")	
+		x = 10;
+	else
+	if ( minionType == "Interceptor")
+		x = 11;
+	else
+	if ( minionType == "Bomber")	
+		x = 12;
+	else
+	if ( minionType == "Lander")	
+		x = 13;
+	else
+	if ( minionType == "Battleship")	
+		x = 14;
+	else
+	if ( minionType == "Cruiser")
+		x = 15;
+	else
+	if ( minionType == "Gunboat")	
+		x = 16;
+	else
+	if ( minionType == "Submarine")	
+		x = 17;
+	else
+	if ( minionType == "Aircraft_Carrier")	
+		x = 18;
+	else
+	if ( minionType == "Artillery_Emplacement")
+		x = 19;
+	else
+	if ( minionType == "SAM_Site")	
+		x = 20;
+
+
+	//   . + ^ M  H m n h Q = ~ - A P
+	switch (terrainType)
+	{
+	case('.'):
+		y = 0;
+		break;
+	case('+'):
+		y = 1;
+		break;
+	case('^'):
+		y = 2;
+		break;
+	case('M'):
+		y = 3;
+		break;
+	case('H'):
+		y = 4;
+		break;
+	case('m'):
+		y = 5;
+		break;
+	case('n'):
+		y = 6;
+		break;
+	case('h'):
+		y = 7;
+		break;
+	case('Q'):
+		y = 8;
+		break;
+	case('='):
+		y = 9;
+		break;
+	case('~'):
+		y = 10;
+		break;
+	case('-'):
+		y = 11;
+		break;
+	case('A'):
+		y = 12;
+		break;
+	case('P'):	//Port
+		y = 13;
+		break;
+	case('*'):	//Beach
+		y = 14;
+		break;
+	}
+
+	if (x == -1 || y == -1)
+	{
+		return -1;
+	}
+
+	int answer = -1;
+	answer = MOVE_VALUES_MATRIX[x][y];
+	return answer;
+
+}
+	
+
+
+bool tile::checkForProperty(char terrainType)
+{
+	bool isProperty = false;
+
+	//Non property included for clarity.
+	switch (terrainType)
+	{
+	case('.'):
+	case('+'):
+	case('^'):
+	case('M'):
+	case('='):
+	case('~'):
+	case('-'):
+	case('*'):
+		isProperty = false;
+		break;
+	case('A'):
+	case('P'):
+	case('H'):
+	case('m'):
+	case('n'):
+	case('h'):
+	case('Q'):
+		isProperty = true;
+		break;
+	}
+
+	return isProperty;
+}

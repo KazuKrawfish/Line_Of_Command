@@ -21,6 +21,45 @@ int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
 }
 //Above functions are "utilities" that need to find a home.
 
+//Find closest airbase to minion
+//If none exist, return NULL tile
+tile* compie::findClosestAirbase(MasterBoard* boardToUse, Minion* inputMinion)
+{
+	tile* closestAirBase = NULL;
+	int oldDistance = -1;
+
+
+	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
+		{
+			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
+			{
+				if (boardToUse->Board[x][y].symbol == 'A')
+				{
+					if (closestAirBase == NULL)
+					{
+						closestAirBase = &boardToUse->Board[x][y];
+						oldDistance = computeDistance(boardToUse->Board[x][y].locationX, inputMinion->locationX, boardToUse->Board[x][y].locationY, inputMinion->locationY);
+					}
+					else
+					{
+						int newDistance = computeDistance(boardToUse->Board[x][y].locationX, inputMinion->locationX, boardToUse->Board[x][y].locationY, inputMinion->locationY);
+
+						if (newDistance < oldDistance)
+						{
+							oldDistance = newDistance;
+							closestAirBase = &boardToUse->Board[x][y];
+						}
+					}
+				}
+			}
+		}
+
+	}
+	return closestAirBase;
+}
+
 int compie::statusUpdate(MasterBoard* boardToUse)
 {
 	double totalPropertiesCompieOwns = 0;
@@ -295,7 +334,7 @@ int compie::analyzeMap(MasterBoard* boardToUse)
 				totalPropertiesOnMap++;
 
 			//Here we find which properties are impassible to an infantry, which helps determine the boundaries for compie's land mass map.
-			int movementCostHere = boardToUse->Board[x][y].consultMovementChart('i', boardToUse->Board[x][y].symbol);
+			int movementCostHere = boardToUse->Board[x][y].consultMovementChart("Infantry", boardToUse->Board[x][y].symbol);
 			if (movementCostHere == -1)
 			{
 				std::cout << "Error while analyzing map, incorrect symbol" << std::endl;
@@ -1058,7 +1097,6 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 	int returnX = 0;
 	int returnY = 0;
 
-
 	if (boardToUse->cursor.selectMinionPointer == NULL)
 	{
 		return 1;
@@ -1077,9 +1115,25 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 
 	}
 	else
-		//If highly damaged or Air and low on fuel
-		if (myMinion->health < 50 ||
-			(myMinion->domain == air && (myMinion->currentFuel < (myMinion->maxFuel / 3) || myMinion->currentPriAmmo == 0 || myMinion->currentSecAmmo == 0)))
+	{
+		int distanceToAirbase = -1;
+		//Air minions need to accurately assess their chance of reaching a fuel point.
+		if (myMinion->domain == air)
+		{
+			tile* closestAirbase = findClosestAirbase(boardToUse, myMinion);
+			if (closestAirbase != NULL)
+			{
+				distanceToAirbase = computeDistance(closestAirbase->locationX, myMinion->locationX, closestAirbase->locationY, myMinion->locationY);
+
+			}
+
+		}
+
+		//If highly damaged or Air and far from base/needs to refuel soon / out of ammo
+		//Far from base means - current fuel less than distance to closest base, including 2 turns of fuel burn (+10) and a fuel margin (+10) to actually make it.
+		if (myMinion->health < 50 || (myMinion->domain == air
+			&& (myMinion->currentFuel < distanceToAirbase + 20 || myMinion->currentFuel < (myMinion->maxFuel / 3)
+				|| myMinion->currentPriAmmo == 0 || myMinion->currentSecAmmo == 0)))
 		{
 			int distance = strategicWithdraw(boardToUse, selectedMinionRecord);
 			if (distance < 999 && distance >= 0)	//Error code is -1
@@ -1103,7 +1157,8 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 			}
 			else
 				if (defendHeadquarters(boardToUse, selectedMinionRecord) == 1)
-				{
+				{	//Not sure if this is actually happening, may need to add tasking and taskingStatus.
+					std::cout << "Headquarters under attack!" << std::endl;
 					return 1;
 				}
 				else		//DefendProperty ensures that defending prop has higher priority than attacking a local minion regardless of cost
@@ -1150,7 +1205,7 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 					}
 
 
-
+	}
 
 
 	//Check adjacent tiles if we want to attack them, even if we stood still.
@@ -1434,14 +1489,19 @@ int compie::determineProduction(MasterBoard* boardToUse)
 {
 
 	int totalFactoriesLeft = 0;
+	int numberOfPorts = 0;
 	int numberOfTanks = 0;
 	int numberOfInfantry = 0;
 	int numberOfCavalry = 0;
 	int numberOfSpecialists = 0;
 	int numberOfRanged = 0;
 	int numberOfBombers = 0;
+	int numberOfAA = 0;
+	int numberOfSeaCombatants = 0;
+	int numberOfEnemyAirUnits = 0;
 
 	//Go through map and find all of our factories for totalFactories
+	//Also count ports for naval contstruction
 	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
@@ -1450,6 +1510,11 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
 			{
 				totalFactoriesLeft++;
+			}
+			//If the current tile is our factory
+			if (boardToUse->Board[x][y].symbol == 'P' && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
+			{
+				numberOfPorts++;
 			}
 		}
 	}
@@ -1460,42 +1525,56 @@ int compie::determineProduction(MasterBoard* boardToUse)
 
 		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team == boardToUse->playerFlag)
 		{
-			switch (boardToUse->minionRoster[i]->type)
-			{
-			case('i'):
+			
+			if ( boardToUse->minionRoster[i]->type == "Infantry")
 			{
 				numberOfInfantry++;
-				break;
+				
 			}
-			case('a'):
-			case('T'):
+			if (boardToUse->minionRoster[i]->type == "Armor" || boardToUse->minionRoster[i]->type == "Heavy_Armor")
 			{
 				numberOfTanks++;
-				break;
+				
 			}
-			case('c'):
+			if (boardToUse->minionRoster[i]->type == "Recon")
 			{
 				numberOfCavalry++;
 
-				break;
+				
 			}
-			case('s'):
+			if (boardToUse->minionRoster[i]->type == "Specialist")
 			{
 				numberOfSpecialists++;
-				break;
+				
 			}
-			case('r'):
-			case('R'):
+			if (boardToUse->minionRoster[i]->type ==  "Artillery" || boardToUse->minionRoster[i]->type == "Rocket_Artillery")
 			{
 				numberOfRanged++;
-				break;
+				
 			}
-			case('v'):
-			case('b'):
+			if (boardToUse->minionRoster[i]->type ==  "Attack_Copter" || boardToUse->minionRoster[i]->type == "Bomber")
 			{
 				numberOfBombers++;
-				break;
+				
 			}
+			if (boardToUse->minionRoster[i]->type ==  "Anti-Aicraft" || boardToUse->minionRoster[i]->type ==  "Interceptor")
+			{
+				numberOfAA++;
+			}
+			
+		}
+
+		//Look at enemy units and count total air units
+		//Must be able to see those units, otherwise compie is cheating
+		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team != boardToUse->playerFlag
+			&& boardToUse->Board[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].withinVision[boardToUse->playerFlag] == true)
+		{
+			if (boardToUse->minionRoster[i]->type == "Interceptor" ||
+				boardToUse->minionRoster[i]->type == "Attack_Copter" ||
+				boardToUse->minionRoster[i]->type == "Bomber" ||
+				boardToUse->minionRoster[i]->type == "Transport_Copter"  )
+			{
+				numberOfEnemyAirUnits++;
 			}
 		}
 	}
@@ -1518,45 +1597,46 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
 
-				//If we have a proper proportion of tanks, buy cavalry.
-				//Must not be banned.
-				if (int(numberOfTanks / 3) > numberOfCavalry
-					&& boardToUse->consultMinionCostChart('c', 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('c', 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'c') != boardToUse->banList.end())
+				//If enemy has at least 1 air unit, and we either have no AA, or they twice or more than our AA
+				//And we can afford, and is not banned
+				if (numberOfEnemyAirUnits > 0 && (numberOfAA == 0 || numberOfEnemyAirUnits / numberOfAA >= 2)
+					&& boardToUse->consultMinionCostChart("Anti-Aircraft", 'h') <= availableTreasury
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Anti-Aircraft", 'h')
+					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Anti-Aircraft") != boardToUse->banList.end())
 				{
 					//Must be able to actually afford the unit.				
-					int success = boardToUse->attemptPurchaseMinion('c', x, y, boardToUse->playerFlag);
+					int success = boardToUse->attemptPurchaseMinion("Anti-Aircraft", x, y, boardToUse->playerFlag);
 					if (success == 0)
 					{
-						numberOfCavalry++;
+						numberOfAA++;
 						totalFactoriesLeft--;
 					}
-
 				}
-				else	//If we have enough cav, buy rocket if not banned
-					if (int(numberOfTanks / 2) > numberOfRanged
-						&& boardToUse->consultMinionCostChart('R', 'h') <= availableTreasury
-						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('R', 'h')
-						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'R') != boardToUse->banList.end())
+				else
+					//If we have a proper proportion of tanks, buy cavalry.
+					//Must not be banned.
+					if (int(numberOfTanks / 3) > numberOfCavalry
+						&& boardToUse->consultMinionCostChart("Recon", 'h') <= availableTreasury
+						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Recon", 'h')
+						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Recon") != boardToUse->banList.end())
 					{
 						//Must be able to actually afford the unit.				
-						int success = boardToUse->attemptPurchaseMinion('R', x, y, boardToUse->playerFlag);
+						int success = boardToUse->attemptPurchaseMinion("Recon", x, y, boardToUse->playerFlag);
 						if (success == 0)
 						{
-							numberOfRanged++;
+							numberOfCavalry++;
 							totalFactoriesLeft--;
 						}
 
 					}
-					else	//If we can't afford rocket, maybe we can afford arty (If not banned)
+					else	//If we have enough cav, buy rocket if not banned
 						if (int(numberOfTanks / 2) > numberOfRanged
-							&& boardToUse->consultMinionCostChart('r', 'h') <= availableTreasury
-							&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('r', 'h')
-							&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'r') != boardToUse->banList.end())
+							&& boardToUse->consultMinionCostChart("Rocket_Artillery", 'h') <= availableTreasury
+							&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Rocket_Artillery", 'h')
+							&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Rocket_Artillery") != boardToUse->banList.end())
 						{
 							//Must be able to actually afford the unit.				
-							int success = boardToUse->attemptPurchaseMinion('r', x, y, boardToUse->playerFlag);
+							int success = boardToUse->attemptPurchaseMinion("Rocket_Artillery", x, y, boardToUse->playerFlag);
 							if (success == 0)
 							{
 								numberOfRanged++;
@@ -1564,65 +1644,80 @@ int compie::determineProduction(MasterBoard* boardToUse)
 							}
 
 						}
-						else		//Infantry and specialists have a similar proportion.
-							if (int(numberOfInfantry / 3) > numberOfSpecialists
-								&& boardToUse->consultMinionCostChart('s', 'h') <= availableTreasury
-								&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('s', 'h')
-								&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 's') != boardToUse->banList.end()
-								&&
-								(compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
-									compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
-								)
+						else	//If we can't afford rocket, maybe we can afford arty (If not banned)
+							if (int(numberOfTanks / 2) > numberOfRanged
+								&& boardToUse->consultMinionCostChart("Artillery", 'h') <= availableTreasury
+								&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Artillery", 'h')
+								&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Artillery") != boardToUse->banList.end())
 							{
-								//Must be able to actually afford the unit.
-
-								int success = boardToUse->attemptPurchaseMinion('s', x, y, boardToUse->playerFlag);
+								//Must be able to actually afford the unit.				
+								int success = boardToUse->attemptPurchaseMinion("Artillery", x, y, boardToUse->playerFlag);
 								if (success == 0)
 								{
-									numberOfSpecialists++;
+									numberOfRanged++;
 									totalFactoriesLeft--;
 								}
+
 							}
-							else    //Otherwise just buy other frontline units
-								if (boardToUse->consultMinionCostChart('T', 'h') <= availableTreasury
-									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('T', 'h')
-									&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'T') != boardToUse->banList.end())
-								{
-									//Must be able to actually afford the unit, and must not be banned.
-									int success = boardToUse->attemptPurchaseMinion('T', x, y, boardToUse->playerFlag);
-									if (success == 0)
-									{
-										numberOfTanks++;
-										totalFactoriesLeft--;
-									}
-								}
-								else if (boardToUse->consultMinionCostChart('a', 'h') <= availableTreasury
-									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('a', 'h')
-									&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'a') != boardToUse->banList.end())
-								{
-									//Must be able to actually afford the unit, and must not be banned.
-									int success = boardToUse->attemptPurchaseMinion('a', x, y, boardToUse->playerFlag);
-									if (success == 0)
-									{
-										numberOfTanks++;
-										totalFactoriesLeft--;
-									}
-								}
-								else if (boardToUse->consultMinionCostChart('i', 'h') <= availableTreasury
-									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('i', 'h')
-									&& (compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
+							else		//Infantry and specialists have a similar proportion.
+								if (int(numberOfInfantry / 3) > numberOfSpecialists
+									&& boardToUse->consultMinionCostChart("Specialist", 'h') <= availableTreasury
+									&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Specialist", 'h')
+									&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Specialist") != boardToUse->banList.end()
+									&&
+									(compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
 										compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
-									&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'i') != boardToUse->banList.end()
 									)
 								{
-									//Must be able to actually afford the unit, and must not be banned.
-									int success = boardToUse->attemptPurchaseMinion('i', x, y, boardToUse->playerFlag);
+									//Must be able to actually afford the unit.
+
+									int success = boardToUse->attemptPurchaseMinion("Specialist", x, y, boardToUse->playerFlag);
 									if (success == 0)
 									{
-										numberOfInfantry++;
+										numberOfSpecialists++;
 										totalFactoriesLeft--;
 									}
 								}
+								else    //Otherwise just buy other frontline units
+									if (boardToUse->consultMinionCostChart("Heavy_Armor", 'h') <= availableTreasury
+										&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Heavy_Armor", 'h')
+										&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Heavy_Armor") != boardToUse->banList.end())
+									{
+										//Must be able to actually afford the unit, and must not be banned.
+										int success = boardToUse->attemptPurchaseMinion("Heavy_Armor", x, y, boardToUse->playerFlag);
+										if (success == 0)
+										{
+											numberOfTanks++;
+											totalFactoriesLeft--;
+										}
+									}
+									else if (boardToUse->consultMinionCostChart("Armor", 'h') <= availableTreasury
+										&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Armor", 'h')
+										&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Armor") != boardToUse->banList.end())
+									{
+										//Must be able to actually afford the unit, and must not be banned.
+										int success = boardToUse->attemptPurchaseMinion("Armor", x, y, boardToUse->playerFlag);
+										if (success == 0)
+										{
+											numberOfTanks++;
+											totalFactoriesLeft--;
+										}
+									}
+									else if (boardToUse->consultMinionCostChart("Infantry", 'h') <= availableTreasury
+										&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Infantry", 'h')
+										&& (compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
+											compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
+										&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Infantry") != boardToUse->banList.end()
+										)
+									{
+										//Must be able to actually afford the unit, and must not be banned.
+										int success = boardToUse->attemptPurchaseMinion("Infantry", x, y, boardToUse->playerFlag);
+										if (success == 0)
+										{
+											numberOfInfantry++;
+											totalFactoriesLeft--;
+										}
+									}
 
 			}
 
@@ -1633,12 +1728,25 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
 				if (int(numberOfTanks / 3) > numberOfBombers
-					&& boardToUse->consultMinionCostChart('b', 'A') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('b', 'A')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'b') != boardToUse->banList.end())
+					&& boardToUse->consultMinionCostChart("Bomber", 'A') <= availableTreasury
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Bomber", 'A')
+					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Bomber") != boardToUse->banList.end())
 				{
 					//Must be able to actually afford the unit.
-					int success = boardToUse->attemptPurchaseMinion('b', x, y, boardToUse->playerFlag);
+					int success = boardToUse->attemptPurchaseMinion("Bomber", x, y, boardToUse->playerFlag);
+					if (success == 0)
+					{
+						numberOfBombers++;
+					}
+				}
+
+				if (int(numberOfTanks / 3) > numberOfBombers
+					&& boardToUse->consultMinionCostChart("Attack_Copter", 'A') <= availableTreasury
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Attack_Copter", 'A')
+					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Attack_Copter") != boardToUse->banList.end())
+				{
+					//Must be able to actually afford the unit.
+					int success = boardToUse->attemptPurchaseMinion("Attack_Copter", x, y, boardToUse->playerFlag);
 					if (success == 0)
 					{
 						numberOfBombers++;
@@ -1646,25 +1754,29 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				}
 			}
 
-			if (boardToUse->Board[x][y].symbol == 'A' &&
+			//Port production
+			//If the current tile is our port and there is no one already on top
+			if (boardToUse->Board[x][y].symbol == 'P' &&
 				boardToUse->Board[x][y].controller == boardToUse->playerFlag &&
 				boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
-				if (int(numberOfTanks / 3) > numberOfBombers
-					&& boardToUse->consultMinionCostChart('v', 'A') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart('v', 'A')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), 'v') != boardToUse->banList.end())
+				//If we have less naval units than ports
+				if (numberOfPorts > numberOfSeaCombatants)
 				{
-					//Must be able to actually afford the unit.
-					int success = boardToUse->attemptPurchaseMinion('v', x, y, boardToUse->playerFlag);
-					if (success == 0)
+					//Try building a gunboat
+					if (boardToUse->consultMinionCostChart("Gunboat", 'P') <= availableTreasury
+						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Gunboat", 'P')
+						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Gunboat") != boardToUse->banList.end())
 					{
-						numberOfBombers++;
+						//Must be able to actually afford the unit.
+						int success = boardToUse->attemptPurchaseMinion("Gunboat", x, y, boardToUse->playerFlag);
+						if (success == 0)
+						{
+							numberOfSeaCombatants++;
+						}
 					}
 				}
 			}
-
-
 
 
 

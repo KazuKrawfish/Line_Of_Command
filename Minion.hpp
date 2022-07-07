@@ -40,7 +40,7 @@ class Minion
 public:
 
 	//Constructors
-	Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam, MasterBoard* Environment,
+	Minion(int inputSeniority, int inputX, int inputY, std::string inputType, int inputTeam, MasterBoard* Environment,
 		int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo, int inputSecAmmo, sf::Texture* inputTexture);
 	Minion();
 	~Minion();
@@ -51,7 +51,7 @@ public:
 	int seniority = -1;		//Used to indicated where the minion resides within the minion array. Used to construct and destruct the minion.
 	int locationX = -1;
 	int locationY = -1;
-	char type = 'x';			//Type of minion  -- equivalent to symbol for tiles.
+	std::string type = "None";			//Type of minion  -- equivalent to symbol for tiles.
 	int movementRange = 0;
 	int attackRange = 0;
 	int minAttackRange = 0;	//Only matters for ranged attacks (Whether Hybrid or rangedFire)

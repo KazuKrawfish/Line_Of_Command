@@ -5,6 +5,7 @@
 
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
+#include <string>
 
 //
 //Default Constructor. Should not be used.
@@ -28,8 +29,8 @@ Minion::Minion()
 //Always use this constructor, it gives the new Minion all required properties.
 //When updating Minion(), also update ATTACK_VALUES_MATRIX, consultAttackValuesChart, movement costs and consultMinionCostChart.
 //This assumes that the transport already exists if the minion is being carried. Can cause NULL dereference!
-Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int inputTeam,
-	MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, 
+Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType, int inputTeam,
+	MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel,
 	int inputPriAmmo, int inputSecAmmo, sf::Texture* inputTexture)
 {
 	veterancy = inputVeterancy;
@@ -60,7 +61,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		if (Environment->Board[inputX][inputY].hasMinionOnTop != NULL)
 		{
 			transporter = Environment->Board[inputX][inputY].minionOnTop;
-			if(Environment->Board[inputX][inputY].minionOnTop->firstMinionBeingTransported == NULL)
+			if (Environment->Board[inputX][inputY].minionOnTop->firstMinionBeingTransported == NULL)
 				Environment->Board[inputX][inputY].minionOnTop->firstMinionBeingTransported = this;
 			else Environment->Board[inputX][inputY].minionOnTop->secondMinionBeingTransported = this;
 		}
@@ -76,9 +77,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		locationY = inputY;
 	}
 
-	switch (inputType)
-	{
-	case('i'):
+	
+	if(inputType == "Infantry")
 	{
 		description = "Infantry";
 		movementRange = 3;
@@ -86,13 +86,13 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		mySprite.setTextureRect(rectArray[0][inputTeam+4]);
+		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
-		break;
 	}
-	case('s'):
+	else
+	if (inputType == "Specialist")
 	{
 		description = "Specialist";
 		movementRange = 2;
@@ -106,9 +106,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxSecAmmo = 0;
 		myAttackSound = rpg;
 		myMoveSound = infantryMove;
-		break;
+		
 	}
-	case('a'):
+	else
+	if(inputType == "Armor")
 	{
 		description = "Armor";
 		movementRange = 6;
@@ -122,9 +123,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxSecAmmo = 0;
 		myAttackSound = cannon;
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('A'):
+	else
+	if(inputType == "Anti-Aircraft")
 	{
 		description = "Anti-Aircraft";
 		movementRange = 6;
@@ -139,9 +141,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxSecAmmo = 6;
 		myAttackSound = antiAircraftCannon;
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('T'):
+	else
+	if(inputType == "Heavy_Armor")
 	{
 		description = "Heavy Armor";
 		movementRange = 5;
@@ -149,15 +152,16 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		mySprite.setTextureRect(rectArray[6][inputTeam + 4]);	
+		mySprite.setTextureRect(rectArray[6][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 6;
 		maxSecAmmo = 0;
 		myAttackSound = cannon;
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('r'):
+	else
+	if(inputType == "Artillery")
 	{
 		description = "Artillery";
 		movementRange = 5;
@@ -172,11 +176,12 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxSecAmmo = -1;
 		myAttackSound = cannon;
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('c'):
+	else
+	if(inputType == "Recon")
 	{
-		description = "Cavalry";
+		description = "Recon";
 		movementRange = 8;
 		attackRange = 1;
 		visionRange = 5;
@@ -188,9 +193,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxSecAmmo = 0;
 
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('R'):
+	else
+	if(inputType == "Rocket_Artillery")
 	{
 		description = "Rocket Artillery";
 		movementRange = 5;
@@ -206,9 +212,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 		myAttackSound = cannon;
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('K'):
+	else
+	if(inputType == "Artillery_Emplacement")
 	{
 		description = "Artillery Emplacement";
 		movementRange = 0;
@@ -223,9 +230,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		maxSecAmmo = -1;
 		myAttackSound = cannon;
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('S'):
+	else
+	if(inputType == "SAM_Site")
 	{
 		description = "SAM Site";
 		movementRange = 0;
@@ -241,9 +249,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 		myAttackSound = cannon;
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('v'):
+	else
+	if(inputType == "Attack_Copter")
 	{
 		description = "Attack Copter";
 		movementRange = 6;
@@ -251,7 +260,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		
+
 		mySprite.setTextureRect(rectArray[9][inputTeam + 4]);
 		maxFuel = 80;
 		domain = air;
@@ -260,9 +269,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 		myAttackSound = cannon;
 		myMoveSound = aircraftMove;
-		break;
+		
 	}
-	case('h'):
+	else
+	if(inputType == "Transport_Copter")
 	{
 		description = "Transport Copter";
 		movementRange = 6;
@@ -276,9 +286,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 
 		myMoveSound = aircraftMove;
-		break;
+		
 	}
-	case('P'):
+	else
+	if(inputType == "APC")
 	{
 		description = "APC";
 		movementRange = 6;
@@ -291,9 +302,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 
 		myMoveSound = vehicleMove;
-		break;
+		
 	}
-	case('f'):
+	else
+	if(inputType == "Interceptor")
 	{
 		description = "Interceptor";
 		movementRange = 10;
@@ -310,9 +322,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 
 		myAttackSound = rpg;
 		myMoveSound = aircraftMove;
-		break;
+		
 	}
-	case('b'):
+	else
+	if(inputType == "Bomber")
 	{
 		description = "Bomber";
 		movementRange = 8;
@@ -321,16 +334,17 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = air;
-		
+
 		mySprite.setTextureRect(rectArray[12][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
 
 		myAttackSound = cannon;
 		myMoveSound = aircraftMove;
-		break;
+		
 	}
-	case('B'):
+	else
+	if(inputType == "Battleship")
 	{
 		description = "Battleship";
 		movementRange = 5;
@@ -340,16 +354,17 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		domain = sea;
 		minAttackRange = 1;
 		specialtyGroup = normal;
-		
+
 		mySprite.setTextureRect(rectArray[13][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
 
 		myAttackSound = cannon;
 
-		break;
+		
 	}
-	case('C'):
+	else
+	if(inputType == "Cruiser")
 	{
 		description = "Cruiser";
 		movementRange = 7;
@@ -359,14 +374,15 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		minAttackRange = 1;
 		specialtyGroup = normal;
 		domain = sea;
-		
+
 		mySprite.setTextureRect(rectArray[14][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
-		break;
+		
 	}
-	case('G'):
+	else
+	if(inputType == "Gunboat")
 	{
 		description = "Gunboat";
 		movementRange = 7;
@@ -378,9 +394,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		mySprite.setTextureRect(rectArray[16][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 1;
-		break;
+		
 	}
-	case('L'):
+	else
+	if(inputType == "Lander")
 	{
 		description = "Lander";
 		movementRange = 6;
@@ -391,9 +408,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		domain = sea;
 		mySprite.setTextureRect(rectArray[15][inputTeam + 4]);
 		maxFuel = 80;
-		break;
+		
 	}
-	case('U'):
+	else
+	if(inputType == "Submarine")
 	{
 		description = "Submarine";
 		movementRange = 6;
@@ -405,9 +423,10 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		mySprite.setTextureRect(rectArray[18][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
-		break;
+		
 	}
-	case('V'):
+	else
+	if(inputType == "Aircraft_Carrier")
 	{
 		description = "Aircraft Carrier";
 		movementRange = 7;
@@ -419,10 +438,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, char inputType, int i
 		mySprite.setTextureRect(rectArray[17][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
-		break;
+		
 	}
-	}
-
+	
 	team = inputTeam;
 
 	//Either minion is new (-1) or provide the input fuel from the save or wherever.

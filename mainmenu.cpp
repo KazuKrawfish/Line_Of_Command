@@ -607,7 +607,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	//Then create ban list
 	for (int i = 0; i < numberOfBannedTypes; i++)
 	{
-		char bannedMinionType;
+		std::string bannedMinionType;
 		*saveGame >> bannedMinionType;
 		boardToPrint->banList.push_back(bannedMinionType);
 	}
@@ -618,7 +618,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	int numberOfMinions;
 	*saveGame >> numberOfMinions;
 	int health, locationX, locationY, team, seniority, status, veterancy, capturePoints, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo;
-	char type;
+	std::string type;
 	*saveGame >> ThrowawayString;
 
 	//Initialize all minions.
