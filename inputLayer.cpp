@@ -20,7 +20,7 @@ when necessary, ie. when game ends or player wants to leave the current game.
 #include <thread>
 #include "button.hpp"
 
-char playCharInput(sf::RenderWindow* myWindow);
+char playCharInput(sf::RenderWindow * myWindow);
 
 inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures)
 {
@@ -239,15 +239,12 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 	//We only do minions and associated effects if they are visible
 	if (minionVisibleStatus == showMinions)
 	{
-
 		//Then print minion if withinVision AND not invisible AND not hidden
 		if (tileToPrint->hasMinionOnTop == true && tileToPrint->withinVision[playerNumber] == true
 			&& tileToPrint->minionOnTop->invisible == false)
 		{
-
-
 			//Last check - must not be stealth minion and unseen
-			if (tileToPrint->minionOnTop->specialtyGroup != stealth || adjacentObservers == true)
+			if (tileToPrint->minionOnTop->specialtyGroup != stealth || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber)
 			{
 				tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50, screenY * 50);
 				inputLayerWindow->draw(tileToPrint->minionOnTop->mySprite);
@@ -698,11 +695,12 @@ int inputLayer::printBoardMenu(MasterBoard* boardToPrint) {
 
 int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 {
-	sf::String boardMessage = "Select a minion to purchase\nDeselect property (t)\n";
-	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
-	newText.setFillColor(sf::Color::Black);
-	inputLayerWindow->draw(newText);
+	//Get mouse position for checking buttons later
+	sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+
+	//Create string, but do not yet print. Still need to add hovered minion name.
+	sf::String boardMessage = "Purchase minion (L-Click). Deselect (R-Click/T-Key)\n";
+	char hoveredMinionName[100];
 
 	tile* myTile = &boardToPrint->Board[boardToPrint->cursor.XCoord][boardToPrint->cursor.YCoord];
 
@@ -755,6 +753,17 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 				inputLayerWindow->draw(factoryButtons.at(i).mySprite);
 				effectsSprite.setPosition(factoryButtons.at(i).mySprite.getPosition());
 				inputLayerWindow->draw(effectsSprite);
+
+				//Also, if not on ban list, see if mouse is hovering over this button, and if so, add that string to the status print.
+
+				bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+
+				if (withinButton == true)
+				{
+					int costOfMinion = boardToPrint->consultMinionCostChart(unitToShow, '~');	//Info check, uses ~
+					snprintf(hoveredMinionName, 100, "%s: costs %d", &unitToShow[0], costOfMinion);
+				}
+
 			}
 
 		}
@@ -786,6 +795,17 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 				inputLayerWindow->draw(portButtons.at(i).mySprite);
 				effectsSprite.setPosition(portButtons.at(i).mySprite.getPosition());
 				inputLayerWindow->draw(effectsSprite);
+
+				//Also, if not on ban list, see if mouse is hovering over this button, and if so, add that string to the status print.
+
+				bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+
+				if (withinButton == true)
+				{
+					int costOfMinion = boardToPrint->consultMinionCostChart(unitToShow, '~');
+					snprintf(hoveredMinionName, 100, "%s: costs %d", &unitToShow[0], costOfMinion);
+				}
+
 			}
 		}
 	}
@@ -812,9 +832,29 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 				inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
 				effectsSprite.setPosition(airbaseButtons.at(i).mySprite.getPosition());
 				inputLayerWindow->draw(effectsSprite);
+
+				//Also, if not on ban list, see if mouse is hovering over this button, and if so, add that string to the status print.
+
+				bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+
+				if (withinButton == true)
+				{
+					int costOfMinion = boardToPrint->consultMinionCostChart(unitToShow, '~');
+					snprintf(hoveredMinionName, 100, "%s: costs %d", &unitToShow[0], costOfMinion);
+				}
+
 			}
 		}
 	}
+
+	//Add final newline at end regardless
+	boardMessage += hoveredMinionName;
+	boardMessage += "\n";
+
+	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setFillColor(sf::Color::Black);
+	inputLayerWindow->draw(newText);
 
 	menuLineTracker += 2;
 

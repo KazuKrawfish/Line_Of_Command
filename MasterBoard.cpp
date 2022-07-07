@@ -866,15 +866,16 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 
 		//See if enemy stealth minion here.
 		bool stealthEnemyHere = false;
-		if (Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team != playerFlag
-			&& Board[x - 1][y].minionOnTop->specialtyGroup == stealth)
+		if (Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team != playerFlag && Board[x - 1][y].minionOnTop->specialtyGroup == stealth)
+		{
 			stealthEnemyHere = true;
+		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 && inputMinion->apparentPathMap[x - 1][y].wasVisited != true) ||
 			(Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 &&
 			(inputMinion->apparentPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
-			if (Board[x - 1][y].withinVision[playerFlag] == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team
+			if (Board[x - 1][y].withinVision[playerFlag] == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team || stealthEnemyHere == true
 				|| (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
 				if (friendlyAdjacentMinion == false || stealthEnemyHere == false)	//Also doesn't have any stealth enemy here, or at least can't see one
 				{
@@ -889,15 +890,16 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 
 		//See if enemy stealth minion here.
 		bool stealthEnemyHere = false;
-		if (Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->team != playerFlag
-			&& Board[x][y - 1].minionOnTop->specialtyGroup == stealth)
+		if (Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->team != playerFlag && Board[x][y - 1].minionOnTop->specialtyGroup == stealth)
+		{
 			stealthEnemyHere = true;
+		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && inputMinion->apparentPathMap[x][y - 1].wasVisited != true) ||
 			(Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 &&
 			(inputMinion->apparentPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
-			if (Board[x][y - 1].withinVision[playerFlag] == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team
+			if (Board[x][y - 1].withinVision[playerFlag] == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team || stealthEnemyHere == true
 				|| (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
 				if (friendlyAdjacentMinion == false || stealthEnemyHere == false)	//Also doesn't have any stealth enemy here, or at least can't see one
 				{
@@ -912,16 +914,17 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 
 		//See if enemy stealth minion here.
 		bool stealthEnemyHere = false;
-		if (Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team != playerFlag
-			&& Board[x + 1][y].minionOnTop->specialtyGroup == stealth)
+		if (Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team != playerFlag && Board[x + 1][y].minionOnTop->specialtyGroup == stealth)
+		{
 			stealthEnemyHere = true;
+		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
 			&& inputMinion->apparentPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
 				&& (inputMinion->apparentPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
-			if (Board[x + 1][y].withinVision[playerFlag] == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air
-				&& Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
+			if (Board[x + 1][y].withinVision[playerFlag] == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || stealthEnemyHere == true
+				|| (cursor.selectMinionPointer->domain != air && Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
 				if (friendlyAdjacentMinion == false || stealthEnemyHere == false)	//Also doesn't have any stealth enemy here, or at least can't see one
 				{
 					buildApparentPathMap(false, x + 1, y, inputMinion);
@@ -935,14 +938,15 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 
 		//See if enemy stealth minion here.
 		bool stealthEnemyHere = false;
-		if (Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->team != playerFlag
-			&& Board[x][y + 1].minionOnTop->specialtyGroup == stealth)
+		if (Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->team != playerFlag && Board[x][y + 1].minionOnTop->specialtyGroup == stealth)
+		{
 			stealthEnemyHere = true;
+		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
 		if ((Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 && inputMinion->apparentPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 &&
 			(inputMinion->apparentPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
-			if (Board[x][y + 1].withinVision[playerFlag] == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team ||
+			if (Board[x][y + 1].withinVision[playerFlag] == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || stealthEnemyHere == true ||
 				(cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air)
 				|| (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
 				if (friendlyAdjacentMinion == false || stealthEnemyHere == false)	//Also doesn't have any stealth enemy here, or at least can't see one
