@@ -389,7 +389,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		attackRange = 1;
 		visionRange = 3;
 		rangeType = directFire;
-		specialtyGroup = smallTransport;
+		specialtyGroup = normal;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[16][inputTeam + 4]);
 		maxFuel = 70;

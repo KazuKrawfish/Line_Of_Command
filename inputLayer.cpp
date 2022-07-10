@@ -324,7 +324,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 	//Must be visible to see effects!
 	if (tileToPrint->hasMinionOnTop == true && minionToPrint != NULL && tileToPrint->withinVision[playerNumber] == true
-		&& minionVisibleStatus == showMinions && minionToPrint->invisible == false && adjacentObservers == true)
+		&& minionVisibleStatus == showMinions && (minionToPrint->invisible == false ||  adjacentObservers == true))
 	{
 
 		//Print if transporting or capturing // Specialty moves
@@ -450,7 +450,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 	//Print current player, with treasury and potential event text.
 	sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-	snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+	snprintf(pointerToPrint, 100, "'s turn. TP:%d AP:%d\nTreasury Total: %d\n", currentTile->withinApparentRange, currentTile->withinRange,boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+	//snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	playerStatus += pointerToPrint;
 	playerStatus += &eventText[0];
 
@@ -483,9 +484,22 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			}
 
 		}
+		
+		//See if any adjacent friendly minions to this square
+		bool friendlyAdjacentMinion = boardToPrint->hasAdjacentMinion(currentTile->locationX, currentTile->locationY, boardToPrint->playerFlag);
 
-		if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber])
+		//See if enemy minion here.
+		bool stealthEnemyHere = false;
+		if (currentTile->hasMinionOnTop == true && currentTile->minionOnTop->team != boardToPrint->playerFlag && currentTile->minionOnTop->specialtyGroup == stealth)
+			stealthEnemyHere = true;
+
+		bool unseenStealthEnemyHere = false;
+		if (stealthEnemyHere == true && friendlyAdjacentMinion == false)
+			unseenStealthEnemyHere = true;
+
+		if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber] && unseenStealthEnemyHere == false)
 		{
+
 
 			//If tile is undergoing capture, let us know.
 			if (currentTile->capturePoints != 20)
@@ -2072,6 +2086,10 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		&& boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == stealth)
 		stealthEnemyHere = true;
 
+	bool unseenStealthEnemyHere = false;
+	if (stealthEnemyHere == true && friendlyAdjacentMinion == false)
+		unseenStealthEnemyHere = true;
+
 	//Move minion command
 	//If minion selected and hasn't moved or fired, attempt to move.
 	//The moveMinion function will check if we are on top of ourselves or another minion.
@@ -2081,7 +2099,8 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 		//If there is a minion on top and that minion is visible to the minion's owner
 		if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true
-			&& boardToInput->Board[cursorX][cursorY].withinVision[boardToInput->cursor.selectMinionPointer->team] == true)
+			&& boardToInput->Board[cursorX][cursorY].withinVision[boardToInput->cursor.selectMinionPointer->team] == true
+			&& unseenStealthEnemyHere == false)
 		{
 			//If minion on top is this minion, do hold position movement.
 			if (boardToInput->cursor.selectMinionPointer->locationX == cursorX && boardToInput->cursor.selectMinionPointer->locationY == cursorY)
@@ -2104,7 +2123,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 						status = minionAction;
 				}
 		}
-		else //To attempt to mvoe on tile, must either not have a stealther, or at least doesn't have someone adjacent to see them
+		else //To attempt to move on tile, must either not have a stealther, or at least doesn't have someone adjacent to see them
 			if (stealthEnemyHere == false || friendlyAdjacentMinion == false)
 			{
 				if (boardToInput->moveMinion(cursorX, cursorY, this, boardToInput->playerFlag) == 0)
