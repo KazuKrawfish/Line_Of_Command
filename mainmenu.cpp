@@ -729,6 +729,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 			//Keep polling until a legit player input, not just mouse movement.
 			mywindow->waitEvent(playerInput);
 
+
 			if (playerInput.type == sf::Event::KeyPressed)
 			{
 				Input = playerInput.key.code;

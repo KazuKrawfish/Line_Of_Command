@@ -869,7 +869,6 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 		if (Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team != playerFlag && Board[x - 1][y].minionOnTop->specialtyGroup == stealth && friendlyAdjacentMinion == false)
 		{
 			unseenStealthEnemyHere = true;
-			std::cout << "stealther at " << x<< " " << y <<std::endl;
 		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.

@@ -19,6 +19,8 @@ when necessary, ie. when game ends or player wants to leave the current game.
 #include "compie.hpp"
 #include <thread>
 #include "button.hpp"
+#include "SFML/System/Time.hpp"
+#include "SFML/System/Clock.hpp"
 
 char playCharInput(sf::RenderWindow * myWindow);
 
@@ -450,7 +452,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 	//Print current player, with treasury and potential event text.
 	sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-	snprintf(pointerToPrint, 100, "'s turn. TP:%d AP:%d\nTreasury Total: %d\n", currentTile->withinApparentRange, currentTile->withinRange,boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+	snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	//snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	playerStatus += pointerToPrint;
 	playerStatus += &eventText[0];
@@ -1136,7 +1138,17 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 
 
 	//Delay after printing;
-	std::this_thread::sleep_for(std::chrono::milliseconds(140 / speedFactor));
+	sf::Clock timer;
+
+	timer.restart();
+	sf::Time elapsedTime;
+
+	while (elapsedTime.asSeconds() < float (0.140 / speedFactor))
+	{
+		elapsedTime = timer.getElapsedTime();
+	}
+
+	//std::this_thread::sleep_for(std::chrono::milliseconds(140 / speedFactor));
 
 	//Reset invisibilty status for minion selected
 	minionToMove->invisible = false;
@@ -1189,7 +1201,17 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 			tileAttacking->animationSprite->setTextureRect(rectArray[i][13]);
 			bool withinAnimation = true;
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
+			//Delay after printing;
+			sf::Clock timer;
+
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.07 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
 		}
 
 		//Clean up afterwards if necessary
@@ -1218,7 +1240,17 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 			bool withinAnimation = true;
 			printScreen(boardToPrint, observerNumber, withinAnimation);
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
+			//Delay after printing;
+			sf::Clock timer;
+
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.07 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
 		}
 
 		//Clean up afterwards if necessary
@@ -1273,11 +1305,31 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 			bool withinAnimation = true;
 			myTile->animationSprite->setTextureRect(rectArray[5][14]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+			
+			//Delay after printing;
+			sf::Clock timer;
+
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+		//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
 
 			myTile->animationSprite->setTextureRect(rectArray[5 + minionToCapture->team][14]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+			
+			//Delay after printing;
+			timer.restart();
+			sf::Time secondElapsedTime;
+
+			while (secondElapsedTime.asSeconds() < float(0.140 / speedFactor))
+			{
+				secondElapsedTime = timer.getElapsedTime();
+			}
+		//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
 
 		}
 
@@ -1330,11 +1382,31 @@ int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 			bool withinAnimation = true;
 			myTile->animationSprite->setTextureRect(rectArray[6][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+
+			//Delay after printing;
+			sf::Clock timer;
+
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
 
 			myTile->animationSprite->setTextureRect(rectArray[5][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+			
+			timer.restart();
+			sf::Time anotherElapsedTime;
+
+			while (anotherElapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				anotherElapsedTime = timer.getElapsedTime();
+			}
+			
+			//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
 
 		}
 
@@ -1388,7 +1460,18 @@ int inputLayer::trapGraphics(MasterBoard* boardToPrint, int observerNumber, Mini
 
 		myTile->animationSprite->setTextureRect(rectArray[8][13]);
 		printScreen(boardToPrint, observerNumber, withinAnimation);
-		std::this_thread::sleep_for(std::chrono::milliseconds(350 / speedFactor));
+
+		//Delay after printing;
+		sf::Clock timer;
+
+		timer.restart();
+		sf::Time elapsedTime;
+
+		while (elapsedTime.asSeconds() < float(0.350 / speedFactor))
+		{
+			elapsedTime = timer.getElapsedTime();
+		}
+		//std::this_thread::sleep_for(std::chrono::milliseconds(350 / speedFactor));
 
 		myTile->animationSprite->setTextureRect(rectArray[5][13]);
 		printScreen(boardToPrint, observerNumber, withinAnimation);
@@ -1449,11 +1532,30 @@ int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 			bool withinAnimation = true;
 			myTile->animationSprite->setTextureRect(rectArray[7][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+			//Delay after printing;
+			sf::Clock timer;
+
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
 
 			myTile->animationSprite->setTextureRect(rectArray[5][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
-			std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+			
+			//Delay
+			timer.restart();
+			elapsedTime = timer.getElapsedTime();;
+
+			while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
 
 		}
 
