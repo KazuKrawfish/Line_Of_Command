@@ -19,7 +19,7 @@ development, and since this is almost entirely a solo effort.
 #include "mainmenu.h"
 #include <algorithm>
 
-int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2);
+
 
 //If the two input coordinates are next to each other, return true. Otherwise, return false.
 //This can be either horizontal or vertical adjacency.
@@ -34,6 +34,13 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2)
 	{
 		return false;
 	}
+}
+
+
+int MasterBoard::computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
+{
+	return abs(inputX1 - inputX2) + abs(inputY1 - inputY2);
+
 }
 
 //Returns if the observer has any minions adjacent to the indicated XY combo.
@@ -190,7 +197,7 @@ const double SECONDARY_ATTACK_VALUES_MATRIX[21][20] = {	/*i*/	0.55, 0.50, 0.05, 
 //Assign numeric values for different units to access attack values matrix easier.
 //Assumes attacking minion is selected. Otherwise withinRange won't work.
 //Needs defaults to catch error!!!!
-double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion, bool& isAmmoUsed, int& weaponUsed, bool ignoreLimitations)
+double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion, bool& isAmmoUsed, int& weaponUsed, bool ignoreLimitations)
 {
 	//Assume ammo is not used until told otherwise.
 	isAmmoUsed = false;

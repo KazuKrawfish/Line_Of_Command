@@ -200,7 +200,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 	{
 		description = "Rocket Artillery";
 		movementRange = 5;
-		attackRange = 4;
+		attackRange = 5;
 		visionRange = 2;
 		rangeType = rangedFire;
 		minAttackRange = 2;

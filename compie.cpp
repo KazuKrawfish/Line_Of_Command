@@ -14,11 +14,7 @@
 
 
 //Below functions are "utilities" that need to find a home.
-int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2)
-{
-	return abs(inputX1 - inputX2) + abs(inputY1 - inputY2);
 
-}
 //Above functions are "utilities" that need to find a home.
 
 //Find closest airbase to minion
@@ -40,11 +36,11 @@ tile* compie::findClosestAirbase(MasterBoard* boardToUse, Minion* inputMinion)
 					if (closestAirBase == NULL)
 					{
 						closestAirBase = &boardToUse->Board[x][y];
-						oldDistance = computeDistance(boardToUse->Board[x][y].locationX, inputMinion->locationX, boardToUse->Board[x][y].locationY, inputMinion->locationY);
+						oldDistance = boardToUse->computeDistance(boardToUse->Board[x][y].locationX, inputMinion->locationX, boardToUse->Board[x][y].locationY, inputMinion->locationY);
 					}
 					else
 					{
-						int newDistance = computeDistance(boardToUse->Board[x][y].locationX, inputMinion->locationX, boardToUse->Board[x][y].locationY, inputMinion->locationY);
+						int newDistance = boardToUse->computeDistance(boardToUse->Board[x][y].locationX, inputMinion->locationX, boardToUse->Board[x][y].locationY, inputMinion->locationY);
 
 						if (newDistance < oldDistance)
 						{
@@ -1014,8 +1010,8 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 					&& myCursor->selectMinionPointer->team != boardToUse->Board[x][y].minionOnTop->team)
 				{
 					//Must be within range but outside minimum range
-					if (myCursor->selectMinionPointer->minAttackRange < computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y)
-						&& myCursor->selectMinionPointer->attackRange >= computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y))
+					if (myCursor->selectMinionPointer->minAttackRange < boardToUse->computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y)
+						&& myCursor->selectMinionPointer->attackRange >= boardToUse->computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y))
 						checkSingleTileForCombatValue(myCursor->selectMinionPointer->locationX, myCursor->selectMinionPointer->locationY, x, y, myCursor, boardToUse, &relativeSuitabilityScore, selectedMinionRecord);
 				}
 		}
@@ -1069,7 +1065,7 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 				{
 					//If the current tile is within movement range AND is less distant than current closestEnemyProp.
 					//This means the minion has to be "selected", to turn on withinRange flags.
-					int rangeToProp = computeDistance(x, myCursor->selectMinionPointer->locationX, y, myCursor->selectMinionPointer->locationY);
+					int rangeToProp = boardToUse->computeDistance(x, myCursor->selectMinionPointer->locationX, y, myCursor->selectMinionPointer->locationY);
 					if (boardToUse->Board[x][y].withinRange == true && rangeToProp < distanceToClosestEnemyProperty)
 					{
 						distanceToClosestEnemyProperty = rangeToProp;
@@ -1123,7 +1119,7 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 			tile* closestAirbase = findClosestAirbase(boardToUse, myMinion);
 			if (closestAirbase != NULL)
 			{
-				distanceToAirbase = computeDistance(closestAirbase->locationX, myMinion->locationX, closestAirbase->locationY, myMinion->locationY);
+				distanceToAirbase = boardToUse->computeDistance(closestAirbase->locationX, myMinion->locationX, closestAirbase->locationY, myMinion->locationY);
 
 			}
 

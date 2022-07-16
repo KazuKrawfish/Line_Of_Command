@@ -24,6 +24,7 @@ class Button;
 enum otherImages { startScreenBackground, topMenuBackground, startScreenStatement, topMenuBox };
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer, compieTakingTurn, insertMinion, insertTile };
 enum specialKey { showMinions, hideMinions };
+enum rangeVisibleStatus { showRange, hideRange};
 enum colorCode {
 	unused, fogLandTile, waterTile, fogWaterTile, player1Minion,
 	player2Minion, player3Minion, player4Minion, player5Minion, player6Minion,
@@ -95,6 +96,7 @@ public:
 
 	gameInputLayer status = gameBoard;
 	specialKey minionVisibleStatus = showMinions;
+	rangeVisibleStatus showRangeStatus = hideRange;
 	bool capsLockOn = false;
 	mainMenu* MainMenu;
 

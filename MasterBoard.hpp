@@ -58,6 +58,8 @@ public:
 	//Board Management Functions//////////////
 	int checkWindow();
 	int clearBoard(inputLayer* InputLayer);
+	int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2);
+	double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion, bool& isAmmoUsed, int& weaponUsed, bool ignoreLimitations);
 	//Board Management Functions//////////////
 
 	//Pathfinding Functions////////////////////
