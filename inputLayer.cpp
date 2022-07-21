@@ -1169,7 +1169,8 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 		//Sound effects
 		if (soundsOn == true)
 		{
-			(*soundEffects)[minionToMove->myMoveSound].play();
+			if( (*soundEffects)[minionToMove->myMoveSound].getStatus() == sf::SoundSource::Stopped)
+				(*soundEffects)[minionToMove->myMoveSound].play();
 		}
 
 		//If player controlled, tile the minion moves through will always be visible.

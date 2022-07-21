@@ -1,11 +1,3 @@
-//faction is new playerRosterElement member - start at 0 - unchosen/no faction, 1 is North Redonia, 2 is South Redonia, 3 is Ormosa, 4 is Torran.
-
-//Still need to make technical capture capable.
-//Still need to make operative special rules 
-//Need to add Torran, and other potential "Later" units
-
-//Need to add player Faction element into main menu/masterboard.
-
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	Minion.cpp
