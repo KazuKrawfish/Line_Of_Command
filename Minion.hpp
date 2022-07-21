@@ -57,6 +57,10 @@ public:
 	int minAttackRange = 0;	//Only matters for ranged attacks (Whether Hybrid or rangedFire)
 	int visionRange = 0;
 	bool isCapturing = false;
+	bool stealthMode = false;
+
+	// 0 is no faction/neutral/base group, 1 is North Redonia, 2 is South Redonia, 3 is Ormosa, 4 is Torran.
+	bool factionAllowed[5] = {true, true, true, true, true};
 
 	//True path.
 	std::vector<std::vector<pathSquare>> truePathMap;			

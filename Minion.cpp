@@ -1,3 +1,11 @@
+//faction is new playerRosterElement member - start at 0 - unchosen/no faction, 1 is North Redonia, 2 is South Redonia, 3 is Ormosa, 4 is Torran.
+
+//Still need to make technical capture capable.
+//Still need to make operative special rules 
+//Need to add Torran, and other potential "Later" units
+
+//Need to add player Faction element into main menu/masterboard.
+
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	Minion.cpp
@@ -18,6 +26,10 @@ Minion::Minion()
 	team = 0;						//Team 0 is the neutral team.
 	status = hasntmovedorfired;
 	health = 100;
+	stealthMode = false;
+
+	// 0 is no faction/neutral/base group, 1 is North Redonia, 2 is South Redonia, 3 is Ormosa, 4 is Torran.
+	factionAllowed[0] = true; factionAllowed[1] = true; factionAllowed[2] = true; factionAllowed[3] = true; factionAllowed[4] = true;
 
 	//Basic image init below
 	mySprite.setTextureRect(rectArray[0][4]);
@@ -38,8 +50,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 	minionEnvironment = Environment;
 	type = inputType;
 	health = inputHealth;
-
-	myTexture = inputTexture;
+    stealthMode = false;
+	
+    myTexture = inputTexture;
 	mySprite.setTexture(*myTexture);
 	mySprite.setTextureRect(rectArray[0][4]);
 	//Basic image init end
@@ -91,6 +104,37 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
 	}
+    else
+	if(inputType == "Insurgent")
+	{
+		description = "Insurgent";
+		movementRange = 3;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = infantry;
+		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[30][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = 1;
+		maxSecAmmo = 0;
+	}
+	else
+	if(inputType == "Operative")
+	{
+		description = "Operative";
+		movementRange = 4;
+		attackRange = 1;
+		visionRange = 4;
+		rangeType = directFire;
+		specialtyGroup = infantry;
+		stealthMode = true;
+		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[29][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = -1;
+		maxSecAmmo = 0;
+	}
 	else
 	if (inputType == "Specialist")
 	{
@@ -126,6 +170,40 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		
 	}
 	else
+    if(inputType == "Upgunned_Armor")
+	{
+		description = "Upgunned Armor";
+		movementRange = 6;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		factionAllowed[0] = false; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = false; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[27][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = 9;
+		maxSecAmmo = 0;
+		myAttackSound = cannon;
+		myMoveSound = vehicleMove;
+	}
+	else
+    if(inputType == "Assault_Gun")
+	{
+		description = "Assault Gun";
+		movementRange = 6;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = hybridRange;
+		specialtyGroup = normal;
+		factionAllowed[0] = false; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = false; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[28][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = 6;
+		maxSecAmmo = 6;
+		myAttackSound = cannon;
+		myMoveSound = vehicleMove;
+	}
+	else
 	if(inputType == "Anti-Aircraft")
 	{
 		description = "Anti-Aircraft";
@@ -152,9 +230,28 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
+		factionAllowed[0] = true; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = true;
 		mySprite.setTextureRect(rectArray[6][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 6;
+		maxSecAmmo = 0;
+		myAttackSound = cannon;
+		myMoveSound = vehicleMove;
+		
+	}
+	else
+	if(inputType == "Modern_Armor")
+	{
+		description = "Modern Armor";
+		movementRange = 6;
+		attackRange = 1;
+		visionRange = 4;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = true; factionAllowed[3] = false; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[27][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = 9;
 		maxSecAmmo = 0;
 		myAttackSound = cannon;
 		myMoveSound = vehicleMove;
@@ -170,6 +267,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = rangedFire;
 		specialtyGroup = normal;
 		minAttackRange = 1;
+		factionAllowed[0] = true; factionAllowed[1] = false; factionAllowed[2] = true; factionAllowed[3] = true; factionAllowed[4] = true;
 		mySprite.setTextureRect(rectArray[5][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
@@ -187,7 +285,26 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 5;
 		rangeType = directFire;
 		specialtyGroup = normal;
+		factionAllowed[0] = true; factionAllowed[1] = true; factionAllowed[2] = true; factionAllowed[3] = false; factionAllowed[4] = true;
 		mySprite.setTextureRect(rectArray[2][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = -1;
+		maxSecAmmo = 0;
+
+		myMoveSound = vehicleMove;
+		
+	}
+	else
+    if(inputType == "Technical")
+	{
+		description = "Technical";
+		movementRange = 10;
+		attackRange = 1;
+		visionRange = 4;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[31][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -297,10 +414,28 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = smallTransport;
+		factionAllowed[0] = true; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = true;
 		mySprite.setTextureRect(rectArray[4][inputTeam + 4]);
 		maxFuel = 70;
 
 
+		myMoveSound = vehicleMove;
+		
+	}
+	else
+	if(inputType == "IFV")
+	{
+		description = "IFV";
+		movementRange = 6;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = smallTransport;
+		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = true; factionAllowed[3] = false; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[26][inputTeam + 4]);
+		maxFuel = 70;
+
+		myAttackSound = antiAircraftCannon;
 		myMoveSound = vehicleMove;
 		
 	}
@@ -314,13 +449,52 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = air;
-
 		mySprite.setTextureRect(rectArray[11][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 3;
+		maxSecAmmo = 0;
+
+		myAttackSound = rpg;
+		myMoveSound = aircraftMove;
+		
+	}
+	else
+	if(inputType == "Advanced_Fighter")
+	{
+		description = "Advanced Fighter";
+		movementRange = 12;
+		attackRange = 1;
+		visionRange = 5;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		domain = air;
+		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = true; factionAllowed[3] = false; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
+		maxFuel = 75;
+		maxPriAmmo = 6;
 		maxSecAmmo = -1;
 
 		myAttackSound = rpg;
+		myMoveSound = aircraftMove;
+		
+	}
+	else
+	if(inputType == "Multirole")
+	{
+		description = "Multirole";
+		movementRange = 8;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		domain = air;
+		factionAllowed[0] = false; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = false; factionAllowed[4] = false;
+		mySprite.setTextureRect(rectArray[21][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = 6;
+		maxSecAmmo = 0;
+
+		myAttackSound = antiAircraftCannon;
 		myMoveSound = aircraftMove;
 		
 	}
@@ -394,6 +568,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		mySprite.setTextureRect(rectArray[16][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 1;
+		maxSecAmmo = -1;
 		
 	}
 	else
@@ -418,7 +593,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		attackRange = 0;
 		visionRange = 2;
 		rangeType = directFire;
-		specialtyGroup = stealth;
+		specialtyGroup = normal;
+        stealthMode = true;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[18][inputTeam + 4]);
 		maxFuel = 80;

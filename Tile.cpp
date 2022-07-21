@@ -2,7 +2,7 @@
 //
 //	tile.cpp
 //
-/*	
+/*
 The Tile class is the basic unit of terrain that makes up the gameboard. It contains data like terrain type, movement costs, defense bonuses, etc.
 */
 
@@ -10,27 +10,27 @@ The Tile class is the basic unit of terrain that makes up the gameboard. It cont
 #include "MasterBoard.hpp"
 
 
-int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSet)
+int tile::determineRiverRoadType(bool thisTileChanged, MasterBoard* boardToSet)
 {
 	bool upNeigh = false;
 	bool downNeigh = false;
 	bool leftNeigh = false;
 	bool rightNeigh = false;
 
-	tile* thisTile =  & boardToSet->Board[locationX][locationY];
+	tile* thisTile = &boardToSet->Board[locationX][locationY];
 
 	//Check each neighbor to see if they are same type
 	//If they are, note it, and call determineRiverRoadType on that tile.
 	if (locationY + 1 >= boardToSet->BOARD_HEIGHT
-		|| (boardToSet->Board[locationX][locationY + 1].symbol == symbol) 
+		|| (boardToSet->Board[locationX][locationY + 1].symbol == symbol)
 		)
-	{ 
+	{
 		downNeigh = true;
-		if(locationY + 1 < boardToSet->BOARD_HEIGHT && thisTileChanged == true)
+		if (locationY + 1 < boardToSet->BOARD_HEIGHT && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY + 1].determineRiverRoadType(false, boardToSet);
 	}
-	if( locationY < boardToSet->BOARD_HEIGHT - 1  
-		&& (  (boardToSet->Board[locationX][locationY + 1].symbol == '~' || boardToSet->Board[locationX][locationY + 1].symbol == '*')
+	if (locationY < boardToSet->BOARD_HEIGHT - 1
+		&& ((boardToSet->Board[locationX][locationY + 1].symbol == '~' || boardToSet->Board[locationX][locationY + 1].symbol == '*')
 			&& thisTile->symbol == '-'))
 	{
 		downNeigh = true;
@@ -42,9 +42,9 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 	{
 		upNeigh = true;
 		if (locationY > 0 && thisTileChanged == true)
-			boardToSet->Board[locationX][locationY - 1].determineRiverRoadType( false, boardToSet);
+			boardToSet->Board[locationX][locationY - 1].determineRiverRoadType(false, boardToSet);
 	}
-	if (locationY > 0 
+	if (locationY > 0
 		&& ((boardToSet->Board[locationX][locationY - 1].symbol == '~' || boardToSet->Board[locationX][locationY - 1].symbol == '*')
 			&& thisTile->symbol == '-'))
 	{
@@ -57,10 +57,10 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 	{
 		leftNeigh = true;
 		if (locationX > 0 && thisTileChanged == true)
-			boardToSet->Board[locationX - 1][locationY].determineRiverRoadType( false, boardToSet);
+			boardToSet->Board[locationX - 1][locationY].determineRiverRoadType(false, boardToSet);
 	}
-	if (locationX > 0 
-		&& ((boardToSet->Board[locationX - 1 ][locationY ].symbol == '~' || boardToSet->Board[locationX- 1][locationY ].symbol == '*') 
+	if (locationX > 0
+		&& ((boardToSet->Board[locationX - 1][locationY].symbol == '~' || boardToSet->Board[locationX - 1][locationY].symbol == '*')
 			&& thisTile->symbol == '-'))
 	{
 		leftNeigh = true;
@@ -72,10 +72,10 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 	{
 		rightNeigh = true;
 		if (locationX + 1 < boardToSet->BOARD_WIDTH && thisTileChanged == true)
-			boardToSet->Board[locationX + 1][locationY].determineRiverRoadType(false , boardToSet);
+			boardToSet->Board[locationX + 1][locationY].determineRiverRoadType(false, boardToSet);
 	}
 	if (locationX < boardToSet->BOARD_WIDTH - 1 && (
-		(boardToSet->Board[locationX + 1 ][locationY ].symbol == '~' || boardToSet->Board[locationX + 1][locationY ].symbol == '*') 
+		(boardToSet->Board[locationX + 1][locationY].symbol == '~' || boardToSet->Board[locationX + 1][locationY].symbol == '*')
 		&& thisTile->symbol == '-'))
 	{
 		rightNeigh = true;
@@ -84,7 +84,7 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 	//Change sprite rect based on selections above
 	//Default is up-down
 	//Sideways
-	if (downNeigh == false && upNeigh == false && ( leftNeigh == true ||  rightNeigh == true) )
+	if (downNeigh == false && upNeigh == false && (leftNeigh == true || rightNeigh == true))
 	{
 		mySprite.setTextureRect(rectArray[textureRectAnchorX + 1][textureRectAnchorY]);
 		myFogSprite.setTextureRect(rectArray[textureRectAnchorX + 1][textureRectAnchorY + 1]);
@@ -92,10 +92,10 @@ int tile::determineRiverRoadType( bool thisTileChanged,   MasterBoard* boardToSe
 	}
 
 	//Up-down
-	if ( (downNeigh == true || upNeigh == true ) && leftNeigh == false && rightNeigh == false)
+	if ((downNeigh == true || upNeigh == true) && leftNeigh == false && rightNeigh == false)
 	{
-		mySprite.setTextureRect(rectArray[textureRectAnchorX ][textureRectAnchorY]);
-		myFogSprite.setTextureRect(rectArray[textureRectAnchorX ][textureRectAnchorY + 1]);
+		mySprite.setTextureRect(rectArray[textureRectAnchorX][textureRectAnchorY]);
+		myFogSprite.setTextureRect(rectArray[textureRectAnchorX][textureRectAnchorY + 1]);
 
 	}
 
@@ -176,35 +176,35 @@ int tile::determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet)
 	//Check each neighbor to see if they are same type
 	//If they are, note it, and call determineSeaBeachType on that tile.
 	if (locationY + 1 >= boardToSet->BOARD_HEIGHT
-		|| (boardToSet->Board[locationX][locationY + 1].symbol == '~' || boardToSet->Board[locationX][locationY + 1].symbol == '*' ))
+		|| (boardToSet->Board[locationX][locationY + 1].symbol == '~' || boardToSet->Board[locationX][locationY + 1].symbol == '*'))
 	{
 		downNeigh = true;
 		if (locationY + 1 < boardToSet->BOARD_HEIGHT && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY + 1].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationY <= 0
-		|| (boardToSet->Board[locationX][locationY - 1].symbol == '~' || boardToSet->Board[locationX][locationY - 1].symbol == '*' ))
+		|| (boardToSet->Board[locationX][locationY - 1].symbol == '~' || boardToSet->Board[locationX][locationY - 1].symbol == '*'))
 	{
 		upNeigh = true;
 		if (locationY > 0 && thisTileChanged == true)
 			boardToSet->Board[locationX][locationY - 1].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationX <= 0
-		|| (boardToSet->Board[locationX - 1][locationY ].symbol == '~' || boardToSet->Board[locationX - 1][locationY ].symbol == '*' ))
+		|| (boardToSet->Board[locationX - 1][locationY].symbol == '~' || boardToSet->Board[locationX - 1][locationY].symbol == '*'))
 	{
 		leftNeigh = true;
 		if (locationX > 0 && thisTileChanged == true)
 			boardToSet->Board[locationX - 1][locationY].determineSeaBeachType(false, boardToSet);
 	}
 	if (locationX + 1 >= boardToSet->BOARD_WIDTH
-		|| (boardToSet->Board[locationX + 1][locationY].symbol == '~' || boardToSet->Board[locationX + 1][locationY].symbol == '*' ))
+		|| (boardToSet->Board[locationX + 1][locationY].symbol == '~' || boardToSet->Board[locationX + 1][locationY].symbol == '*'))
 	{
 		rightNeigh = true;
 		if (locationX + 1 < boardToSet->BOARD_WIDTH && thisTileChanged == true)
 			boardToSet->Board[locationX + 1][locationY].determineSeaBeachType(false, boardToSet);
 	}
 
-	
+
 	//Change sprite rect based on selections above
 	//Default is up-down
 	//Sideways13 
@@ -219,7 +219,7 @@ int tile::determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet)
 	if (downNeigh == true && upNeigh == true && leftNeigh == false && rightNeigh == false)
 	{
 		mySprite.setTextureRect(rectArray[textureRectAnchorX + 14][textureRectAnchorY]);
-		myFogSprite.setTextureRect(rectArray[textureRectAnchorX+14][textureRectAnchorY + 1]);
+		myFogSprite.setTextureRect(rectArray[textureRectAnchorX + 14][textureRectAnchorY + 1]);
 
 	}
 
@@ -260,8 +260,8 @@ int tile::determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet)
 	}
 	if (downNeigh == true && upNeigh == false && leftNeigh == true && rightNeigh == true)
 	{
-		mySprite.setTextureRect(rectArray[textureRectAnchorX ][textureRectAnchorY]);
-		myFogSprite.setTextureRect(rectArray[textureRectAnchorX ][textureRectAnchorY + 1]);
+		mySprite.setTextureRect(rectArray[textureRectAnchorX][textureRectAnchorY]);
+		myFogSprite.setTextureRect(rectArray[textureRectAnchorX][textureRectAnchorY + 1]);
 
 	}
 
@@ -329,68 +329,71 @@ int tile::consultMovementChart(std::string minionType, char terrainType)
 	int x = -1;
 	int y = -1;
 
-	if ( minionType == "Infantry")
+	if (minionType == "Infantry" || minionType == "Insurgent")
 		x = 0;
 	else
-	if ( minionType == "Specialist")
+	if (minionType == "Specialist" || minionType == "Operative")
 		x = 1;
 	else
-	if ( minionType == "Armor")
+	if (minionType == "Armor" || minionType == "Upgunned_Armor" || minionType == "Modern_Armor")
 		x = 2;
 	else
-	if ( minionType == "Artillery")
+	if (minionType == "Artillery" || minionType == "Assault_Gun")
 		x = 3;
 	else
-	if ( minionType == "Recon")
+	if (minionType == "Recon" || minionType == "Technical")
 		x = 4;
 	else
-	if ( minionType == "Rocket_Artillery")
+	if (minionType == "Rocket_Artillery")
 		x = 5;
 	else
-	if ( minionType == "Heavy_Armor")
+	if (minionType == "Heavy_Armor")
 		x = 6;
 	else
-	if ( minionType == "Anti-Aircraft")
+	if (minionType == "Anti-Aircraft")
 		x = 7;
 	else
-	if ( minionType == "Attack_Copter")
+	if (minionType == "Attack_Copter")
 		x = 8;
 	else
-	if ( minionType == "Transport_Copter")
+	if (minionType == "Transport_Copter")
 		x = 9;
 	else
-	if ( minionType == "APC")	
+	if (minionType == "APC")
 		x = 10;
 	else
-	if ( minionType == "Interceptor")
+	if (minionType == "Interceptor" || minionType == "Multirole" || minionType == "Advanced_Fighter")
 		x = 11;
 	else
-	if ( minionType == "Bomber")	
+	if (minionType == "Bomber")
 		x = 12;
 	else
-	if ( minionType == "Lander")	
+	if (minionType == "Lander")
 		x = 13;
 	else
-	if ( minionType == "Battleship")	
+	if (minionType == "Battleship")
 		x = 14;
 	else
-	if ( minionType == "Cruiser")
+	if (minionType == "Cruiser")
 		x = 15;
 	else
-	if ( minionType == "Gunboat")	
+	if (minionType == "Gunboat")
 		x = 16;
 	else
-	if ( minionType == "Submarine")	
+	if (minionType == "Submarine")
 		x = 17;
 	else
-	if ( minionType == "Aircraft_Carrier")	
+	if (minionType == "Aircraft_Carrier")
 		x = 18;
 	else
-	if ( minionType == "Artillery_Emplacement")
+	if (minionType == "Artillery_Emplacement")
 		x = 19;
 	else
-	if ( minionType == "SAM_Site")	
+	if (minionType == "SAM_Site")
 		x = 20;
+	else
+	if (minionType == "IFV")
+		x = 21;
 
 
 	//   . + ^ M  H m n h Q = ~ - A P
@@ -453,7 +456,7 @@ int tile::consultMovementChart(std::string minionType, char terrainType)
 	return answer;
 
 }
-	
+
 
 
 bool tile::checkForProperty(char terrainType)

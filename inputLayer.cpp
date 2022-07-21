@@ -1,9 +1,3 @@
-//Gray out minion purchase box based on minion price vs player treasury.
-//Need to change rocket range from 4 to 5.
-//9 shows range of whatever minion is below cursor.Direct attack minions are only 1.
-//showRangeStatus is needed variable in inputLayer.hpp
-//printSingleTile now prints red fire box if the showRangeStatus is toggled and appropriate cursor placement / no minion selected
-
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	inputLayer.cpp
