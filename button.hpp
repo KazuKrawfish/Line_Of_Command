@@ -1,3 +1,5 @@
+//Added button name to allow for easier searching
+
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	button.hpp
@@ -36,6 +38,7 @@ public:
 
 public:
 	buttonType myType;
+	std::string myName = "~";
 
 	//GRAPHICS ///////////////////////////
 	//Each button has its own individual texture loaded separately from the texture array
@@ -43,13 +46,13 @@ public:
 	sf::Texture* myTexture;
 	//GRAPHICS ///////////////////////////
 
-	Button(int inputXCoord, int inputYCoord, int inputButtonType, sf::Texture* inputTexture)
+	Button(int inputXCoord, int inputYCoord, int inputButtonType, sf::Texture* inputTexture, std::string inputName)
 	{
 		//Assign values to members
 		xCoord = inputXCoord;
 		yCoord = inputYCoord;
 
-		myType = buttonType (inputButtonType );
+		myType = buttonType(inputButtonType);
 		myTexture = inputTexture;
 		mySprite.setTexture(*myTexture);
 		mySprite.setPosition(xCoord, yCoord);
@@ -57,7 +60,9 @@ public:
 		sf::Vector2u dimensions = myTexture->getSize();
 		width = dimensions.x;
 		height = dimensions.y;
-		
+
+		myName = inputName;
+
 	}
 
 	bool checkWithinButton(int inputXCoord, int inputYCoord)

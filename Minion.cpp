@@ -21,7 +21,7 @@ Minion::Minion()
 	stealthMode = false;
 
 	// 0 is no faction/neutral/base group, 1 is North Redonia, 2 is South Redonia, 3 is Ormosa, 4 is Torran.
-	factionAllowed[0] = true; factionAllowed[1] = true; factionAllowed[2] = true; factionAllowed[3] = true; factionAllowed[4] = true;
+	
 
 	//Basic image init below
 	mySprite.setTextureRect(rectArray[0][4]);
@@ -105,7 +105,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[30][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 1;
@@ -121,7 +121,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = infantry;
 		stealthMode = true;
-		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[29][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
@@ -170,7 +170,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		factionAllowed[0] = false; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = false; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[27][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
@@ -187,7 +187,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 3;
 		rangeType = hybridRange;
 		specialtyGroup = normal;
-		factionAllowed[0] = false; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = false; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[28][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 6;
@@ -222,7 +222,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		factionAllowed[0] = true; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = true;
+		
 		mySprite.setTextureRect(rectArray[6][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 6;
@@ -240,7 +240,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 4;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = true; factionAllowed[3] = false; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[27][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
@@ -259,7 +259,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = rangedFire;
 		specialtyGroup = normal;
 		minAttackRange = 1;
-		factionAllowed[0] = true; factionAllowed[1] = false; factionAllowed[2] = true; factionAllowed[3] = true; factionAllowed[4] = true;
+		
 		mySprite.setTextureRect(rectArray[5][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
@@ -277,7 +277,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 5;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		factionAllowed[0] = true; factionAllowed[1] = true; factionAllowed[2] = true; factionAllowed[3] = false; factionAllowed[4] = true;
+		
 		mySprite.setTextureRect(rectArray[2][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
@@ -295,7 +295,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 4;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[31][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
@@ -406,7 +406,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = smallTransport;
-		factionAllowed[0] = true; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = true; factionAllowed[4] = true;
+		
 		mySprite.setTextureRect(rectArray[4][inputTeam + 4]);
 		maxFuel = 70;
 
@@ -423,7 +423,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = smallTransport;
-		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = true; factionAllowed[3] = false; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[26][inputTeam + 4]);
 		maxFuel = 70;
 
@@ -460,7 +460,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = air;
-		factionAllowed[0] = false; factionAllowed[1] = false; factionAllowed[2] = true; factionAllowed[3] = false; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
 		maxFuel = 75;
 		maxPriAmmo = 6;
@@ -480,7 +480,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = normal;
 		domain = air;
-		factionAllowed[0] = false; factionAllowed[1] = true; factionAllowed[2] = false; factionAllowed[3] = false; factionAllowed[4] = false;
+		
 		mySprite.setTextureRect(rectArray[21][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 6;

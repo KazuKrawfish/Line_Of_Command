@@ -22,6 +22,7 @@ class Cursor;
 const int GLOBALSUPPLYCAP = 100;		//Global variables declarations
 
 enum playerTypeKind { humanPlayer, computerPlayer };
+enum factionType {NeutralFaction, NorthRedonia, SouthRedonia, Ormosa, Torran};
 
 class playerRosterEntry
 {
@@ -36,7 +37,6 @@ public:
 		treasury = inputTreasury;
 		name = inputName;
 		playerFlag = inputPlayerFlag;
-
 	};
 
 	int treasury = 0;
@@ -45,6 +45,7 @@ public:
 	int playerFlag = -1;
 	bool stillAlive = true;
 	int numberOfMinions = 0;
+	factionType playerFaction = NeutralFaction;
 };
 
 
@@ -101,6 +102,7 @@ public:
 	//Purchase Functions///////////////////////
 	int attemptPurchaseMinion(std::string inputType, int inputX, int inputY, int inputTeam);
 	int consultMinionCostChart(std::string minionType, char propertyType);
+	bool checkFactionAvailability(std::string minionType, int inputPlayer);
 	int createMinion(std::string, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
 	//Purchase Functions///////////////////////
 

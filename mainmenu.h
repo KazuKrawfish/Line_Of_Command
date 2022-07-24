@@ -31,8 +31,9 @@ class mainMenu
 public:
 
 	//CONSTRUCTOR///////////////////////////////
-	mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
-		std::vector <sf::Texture>* gameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic);
+	mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
+				std::vector <sf::Texture>* gameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic,
+				std::vector <sf::Texture>* factionButtonTextureArray);
 	//CONSTRUCTOR///////////////////////////////
 
 	//Main Menu Interface //////////////////////
@@ -85,6 +86,7 @@ public:
 	//Buttons////////////////////////////////////
 	std::vector <Button> gameMenuButtons;
 	std::vector <Button> topMenuButtons;
+	std::vector <Button> factionChoiceButtons;
 	//Buttons////////////////////////////////////
 
 	//SFML Objects///////////////////////////////

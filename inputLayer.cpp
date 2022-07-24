@@ -1,12 +1,15 @@
-//Copyright 2022, Supercontinent Software Ltd.
-//
-//	inputLayer.cpp
-//
-/*
-The inputLayer class is responsible for all player-related and interface activities. It interacts with the masterboard class, sending commands
-to move minions and such, while receiving data from the board to print to screen for animations and static display. It also goes back up to mainmenu
-when necessary, ie. when game ends or player wants to leave the current game.
-*/
+//Changed printPropertyMenu to use button names instead of painstakingly searching
+//Todo : Finish removing factionAllowed characteristic from minion.hpp
+
+	//Copyright 2022, Supercontinent Software Ltd.
+	//
+	//	inputLayer.cpp
+	//
+	/*
+	The inputLayer class is responsible for all player-related and interface activities. It interacts with the masterboard class, sending commands
+	to move minions and such, while receiving data from the board to print to screen for animations and static display. It also goes back up to mainmenu
+	when necessary, ie. when game ends or player wants to leave the current game.
+	*/
 
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
@@ -22,9 +25,11 @@ when necessary, ie. when game ends or player wants to leave the current game.
 #include "SFML/System/Time.hpp"
 #include "SFML/System/Clock.hpp"
 
-char playCharInput(sf::RenderWindow * myWindow);
+	char playCharInput(sf::RenderWindow* myWindow);
 
-inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures)
+inputLayer::inputLayer(	mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, 
+						sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, 
+						std::vector <sf::Texture>* statusTextures)
 {
 	inputLayerTexture = gameTexture;
 	inputLayerFont = cour;
@@ -50,7 +55,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	//For each minion that can be purchased, create new button and push_back.
 	for (int i = 0; i < factoryOptions.size(); i++)
 	{
-		factoryButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, factoryButton, gameTexture);
+		factoryButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, factoryButton, gameTexture, factoryOptions.at(i));
 		factoryButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
 		factoryButtons.at(i).width = 50;
 		factoryButtons.at(i).height = 50;
@@ -61,25 +66,33 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 			y++;
 		}
 	}
-	factoryButtons.at(0).mySprite.setTextureRect(rectArray[0][4]);	//i
-	factoryButtons.at(1).mySprite.setTextureRect(rectArray[1][4]);	//s
-	factoryButtons.at(2).mySprite.setTextureRect(rectArray[2][4]);  //c
-	factoryButtons.at(3).mySprite.setTextureRect(rectArray[4][4]);  //P
-	factoryButtons.at(4).mySprite.setTextureRect(rectArray[5][4]);  //r	
-	factoryButtons.at(5).mySprite.setTextureRect(rectArray[3][4]);  //a
-	factoryButtons.at(6).mySprite.setTextureRect(rectArray[7][4]);  //A
-	factoryButtons.at(7).mySprite.setTextureRect(rectArray[8][4]);  //R
-	factoryButtons.at(8).mySprite.setTextureRect(rectArray[6][4]);  //T
+	factoryButtons.at(0).mySprite.setTextureRect(rectArray[0][4]);	    //Infantry
+	factoryButtons.at(1).mySprite.setTextureRect(rectArray[30][4]);	    //Insurgent
+	factoryButtons.at(2).mySprite.setTextureRect(rectArray[29][4]);	    //Operative
+	factoryButtons.at(3).mySprite.setTextureRect(rectArray[1][4]);	    //Specialist
+	factoryButtons.at(4).mySprite.setTextureRect(rectArray[2][4]);      //Recon
+	factoryButtons.at(5).mySprite.setTextureRect(rectArray[31][4]);     //Technical
+	factoryButtons.at(6).mySprite.setTextureRect(rectArray[4][4]);      //APC
+	factoryButtons.at(7).mySprite.setTextureRect(rectArray[26][4]);     //IFV
+	factoryButtons.at(8).mySprite.setTextureRect(rectArray[5][4]);      //Artillery	
+	factoryButtons.at(9).mySprite.setTextureRect(rectArray[3][4]);      //Armor
+	factoryButtons.at(10).mySprite.setTextureRect(rectArray[28][4]);     //Assault gun
+	factoryButtons.at(11).mySprite.setTextureRect(rectArray[27][4]);      //Upgunned armor
+	factoryButtons.at(12).mySprite.setTextureRect(rectArray[7][4]);      //Anti-Aircraft
+	factoryButtons.at(13).mySprite.setTextureRect(rectArray[8][4]);      //Rocket
+	factoryButtons.at(14).mySprite.setTextureRect(rectArray[6][4]);      //Heavy Armor
+	factoryButtons.at(15).mySprite.setTextureRect(rectArray[27][4]);      //Modern Armor
+
 
 	//Airbase buttons
 	y = 0;	//Reset counters
 	x = 0;
 	for (int i = 0; i < airbaseOptions.size(); i++)
 	{
-		airbaseButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, airbaseButton, gameTexture);
+		airbaseButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, airbaseButton, gameTexture, airbaseOptions.at(i));
 		airbaseButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
-		factoryButtons.at(i).width = 50;
-		factoryButtons.at(i).height = 50;
+		airbaseButtons.at(i).width = 50;
+		airbaseButtons.at(i).height = 50;
 		x++;
 		if (x == numberOfButtonsPerRow)
 		{
@@ -87,20 +100,22 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 			y++;
 		}
 	}
-	airbaseButtons.at(0).mySprite.setTextureRect(rectArray[10][4]);  //h
-	airbaseButtons.at(1).mySprite.setTextureRect(rectArray[9][4]);   //v
-	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[11][4]);  //f
-	airbaseButtons.at(3).mySprite.setTextureRect(rectArray[12][4]);  //b
+	airbaseButtons.at(0).mySprite.setTextureRect(rectArray[10][4]);  //Transport_Copter
+	airbaseButtons.at(1).mySprite.setTextureRect(rectArray[9][4]);   //Attack_Copter
+	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[11][4]);  //Interceptor
+	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[25][4]);  //Advanced_Fighter
+	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[21][4]);  //Multirole
+	airbaseButtons.at(3).mySprite.setTextureRect(rectArray[12][4]);  //Bomber
 
 	//Naval buttons
 	y = 0;	//Reset counters
 	x = 0;
 	for (int i = 0; i < portOptions.size(); i++)
 	{
-		portButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, portButton, gameTexture);
+		portButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, portButton, gameTexture, portOptions.at(i));
 		portButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
-		factoryButtons.at(i).width = 50;
-		factoryButtons.at(i).height = 50;
+		portButtons.at(i).width = 50;
+		portButtons.at(i).height = 50;
 		x++;
 		if (x == numberOfButtonsPerRow)
 		{
@@ -114,7 +129,6 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	portButtons.at(3).mySprite.setTextureRect(rectArray[18][4]);  //U
 	portButtons.at(4).mySprite.setTextureRect(rectArray[13][4]);  //B
 	portButtons.at(5).mySprite.setTextureRect(rectArray[17][4]);  //V
-
 
 	//Create status indicator buttons
 	//Overall status area is same as above
@@ -305,7 +319,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 						effectsSprite.setTextureRect(rectArray[2][2]);
 						inputLayerWindow->draw(effectsSprite);
 					}
-					
+
 		}
 		else   //If cursor is hovering (no one selected), and showRange is toggled
 			if (showRangeStatus == showRange && boardToPrint->cursor.selectMinionFlag == false)
@@ -452,353 +466,319 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 	}
 }
 
-	//Updated printStatus
-	int inputLayer::printStatus(MasterBoard * boardToPrint, int observerNumber)
+//Updated printStatus
+int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
+{
+	//InputLayerStatus is not working, so we check if they're computer player here
+	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == computerPlayer)
+		menuLineTracker += 2;
+
+	int spacingConstant = 25;
+	tile* currentTile = &boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
+
+	//Need string pointer since addstr giving grief about printing strings, and same with snprintf.
+	char pointerToPrint[100];
+	char* descriptionPointer = &currentTile->description[0];
+	char* playerName = &(boardToPrint->playerRoster[currentTile->controller].name[0]);
+	sf::String tileDescription;
+
+	//Print current player, with treasury and potential event text.
+	sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
+	snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+	//snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+	playerStatus += pointerToPrint;
+	playerStatus += &eventText[0];
+
+	//Convert and print.
+	sf::Text playerStatusText(playerStatus, *inputLayerFont, MainMenu->menuTextSize);
+	playerStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+	playerStatusText.setFillColor(sf::Color::Black);
+	inputLayerWindow->draw(playerStatusText);
+
+
+	//Reset event text
+	eventText = "";
+
+	//Do not print out status boxes for property menu
+	//Do not print status for compie moves
+	if (status != propertyAction && boardToPrint->playerRoster[boardToPrint->playerFlag].playerType != computerPlayer)
 	{
-		//InputLayerStatus is not working, so we check if they're computer player here
-		if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == computerPlayer)
-			menuLineTracker += 2;
 
-		int spacingConstant = 25;
-		tile* currentTile = &boardToPrint->Board[boardToPrint->cursor.getX()][boardToPrint->cursor.getY()];
-
-		//Need string pointer since addstr giving grief about printing strings, and same with snprintf.
-		char pointerToPrint[100];
-		char* descriptionPointer = &currentTile->description[0];
-		char* playerName = &(boardToPrint->playerRoster[currentTile->controller].name[0]);
-		sf::String tileDescription;
-
-		//Print current player, with treasury and potential event text.
-		sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-		snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
-		//snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
-		playerStatus += pointerToPrint;
-		playerStatus += &eventText[0];
-
-		//Convert and print.
-		sf::Text playerStatusText(playerStatus, *inputLayerFont, MainMenu->menuTextSize);
-		playerStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
-		playerStatusText.setFillColor(sf::Color::Black);
-		inputLayerWindow->draw(playerStatusText);
-
-
-		//Reset event text
-		eventText = "";
-
-		//Do not print out status boxes for property menu
-		//Do not print status for compie moves
-		if (status != propertyAction && boardToPrint->playerRoster[boardToPrint->playerFlag].playerType != computerPlayer)
+		if (observerNumber == boardToPrint->playerFlag)
 		{
-
-			if (observerNumber == boardToPrint->playerFlag)
+			if (currentTile->controller != 0)
 			{
-				if (currentTile->controller != 0)
-				{
-					tileDescription = playerName;
-					tileDescription += "'s ";
-					tileDescription += descriptionPointer;
-				}
-				else
-				{
-					tileDescription = descriptionPointer;
-				}
-
+				tileDescription = playerName;
+				tileDescription += "'s ";
+				tileDescription += descriptionPointer;
+			}
+			else
+			{
+				tileDescription = descriptionPointer;
 			}
 
-			//See if any adjacent friendly minions to this square
-			bool friendlyAdjacentMinion = boardToPrint->hasAdjacentMinion(currentTile->locationX, currentTile->locationY, boardToPrint->playerFlag);
+		}
 
-			//See if enemy minion here.
-			bool stealthEnemyHere = false;
-			if (currentTile->hasMinionOnTop == true && currentTile->minionOnTop->team != boardToPrint->playerFlag && currentTile->minionOnTop->specialtyGroup == stealth)
-				stealthEnemyHere = true;
+		//See if any adjacent friendly minions to this square
+		bool friendlyAdjacentMinion = boardToPrint->hasAdjacentMinion(currentTile->locationX, currentTile->locationY, boardToPrint->playerFlag);
 
-			bool unseenStealthEnemyHere = false;
-			if (stealthEnemyHere == true && friendlyAdjacentMinion == false)
-				unseenStealthEnemyHere = true;
+		//See if enemy minion here.
+		bool stealthEnemyHere = false;
+		if (currentTile->hasMinionOnTop == true && currentTile->minionOnTop->team != boardToPrint->playerFlag && currentTile->minionOnTop->specialtyGroup == stealth)
+			stealthEnemyHere = true;
 
-			if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber] && unseenStealthEnemyHere == false)
+		bool unseenStealthEnemyHere = false;
+		if (stealthEnemyHere == true && friendlyAdjacentMinion == false)
+			unseenStealthEnemyHere = true;
+
+		if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber] && unseenStealthEnemyHere == false)
+		{
+
+
+			//If tile is undergoing capture, let us know.
+			if (currentTile->capturePoints != 20)
 			{
+				//First draw box for capture status
+				inputLayerWindow->draw(statusButtons.at(2).mySprite);
+				snprintf(pointerToPrint, 100, "%d", currentTile->capturePoints);
+				sf::Text newText(pointerToPrint, *inputLayerFont, MainMenu->menuTextSize + 6);
+				newText.setPosition(statusButtons.at(2).xCoord + 78, statusButtons.at(2).yCoord + 18);
+				newText.setFillColor(sf::Color::Black);
+				inputLayerWindow->draw(newText);
+			}
+
+			Minion* currentMinion = currentTile->minionOnTop;
+
+			//Print out basic minion status.
+			tileDescription += "\n";
+			tileDescription += &(boardToPrint->playerRoster[currentMinion->team].name[0]);
+			tileDescription += "'s ";
+			tileDescription += &currentMinion->description[0];
 
 
-				//If tile is undergoing capture, let us know.
-				if (currentTile->capturePoints != 20)
+			//Print health:
+			//First draw box 
+			inputLayerWindow->draw(statusButtons.at(3).mySprite);
+			//Then print actual number
+			snprintf(pointerToPrint, 100, "%d", int(currentMinion->health));
+			sf::String healthNumberString = pointerToPrint;
+			sf::Text healthNumberText(healthNumberString, *inputLayerFont, MainMenu->menuTextSize);
+			healthNumberText.setPosition(statusButtons.at(3).xCoord + 78, statusButtons.at(3).yCoord + 23);
+			healthNumberText.setFillColor(sf::Color::Black);
+			inputLayerWindow->draw(healthNumberText);
+
+			//Print out fuel status
+			//Start with box
+			inputLayerWindow->draw(statusButtons.at(4).mySprite);
+			//Then print actual number
+			snprintf(pointerToPrint, 100, "%d/%d", currentMinion->currentFuel, currentMinion->maxFuel);
+			sf::String fuelNumberString = pointerToPrint;
+			sf::Text fuelNumberText(fuelNumberString, *inputLayerFont, MainMenu->menuTextSize);
+			fuelNumberText.setPosition(statusButtons.at(4).xCoord + 70, statusButtons.at(4).yCoord + 23);
+			fuelNumberText.setFillColor(sf::Color::Black);
+			inputLayerWindow->draw(fuelNumberText);
+
+			//Print ammo box:
+			//First draw box 
+			inputLayerWindow->draw(statusButtons.at(5).mySprite);
+
+			//Then determine combo of pri/sec ammo:
+			if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo > 0)		//Both pri/sec have ammo
+				snprintf(pointerToPrint, 100, "%d/%d\n%d/%d", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo, currentMinion->currentSecAmmo, currentMinion->maxSecAmmo);
+			else if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo == 0)		//Infinte sec ammo
+				snprintf(pointerToPrint, 100, "%d/%d\nINF", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo);
+			else if (currentMinion->maxSecAmmo == 0 && currentMinion->maxPriAmmo == -1)	//No pri, infinite sec. 
+				snprintf(pointerToPrint, 100, "N/A\nINF");
+			else if (currentMinion->maxSecAmmo == -1 && currentMinion->maxPriAmmo > 0)	//Primary with no sec.
+				snprintf(pointerToPrint, 100, "%d/%d\nN/A", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo);
+			else //No weapons.
+				snprintf(pointerToPrint, 100, "N/A\nN/A");
+
+			//Then print out actual values of ammo
+			sf::String ammoNumberString = pointerToPrint;
+			sf::Text ammoNumberText(ammoNumberString, *inputLayerFont, MainMenu->menuTextSize);
+			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80, statusButtons.at(5).yCoord + 15);
+			ammoNumberText.setFillColor(sf::Color::Black);
+			inputLayerWindow->draw(ammoNumberText);
+
+			//Print move state of minion
+			inputLayerWindow->draw(statusButtons.at(6).mySprite);
+			sf::Sprite effectsSprite;
+			effectsSprite.setTexture(*inputLayerTexture);
+			effectsSprite.setPosition(statusButtons.at(6).xCoord + 35, statusButtons.at(6).yCoord + 10);
+			if (currentMinion->status == gaveupmovehasntfired)
+			{
+				//Print yellow pause image
+				effectsSprite.setTextureRect(rectArray[1][15]);
+				inputLayerWindow->draw(effectsSprite);
+			}
+			else
+				if (currentMinion->status == hasmovedhasntfired)
 				{
-					//First draw box for capture status
-					inputLayerWindow->draw(statusButtons.at(2).mySprite);
-					snprintf(pointerToPrint, 100, "%d", currentTile->capturePoints);
-					sf::Text newText(pointerToPrint, *inputLayerFont, MainMenu->menuTextSize + 6);
-					newText.setPosition(statusButtons.at(2).xCoord + 78, statusButtons.at(2).yCoord + 18);
-					newText.setFillColor(sf::Color::Black);
-					inputLayerWindow->draw(newText);
-				}
+					if (currentMinion->rangeType == rangedFire)
+					{
+						//Print red octagon -- 15, 2
+						effectsSprite.setTextureRect(rectArray[2][15]);
+						inputLayerWindow->draw(effectsSprite);
 
-				Minion* currentMinion = currentTile->minionOnTop;
+					}
+					if (currentMinion->rangeType == directFire)
+					{
+						//Print yellow pause image -- 15, 1
+						effectsSprite.setTextureRect(rectArray[1][15]);
+						inputLayerWindow->draw(effectsSprite);
 
-				//Print out basic minion status.
-				tileDescription += "\n";
-				tileDescription += &(boardToPrint->playerRoster[currentMinion->team].name[0]);
-				tileDescription += "'s ";
-				tileDescription += &currentMinion->description[0];
-
-
-				//Print health:
-				//First draw box 
-				inputLayerWindow->draw(statusButtons.at(3).mySprite);
-				//Then print actual number
-				snprintf(pointerToPrint, 100, "%d", int(currentMinion->health));
-				sf::String healthNumberString = pointerToPrint;
-				sf::Text healthNumberText(healthNumberString, *inputLayerFont, MainMenu->menuTextSize);
-				healthNumberText.setPosition(statusButtons.at(3).xCoord + 78, statusButtons.at(3).yCoord + 23);
-				healthNumberText.setFillColor(sf::Color::Black);
-				inputLayerWindow->draw(healthNumberText);
-
-				//Print out fuel status
-				//Start with box
-				inputLayerWindow->draw(statusButtons.at(4).mySprite);
-				//Then print actual number
-				snprintf(pointerToPrint, 100, "%d/%d", currentMinion->currentFuel, currentMinion->maxFuel);
-				sf::String fuelNumberString = pointerToPrint;
-				sf::Text fuelNumberText(fuelNumberString, *inputLayerFont, MainMenu->menuTextSize);
-				fuelNumberText.setPosition(statusButtons.at(4).xCoord + 70, statusButtons.at(4).yCoord + 23);
-				fuelNumberText.setFillColor(sf::Color::Black);
-				inputLayerWindow->draw(fuelNumberText);
-
-				//Print ammo box:
-				//First draw box 
-				inputLayerWindow->draw(statusButtons.at(5).mySprite);
-
-				//Then determine combo of pri/sec ammo:
-				if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo > 0)		//Both pri/sec have ammo
-					snprintf(pointerToPrint, 100, "%d/%d\n%d/%d", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo, currentMinion->currentSecAmmo, currentMinion->maxSecAmmo);
-				else if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo == 0)		//Infinte sec ammo
-					snprintf(pointerToPrint, 100, "%d/%d\nINF", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo);
-				else if (currentMinion->maxSecAmmo == 0 && currentMinion->maxPriAmmo == -1)	//No pri, infinite sec. 
-					snprintf(pointerToPrint, 100, "N/A\nINF");
-				else if (currentMinion->maxSecAmmo == -1 && currentMinion->maxPriAmmo > 0)	//Primary with no sec.
-					snprintf(pointerToPrint, 100, "%d/%d\nN/A", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo);
-				else //No weapons.
-					snprintf(pointerToPrint, 100, "N/A\nN/A");
-
-				//Then print out actual values of ammo
-				sf::String ammoNumberString = pointerToPrint;
-				sf::Text ammoNumberText(ammoNumberString, *inputLayerFont, MainMenu->menuTextSize);
-				ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80, statusButtons.at(5).yCoord + 15);
-				ammoNumberText.setFillColor(sf::Color::Black);
-				inputLayerWindow->draw(ammoNumberText);
-
-				//Print move state of minion
-				inputLayerWindow->draw(statusButtons.at(6).mySprite);
-				sf::Sprite effectsSprite;
-				effectsSprite.setTexture(*inputLayerTexture);
-				effectsSprite.setPosition(statusButtons.at(6).xCoord + 35, statusButtons.at(6).yCoord + 10);
-				if (currentMinion->status == gaveupmovehasntfired)
-				{
-					//Print yellow pause image
-					effectsSprite.setTextureRect(rectArray[1][15]);
-					inputLayerWindow->draw(effectsSprite);
+					}
 				}
 				else
-					if (currentMinion->status == hasmovedhasntfired)
+					if (currentMinion->status == hasfired)
 					{
-						if (currentMinion->rangeType == rangedFire)
-						{
-							//Print red octagon -- 15, 2
-							effectsSprite.setTextureRect(rectArray[2][15]);
-							inputLayerWindow->draw(effectsSprite);
-
-						}
-						if (currentMinion->rangeType == directFire)
-						{
-							//Print yellow pause image -- 15, 1
-							effectsSprite.setTextureRect(rectArray[1][15]);
-							inputLayerWindow->draw(effectsSprite);
-
-						}
+						//Print red octagon -- 15, 2
+						effectsSprite.setTextureRect(rectArray[2][15]);
+						inputLayerWindow->draw(effectsSprite);
 					}
 					else
-						if (currentMinion->status == hasfired)
+						if (currentMinion->status == hasntmovedorfired)
 						{
-							//Print red octagon -- 15, 2
-							effectsSprite.setTextureRect(rectArray[2][15]);
+							//Print green triangle -- 15,0
+							effectsSprite.setTextureRect(rectArray[0][15]);
 							inputLayerWindow->draw(effectsSprite);
 						}
-						else
-							if (currentMinion->status == hasntmovedorfired)
-							{
-								//Print green triangle -- 15,0
-								effectsSprite.setTextureRect(rectArray[0][15]);
-								inputLayerWindow->draw(effectsSprite);
-							}
 
-			}
+		}
 
-			//No longer need debug printouts on editMode.
-			sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
-			newText.setPosition(MAX_WINDOW_WIDTH * 52 + 200, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
-			newText.setFillColor(sf::Color::Black);
-			inputLayerWindow->draw(newText);
+		//No longer need debug printouts on editMode.
+		sf::Text newText(tileDescription, *inputLayerFont, MainMenu->menuTextSize);
+		newText.setPosition(MAX_WINDOW_WIDTH * 52 + 200, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+		newText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(newText);
 
-			//Printout defense bonus status for tile
+		//Printout defense bonus status for tile
+		//Start with box
+		inputLayerWindow->draw(statusButtons.at(0).mySprite);
+		//Then print actual number
+		snprintf(pointerToPrint, 100, "%d", int(round((currentTile->defenseFactor - 1.0) * 10)));
+		sf::String defenseBonusNumber = pointerToPrint;
+		sf::Text defenseBonusText(defenseBonusNumber, *inputLayerFont, MainMenu->menuTextSize + 6);
+		defenseBonusText.setPosition(statusButtons.at(0).xCoord + 80, statusButtons.at(0).yCoord + 18);
+		defenseBonusText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(defenseBonusText);
+
+		//Printout production status for tile if it exists
+		if (currentTile->production > 0)
+		{
+			//Print out production status
 			//Start with box
-			inputLayerWindow->draw(statusButtons.at(0).mySprite);
+			inputLayerWindow->draw(statusButtons.at(1).mySprite);
 			//Then print actual number
-			snprintf(pointerToPrint, 100, "%d", int(round((currentTile->defenseFactor - 1.0) * 10)));
-			sf::String defenseBonusNumber = pointerToPrint;
-			sf::Text defenseBonusText(defenseBonusNumber, *inputLayerFont, MainMenu->menuTextSize + 6);
-			defenseBonusText.setPosition(statusButtons.at(0).xCoord + 80, statusButtons.at(0).yCoord + 18);
-			defenseBonusText.setFillColor(sf::Color::Black);
-			inputLayerWindow->draw(defenseBonusText);
-
-			//Printout production status for tile if it exists
-			if (currentTile->production > 0)
-			{
-				//Print out production status
-				//Start with box
-				inputLayerWindow->draw(statusButtons.at(1).mySprite);
-				//Then print actual number
-				snprintf(pointerToPrint, 100, "%d", currentTile->production);
-				sf::String productionNumberString = pointerToPrint;
-				sf::Text productionNumberText(productionNumberString, *inputLayerFont, MainMenu->menuTextSize);
-				productionNumberText.setPosition(statusButtons.at(1).xCoord + 70, statusButtons.at(1).yCoord + 23);
-				productionNumberText.setFillColor(sf::Color::Black);
-				inputLayerWindow->draw(productionNumberText);
-			}
+			snprintf(pointerToPrint, 100, "%d", currentTile->production);
+			sf::String productionNumberString = pointerToPrint;
+			sf::Text productionNumberText(productionNumberString, *inputLayerFont, MainMenu->menuTextSize);
+			productionNumberText.setPosition(statusButtons.at(1).xCoord + 70, statusButtons.at(1).yCoord + 23);
+			productionNumberText.setFillColor(sf::Color::Black);
+			inputLayerWindow->draw(productionNumberText);
 		}
-
-
-		return 0;
 	}
 
 
-	int inputLayer::printMinionMenu(MasterBoard * boardToPrint) {
+	return 0;
+}
 
-		if (boardToPrint->cursor.selectMinionPointer == NULL)
-			return 0;
 
-		minionStatus mystatus = boardToPrint->cursor.selectMinionPointer->status;
+int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 
-		sf::String boardMessage;
-
-		if (mystatus == hasntmovedorfired)
-		{
-			boardMessage = "Move cursor(WASD) | Move minion (m)\nDeselect minion(t) | Capture move(c)\n";
-		}
-
-		if (mystatus == hasmovedhasntfired || mystatus == gaveupmovehasntfired)
-		{
-			boardMessage = "Move cursor(WASD) | Attack (r)\nDeselect minion (t) | Capture (c)\n";
-		}
-
-		if (mystatus == hasfired)
-		{
-			boardMessage = "No further action possible";
-
-		}
-
-		sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-
-		newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 2);
-
-		newText.setFillColor(sf::Color::Black);
-
-		inputLayerWindow->draw(newText);
-
-		menuLineTracker += 2;
-
+	if (boardToPrint->cursor.selectMinionPointer == NULL)
 		return 0;
 
-	}
+	minionStatus mystatus = boardToPrint->cursor.selectMinionPointer->status;
 
-	int inputLayer::printBoardMenu(MasterBoard * boardToPrint) {
+	sf::String boardMessage;
 
-		sf::String boardMessage = "Move cursor (WASD) | Menu (m)\nSelect minion/property (t)\n";
-
-		sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-
-		newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
-
-		newText.setFillColor(sf::Color::Black);
-
-		inputLayerWindow->draw(newText);
-
-		menuLineTracker += 2;
-
-		return 0;
-	}
-
-	int	inputLayer::printPropertyMenu(MasterBoard * boardToPrint)
+	if (mystatus == hasntmovedorfired)
 	{
-		//Get mouse position for checking buttons later
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+		boardMessage = "Move cursor(WASD) | Move minion (m)\nDeselect minion(t) | Capture move(c)\n";
+	}
 
-		//Create string, but do not yet print. Still need to add hovered minion name.
-		sf::String boardMessage = "Purchase minion (L-Click). Deselect (R-Click/T-Key)\n";
-		char hoveredMinionName[100];
-		snprintf(hoveredMinionName, 100, " ");
+	if (mystatus == hasmovedhasntfired || mystatus == gaveupmovehasntfired)
+	{
+		boardMessage = "Move cursor(WASD) | Attack (r)\nDeselect minion (t) | Capture (c)\n";
+	}
 
-		tile* myTile = &boardToPrint->Board[boardToPrint->cursor.XCoord][boardToPrint->cursor.YCoord];
+	if (mystatus == hasfired)
+	{
+		boardMessage = "No further action possible";
 
-		//Black border box
-		sf::Sprite effectsSprite;
-		effectsSprite.setTexture(*inputLayerTexture);
-		effectsSprite.setTextureRect(rectArray[25][4]);
+	}
 
-		sf::Sprite grayBoxSprite;
-		grayBoxSprite.setTexture(*inputLayerTexture);
-		grayBoxSprite.setTextureRect(rectArray[9][13]);
-		grayBoxSprite.setColor(sf::Color(255, 255, 255, 128));
+	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-		std::string unitToShow = " ";
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 2);
 
-		if (myTile->symbol == 'h')
+	newText.setFillColor(sf::Color::Black);
+
+	inputLayerWindow->draw(newText);
+
+	menuLineTracker += 2;
+
+	return 0;
+
+}
+
+int inputLayer::printBoardMenu(MasterBoard* boardToPrint) {
+
+	sf::String boardMessage = "Move cursor (WASD) | Menu (m)\nSelect minion/property (t)\n";
+
+	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
+
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+
+	newText.setFillColor(sf::Color::Black);
+
+	inputLayerWindow->draw(newText);
+
+	menuLineTracker += 2;
+
+	return 0;
+}
+
+int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
+{
+	//Get mouse position for checking buttons later
+	sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+
+	//Create string, but do not yet print. Still need to add hovered minion name.
+	sf::String boardMessage = "Purchase minion (L-Click). Deselect (R-Click/T-Key)\n";
+	char hoveredMinionName[100];
+	snprintf(hoveredMinionName, 100, " ");
+
+	tile* myTile = &boardToPrint->Board[boardToPrint->cursor.XCoord][boardToPrint->cursor.YCoord];
+
+	//Black border box
+	sf::Sprite effectsSprite;
+	effectsSprite.setTexture(*inputLayerTexture);
+	effectsSprite.setTextureRect(rectArray[25][4]);
+
+	sf::Sprite grayBoxSprite;
+	grayBoxSprite.setTexture(*inputLayerTexture);
+	grayBoxSprite.setTextureRect(rectArray[9][13]);
+	grayBoxSprite.setColor(sf::Color(255, 255, 255, 128));
+
+	if (myTile->symbol == 'h')
+	{
+		for (int i = 0; i < factoryButtons.size(); i++)
 		{
-			for (int i = 0; i < factoryButtons.size(); i++)
-			{
-				//Ungainly method to convert button number to minion type, to check if it's banned
-
-				switch (i)
-				{
-				case 0:
-					unitToShow = "Infantry";
-					break;
-				case 1:
-					unitToShow = "Specialist";
-					break;
-				case 2:
-					unitToShow = "Recon";
-					break;
-				case 3:
-					unitToShow = "APC";
-					break;
-				case 4:
-					unitToShow = "Artillery";
-					break;
-				case 5:
-					unitToShow = "Armor";
-					break;
-				case 6:
-					unitToShow = "Anti-Aircraft";
-					break;
-				case 7:
-					unitToShow = "Rocket_Artillery";
-					break;
-				case 8:
-					unitToShow = "Heavy_Armor";
-					break;
-				}
-
-				//Check if minion type is on ban-list
-				//Must NOT be on ban list in order to print
-				if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), unitToShow) == boardToPrint->banList.end())
+			//Check if minion type is on ban-list
+			//Must NOT be on ban list in order to print
+			bool withinFaction =
+				if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), factoryButtons.at(i).myName) == boardToPrint->banList.end())
 				{
 					inputLayerWindow->draw(factoryButtons.at(i).mySprite);
 					effectsSprite.setPosition(factoryButtons.at(i).mySprite.getPosition());
 					inputLayerWindow->draw(effectsSprite);
 
 					//Check if player can afford each particular minion, and if not, then draw over a gray box effect.
-					int minionPrice = boardToPrint->consultMinionCostChart(unitToShow, '~');
-					
+					int minionPrice = boardToPrint->consultMinionCostChart(factoryButtons.at(i).myName, '~');
+
 					//If it is a real and non-banned minion, BUT is not affordable, print gray box effect.
 					if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury)
 					{
@@ -812,43 +792,29 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 					if (withinButton == true)
 					{
-						snprintf(hoveredMinionName, 100, "%s: costs %d", &unitToShow[0], minionPrice);
+						snprintf(hoveredMinionName, 100, "%s: costs %d", &(factoryButtons.at(i).myName[0]), minionPrice);
 					}
 
 				}
 
-			}
 		}
+	}
 
-		if (myTile->symbol == 'P')
+	if (myTile->symbol == 'P')
+	{
+		for (int i = 0; i < portButtons.size(); i++)
 		{
-			for (int i = 0; i < portButtons.size(); i++)
-			{
-
-				if (i == 0)
-					unitToShow = "Gunboat";
-				if (i == 1)
-					unitToShow = "Cruiser";
-				if (i == 2)
-					unitToShow = "Lander";
-				if (i == 3)
-					unitToShow = "Submarine";
-				if (i == 4)
-					unitToShow = "Battleship";
-				if (i == 5)
-					unitToShow = "Aircraft_Carrier";
-
-
-				//Check if minion type is on ban-list
-				//Must NOT be on ban list in order to print
-				if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), unitToShow) == boardToPrint->banList.end())
+			//Check if minion type is on ban-list
+			//Must NOT be on ban list in order to print
+			Must also be in the appropriate faction to produce
+				if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), portButtons.at(i).myName) == boardToPrint->banList.end())
 				{
 					inputLayerWindow->draw(portButtons.at(i).mySprite);
 					effectsSprite.setPosition(portButtons.at(i).mySprite.getPosition());
 					inputLayerWindow->draw(effectsSprite);
 
 					//Check if player can afford each particular minion, and if not, then draw over a gray box effect.
-					int minionPrice = boardToPrint->consultMinionCostChart(unitToShow, '~');
+					int minionPrice = boardToPrint->consultMinionCostChart(portButtons.at(i).myName, '~');
 					//If it is a real and non-banned minion, BUT is not affordable, print gray box effect.
 					if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 					{
@@ -865,38 +831,28 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 					if (withinButton == true)
 					{
 
-						snprintf(hoveredMinionName, 100, "%s: costs %d", &unitToShow[0], minionPrice);
+						snprintf(hoveredMinionName, 100, "%s: costs %d", &(portButtons.at(i).myName[0]), minionPrice);
 					}
 
 				}
-			}
 		}
+	}
 
-		if (myTile->symbol == 'A')
+	if (myTile->symbol == 'A')
+	{
+		for (int i = 0; i < airbaseButtons.size(); i++)
 		{
-			for (int i = 0; i < airbaseButtons.size(); i++)
-			{
-
-				if (i == 0)
-					unitToShow = "Transport_Copter";
-				if (i == 1)
-					unitToShow = "Attack_Copter";
-				if (i == 2)
-					unitToShow = "Interceptor";
-				if (i == 3)
-					unitToShow = "Bomber";
-
-
-				//Check if minion type is on ban-list
-				//Must NOT be on ban list in order to print
-				if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), unitToShow) == boardToPrint->banList.end())
+			//Check if minion type is on ban-list
+			//Must NOT be on ban list in order to print
+			Must also be in the appropriate faction to produce
+				if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), airbaseButtons.at(i).myName) == boardToPrint->banList.end())
 				{
 					inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
 					effectsSprite.setPosition(airbaseButtons.at(i).mySprite.getPosition());
 					inputLayerWindow->draw(effectsSprite);
 
 					//Check if player can afford each particular minion, and if not, then draw over a gray box effect.
-					int minionPrice = boardToPrint->consultMinionCostChart(unitToShow, '~');
+					int minionPrice = boardToPrint->consultMinionCostChart(airbaseButtons.at(i).myName, '~');
 					//If it is a real and non-banned minion, BUT is not affordable, print gray box effect.
 					if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 					{
@@ -912,611 +868,390 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 					if (withinButton == true)
 					{
-						snprintf(hoveredMinionName, 100, "%s: costs %d", &unitToShow[0], minionPrice);
+						snprintf(hoveredMinionName, 100, "%s: costs %d", &(airbaseButtons.at(i).myName[0]), minionPrice);
 					}
 
 				}
-			}
 		}
-
-		//Add final newline at end regardless
-		if(unitToShow != " ")
-			boardMessage += hoveredMinionName;
-		boardMessage += "\n";
-
-		sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-		newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
-		newText.setFillColor(sf::Color::Black);
-		inputLayerWindow->draw(newText);
-
-		menuLineTracker += 2;
-
-		return 0;
 	}
 
-	int inputLayer::printMenu(MasterBoard * boardToPrint)
+	//Add final newline at end regardless
+	//if(unitToShow != " ") I think this line is useless, since unitToShow is always assigned some value since this is the property menu printer.
+	boardMessage += hoveredMinionName;
+	boardMessage += "\n";
+
+	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setFillColor(sf::Color::Black);
+	inputLayerWindow->draw(newText);
+
+	menuLineTracker += 2;
+
+	return 0;
+}
+
+int inputLayer::printMenu(MasterBoard* boardToPrint)
+{
+
+	//Draw each button at its offset.
+	//Button must be active, so no sound means soundOn is not drawn
+	for (int i = 0; i < menuButtons->size(); i++)
 	{
+		bool printThisButton = false;
 
-		//Draw each button at its offset.
-		//Button must be active, so no sound means soundOn is not drawn
-		for (int i = 0; i < menuButtons->size(); i++)
+		switch ((menuButtons->at(i)).myType)
 		{
-			bool printThisButton = false;
-
-			switch ((menuButtons->at(i)).myType)
-			{
-			case (soundOn):
-			{
-				if (soundsOn == true)
-					printThisButton = true;
-				break;
-			}
-			case (soundOff):
-			{
-				if (soundsOn == false)
-					printThisButton = true;
-				break;
-			}
-			case (speedNormal):
-			{
-				if (speedFactor == 1)
-					printThisButton = true;
-				break;
-			}
-			case(speedFast):
-			{
-				if (speedFactor != 1)
-					printThisButton = true;
-				break;
-			}
-			default:
+		case (soundOn):
+		{
+			if (soundsOn == true)
 				printThisButton = true;
-			}
-
-			if (printThisButton == true)
-				inputLayerWindow->draw((*menuButtons)[i].mySprite);
+			break;
+		}
+		case (soundOff):
+		{
+			if (soundsOn == false)
+				printThisButton = true;
+			break;
+		}
+		case (speedNormal):
+		{
+			if (speedFactor == 1)
+				printThisButton = true;
+			break;
+		}
+		case(speedFast):
+		{
+			if (speedFactor != 1)
+				printThisButton = true;
+			break;
+		}
+		default:
+			printThisButton = true;
 		}
 
-		return 0;
-
+		if (printThisButton == true)
+			inputLayerWindow->draw((*menuButtons)[i].mySprite);
 	}
 
-	int inputLayer::printLowerScreen(MasterBoard * boardToPrint, int observerNumber) {
+	return 0;
 
-		//First draw the background for status area
-		sf::Sprite statusBox;
-		statusBox.setTexture(MainMenu->otherGameTextures->at(4));
-		statusBox.setPosition(MAX_WINDOW_WIDTH * 50, 0);
-		inputLayerWindow->draw(statusBox);
+}
+
+int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) {
+
+	//First draw the background for status area
+	sf::Sprite statusBox;
+	statusBox.setTexture(MainMenu->otherGameTextures->at(4));
+	statusBox.setPosition(MAX_WINDOW_WIDTH * 50, 0);
+	inputLayerWindow->draw(statusBox);
 
 
-		//Then write whatever status message
-		if (boardToPrint->playerFlag == observerNumber)
+	//Then write whatever status message
+	if (boardToPrint->playerFlag == observerNumber)
+	{
+		if (status == gameBoard)
 		{
-			if (status == gameBoard)
+			printBoardMenu(boardToPrint);
+		}
+		else
+
+			if (status == menu)
 			{
-				printBoardMenu(boardToPrint);
+				printMenu(boardToPrint);
 			}
 			else
 
-				if (status == menu)
+				if (status == minionAction)
 				{
-					printMenu(boardToPrint);
+					printMinionMenu(boardToPrint);
 				}
 				else
 
-					if (status == minionAction)
+					if (status == propertyAction)
 					{
-						printMinionMenu(boardToPrint);
+						printPropertyMenu(boardToPrint);
 					}
 					else
-
-						if (status == propertyAction)
+						if (status == insertMinion)
 						{
-							printPropertyMenu(boardToPrint);
+							printInsertMinion(boardToPrint);
 						}
 						else
-							if (status == insertMinion)
+							if (status == insertTile)
 							{
-								printInsertMinion(boardToPrint);
+								printInsertTile(boardToPrint);
 							}
-							else
-								if (status == insertTile)
-								{
-									printInsertTile(boardToPrint);
-								}
 
 
+	}
+
+
+
+	if (status != menu)
+		printStatus(boardToPrint, observerNumber);
+
+	return 0;
+
+}
+
+int inputLayer::printInsertMinion(MasterBoard* boardToPrint)
+{
+
+	sf::String boardMessage = "Insert a minion by typing its symbol\nExit insert minion menu(x) \n";
+
+	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
+
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+
+	newText.setFillColor(sf::Color::Black);
+
+	inputLayerWindow->draw(newText);
+
+	menuLineTracker += 2;
+
+	return 0;
+
+}
+
+int inputLayer::printInsertTile(MasterBoard* boardToPrint)
+{
+	sf::String boardMessage = "Insert a tile by typing its symbol\nExit insert tile menu(x) \n";
+
+	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
+
+	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+
+	newText.setFillColor(sf::Color::Black);
+
+	inputLayerWindow->draw(newText);
+
+	menuLineTracker += 2;
+
+	return 0;
+
+}
+
+int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
+{
+	inputLayerWindow->clear();
+	sf::String boardMessage;
+
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(9));
+	inputLayerWindow->draw(backgroundSprite);
+
+	if (boardToInput->missionFlag == true)
+	{
+		boardMessage = boardToInput->campaignName;
+		boardMessage += ": ";
+	}
+
+	boardMessage += boardToInput->scenarioOrMissionName;
+	boardMessage += "\n\n";
+
+	boardMessage += MainMenu->missionBriefing;
+	boardMessage += "\n\nPress any key to continue.";
+
+	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
+	newText.setPosition(250, 200);
+	newText.setFillColor(sf::Color::Black);
+
+	inputLayerWindow->draw(newText);
+	inputLayerWindow->display();
+
+	sf::Event event;
+	inputLayerWindow->pollEvent(event);
+
+	//Wait for one input.
+	playCharInput(inputLayerWindow);
+
+	inputLayerWindow->pollEvent(event);
+
+	return 0;
+
+}
+
+int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation) {
+	//windowLocation is a single scalar representing x and y.
+	//We do some basic math to break it into the two values for the function.
+	//Need to convert windowLocation into a better two part variable.
+	int windowY = boardToPrint->windowLocationY;
+	int windowX = boardToPrint->windowLocationX;
+
+	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
+	for (int i = windowY; i < (windowY + boardToPrint->WINDOW_HEIGHT); i++)
+	{
+		for (int j = windowX; j < (windowX + boardToPrint->WINDOW_WIDTH); j++)
+		{
+			printSingleTile((j - windowX), (i - windowY), j, i, boardToPrint, observerNumber, withinAnimation);
 		}
 
-
-
-		if (status != menu)
-			printStatus(boardToPrint, observerNumber);
-
-		return 0;
-
 	}
 
-	int inputLayer::printInsertMinion(MasterBoard * boardToPrint)
-	{
+	return 0;
+}
 
-		sf::String boardMessage = "Insert a minion by typing its symbol\nExit insert minion menu(x) \n";
-
-		sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-
-		newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
-
-		newText.setFillColor(sf::Color::Black);
-
-		inputLayerWindow->draw(newText);
-
-		menuLineTracker += 2;
-
-		return 0;
-
-	}
-
-	int inputLayer::printInsertTile(MasterBoard * boardToPrint)
-	{
-		sf::String boardMessage = "Insert a tile by typing its symbol\nExit insert tile menu(x) \n";
-
-		sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-
-		newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
-
-		newText.setFillColor(sf::Color::Black);
-
-		inputLayerWindow->draw(newText);
-
-		menuLineTracker += 2;
-
-		return 0;
-
-	}
-
-	int inputLayer::printMissionBriefing(MasterBoard * boardToInput)
+int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
+{
+	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
 	{
 		inputLayerWindow->clear();
-		sf::String boardMessage;
+		char buffer[100];
 
 		sf::Sprite backgroundSprite;
-		backgroundSprite.setTexture(MainMenu->otherGameTextures->at(9));
+		backgroundSprite.setTexture(MainMenu->otherGameTextures->at(8));
 		inputLayerWindow->draw(backgroundSprite);
 
-		if (boardToInput->missionFlag == true)
-		{
-			boardMessage = boardToInput->campaignName;
-			boardMessage += ": ";
-		}
-
-		boardMessage += boardToInput->scenarioOrMissionName;
-		boardMessage += "\n\n";
-
-		boardMessage += MainMenu->missionBriefing;
-		boardMessage += "\n\nPress any key to continue.";
-
-		sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-		newText.setPosition(250, 200);
+		sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
+		announceString += "'s turn. Press any key to begin.  \n";
+		sf::Text newText(announceString, *inputLayerFont, 20);
+		newText.setPosition(300, 200);
 		newText.setFillColor(sf::Color::Black);
-
 		inputLayerWindow->draw(newText);
 		inputLayerWindow->display();
-
-		sf::Event event;
-		inputLayerWindow->pollEvent(event);
-
-		//Wait for one input.
-		playCharInput(inputLayerWindow);
-
-		inputLayerWindow->pollEvent(event);
-
-		return 0;
-
 	}
+	return 0;
 
-	int inputLayer::printUpperScreen(MasterBoard * boardToPrint, int observerNumber, bool withinAnimation) {
-		//windowLocation is a single scalar representing x and y.
-		//We do some basic math to break it into the two values for the function.
-		//Need to convert windowLocation into a better two part variable.
-		int windowY = boardToPrint->windowLocationY;
-		int windowX = boardToPrint->windowLocationX;
+}
 
-		//Go through the whole "board", staying within the bounds of window's x and y coordinates.
-		for (int i = windowY; i < (windowY + boardToPrint->WINDOW_HEIGHT); i++)
-		{
-			for (int j = windowX; j < (windowX + boardToPrint->WINDOW_WIDTH); j++)
-			{
-				printSingleTile((j - windowX), (i - windowY), j, i, boardToPrint, observerNumber, withinAnimation);
-			}
+//movementGraphics is called for every tile as the path is verified. If that tile is within vision OR this is player turn,
+//we will print movement "animation" i.e. the minion sprite flashing on that tile for 200 ms.
+int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToMove, int locationX, int locationY)
+{
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
 
-		}
-
-		return 0;
-	}
-
-	int inputLayer::printWaitingScreen(MasterBoard * boardToPrint)
+	//Sound effects
+	if (soundsOn == true)
 	{
-		if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
-		{
-			inputLayerWindow->clear();
-			char buffer[100];
-
-			sf::Sprite backgroundSprite;
-			backgroundSprite.setTexture(MainMenu->otherGameTextures->at(8));
-			inputLayerWindow->draw(backgroundSprite);
-
-			sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
-			announceString += "'s turn. Press any key to begin.  \n";
-			sf::Text newText(announceString, *inputLayerFont, 20);
-			newText.setPosition(300, 200);
-			newText.setFillColor(sf::Color::Black);
-			inputLayerWindow->draw(newText);
-			inputLayerWindow->display();
-		}
-		return 0;
-
+		if ((*soundEffects)[minionToMove->myMoveSound].getStatus() == sf::SoundSource::Stopped)
+			(*soundEffects)[minionToMove->myMoveSound].play();
 	}
 
-	//movementGraphics is called for every tile as the path is verified. If that tile is within vision OR this is player turn,
-	//we will print movement "animation" i.e. the minion sprite flashing on that tile for 200 ms.
-	int inputLayer::movementGraphics(MasterBoard * boardToPrint, int observerNumber, Minion * minionToMove, int locationX, int locationY)
+	//If player controlled, tile the minion moves through will always be visible.
+	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
 	{
-		//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-		if (observerNumber == -1)
-			return -1;
-
-		//Sound effects
-		if (soundsOn == true)
-		{
-			if( (*soundEffects)[minionToMove->myMoveSound].getStatus() == sf::SoundSource::Stopped)
-				(*soundEffects)[minionToMove->myMoveSound].play();
-		}
-
-		//If player controlled, tile the minion moves through will always be visible.
-		if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
-		{
-			boardToPrint->Board[locationX][locationY].withinVision[observerNumber] = true;
-		}
-
-		//If within vision, change specific tile's animationSprite to match the movement graphics.
-		//Also, must not be a stealth type minion if not our turn
-		if (boardToPrint->Board[locationX][locationY].withinVision[observerNumber] == true
-			&& (minionToMove->team == observerNumber || minionToMove->specialtyGroup != stealth))
-		{
-			boardToPrint->Board[locationX][locationY].animationSprite = &(minionToMove->mySprite);
-		}
-
-		//Temporarily make minion invisible, so it disappears from its starting point.
-		minionToMove->invisible = true;
-
-		//Use usual print method
-		bool withinAnimation = true;
-		printScreen(boardToPrint, observerNumber, withinAnimation);
-
-
-		//Delay after printing;
-		sf::Clock timer;
-
-		timer.restart();
-		sf::Time elapsedTime;
-
-		while (elapsedTime.asSeconds() < float(0.140 / speedFactor))
-		{
-			elapsedTime = timer.getElapsedTime();
-		}
-
-		//std::this_thread::sleep_for(std::chrono::milliseconds(140 / speedFactor));
-
-		//Reset invisibilty status for minion selected
-		minionToMove->invisible = false;
-
-		//Reset animation sprite
-		boardToPrint->Board[locationX][locationY].animationSprite = NULL;
-
-		if (soundsOn == true && minionToMove->myMoveSound != aircraftMove)
-		{
-			(*soundEffects)[minionToMove->myMoveSound].stop();
-		}
-
-		return 0;
+		boardToPrint->Board[locationX][locationY].withinVision[observerNumber] = true;
 	}
 
-	int inputLayer::combatGraphics(MasterBoard * boardToPrint, int observerNumber, tile * tileAttacking, tile * tileBeingAttacked)
+	//If within vision, change specific tile's animationSprite to match the movement graphics.
+	//Also, must not be a stealth type minion if not our turn
+	if (boardToPrint->Board[locationX][locationY].withinVision[observerNumber] == true
+		&& (minionToMove->team == observerNumber || minionToMove->specialtyGroup != stealth))
 	{
-		//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-		if (observerNumber == -1)
-			return -1;
-
-		if (tileAttacking == NULL || tileBeingAttacked == NULL)
-		{
-			std::cout << "Could not animate combat, one of the tiles was NULL" << std::endl;
-			return -1;
-		}
-
-		if (soundsOn == true)
-		{
-			//Provide sound regardless of vision
-			(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].play();
-		}
-
-
-		//If within vision, we will watch attackerVisible
-		if (tileAttacking->withinVision[observerNumber] == true)
-		{
-
-			//Create new sprite for animation
-			tileAttacking->animationSprite = new sf::Sprite;
-
-			//Set texture
-			tileAttacking->animationSprite->setTexture(*inputLayerTexture);
-
-			//Now do animation sequence. Custom for combat.
-			//Remember the last tile which is blank, to "clear" the effect
-			for (int i = 0; i < 5; i++)
-			{
-
-				tileAttacking->animationSprite->setTextureRect(rectArray[i][13]);
-				bool withinAnimation = true;
-				printScreen(boardToPrint, observerNumber, withinAnimation);
-				//Delay after printing;
-				sf::Clock timer;
-
-				timer.restart();
-				sf::Time elapsedTime;
-
-				while (elapsedTime.asSeconds() < float(0.07 / speedFactor))
-				{
-					elapsedTime = timer.getElapsedTime();
-				}
-				//std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
-			}
-
-			//Clean up afterwards if necessary
-			if (tileAttacking->animationSprite != NULL)
-			{
-				delete tileAttacking->animationSprite;
-				tileAttacking->animationSprite = NULL;
-			}
-		}
-
-		//If within vision, we will watch attackerVisible
-		if (tileBeingAttacked->withinVision[observerNumber] == true)
-		{
-
-			//Create new sprite for animation
-			tileBeingAttacked->animationSprite = new sf::Sprite;
-
-			//Set texture
-			tileBeingAttacked->animationSprite->setTexture(*inputLayerTexture);
-
-			//Now do animation sequence. Custom for combat.
-			//Remember the last tile which is blank, to "clear" the effect
-			for (int i = 0; i < 5; i++)
-			{
-				tileBeingAttacked->animationSprite->setTextureRect(rectArray[i][14]);
-				bool withinAnimation = true;
-				printScreen(boardToPrint, observerNumber, withinAnimation);
-
-				//Delay after printing;
-				sf::Clock timer;
-
-				timer.restart();
-				sf::Time elapsedTime;
-
-				while (elapsedTime.asSeconds() < float(0.07 / speedFactor))
-				{
-					elapsedTime = timer.getElapsedTime();
-				}
-				//std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
-			}
-
-			//Clean up afterwards if necessary
-			if (tileBeingAttacked->animationSprite != NULL)
-			{
-				delete tileBeingAttacked->animationSprite;
-				tileBeingAttacked->animationSprite = NULL;
-			}
-
-
-		}
-		if (soundsOn == true)
-		{
-			(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].stop();
-		}
-		return 0;
+		boardToPrint->Board[locationX][locationY].animationSprite = &(minionToMove->mySprite);
 	}
 
-	int inputLayer::captureGraphics(MasterBoard * boardToPrint, int observerNumber, Minion * minionToCapture, int locationX, int locationY)
+	//Temporarily make minion invisible, so it disappears from its starting point.
+	minionToMove->invisible = true;
+
+	//Use usual print method
+	bool withinAnimation = true;
+	printScreen(boardToPrint, observerNumber, withinAnimation);
+
+
+	//Delay after printing;
+	sf::Clock timer;
+
+	timer.restart();
+	sf::Time elapsedTime;
+
+	while (elapsedTime.asSeconds() < float(0.140 / speedFactor))
+	{
+		elapsedTime = timer.getElapsedTime();
+	}
+
+	//std::this_thread::sleep_for(std::chrono::milliseconds(140 / speedFactor));
+
+	//Reset invisibilty status for minion selected
+	minionToMove->invisible = false;
+
+	//Reset animation sprite
+	boardToPrint->Board[locationX][locationY].animationSprite = NULL;
+
+	if (soundsOn == true && minionToMove->myMoveSound != aircraftMove)
+	{
+		(*soundEffects)[minionToMove->myMoveSound].stop();
+	}
+
+	return 0;
+}
+
+int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, tile* tileAttacking, tile* tileBeingAttacked)
+{
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (tileAttacking == NULL || tileBeingAttacked == NULL)
+	{
+		std::cout << "Could not animate combat, one of the tiles was NULL" << std::endl;
+		return -1;
+	}
+
+	if (soundsOn == true)
+	{
+		//Provide sound regardless of vision
+		(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].play();
+	}
+
+
+	//If within vision, we will watch attackerVisible
+	if (tileAttacking->withinVision[observerNumber] == true)
 	{
 
-		//Should be checking for bad locX but will add later
-		tile* myTile = &boardToPrint->Board[locationX][locationY];
+		//Create new sprite for animation
+		tileAttacking->animationSprite = new sf::Sprite;
 
-		//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-		if (observerNumber == -1)
-			return -1;
+		//Set texture
+		tileAttacking->animationSprite->setTexture(*inputLayerTexture);
 
-		if (minionToCapture == NULL)
+		//Now do animation sequence. Custom for combat.
+		//Remember the last tile which is blank, to "clear" the effect
+		for (int i = 0; i < 5; i++)
 		{
-			std::cout << "Could not animate capture, the tile was NULL" << std::endl;
-			return -1;
-		}
 
-		if (soundsOn == true)
-		{
-			(*soundEffects)[capture].play();
-		}
-
-		//If within vision, we will watch capture occur
-		if (myTile->withinVision[observerNumber] == true)
-		{
-			//Create new sprite for animation
-			myTile->animationSprite = new sf::Sprite;
-
-			//Set texture
-			myTile->animationSprite->setTexture(*inputLayerTexture);
-
-
-			for (int i = 0; i < 2; i++)
-			{
-				bool withinAnimation = true;
-				myTile->animationSprite->setTextureRect(rectArray[5][14]);
-				printScreen(boardToPrint, observerNumber, withinAnimation);
-
-				//Delay after printing;
-				sf::Clock timer;
-
-				timer.restart();
-				sf::Time elapsedTime;
-
-				while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
-				{
-					elapsedTime = timer.getElapsedTime();
-				}
-				//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
-
-				myTile->animationSprite->setTextureRect(rectArray[5 + minionToCapture->team][14]);
-				printScreen(boardToPrint, observerNumber, withinAnimation);
-
-				//Delay after printing;
-				timer.restart();
-				sf::Time secondElapsedTime;
-
-				while (secondElapsedTime.asSeconds() < float(0.140 / speedFactor))
-				{
-					secondElapsedTime = timer.getElapsedTime();
-				}
-				//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
-
-			}
-
-			//Clean up afterwards if necessary
-			if (myTile->animationSprite != NULL)
-			{
-				delete myTile->animationSprite;
-				myTile->animationSprite = NULL;
-			}
-
-		}
-
-		if (soundsOn == true)
-		{
-			(*soundEffects)[capture].stop();
-		}
-	}
-
-	int inputLayer::supplyGraphics(MasterBoard * boardToPrint, int observerNumber, Minion * minionToSupply, int locationX, int locationY)
-	{
-		//Should be checking for bad locX but will add later
-		tile* myTile = &boardToPrint->Board[locationX][locationY];
-
-		//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-		if (observerNumber == -1)
-			return -1;
-
-		if (minionToSupply == NULL)
-		{
-			std::cout << "Could not animate supply, the tile was NULL" << std::endl;
-			return -1;
-		}
-
-		if (soundsOn == true)
-		{
-			(*soundEffects)[resupply].play();
-		}
-
-		//If within vision, we will watch capture occur
-		if (myTile->withinVision[observerNumber] == true)
-		{
-			//Create new sprite for animation
-			myTile->animationSprite = new sf::Sprite;
-
-			//Set texture
-			myTile->animationSprite->setTexture(*inputLayerTexture);
-
-			for (int i = 0; i < 3; i++)
-			{
-				bool withinAnimation = true;
-				myTile->animationSprite->setTextureRect(rectArray[6][13]);
-				printScreen(boardToPrint, observerNumber, withinAnimation);
-
-				//Delay after printing;
-				sf::Clock timer;
-
-				timer.restart();
-				sf::Time elapsedTime;
-
-				while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
-				{
-					elapsedTime = timer.getElapsedTime();
-				}
-				//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
-
-				myTile->animationSprite->setTextureRect(rectArray[5][13]);
-				printScreen(boardToPrint, observerNumber, withinAnimation);
-
-				timer.restart();
-				sf::Time anotherElapsedTime;
-
-				while (anotherElapsedTime.asSeconds() < float(0.180 / speedFactor))
-				{
-					anotherElapsedTime = timer.getElapsedTime();
-				}
-
-				//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
-
-			}
-
-			//Clean up afterwards if necessary
-			if (myTile->animationSprite != NULL)
-			{
-				delete myTile->animationSprite;
-				myTile->animationSprite = NULL;
-			}
-
-		}
-
-		if (soundsOn == true)
-		{
-			(*soundEffects)[resupply].stop();
-		}
-
-	}
-
-	int inputLayer::trapGraphics(MasterBoard * boardToPrint, int observerNumber, Minion * minionTrapped, int locationX, int locationY)
-	{
-		//Should be checking for bad locX but will add later
-		tile* myTile = &boardToPrint->Board[locationX][locationY];
-
-		//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-		if (observerNumber == -1)
-			return -1;
-
-		if (minionTrapped == NULL)
-		{
-			std::cout << "Could not animate trap, the tile was NULL" << std::endl;
-			return -1;
-		}
-
-		if (soundsOn == true)
-		{
-			(*soundEffects)[trapped].play();
-		}
-
-		//If within vision, we will watch trap occur
-		if (myTile->withinVision[observerNumber] == true)
-		{
-			//Create new sprite for animation
-			myTile->animationSprite = new sf::Sprite;
-
-			//Set texture
-			myTile->animationSprite->setTexture(*inputLayerTexture);
-
-
+			tileAttacking->animationSprite->setTextureRect(rectArray[i][13]);
 			bool withinAnimation = true;
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+			//Delay after printing;
+			sf::Clock timer;
 
-			myTile->animationSprite->setTextureRect(rectArray[8][13]);
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.07 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
+		}
+
+		//Clean up afterwards if necessary
+		if (tileAttacking->animationSprite != NULL)
+		{
+			delete tileAttacking->animationSprite;
+			tileAttacking->animationSprite = NULL;
+		}
+	}
+
+	//If within vision, we will watch attackerVisible
+	if (tileBeingAttacked->withinVision[observerNumber] == true)
+	{
+
+		//Create new sprite for animation
+		tileBeingAttacked->animationSprite = new sf::Sprite;
+
+		//Set texture
+		tileBeingAttacked->animationSprite->setTexture(*inputLayerTexture);
+
+		//Now do animation sequence. Custom for combat.
+		//Remember the last tile which is blank, to "clear" the effect
+		for (int i = 0; i < 5; i++)
+		{
+			tileBeingAttacked->animationSprite->setTextureRect(rectArray[i][14]);
+			bool withinAnimation = true;
 			printScreen(boardToPrint, observerNumber, withinAnimation);
 
 			//Delay after printing;
@@ -1525,1387 +1260,1553 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			timer.restart();
 			sf::Time elapsedTime;
 
-			while (elapsedTime.asSeconds() < float(0.350 / speedFactor))
+			while (elapsedTime.asSeconds() < float(0.07 / speedFactor))
 			{
 				elapsedTime = timer.getElapsedTime();
 			}
-			//std::this_thread::sleep_for(std::chrono::milliseconds(350 / speedFactor));
+			//std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
+		}
+
+		//Clean up afterwards if necessary
+		if (tileBeingAttacked->animationSprite != NULL)
+		{
+			delete tileBeingAttacked->animationSprite;
+			tileBeingAttacked->animationSprite = NULL;
+		}
+
+
+	}
+	if (soundsOn == true)
+	{
+		(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].stop();
+	}
+	return 0;
+}
+
+int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToCapture, int locationX, int locationY)
+{
+
+	//Should be checking for bad locX but will add later
+	tile* myTile = &boardToPrint->Board[locationX][locationY];
+
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (minionToCapture == NULL)
+	{
+		std::cout << "Could not animate capture, the tile was NULL" << std::endl;
+		return -1;
+	}
+
+	if (soundsOn == true)
+	{
+		(*soundEffects)[capture].play();
+	}
+
+	//If within vision, we will watch capture occur
+	if (myTile->withinVision[observerNumber] == true)
+	{
+		//Create new sprite for animation
+		myTile->animationSprite = new sf::Sprite;
+
+		//Set texture
+		myTile->animationSprite->setTexture(*inputLayerTexture);
+
+
+		for (int i = 0; i < 2; i++)
+		{
+			bool withinAnimation = true;
+			myTile->animationSprite->setTextureRect(rectArray[5][14]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+
+			//Delay after printing;
+			sf::Clock timer;
+
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+
+			myTile->animationSprite->setTextureRect(rectArray[5 + minionToCapture->team][14]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+
+			//Delay after printing;
+			timer.restart();
+			sf::Time secondElapsedTime;
+
+			while (secondElapsedTime.asSeconds() < float(0.140 / speedFactor))
+			{
+				secondElapsedTime = timer.getElapsedTime();
+			}
+			//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+
+		}
+
+		//Clean up afterwards if necessary
+		if (myTile->animationSprite != NULL)
+		{
+			delete myTile->animationSprite;
+			myTile->animationSprite = NULL;
+		}
+
+	}
+
+	if (soundsOn == true)
+	{
+		(*soundEffects)[capture].stop();
+	}
+}
+
+int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToSupply, int locationX, int locationY)
+{
+	//Should be checking for bad locX but will add later
+	tile* myTile = &boardToPrint->Board[locationX][locationY];
+
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (minionToSupply == NULL)
+	{
+		std::cout << "Could not animate supply, the tile was NULL" << std::endl;
+		return -1;
+	}
+
+	if (soundsOn == true)
+	{
+		(*soundEffects)[resupply].play();
+	}
+
+	//If within vision, we will watch capture occur
+	if (myTile->withinVision[observerNumber] == true)
+	{
+		//Create new sprite for animation
+		myTile->animationSprite = new sf::Sprite;
+
+		//Set texture
+		myTile->animationSprite->setTexture(*inputLayerTexture);
+
+		for (int i = 0; i < 3; i++)
+		{
+			bool withinAnimation = true;
+			myTile->animationSprite->setTextureRect(rectArray[6][13]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+
+			//Delay after printing;
+			sf::Clock timer;
+
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
 
 			myTile->animationSprite->setTextureRect(rectArray[5][13]);
 			printScreen(boardToPrint, observerNumber, withinAnimation);
 
+			timer.restart();
+			sf::Time anotherElapsedTime;
 
-			//Clean up afterwards if necessary
-			if (myTile->animationSprite != NULL)
+			while (anotherElapsedTime.asSeconds() < float(0.180 / speedFactor))
 			{
-				delete myTile->animationSprite;
-				myTile->animationSprite = NULL;
+				anotherElapsedTime = timer.getElapsedTime();
 			}
 
+			//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+
 		}
 
-		if (soundsOn == true)
+		//Clean up afterwards if necessary
+		if (myTile->animationSprite != NULL)
 		{
-			(*soundEffects)[trapped].stop();
+			delete myTile->animationSprite;
+			myTile->animationSprite = NULL;
 		}
-
 
 	}
 
-	int inputLayer::repairGraphics(MasterBoard * boardToPrint, int observerNumber, Minion * minionToSupply, int locationX, int locationY)
+	if (soundsOn == true)
 	{
-
-		//Should be checking for bad locX but will add later
-		tile* myTile = &boardToPrint->Board[locationX][locationY];
-
-		//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-		if (observerNumber == -1)
-			return -1;
-
-		if (minionToSupply == NULL)
-		{
-			std::cout << "Could not animate repair, the tile was NULL" << std::endl;
-			return -1;
-		}
-
-		std::cout << "Repairing " << minionToSupply->description << std::endl;
-
-		if (soundsOn == true)
-		{
-			(*soundEffects)[repair].play();
-
-		}
-
-		//If within vision, we will watch repair occur
-		if (myTile->withinVision[observerNumber] == true)
-		{
-			//Create new sprite for animation
-			myTile->animationSprite = new sf::Sprite;
-
-			//Set texture
-			myTile->animationSprite->setTexture(*inputLayerTexture);
-
-			for (int i = 0; i < 3; i++)
-			{
-				bool withinAnimation = true;
-				myTile->animationSprite->setTextureRect(rectArray[7][13]);
-				printScreen(boardToPrint, observerNumber, withinAnimation);
-				//Delay after printing;
-				sf::Clock timer;
-
-				timer.restart();
-				sf::Time elapsedTime;
-
-				while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
-				{
-					elapsedTime = timer.getElapsedTime();
-				}
-				//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
-
-				myTile->animationSprite->setTextureRect(rectArray[5][13]);
-				printScreen(boardToPrint, observerNumber, withinAnimation);
-
-				//Delay
-				timer.restart();
-				elapsedTime = timer.getElapsedTime();;
-
-				while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
-				{
-					elapsedTime = timer.getElapsedTime();
-				}
-				//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
-
-			}
-
-			//Clean up afterwards if necessary
-			if (myTile->animationSprite != NULL)
-			{
-				delete myTile->animationSprite;
-				myTile->animationSprite = NULL;
-			}
-
-		}
-
-		if (soundsOn == true)
-		{
-			(*soundEffects)[repair].stop();
-		}
+		(*soundEffects)[resupply].stop();
 	}
 
-	int inputLayer::printScreen(MasterBoard * boardToPrint, int observerNumber, bool withinAnimation)
+}
+
+int inputLayer::trapGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionTrapped, int locationX, int locationY)
+{
+	//Should be checking for bad locX but will add later
+	tile* myTile = &boardToPrint->Board[locationX][locationY];
+
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (minionTrapped == NULL)
 	{
-		if (status != waitingForNextLocalPlayer)
-		{
-			inputLayerWindow->clear();
-			printUpperScreen(boardToPrint, observerNumber, withinAnimation);
-			printLowerScreen(boardToPrint, observerNumber);
-			inputLayerWindow->display();
-
-		}
-		else printWaitingScreen(boardToPrint);
-
-		//Reset line tracker after each print.
-		menuLineTracker = 1;
-
-		return 0;
+		std::cout << "Could not animate trap, the tile was NULL" << std::endl;
+		return -1;
 	}
 
-	int inputLayer::waitingScreenInput(MasterBoard * boardToInput)
+	if (soundsOn == true)
 	{
-		playCharInput(inputLayerWindow);
-
-		//Only lasts one input.
-		status = gameBoard;
-
-		if (boardToInput->playerRoster[boardToInput->playerFlag].playerType == humanPlayer) {
-			if (MainMenu->editorMode == true)	//If debug, see from 0's perspective.
-			{
-				boardToInput->upkeep(this, 0);
-			}
-			else  if (boardToInput->isItSinglePlayerGame == true)	//If it's single player, then we see from player 1's perspective. 
-			{
-				boardToInput->upkeep(this, 1);
-			}
-			else if (boardToInput->isItSinglePlayerGame == false && boardToInput->playerRoster[boardToInput->playerFlag].playerType == computerPlayer)	//If compie during multiplayer, no sight
-			{
-				boardToInput->upkeep(this, -1);
-			}
-			else
-			{
-				boardToInput->upkeep(this, boardToInput->playerFlag);
-			}
-		}
-		//Do upkeep here for all human players
-
-		return 0;
+		(*soundEffects)[trapped].play();
 	}
 
-	int inputLayer::insertMinionInput(sf::Keyboard::Key * Input, MasterBoard * boardToInput)
+	//If within vision, we will watch trap occur
+	if (myTile->withinVision[observerNumber] == true)
 	{
-		Cursor* myCursor = &boardToInput->cursor;
-		tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
+		//Create new sprite for animation
+		myTile->animationSprite = new sf::Sprite;
 
-		//Shift must be used like Caps Lock
-		if (*Input == sf::Keyboard::Key::LShift || *Input == sf::Keyboard::Key::RShift)
+		//Set texture
+		myTile->animationSprite->setTexture(*inputLayerTexture);
+
+
+		bool withinAnimation = true;
+
+		myTile->animationSprite->setTextureRect(rectArray[8][13]);
+		printScreen(boardToPrint, observerNumber, withinAnimation);
+
+		//Delay after printing;
+		sf::Clock timer;
+
+		timer.restart();
+		sf::Time elapsedTime;
+
+		while (elapsedTime.asSeconds() < float(0.350 / speedFactor))
 		{
-			if (capsLockOn == false)
-				capsLockOn = true;
-			else if (capsLockOn == true)
-				capsLockOn = false;
+			elapsedTime = timer.getElapsedTime();
+		}
+		//std::this_thread::sleep_for(std::chrono::milliseconds(350 / speedFactor));
 
-			return 1;
+		myTile->animationSprite->setTextureRect(rectArray[5][13]);
+		printScreen(boardToPrint, observerNumber, withinAnimation);
+
+
+		//Clean up afterwards if necessary
+		if (myTile->animationSprite != NULL)
+		{
+			delete myTile->animationSprite;
+			myTile->animationSprite = NULL;
 		}
 
+	}
 
-		//Return to gameBoard if player presses 'x'.
-		if (*Input == sf::Keyboard::Key::X)
+	if (soundsOn == true)
+	{
+		(*soundEffects)[trapped].stop();
+	}
+
+
+}
+
+int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToSupply, int locationX, int locationY)
+{
+
+	//Should be checking for bad locX but will add later
+	tile* myTile = &boardToPrint->Board[locationX][locationY];
+
+	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
+	if (observerNumber == -1)
+		return -1;
+
+	if (minionToSupply == NULL)
+	{
+		std::cout << "Could not animate repair, the tile was NULL" << std::endl;
+		return -1;
+	}
+
+	std::cout << "Repairing " << minionToSupply->description << std::endl;
+
+	if (soundsOn == true)
+	{
+		(*soundEffects)[repair].play();
+
+	}
+
+	//If within vision, we will watch repair occur
+	if (myTile->withinVision[observerNumber] == true)
+	{
+		//Create new sprite for animation
+		myTile->animationSprite = new sf::Sprite;
+
+		//Set texture
+		myTile->animationSprite->setTexture(*inputLayerTexture);
+
+		for (int i = 0; i < 3; i++)
 		{
-			status = gameBoard;
-			return 1;
+			bool withinAnimation = true;
+			myTile->animationSprite->setTextureRect(rectArray[7][13]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+			//Delay after printing;
+			sf::Clock timer;
+
+			timer.restart();
+			sf::Time elapsedTime;
+
+			while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+
+			myTile->animationSprite->setTextureRect(rectArray[5][13]);
+			printScreen(boardToPrint, observerNumber, withinAnimation);
+
+			//Delay
+			timer.restart();
+			elapsedTime = timer.getElapsedTime();;
+
+			while (elapsedTime.asSeconds() < float(0.180 / speedFactor))
+			{
+				elapsedTime = timer.getElapsedTime();
+			}
+			//	std::this_thread::sleep_for(std::chrono::milliseconds(180 / speedFactor));
+
 		}
 
+		//Clean up afterwards if necessary
+		if (myTile->animationSprite != NULL)
+		{
+			delete myTile->animationSprite;
+			myTile->animationSprite = NULL;
+		}
 
-		//Convert valid keyboard input to char
-		std::string convertedInput = "~";
+	}
 
+	if (soundsOn == true)
+	{
+		(*soundEffects)[repair].stop();
+	}
+}
+
+int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation)
+{
+	if (status != waitingForNextLocalPlayer)
+	{
+		inputLayerWindow->clear();
+		printUpperScreen(boardToPrint, observerNumber, withinAnimation);
+		printLowerScreen(boardToPrint, observerNumber);
+		inputLayerWindow->display();
+
+	}
+	else printWaitingScreen(boardToPrint);
+
+	//Reset line tracker after each print.
+	menuLineTracker = 1;
+
+	return 0;
+}
+
+int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
+{
+	playCharInput(inputLayerWindow);
+
+	//Only lasts one input.
+	status = gameBoard;
+
+	if (boardToInput->playerRoster[boardToInput->playerFlag].playerType == humanPlayer) {
+		if (MainMenu->editorMode == true)	//If debug, see from 0's perspective.
+		{
+			boardToInput->upkeep(this, 0);
+		}
+		else  if (boardToInput->isItSinglePlayerGame == true)	//If it's single player, then we see from player 1's perspective. 
+		{
+			boardToInput->upkeep(this, 1);
+		}
+		else if (boardToInput->isItSinglePlayerGame == false && boardToInput->playerRoster[boardToInput->playerFlag].playerType == computerPlayer)	//If compie during multiplayer, no sight
+		{
+			boardToInput->upkeep(this, -1);
+		}
+		else
+		{
+			boardToInput->upkeep(this, boardToInput->playerFlag);
+		}
+	}
+	//Do upkeep here for all human players
+
+	return 0;
+}
+
+int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
+{
+	Cursor* myCursor = &boardToInput->cursor;
+	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
+
+	//Shift must be used like Caps Lock
+	if (*Input == sf::Keyboard::Key::LShift || *Input == sf::Keyboard::Key::RShift)
+	{
 		if (capsLockOn == false)
-		{
-			//Lower case letters
-			switch (*Input)
-			{
-			case sf::Keyboard::I:
-			{
-				convertedInput = "Infantry";
-				break;
-			}
-
-			case(sf::Keyboard::S):
-			{
-				convertedInput = "Specialist";
-				break;
-			}
-
-			case(sf::Keyboard::A):
-			{
-				convertedInput = "Armor";
-				break;
-			}
-
-			case(sf::Keyboard::T):
-			{
-				convertedInput = "Heavy_Armor";
-				break;
-			}
-
-			case(sf::Keyboard::R):
-			{
-				convertedInput = "Artillery";
-				break;
-			}
-
-			case(sf::Keyboard::C):
-			{
-				convertedInput = "Recon";
-				break;
-			}
-
-			case(sf::Keyboard::K):
-			{
-				convertedInput = "Artillery_Emplacement";
-				break;
-			}
-
-			case(sf::Keyboard::V):
-			{
-				convertedInput = "Attack_Copter";
-				break;
-			}
-
-			case(sf::Keyboard::H):
-			{
-				convertedInput = "Transport_Copter";
-				break;
-			}
-
-			case(sf::Keyboard::P):
-			{
-				convertedInput = "APC";
-				break;
-			}
-
-			case(sf::Keyboard::F):
-			{
-				convertedInput = "Interceptor";
-				break;
-			}
-
-			case(sf::Keyboard::B):
-			{
-				convertedInput = "Bomber";
-				break;
-			}
-
-			case(sf::Keyboard::G):
-			{
-				convertedInput = "Gunboat";
-				break;
-			}
-
-			case(sf::Keyboard::L):
-			{
-				convertedInput = "Lander";
-				break;
-			}
-
-			case(sf::Keyboard::U):
-			{
-				convertedInput = "Submarine";
-				break;
-			}
-
-			}
-		}
-		else //Shift-required characters
-		{
-			switch (*Input)
-			{
-			case(sf::Keyboard::A):
-			{
-				convertedInput = "Anti-Aircraft";
-				break;
-			}
-			case(sf::Keyboard::V):
-			{
-				convertedInput = "Aircraft_Carrier";
-				break;
-			}
-
-			case(sf::Keyboard::R):
-			{
-				convertedInput = "Rocket_Artillery";
-				break;
-			}
-			case(sf::Keyboard::B):
-			{
-
-				convertedInput = "Battleship";
-				break;
-			}
-			case(sf::Keyboard::C):
-			{
-				convertedInput = "Cruiser";
-				break;
-			}
-			case(sf::Keyboard::S):
-			{
-				convertedInput = "SAM_Site";
-				break;
-			}
-			}
-		}
-
-		//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
-		if (myTile->hasMinionOnTop == true || myTile->consultMovementChart(convertedInput, myTile->symbol) == 99)
-			return 1;
-
-		int requestedUnitPrice = boardToInput->consultMinionCostChart(convertedInput, '~');
-
-		//If it is real minion, then price > 0
-		if (requestedUnitPrice > 0)
-		{
-			boardToInput->createMinion(convertedInput, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1, -1);
-			status = gameBoard;
-			return 0;
-		}
+			capsLockOn = true;
+		else if (capsLockOn == true)
+			capsLockOn = false;
 
 		return 1;
-
 	}
 
-	//If there is a minion underneath, destroy it regardless of any status.
-	//Activate with debug mode and "z" input.
-	int inputLayer::deleteMinionInput(MasterBoard * boardToInput)
+
+	//Return to gameBoard if player presses 'x'.
+	if (*Input == sf::Keyboard::Key::X)
 	{
-		Cursor* myCursor = &boardToInput->cursor;
-		tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
-
-
-		if (myTile->hasMinionOnTop != true)
-		{
-			status = gameBoard;
-			return 1;
-		}
-		else
-		{
-			boardToInput->destroyMinion(myTile->minionOnTop, false, this, true);
-			status = gameBoard;
-			return 0;
-		}
-
-
-
+		status = gameBoard;
+		return 1;
 	}
 
-	int inputLayer::insertTileInput(sf::Keyboard::Key * Input, MasterBoard * boardToInput)
+
+	//Convert valid keyboard input to char
+	std::string convertedInput = "~";
+
+	if (capsLockOn == false)
 	{
-		Cursor* myCursor = &boardToInput->cursor;
-		tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
-
-		//Return to gameBoard if player presses 'q'.
-		if (*Input == sf::Keyboard::Key::Q)
+		//Lower case letters
+		switch (*Input)
 		{
-			status = gameBoard;
-			return 1;
+		case sf::Keyboard::I:
+		{
+			convertedInput = "Infantry";
+			break;
 		}
 
-		//Shift must be used like Caps Lock
-		if (*Input == sf::Keyboard::Key::LShift || *Input == sf::Keyboard::Key::RShift)
+		case(sf::Keyboard::S):
 		{
-			if (capsLockOn == false)
-				capsLockOn = true;
-			else if (capsLockOn == true)
-				capsLockOn = false;
-
-			return 1;
+			convertedInput = "Specialist";
+			break;
 		}
 
-
-		//Convert to char before analyzing
-		char inputChar = '!';
-
-		if (capsLockOn == false)
+		case(sf::Keyboard::A):
 		{
-			//Lower case letters
-			switch (*Input)
-			{
-			case sf::Keyboard::Period:
-				inputChar = '.';
-				break;
-			case(sf::Keyboard::Add):
-				inputChar = '+';
-				break;
-			case(sf::Keyboard::M):
-				inputChar = 'm';
-				break;
-			case(sf::Keyboard::N):
-				inputChar = 'n';
-				break;
-			case(sf::Keyboard::H):
-				inputChar = 'h';
-				break;
-			case(sf::Keyboard::Equal):
-				inputChar = '=';
-				break;
-			case(sf::Keyboard::Dash):
-				inputChar = '-';
-				break;
-			}
-		}
-		else
-		{
-			//Upper case letters
-			switch (*Input)
-			{
-			case(sf::Keyboard::Add):
-			case(sf::Keyboard::Equal):		//Test okay
-				inputChar = '+';
-				break;
-			case(sf::Keyboard::Num6):
-				inputChar = '^';
-				break;
-			case(sf::Keyboard::M):
-				inputChar = 'M';
-				break;
-			case(sf::Keyboard::H):
-				inputChar = 'H';
-				break;
-			case(sf::Keyboard::A):
-				inputChar = 'A';
-				break;
-			case(sf::Keyboard::P):
-				inputChar = 'P';
-				break;
-			case(sf::Keyboard::Num8):
-			case(sf::Keyboard::Multiply):		//Test okay
-				inputChar = '*';
-				break;
-			case(sf::Keyboard::Subtract):	//Test okay
-				inputChar = '-';
-				break;
-			case(sf::Keyboard::Q):
-				inputChar = 'Q';
-				break;
-			case(sf::Keyboard::Tilde):	//Test needed
-				inputChar = '~';
-				break;
-			}
+			convertedInput = "Armor";
+			break;
 		}
 
-		//If input tile symbol is invalid, return 1.
-		if (myTile->consultMovementChart("Infantry", inputChar) == -1)
-			return 1;
-
-		//Prevent terrain from being somewhere that minion couldn't actually move.
-		if (myTile->hasMinionOnTop == true && myTile->consultMovementChart(myTile->minionOnTop->type, inputChar) == 99)
-			return 1;
-
-		//If it is real tile, change the underlying tile.
-		myTile->symbol = inputChar;
-		myTile->capturePoints = 20;
-
-		if (myTile->checkForProperty(myTile->symbol) == true)
+		case(sf::Keyboard::T):
 		{
-			myTile->controller = boardToInput->playerFlag;
-		}
-		else
-		{
-			myTile->controller = 0;
+			convertedInput = "Heavy_Armor";
+			break;
 		}
 
-		myTile->setCharacterstics(inputLayerTexture, boardToInput);
+		case(sf::Keyboard::R):
+		{
+			convertedInput = "Artillery";
+			break;
+		}
 
+		case(sf::Keyboard::C):
+		{
+			convertedInput = "Recon";
+			break;
+		}
+
+		case(sf::Keyboard::K):
+		{
+			convertedInput = "Artillery_Emplacement";
+			break;
+		}
+
+		case(sf::Keyboard::V):
+		{
+			convertedInput = "Attack_Copter";
+			break;
+		}
+
+		case(sf::Keyboard::H):
+		{
+			convertedInput = "Transport_Copter";
+			break;
+		}
+
+		case(sf::Keyboard::P):
+		{
+			convertedInput = "APC";
+			break;
+		}
+
+		case(sf::Keyboard::F):
+		{
+			convertedInput = "Interceptor";
+			break;
+		}
+
+		case(sf::Keyboard::B):
+		{
+			convertedInput = "Bomber";
+			break;
+		}
+
+		case(sf::Keyboard::G):
+		{
+			convertedInput = "Gunboat";
+			break;
+		}
+
+		case(sf::Keyboard::L):
+		{
+			convertedInput = "Lander";
+			break;
+		}
+
+		case(sf::Keyboard::U):
+		{
+			convertedInput = "Submarine";
+			break;
+		}
+
+		}
+	}
+	else //Shift-required characters
+	{
+		switch (*Input)
+		{
+		case(sf::Keyboard::A):
+		{
+			convertedInput = "Anti-Aircraft";
+			break;
+		}
+		case(sf::Keyboard::V):
+		{
+			convertedInput = "Aircraft_Carrier";
+			break;
+		}
+
+		case(sf::Keyboard::R):
+		{
+			convertedInput = "Rocket_Artillery";
+			break;
+		}
+		case(sf::Keyboard::B):
+		{
+
+			convertedInput = "Battleship";
+			break;
+		}
+		case(sf::Keyboard::C):
+		{
+			convertedInput = "Cruiser";
+			break;
+		}
+		case(sf::Keyboard::S):
+		{
+			convertedInput = "SAM_Site";
+			break;
+		}
+		}
+	}
+
+	//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
+	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart(convertedInput, myTile->symbol) == 99)
+		return 1;
+
+	int requestedUnitPrice = boardToInput->consultMinionCostChart(convertedInput, '~');
+
+	//If it is real minion, then price > 0
+	if (requestedUnitPrice > 0)
+	{
+		boardToInput->createMinion(convertedInput, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1, -1);
 		status = gameBoard;
 		return 0;
-
 	}
 
-	int inputLayer::gameBoardInput(sf::Keyboard::Key * Input, MasterBoard * boardToInput)
+	return 1;
+
+}
+
+//If there is a minion underneath, destroy it regardless of any status.
+//Activate with debug mode and "z" input.
+int inputLayer::deleteMinionInput(MasterBoard* boardToInput)
+{
+	Cursor* myCursor = &boardToInput->cursor;
+	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
+
+
+	if (myTile->hasMinionOnTop != true)
 	{
-		//Must be mouse click
-
-		if (*Input == sf::Keyboard::Quote)
-		{
-			sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
-
-			//If mouse click is within map, 
-
-			int windowX = mousePosition.x / 50;
-			int windowY = mousePosition.y / 50;
-			int tileX = windowX + boardToInput->windowLocationX;
-			int tileY = windowY + boardToInput->windowLocationY;
-
-			if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
-			{
-				//And mouse click not within cursor, move cursor there.
-				if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord)
-				{
-					boardToInput->cursor.relocate(tileX, tileY);	//Move cursor to where mouse click occurred.
-				}
-				else
-					//If mouse click IS within cursor, change input to "select" tile.
-					if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
-					{
-						*Input = sf::Keyboard::Key::T; //Select that tile.
-					}
-			}
-
-		}
-
-
-		//The below inputs will also occur based on mouse clicks setting the input to such.
-
-		if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
-		{
-			boardToInput->cursor.move(Input);
-		}
-
-		if (*Input == sf::Keyboard::Key::X && MainMenu->editorMode == true)
-		{
-			status = insertMinion;
-		}
-
-		if (*Input == sf::Keyboard::Key::Z && MainMenu->editorMode == true)
-		{
-			deleteMinionInput(boardToInput);
-		}
-
-		if (*Input == sf::Keyboard::Key::Q && MainMenu->editorMode == true)
-		{
-			status = insertTile;
-		}
-
-		//Add'l advance to next game via loadNextGame for inputLayer:
-		if (*Input == sf::Keyboard::Key::V && MainMenu->editorMode == true)
-		{
-			NextMission(boardToInput);
-		}
-
-		//Need char for shift
-		if (*Input == sf::Keyboard::Key::Num0)
-		{
-			if (minionVisibleStatus == hideMinions)
-			{
-				minionVisibleStatus = showMinions;
-			}
-			else if (minionVisibleStatus == showMinions)
-			{
-				minionVisibleStatus = hideMinions;
-			}
-		}
-
-		if (*Input == sf::Keyboard::Key::Num9)
-		{
-			if (showRangeStatus == showRange)
-			{
-				showRangeStatus = hideRange;
-			}
-			else if (showRangeStatus == hideRange)
-			{
-				showRangeStatus = showRange;
-			}
-		}
-
-
-		//Select minion or property.
-		if (*Input == sf::Keyboard::Key::T)
-		{
-			//If minion is not selected, select it.Must be successful to set flag.
-			if (boardToInput->cursor.selectMinionFlag == false //This is probably not needed since it's always true/false in conj. with inputLayer.
-				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
-			{
-				if (boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
-				{
-					status = minionAction;
-				}
-			}	//Else if empty property, select it. No minion on top, right team, must be factory to select.
-			else
-				if ((boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'h' ||
-					boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'A' ||
-					boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'P')
-					&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].controller == boardToInput->playerFlag
-					&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
-				{
-					status = propertyAction;
-				}
-
-		}
-
-		if (*Input == sf::Keyboard::Key::M || *Input == sf::Keyboard::Key::Comma)
-		{
-			status = menu;
-		}
-
+		status = gameBoard;
+		return 1;
+	}
+	else
+	{
+		boardToInput->destroyMinion(myTile->minionOnTop, false, this, true);
+		status = gameBoard;
 		return 0;
 	}
 
-	//Update minionInput:
-	//Left click to select and deselect. Right click to move.
 
-	int inputLayer::minionInput(sf::Keyboard::Key * Input, MasterBoard * boardToInput) {
 
-		//This tracks who may lose after an action. Only one player can lose per action, so only need one number.
-		int playerPotentiallyDefeated = 0;
+}
 
-		//If right click occurred, may move, may not move.
-		//This is to avoid accidentally moving in place after selecting a minion.
-		//Requires left, then right click, to move in place.
-		if (*Input == sf::Keyboard::Comma)
+int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
+{
+	Cursor* myCursor = &boardToInput->cursor;
+	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
+
+	//Return to gameBoard if player presses 'q'.
+	if (*Input == sf::Keyboard::Key::Q)
+	{
+		status = gameBoard;
+		return 1;
+	}
+
+	//Shift must be used like Caps Lock
+	if (*Input == sf::Keyboard::Key::LShift || *Input == sf::Keyboard::Key::RShift)
+	{
+		if (capsLockOn == false)
+			capsLockOn = true;
+		else if (capsLockOn == true)
+			capsLockOn = false;
+
+		return 1;
+	}
+
+
+	//Convert to char before analyzing
+	char inputChar = '!';
+
+	if (capsLockOn == false)
+	{
+		//Lower case letters
+		switch (*Input)
 		{
-			sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+		case sf::Keyboard::Period:
+			inputChar = '.';
+			break;
+		case(sf::Keyboard::Add):
+			inputChar = '+';
+			break;
+		case(sf::Keyboard::M):
+			inputChar = 'm';
+			break;
+		case(sf::Keyboard::N):
+			inputChar = 'n';
+			break;
+		case(sf::Keyboard::H):
+			inputChar = 'h';
+			break;
+		case(sf::Keyboard::Equal):
+			inputChar = '=';
+			break;
+		case(sf::Keyboard::Dash):
+			inputChar = '-';
+			break;
+		}
+	}
+	else
+	{
+		//Upper case letters
+		switch (*Input)
+		{
+		case(sf::Keyboard::Add):
+		case(sf::Keyboard::Equal):		//Test okay
+			inputChar = '+';
+			break;
+		case(sf::Keyboard::Num6):
+			inputChar = '^';
+			break;
+		case(sf::Keyboard::M):
+			inputChar = 'M';
+			break;
+		case(sf::Keyboard::H):
+			inputChar = 'H';
+			break;
+		case(sf::Keyboard::A):
+			inputChar = 'A';
+			break;
+		case(sf::Keyboard::P):
+			inputChar = 'P';
+			break;
+		case(sf::Keyboard::Num8):
+		case(sf::Keyboard::Multiply):		//Test okay
+			inputChar = '*';
+			break;
+		case(sf::Keyboard::Subtract):	//Test okay
+			inputChar = '-';
+			break;
+		case(sf::Keyboard::Q):
+			inputChar = 'Q';
+			break;
+		case(sf::Keyboard::Tilde):	//Test needed
+			inputChar = '~';
+			break;
+		}
+	}
 
-			//Get mouse click information
-			int windowX = mousePosition.x / 50;
-			int windowY = mousePosition.y / 50;
-			int tileX = windowX + boardToInput->windowLocationX;
-			int tileY = windowY + boardToInput->windowLocationY;
+	//If input tile symbol is invalid, return 1.
+	if (myTile->consultMovementChart("Infantry", inputChar) == -1)
+		return 1;
 
-			//If mouse click is within map, 
-			if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
+	//Prevent terrain from being somewhere that minion couldn't actually move.
+	if (myTile->hasMinionOnTop == true && myTile->consultMovementChart(myTile->minionOnTop->type, inputChar) == 99)
+		return 1;
+
+	//If it is real tile, change the underlying tile.
+	myTile->symbol = inputChar;
+	myTile->capturePoints = 20;
+
+	if (myTile->checkForProperty(myTile->symbol) == true)
+	{
+		myTile->controller = boardToInput->playerFlag;
+	}
+	else
+	{
+		myTile->controller = 0;
+	}
+
+	myTile->setCharacterstics(inputLayerTexture, boardToInput);
+
+	status = gameBoard;
+	return 0;
+
+}
+
+int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
+{
+	//Must be mouse click
+
+	if (*Input == sf::Keyboard::Quote)
+	{
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+
+		//If mouse click is within map, 
+
+		int windowX = mousePosition.x / 50;
+		int windowY = mousePosition.y / 50;
+		int tileX = windowX + boardToInput->windowLocationX;
+		int tileY = windowY + boardToInput->windowLocationY;
+
+		if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
+		{
+			//And mouse click not within cursor, move cursor there.
+			if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord)
 			{
-				//And mouse click not within cursor, move cursor there.
-				if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord)
+				boardToInput->cursor.relocate(tileX, tileY);	//Move cursor to where mouse click occurred.
+			}
+			else
+				//If mouse click IS within cursor, change input to "select" tile.
+				if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
 				{
-					boardToInput->cursor.relocate(tileX, tileY);	//Move cursor to where mouse click occurred.
+					*Input = sf::Keyboard::Key::T; //Select that tile.
 				}
-				else
-					//If mouse click IS within cursor 
-					if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
+		}
+
+	}
+
+
+	//The below inputs will also occur based on mouse clicks setting the input to such.
+
+	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
+	{
+		boardToInput->cursor.move(Input);
+	}
+
+	if (*Input == sf::Keyboard::Key::X && MainMenu->editorMode == true)
+	{
+		status = insertMinion;
+	}
+
+	if (*Input == sf::Keyboard::Key::Z && MainMenu->editorMode == true)
+	{
+		deleteMinionInput(boardToInput);
+	}
+
+	if (*Input == sf::Keyboard::Key::Q && MainMenu->editorMode == true)
+	{
+		status = insertTile;
+	}
+
+	//Add'l advance to next game via loadNextGame for inputLayer:
+	if (*Input == sf::Keyboard::Key::V && MainMenu->editorMode == true)
+	{
+		NextMission(boardToInput);
+	}
+
+	//Need char for shift
+	if (*Input == sf::Keyboard::Key::Num0)
+	{
+		if (minionVisibleStatus == hideMinions)
+		{
+			minionVisibleStatus = showMinions;
+		}
+		else if (minionVisibleStatus == showMinions)
+		{
+			minionVisibleStatus = hideMinions;
+		}
+	}
+
+	if (*Input == sf::Keyboard::Key::Num9)
+	{
+		if (showRangeStatus == showRange)
+		{
+			showRangeStatus = hideRange;
+		}
+		else if (showRangeStatus == hideRange)
+		{
+			showRangeStatus = showRange;
+		}
+	}
+
+
+	//Select minion or property.
+	if (*Input == sf::Keyboard::Key::T)
+	{
+		//If minion is not selected, select it.Must be successful to set flag.
+		if (boardToInput->cursor.selectMinionFlag == false //This is probably not needed since it's always true/false in conj. with inputLayer.
+			&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
+		{
+			if (boardToInput->selectMinion(boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+			{
+				status = minionAction;
+			}
+		}	//Else if empty property, select it. No minion on top, right team, must be factory to select.
+		else
+			if ((boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'h' ||
+				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'A' ||
+				boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].symbol == 'P')
+				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].controller == boardToInput->playerFlag
+				&& boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == false)
+			{
+				status = propertyAction;
+			}
+
+	}
+
+	if (*Input == sf::Keyboard::Key::M || *Input == sf::Keyboard::Key::Comma)
+	{
+		status = menu;
+	}
+
+	return 0;
+}
+
+//Update minionInput:
+//Left click to select and deselect. Right click to move.
+
+int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput) {
+
+	//This tracks who may lose after an action. Only one player can lose per action, so only need one number.
+	int playerPotentiallyDefeated = 0;
+
+	//If right click occurred, may move, may not move.
+	//This is to avoid accidentally moving in place after selecting a minion.
+	//Requires left, then right click, to move in place.
+	if (*Input == sf::Keyboard::Comma)
+	{
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+
+		//Get mouse click information
+		int windowX = mousePosition.x / 50;
+		int windowY = mousePosition.y / 50;
+		int tileX = windowX + boardToInput->windowLocationX;
+		int tileY = windowY + boardToInput->windowLocationY;
+
+		//If mouse click is within map, 
+		if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
+		{
+			//And mouse click not within cursor, move cursor there.
+			if (tileX != boardToInput->cursor.XCoord || tileY != boardToInput->cursor.YCoord)
+			{
+				boardToInput->cursor.relocate(tileX, tileY);	//Move cursor to where mouse click occurred.
+			}
+			else
+				//If mouse click IS within cursor 
+				if (tileX == boardToInput->cursor.XCoord && tileY == boardToInput->cursor.YCoord)
+				{
+					Minion* myMinion = boardToInput->cursor.selectMinionPointer;
+					tile* targetedTile = &boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()];
+
+					//If cursor is on top of selected minion,
+					if (boardToInput->cursor.XCoord == myMinion->locationX &&
+						boardToInput->cursor.YCoord == myMinion->locationY)
 					{
-						Minion* myMinion = boardToInput->cursor.selectMinionPointer;
-						tile* targetedTile = &boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()];
-
-						//If cursor is on top of selected minion,
-						if (boardToInput->cursor.XCoord == myMinion->locationX &&
-							boardToInput->cursor.YCoord == myMinion->locationY)
-						{
-							//If minion is infantry that has already moved, attempt to capture
-							if (myMinion->specialtyGroup == infantry &&
+						//If minion is infantry that has already moved, attempt to capture
+						if (myMinion->specialtyGroup == infantry &&
+							(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
+							* Input = sf::Keyboard::Key::C;
+						else
+							//If minion is transport that already moved, attempt to supply.
+							if ((myMinion->specialtyGroup == smallTransport || myMinion->specialtyGroup == largeTransport) &&
 								(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
-								* Input = sf::Keyboard::Key::C;
+							{
+								*Input = sf::Keyboard::Key::I;
+							}
 							else
-								//If minion is transport that already moved, attempt to supply.
-								if ((myMinion->specialtyGroup == smallTransport || myMinion->specialtyGroup == largeTransport) &&
-									(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
-								{
-									*Input = sf::Keyboard::Key::I;
-								}
-								else
-								{
-									*Input = sf::Keyboard::Key::M;	//Otherwise attempt to move there.
-								}
-						}
-						else //If we are direct/hybrid attack, and have already moved, attempt to attack there. Must be in range and visible.
-							 //Or if we are indirect/hybrid attack that held position, attempt to attack there. Must be in range and visible.
-							if (targetedTile->hasMinionOnTop == true && targetedTile->minionOnTop->team != boardToInput->playerFlag &&
-								targetedTile->withinRange == true && targetedTile->withinVision[myMinion->team] == true &&
-								(((myMinion->rangeType == directFire || myMinion->rangeType == hybridRange) &&
-								(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
-									|| ((myMinion->rangeType == rangedFire || myMinion->rangeType == hybridRange) &&
-									(myMinion->status == gaveupmovehasntfired)))
-								)
-
 							{
-								*Input = sf::Keyboard::Key::R;
-							}
-						//If empty space and this is a transport that already moved, attempt to drop there.
-							else	if ((boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport) &&
-								(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
-									boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
-							{
-								*Input = sf::Keyboard::Key::O;
-							}
-							else  //Otherwise attempt to move there.
-							{
-								*Input = sf::Keyboard::Key::M;
+								*Input = sf::Keyboard::Key::M;	//Otherwise attempt to move there.
 							}
 					}
-			}
+					else //If we are direct/hybrid attack, and have already moved, attempt to attack there. Must be in range and visible.
+						 //Or if we are indirect/hybrid attack that held position, attempt to attack there. Must be in range and visible.
+						if (targetedTile->hasMinionOnTop == true && targetedTile->minionOnTop->team != boardToInput->playerFlag &&
+							targetedTile->withinRange == true && targetedTile->withinVision[myMinion->team] == true &&
+							(((myMinion->rangeType == directFire || myMinion->rangeType == hybridRange) &&
+							(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
+								|| ((myMinion->rangeType == rangedFire || myMinion->rangeType == hybridRange) &&
+								(myMinion->status == gaveupmovehasntfired)))
+							)
 
+						{
+							*Input = sf::Keyboard::Key::R;
+						}
+					//If empty space and this is a transport that already moved, attempt to drop there.
+						else	if ((boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport) &&
+							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+								boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
+						{
+							*Input = sf::Keyboard::Key::O;
+						}
+						else  //Otherwise attempt to move there.
+						{
+							*Input = sf::Keyboard::Key::M;
+						}
+				}
 		}
 
-		//If left click, deselect.	
-		if (*Input == sf::Keyboard::Quote)
-		{
-			*Input = sf::Keyboard::Key::T;
-		}
+	}
 
-		if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
-		{
-			boardToInput->cursor.move(Input);
-		}
+	//If left click, deselect.	
+	if (*Input == sf::Keyboard::Quote)
+	{
+		*Input = sf::Keyboard::Key::T;
+	}
 
-		//Need char for shift
-		if (*Input == sf::Keyboard::Key::Num0)
-		{
-			if (minionVisibleStatus == hideMinions)
-			{
-				minionVisibleStatus = showMinions;
-			}
-			else if (minionVisibleStatus == showMinions)
-			{
-				minionVisibleStatus = hideMinions;
-			}
-		}
+	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
+	{
+		boardToInput->cursor.move(Input);
+	}
 
-		if (*Input == sf::Keyboard::Key::Num9)
+	//Need char for shift
+	if (*Input == sf::Keyboard::Key::Num0)
+	{
+		if (minionVisibleStatus == hideMinions)
 		{
-			if (showRangeStatus == showRange)
-			{
-				showRangeStatus = hideRange;
-			}
-			else if (showRangeStatus == hideRange)
-			{
-				showRangeStatus = showRange;
-			}
+			minionVisibleStatus = showMinions;
 		}
-
-		//Deselect
-		if (*Input == sf::Keyboard::Key::T)
+		else if (minionVisibleStatus == showMinions)
 		{
-			if (boardToInput->cursor.selectMinionFlag == true)
+			minionVisibleStatus = hideMinions;
+		}
+	}
+
+	if (*Input == sf::Keyboard::Key::Num9)
+	{
+		if (showRangeStatus == showRange)
+		{
+			showRangeStatus = hideRange;
+		}
+		else if (showRangeStatus == hideRange)
+		{
+			showRangeStatus = showRange;
+		}
+	}
+
+	//Deselect
+	if (*Input == sf::Keyboard::Key::T)
+	{
+		if (boardToInput->cursor.selectMinionFlag == true)
+		{
+			boardToInput->deselectMinion();
+			status = gameBoard;
+		}
+	}
+
+	int cursorX = boardToInput->cursor.getX();
+	int cursorY = boardToInput->cursor.getY();
+
+	//See if any adjacent friendly minions to this square
+	bool friendlyAdjacentMinion = boardToInput->hasAdjacentMinion(cursorX, cursorY, boardToInput->playerFlag);
+
+	//See if enemy minion here.
+	bool stealthEnemyHere = false;
+	if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true && boardToInput->Board[cursorX][cursorY].minionOnTop->team != boardToInput->playerFlag
+		&& boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == stealth)
+		stealthEnemyHere = true;
+
+	bool unseenStealthEnemyHere = false;
+	if (stealthEnemyHere == true && friendlyAdjacentMinion == false)
+		unseenStealthEnemyHere = true;
+
+	//Move minion command
+	//If minion selected and hasn't moved or fired, attempt to move.
+	//The moveMinion function will check if we are on top of ourselves or another minion.
+	if (*Input == sf::Keyboard::Key::M && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
+	{
+
+		//If there is a minion on top and that minion is visible to the minion's owner
+		if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true
+			&& boardToInput->Board[cursorX][cursorY].withinVision[boardToInput->cursor.selectMinionPointer->team] == true
+			&& unseenStealthEnemyHere == false)
+		{
+			//If minion on top is this minion, do hold position movement.
+			if (boardToInput->cursor.selectMinionPointer->locationX == cursorX && boardToInput->cursor.selectMinionPointer->locationY == cursorY)
 			{
+				boardToInput->moveMinion(cursorX, cursorY, this, boardToInput->playerFlag);
+				status = gameBoard;
+			}
+			else
+				//If that minion is a transport and is same team
+				if ((boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == smallTransport ||
+					boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == largeTransport)
+					&& boardToInput->Board[cursorX][cursorY].minionOnTop->team == boardToInput->cursor.selectMinionPointer->team)
+				{
+					status = gameBoard;	//Set status to gameboard to make it through pickupMinion
+										//If we do not set status to gameboard, it will segfault when it prints minion status during move, during validatePath.
+					int success = boardToInput->pickUpMinion(cursorX, cursorY, this, boardToInput->playerFlag);
+
+					//If failed to actually move at all (invalid move attempt), set back to minion action, since we didn't deselect within pickupMinion.
+					if (success == 1)
+						status = minionAction;
+				}
+		}
+		else //To attempt to move on tile, must either not have a stealther, or at least doesn't have someone adjacent to see them
+			if (stealthEnemyHere == false || friendlyAdjacentMinion == false)
+			{
+				if (boardToInput->moveMinion(cursorX, cursorY, this, boardToInput->playerFlag) == 0)
+				{
+					//Change status appropriately for successful movement.
+					status = gameBoard;
+				}
+			}
+
+	}
+
+	//'i' is supply
+	//Must have minion selected.
+	//Must be APC, hasn't taken second action, cursor is on minion, and regardless of transport status.
+	if (*Input == sf::Keyboard::Key::I && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->cursor.selectMinionPointer->type == "APC"
+		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+		&& cursorX == boardToInput->cursor.selectMinionPointer->locationX
+		&& cursorY == boardToInput->cursor.selectMinionPointer->locationY)
+	{
+		//May not be successful, so not necessarily return 0
+		if (boardToInput->individualResupply(boardToInput->cursor.selectMinionPointer, false, this, boardToInput->playerFlag) == 0)
+			status = gameBoard;
+	}
+
+	//O is drop
+	//Must have minion selected.
+	//Must be transport, hasn't taken second action, has a minion to drop, and tile within range, and not blocked by another minion.
+	//Also must not be impassable.
+	if (*Input == sf::Keyboard::Key::O && boardToInput->cursor.selectMinionFlag == true
+		&& (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport)
+		&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+			boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+			&& boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
+		&& boardToInput->Board[cursorX][cursorY].hasMinionOnTop == false
+		&& boardToInput->Board[cursorX][cursorY].withinRange == true
+		&& boardToInput->Board[cursorX][cursorY].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[cursorX][cursorY].symbol) != 99)
+	{
+		if (boardToInput->dropOffMinion() == 0)
+			status = gameBoard;
+	}
+
+	bool lastMinionDestroyed = false;
+	//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
+	//Also, must not be stealth if we have no one adjacent.
+
+
+	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && (boardToInput->cursor.selectMinionPointer->specialtyGroup != smallTransport && boardToInput->cursor.selectMinionPointer->specialtyGroup != largeTransport))
+		if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true)
+			if ((cursorX != boardToInput->cursor.selectMinionPointer->locationX) || (cursorY != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
+				if (boardToInput->Board[cursorX][cursorY].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
+					if (boardToInput->Board[cursorX][cursorY].withinRange == true)	//In range
+						if (stealthEnemyHere == false || friendlyAdjacentMinion == true)	//Either not a stealther, or we can see them with adjacent minion
+						{
+							//This is the actual attack portion. Return of 0 indicates successful attack.
+							//Note minion's owner so if they lose we know who lost.
+							playerPotentiallyDefeated = boardToInput->Board[cursorX][cursorY].minionOnTop->team;
+							bool attackSuccess = boardToInput->attackMinion(cursorX, cursorY, this, boardToInput->playerFlag);
+							if (attackSuccess == 0)
+							{
+								status = gameBoard;
+							}
+						}
+
+	//Press 'c' to capture property minion is currently on.
+	//First, minion must be available.
+	//Also, must be infantry type.
+
+	if (*Input == sf::Keyboard::Key::C && boardToInput->cursor.selectMinionFlag == true)
+		if ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired
+			|| boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+			&& boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry)
+		{
+			tile* tileToCheck = &boardToInput->Board[boardToInput->cursor.selectMinionPointer->locationX][boardToInput->cursor.selectMinionPointer->locationY];
+			playerPotentiallyDefeated = tileToCheck->controller;
+			//Must be property and must not be the current player's property (Could be neutral).
+			if (tileToCheck->checkForProperty(tileToCheck->symbol) && tileToCheck->controller != boardToInput->playerFlag)
+			{
+
+				eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer, this, boardToInput->playerFlag);
 				boardToInput->deselectMinion();
 				status = gameBoard;
 			}
 		}
 
-		int cursorX = boardToInput->cursor.getX();
-		int cursorY = boardToInput->cursor.getY();
 
-		//See if any adjacent friendly minions to this square
-		bool friendlyAdjacentMinion = boardToInput->hasAdjacentMinion(cursorX, cursorY, boardToInput->playerFlag);
+	return 0;
+}
 
-		//See if enemy minion here.
-		bool stealthEnemyHere = false;
-		if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true && boardToInput->Board[cursorX][cursorY].minionOnTop->team != boardToInput->playerFlag
-			&& boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == stealth)
-			stealthEnemyHere = true;
+int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
+{
+	inputLayerWindow->clear();
+	sf::String boardMessage;
 
-		bool unseenStealthEnemyHere = false;
-		if (stealthEnemyHere == true && friendlyAdjacentMinion == false)
-			unseenStealthEnemyHere = true;
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
+	inputLayerWindow->draw(backgroundSprite);
 
-		//Move minion command
-		//If minion selected and hasn't moved or fired, attempt to move.
-		//The moveMinion function will check if we are on top of ourselves or another minion.
-		if (*Input == sf::Keyboard::Key::M && boardToInput->cursor.selectMinionFlag == true
-			&& boardToInput->cursor.selectMinionPointer->status == hasntmovedorfired)
+
+	sf::String defeatMessage = boardToPrint->playerRoster[playerDefeated].name;
+	defeatMessage += " was defeated. Press any key to continue.  \n";
+
+	sf::Text defeatText(defeatMessage, *inputLayerFont, MainMenu->menuTextSize + 5);
+	defeatText.setPosition(380, 100);
+	defeatText.setFillColor(sf::Color::Black);
+	MainMenu->mywindow->draw(defeatText);
+	inputLayerWindow->display();
+
+	sf::Event event;
+	inputLayerWindow->pollEvent(event);
+
+	//Wait for one input.
+	playCharInput(inputLayerWindow);
+
+
+	return 0;
+}
+
+int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPrint)
+{
+	inputLayerWindow->clear();
+
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
+	inputLayerWindow->draw(backgroundSprite);
+
+	sf::String victoryMessage = boardToPrint->playerRoster[playerVictorious].name;
+	victoryMessage += " was victorious! Press any key to continue.  \n";
+
+	sf::Text victoryText(victoryMessage, *inputLayerFont, MainMenu->menuTextSize + 5);
+	victoryText.setPosition(380, 100);
+	victoryText.setFillColor(sf::Color::Black);
+	MainMenu->mywindow->draw(victoryText);
+	inputLayerWindow->display();
+
+	sf::Event event;
+	inputLayerWindow->pollEvent(event);
+
+	//Wait for one input.
+	playCharInput(inputLayerWindow);
+
+	return 0;
+}
+
+//Checks mouse input against various buttons.
+//Buttons are currently hard coded, since array is too small to matter.
+int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
+{
+	//Must be mouse click
+	if (*Input == sf::Keyboard::Quote)
+	{
+
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+
+
+		bool withinMainMenuButton = (*menuButtons)[0].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Exit to main menu
+		if (withinMainMenuButton == true)
 		{
+			MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
+			exitToMainMenu(boardToInput);
 
-			//If there is a minion on top and that minion is visible to the minion's owner
-			if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true
-				&& boardToInput->Board[cursorX][cursorY].withinVision[boardToInput->cursor.selectMinionPointer->team] == true
-				&& unseenStealthEnemyHere == false)
+		}
+
+
+		bool withinSaveGameButton = (*menuButtons)[1].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Prompt user and save game.
+		if (withinSaveGameButton == true)
+		{
+			int lineOffset = 1;
+			inputLayerWindow->clear();
+			sf::String savePrompt = "Choose a name to save your game.\n";
+			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset, "save");
+
+			std::string stdSaveGameName = ".\\savegames\\";
+			stdSaveGameName += saveGameName;
+			stdSaveGameName += "_save.txt";
+
+			MainMenu->gameSave(stdSaveGameName, boardToInput);
+
+			inputLayerWindow->clear();
+
+			sf::Sprite backgroundSprite;
+			backgroundSprite.setTexture(MainMenu->otherGameTextures->at(7));
+			inputLayerWindow->draw(backgroundSprite);
+
+			sf::String successSave = "Game saved. Press any key to continue.\n";
+			sf::Text newText(successSave, *inputLayerFont, MainMenu->menuTextSize);
+			newText.setFillColor(sf::Color::Black);
+			newText.setPosition(300, 200);
+			inputLayerWindow->draw(newText);
+			inputLayerWindow->display();
+
+			//Flush event queue to clear out "Enter" and other rifraf
+			sf::Event throwAwayEvent;
+			while (inputLayerWindow->pollEvent(throwAwayEvent));
+
+			playCharInput(inputLayerWindow);
+
+			status = gameBoard;
+
+		}
+
+
+		bool withinLoadGameButton = (*menuButtons)[2].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Load a game
+		if (withinLoadGameButton == true)
+		{
+			//Load the actual save game
+			std::ifstream loadGameSave;
+			bool loadsuccessful = false;
+
+			//Prompt user and load scenario
+			int lineOffset = 1;
+			while (loadsuccessful == false)
 			{
-				//If minion on top is this minion, do hold position movement.
-				if (boardToInput->cursor.selectMinionPointer->locationX == cursorX && boardToInput->cursor.selectMinionPointer->locationY == cursorY)
+
+				sf::String loadPrompt = "Choose which save game to load (Case sensitive): \n";
+				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset, "load");
+				sf::Event event;
+
+				std::string stdloadGameName = loadGameName;
+				loadGameSave.open(".\\savegames\\" + stdloadGameName + "_save.txt");
+				if (loadGameSave.is_open())
 				{
-					boardToInput->moveMinion(cursorX, cursorY, this, boardToInput->playerFlag);
-					status = gameBoard;
+					inputLayerWindow->clear();
+					sf::String successful = "Successfully loaded! Press any key to continue.\n";
+
+					sf::Sprite backgroundSprite;
+					backgroundSprite.setTexture(MainMenu->otherGameTextures->at(5));
+					inputLayerWindow->draw(backgroundSprite);
+
+					sf::Text newText(successful, *inputLayerFont, MainMenu->menuTextSize);
+					newText.setPosition(300, 200);
+					newText.setFillColor(sf::Color::Black);
+					inputLayerWindow->draw(newText);
+					inputLayerWindow->display();
+
+					loadsuccessful = true;
 				}
 				else
-					//If that minion is a transport and is same team
-					if ((boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == smallTransport ||
-						boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == largeTransport)
-						&& boardToInput->Board[cursorX][cursorY].minionOnTop->team == boardToInput->cursor.selectMinionPointer->team)
-					{
-						status = gameBoard;	//Set status to gameboard to make it through pickupMinion
-											//If we do not set status to gameboard, it will segfault when it prints minion status during move, during validatePath.
-						int success = boardToInput->pickUpMinion(cursorX, cursorY, this, boardToInput->playerFlag);
-
-						//If failed to actually move at all (invalid move attempt), set back to minion action, since we didn't deselect within pickupMinion.
-						if (success == 1)
-							status = minionAction;
-					}
-			}
-			else //To attempt to move on tile, must either not have a stealther, or at least doesn't have someone adjacent to see them
-				if (stealthEnemyHere == false || friendlyAdjacentMinion == false)
 				{
-					if (boardToInput->moveMinion(cursorX, cursorY, this, boardToInput->playerFlag) == 0)
-					{
-						//Change status appropriately for successful movement.
-						status = gameBoard;
-					}
-				}
+					sf::String loadPrompt = "Could not load save game. Please check that it exists and the right spelling was used.\nChoose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
+					lineOffset = 2;
 
-		}
-
-		//'i' is supply
-		//Must have minion selected.
-		//Must be APC, hasn't taken second action, cursor is on minion, and regardless of transport status.
-		if (*Input == sf::Keyboard::Key::I && boardToInput->cursor.selectMinionFlag == true
-			&& boardToInput->cursor.selectMinionPointer->type == "APC"
-			&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-			&& cursorX == boardToInput->cursor.selectMinionPointer->locationX
-			&& cursorY == boardToInput->cursor.selectMinionPointer->locationY)
-		{
-			//May not be successful, so not necessarily return 0
-			if (boardToInput->individualResupply(boardToInput->cursor.selectMinionPointer, false, this, boardToInput->playerFlag) == 0)
-				status = gameBoard;
-		}
-
-		//O is drop
-		//Must have minion selected.
-		//Must be transport, hasn't taken second action, has a minion to drop, and tile within range, and not blocked by another minion.
-		//Also must not be impassable.
-		if (*Input == sf::Keyboard::Key::O && boardToInput->cursor.selectMinionFlag == true
-			&& (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport)
-			&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
-				boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-				&& boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
-			&& boardToInput->Board[cursorX][cursorY].hasMinionOnTop == false
-			&& boardToInput->Board[cursorX][cursorY].withinRange == true
-			&& boardToInput->Board[cursorX][cursorY].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[cursorX][cursorY].symbol) != 99)
-		{
-			if (boardToInput->dropOffMinion() == 0)
-				status = gameBoard;
-		}
-
-		bool lastMinionDestroyed = false;
-		//Attack command. Pre-reqs: must be in range, must be enemy team and not yours. Must also not be transport type.
-		//Also, must not be stealth if we have no one adjacent.
-
-
-		if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && (boardToInput->cursor.selectMinionPointer->specialtyGroup != smallTransport && boardToInput->cursor.selectMinionPointer->specialtyGroup != largeTransport))
-			if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true)
-				if ((cursorX != boardToInput->cursor.selectMinionPointer->locationX) || (cursorY != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
-					if (boardToInput->Board[cursorX][cursorY].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.
-						if (boardToInput->Board[cursorX][cursorY].withinRange == true)	//In range
-							if (stealthEnemyHere == false || friendlyAdjacentMinion == true)	//Either not a stealther, or we can see them with adjacent minion
-							{
-								//This is the actual attack portion. Return of 0 indicates successful attack.
-								//Note minion's owner so if they lose we know who lost.
-								playerPotentiallyDefeated = boardToInput->Board[cursorX][cursorY].minionOnTop->team;
-								bool attackSuccess = boardToInput->attackMinion(cursorX, cursorY, this, boardToInput->playerFlag);
-								if (attackSuccess == 0)
-								{
-									status = gameBoard;
-								}
-							}
-
-		//Press 'c' to capture property minion is currently on.
-		//First, minion must be available.
-		//Also, must be infantry type.
-
-		if (*Input == sf::Keyboard::Key::C && boardToInput->cursor.selectMinionFlag == true)
-			if ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired
-				|| boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-				&& boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry)
-			{
-				tile* tileToCheck = &boardToInput->Board[boardToInput->cursor.selectMinionPointer->locationX][boardToInput->cursor.selectMinionPointer->locationY];
-				playerPotentiallyDefeated = tileToCheck->controller;
-				//Must be property and must not be the current player's property (Could be neutral).
-				if (tileToCheck->checkForProperty(tileToCheck->symbol) && tileToCheck->controller != boardToInput->playerFlag)
-				{
-
-					eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer, this, boardToInput->playerFlag);
-					boardToInput->deselectMinion();
-					status = gameBoard;
 				}
 			}
+			//Actually load scenario. Initialize board, etc.
+			MainMenu->gameLoad(boardToInput, this, &loadGameSave);
+			//Flush event queue to clear out "Enter" and other rifraf
+			sf::Event throwAwayEvent;
+			while (inputLayerWindow->pollEvent(throwAwayEvent));
+			//Give player a chance to click.
+			playCharInput(inputLayerWindow);
 
-
-		return 0;
-	}
-
-	int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard * boardToPrint)
-	{
-		inputLayerWindow->clear();
-		sf::String boardMessage;
-
-		sf::Sprite backgroundSprite;
-		backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
-		inputLayerWindow->draw(backgroundSprite);
-
-
-		sf::String defeatMessage = boardToPrint->playerRoster[playerDefeated].name;
-		defeatMessage += " was defeated. Press any key to continue.  \n";
-
-		sf::Text defeatText(defeatMessage, *inputLayerFont, MainMenu->menuTextSize + 5);
-		defeatText.setPosition(380, 100);
-		defeatText.setFillColor(sf::Color::Black);
-		MainMenu->mywindow->draw(defeatText);
-		inputLayerWindow->display();
-
-		sf::Event event;
-		inputLayerWindow->pollEvent(event);
-
-		//Wait for one input.
-		playCharInput(inputLayerWindow);
-
-
-		return 0;
-	}
-
-	int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard * boardToPrint)
-	{
-		inputLayerWindow->clear();
-
-		sf::Sprite backgroundSprite;
-		backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
-		inputLayerWindow->draw(backgroundSprite);
-
-		sf::String victoryMessage = boardToPrint->playerRoster[playerVictorious].name;
-		victoryMessage += " was victorious! Press any key to continue.  \n";
-
-		sf::Text victoryText(victoryMessage, *inputLayerFont, MainMenu->menuTextSize + 5);
-		victoryText.setPosition(380, 100);
-		victoryText.setFillColor(sf::Color::Black);
-		MainMenu->mywindow->draw(victoryText);
-		inputLayerWindow->display();
-
-		sf::Event event;
-		inputLayerWindow->pollEvent(event);
-
-		//Wait for one input.
-		playCharInput(inputLayerWindow);
-
-		return 0;
-	}
-
-	//Checks mouse input against various buttons.
-	//Buttons are currently hard coded, since array is too small to matter.
-	int inputLayer::menuInput(sf::Keyboard::Key * Input, MasterBoard * boardToInput)
-	{
-		//Must be mouse click
-		if (*Input == sf::Keyboard::Quote)
-		{
-
-			sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
-
-
-			bool withinMainMenuButton = (*menuButtons)[0].checkWithinButton(mousePosition.x, mousePosition.y);
-			//Exit to main menu
-			if (withinMainMenuButton == true)
-			{
-				MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
-				exitToMainMenu(boardToInput);
-
-			}
-
-
-			bool withinSaveGameButton = (*menuButtons)[1].checkWithinButton(mousePosition.x, mousePosition.y);
-			//Prompt user and save game.
-			if (withinSaveGameButton == true)
-			{
-				int lineOffset = 1;
-				inputLayerWindow->clear();
-				sf::String savePrompt = "Choose a name to save your game.\n";
-				sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset, "save");
-
-				std::string stdSaveGameName = ".\\savegames\\";
-				stdSaveGameName += saveGameName;
-				stdSaveGameName += "_save.txt";
-
-				MainMenu->gameSave(stdSaveGameName, boardToInput);
-
-				inputLayerWindow->clear();
-
-				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(MainMenu->otherGameTextures->at(7));
-				inputLayerWindow->draw(backgroundSprite);
-
-				sf::String successSave = "Game saved. Press any key to continue.\n";
-				sf::Text newText(successSave, *inputLayerFont, MainMenu->menuTextSize);
-				newText.setFillColor(sf::Color::Black);
-				newText.setPosition(300, 200);
-				inputLayerWindow->draw(newText);
-				inputLayerWindow->display();
-
-				//Flush event queue to clear out "Enter" and other rifraf
-				sf::Event throwAwayEvent;
-				while (inputLayerWindow->pollEvent(throwAwayEvent));
-
-				playCharInput(inputLayerWindow);
-
-				status = gameBoard;
-
-			}
-
-
-			bool withinLoadGameButton = (*menuButtons)[2].checkWithinButton(mousePosition.x, mousePosition.y);
-			//Load a game
-			if (withinLoadGameButton == true)
-			{
-				//Load the actual save game
-				std::ifstream loadGameSave;
-				bool loadsuccessful = false;
-
-				//Prompt user and load scenario
-				int lineOffset = 1;
-				while (loadsuccessful == false)
-				{
-
-					sf::String loadPrompt = "Choose which save game to load (Case sensitive): \n";
-					sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset, "load");
-					sf::Event event;
-
-					std::string stdloadGameName = loadGameName;
-					loadGameSave.open(".\\savegames\\" + stdloadGameName + "_save.txt");
-					if (loadGameSave.is_open())
-					{
-						inputLayerWindow->clear();
-						sf::String successful = "Successfully loaded! Press any key to continue.\n";
-
-						sf::Sprite backgroundSprite;
-						backgroundSprite.setTexture(MainMenu->otherGameTextures->at(5));
-						inputLayerWindow->draw(backgroundSprite);
-
-						sf::Text newText(successful, *inputLayerFont, MainMenu->menuTextSize);
-						newText.setPosition(300, 200);
-						newText.setFillColor(sf::Color::Black);
-						inputLayerWindow->draw(newText);
-						inputLayerWindow->display();
-
-						loadsuccessful = true;
-					}
-					else
-					{
-						sf::String loadPrompt = "Could not load save game. Please check that it exists and the right spelling was used.\nChoose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
-						lineOffset = 2;
-
-					}
-				}
-				//Actually load scenario. Initialize board, etc.
-				MainMenu->gameLoad(boardToInput, this, &loadGameSave);
-				//Flush event queue to clear out "Enter" and other rifraf
-				sf::Event throwAwayEvent;
-				while (inputLayerWindow->pollEvent(throwAwayEvent));
-				//Give player a chance to click.
-				playCharInput(inputLayerWindow);
-
-				status = gameBoard;
-			}
-
-
-			bool withinRestartButton = (*menuButtons)[3].checkWithinButton(mousePosition.x, mousePosition.y);
-			if (withinRestartButton == true)
-				//Restart current mission/scenario
-			{
-				restartGame(boardToInput);
-			}
-
-
-			bool withinSoundButton = (*menuButtons)[4].checkWithinButton(mousePosition.x, mousePosition.y);
-			//Toggle sound based on current sound output.
-			if (withinSoundButton == true && soundsOn == true)
-			{
-				soundsOn = false;
-			}
-			else if (withinSoundButton == true && soundsOn == false)
-			{
-				soundsOn = true;
-			}
-
-			//Toggle speed based on current speed factor.
-			bool withinToggleSpeedButton = (*menuButtons)[6].checkWithinButton(mousePosition.x, mousePosition.y);
-			if (withinToggleSpeedButton == true && speedFactor == 1)
-			{
-				speedFactor = 3;
-			}
-			else if (withinToggleSpeedButton == true && speedFactor == 3)
-			{
-				speedFactor = 1;
-			}
-
-			bool withinEndTurnButton = (*menuButtons)[8].checkWithinButton(mousePosition.x, mousePosition.y);
-			//Ends the turn and passes it to the next player.
-			//Autosave every turn.
-			if (withinEndTurnButton == true)
-			{
-				if (boardToInput->cursor.selectMinionFlag == true)
-					boardToInput->deselectMinion();
-				int incrementGameTurn = boardToInput->endTurn(this);
-				//If we advanced a gameTurn, mainMenu will keep track of it.
-				MainMenu->gameTurn += incrementGameTurn;
-
-				//Have to always keep an autosave!
-				MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
-
-			}
-
-			bool withinReturnToGameButton = (*menuButtons)[9].checkWithinButton(mousePosition.x, mousePosition.y);
-			//Exit menu
-			if (withinReturnToGameButton == true)
-			{
-				status = gameBoard;
-
-			}
-
-		}
-
-		//Right click to exit menu
-		if (*Input == sf::Keyboard::Comma)
-		{
 			status = gameBoard;
 		}
 
-		return 0;
-	}
 
-	//Because this is only ordered by player, we don't have to worry about cleaning up compie behavior afterwards. So we can just re-load and go back to gameboard.
-	int inputLayer::restartGame(MasterBoard * boardToInput)
-	{
-
-		//Load the actual save game
-		std::ifstream loadGame;
-		bool loadsuccessful = false;
-
-		//Prompt user and load scenario
-		while (loadsuccessful == false)
+		bool withinRestartButton = (*menuButtons)[3].checkWithinButton(mousePosition.x, mousePosition.y);
+		if (withinRestartButton == true)
+			//Restart current mission/scenario
 		{
+			restartGame(boardToInput);
+		}
 
-			std::string gameToLoad = boardToInput->scenarioOrMissionName;
 
-			if (boardToInput->missionFlag == true)
-			{
+		bool withinSoundButton = (*menuButtons)[4].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Toggle sound based on current sound output.
+		if (withinSoundButton == true && soundsOn == true)
+		{
+			soundsOn = false;
+		}
+		else if (withinSoundButton == true && soundsOn == false)
+		{
+			soundsOn = true;
+		}
 
-				loadGame.open(".\\campaigns\\" + boardToInput->campaignName + "\\" + gameToLoad + ".txt");
-			}
-			else
-			{
-				loadGame.open(".\\scenarios\\" + gameToLoad + ".txt");
-			}
+		//Toggle speed based on current speed factor.
+		bool withinToggleSpeedButton = (*menuButtons)[6].checkWithinButton(mousePosition.x, mousePosition.y);
+		if (withinToggleSpeedButton == true && speedFactor == 1)
+		{
+			speedFactor = 3;
+		}
+		else if (withinToggleSpeedButton == true && speedFactor == 3)
+		{
+			speedFactor = 1;
+		}
 
-			if (loadGame.is_open())
-			{
-				std::cout << "Scenario/mission successfully loaded!\n";
-				loadsuccessful = true;
-			}
-			else
-			{
-				std::cout << "Could not load scenario or mission. Please check that it exists and the right spelling was used.\n";
+		bool withinEndTurnButton = (*menuButtons)[8].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Ends the turn and passes it to the next player.
+		//Autosave every turn.
+		if (withinEndTurnButton == true)
+		{
+			if (boardToInput->cursor.selectMinionFlag == true)
+				boardToInput->deselectMinion();
+			int incrementGameTurn = boardToInput->endTurn(this);
+			//If we advanced a gameTurn, mainMenu will keep track of it.
+			MainMenu->gameTurn += incrementGameTurn;
 
-			}
+			//Have to always keep an autosave!
+			MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
 
 		}
-		//Actually load scenario. Initialize board, etc.
-		MainMenu->gameLoad(boardToInput, this, &loadGame);
 
-		//We don't always print mission briefing but we do here
-		printMissionBriefing(boardToInput);
+		bool withinReturnToGameButton = (*menuButtons)[9].checkWithinButton(mousePosition.x, mousePosition.y);
+		//Exit menu
+		if (withinReturnToGameButton == true)
+		{
+			status = gameBoard;
 
-		status = gameBoard;
-		return 0;
+		}
 
 	}
 
-	int inputLayer::NextMission(MasterBoard * boardToInput)
+	//Right click to exit menu
+	if (*Input == sf::Keyboard::Comma)
 	{
-		//Load the actual save game
-		std::ifstream loadGame;
-		bool loadsuccessful = false;
+		status = gameBoard;
+	}
 
-		//Prompt user and load scenario
-		while (loadsuccessful == false)
+	return 0;
+}
+
+//Because this is only ordered by player, we don't have to worry about cleaning up compie behavior afterwards. So we can just re-load and go back to gameboard.
+int inputLayer::restartGame(MasterBoard* boardToInput)
+{
+
+	//Load the actual save game
+	std::ifstream loadGame;
+	bool loadsuccessful = false;
+
+	//Prompt user and load scenario
+	while (loadsuccessful == false)
+	{
+
+		std::string gameToLoad = boardToInput->scenarioOrMissionName;
+
+		if (boardToInput->missionFlag == true)
 		{
-
-			std::string gameToLoad = MainMenu->nextMissionName;
 
 			loadGame.open(".\\campaigns\\" + boardToInput->campaignName + "\\" + gameToLoad + ".txt");
+		}
+		else
+		{
+			loadGame.open(".\\scenarios\\" + gameToLoad + ".txt");
+		}
 
-
-			if (loadGame.is_open())
-			{
-				std::cout << "Scenario/mission successfully loaded!\n";
-				loadsuccessful = true;
-			}
-			else
-			{
-				std::cout << "Could not load scenario or mission. Please check that it exists and the right spelling was used.\n";
-
-			}
+		if (loadGame.is_open())
+		{
+			std::cout << "Scenario/mission successfully loaded!\n";
+			loadsuccessful = true;
+		}
+		else
+		{
+			std::cout << "Could not load scenario or mission. Please check that it exists and the right spelling was used.\n";
 
 		}
-		std::string playerName = boardToInput->playerRoster[1].name;
-		//Actually load scenario. Initialize board, etc.
-		MainMenu->gameLoad(boardToInput, this, &loadGame);
-		boardToInput->playerRoster[1].name = playerName;
-		//NEED to transfer player information -  just the name for now.
-
-		//We don't always print mission briefing but we do here
-		printMissionBriefing(boardToInput);
-
-		status = gameBoard;
-
-		MainMenu->playGame(boardToInput, this);
-
-		return 0;
 
 	}
+	//Actually load scenario. Initialize board, etc.
+	MainMenu->gameLoad(boardToInput, this, &loadGame);
 
-	int inputLayer::propertyMenuInput(sf::Keyboard::Key * Input, MasterBoard * boardToInput) {
+	//We don't always print mission briefing but we do here
+	printMissionBriefing(boardToInput);
 
-		tile* myTile = &boardToInput->Board[boardToInput->cursor.XCoord][boardToInput->cursor.YCoord];
-		std::string requestedPurchase = "NOBODY";
-		bool purchaseSuccess = false;
-		int treasury = boardToInput->playerRoster[boardToInput->playerFlag].treasury;
+	status = gameBoard;
+	return 0;
 
-		//Need char for shift
-		if (*Input == sf::Keyboard::Key::Num0)
-		{
-			if (minionVisibleStatus == hideMinions)
-			{
-				minionVisibleStatus = showMinions;
-			}
-			else if (minionVisibleStatus == showMinions)
-			{
-				minionVisibleStatus = hideMinions;
-			}
-			return 0;
-		}
+}
 
-		if (*Input == sf::Keyboard::Key::Num9)
-		{
-			if (showRangeStatus == showRange)
-			{
-				showRangeStatus = hideRange;
-			}
-			else if (showRangeStatus == hideRange)
-			{
-				showRangeStatus = showRange;
-			}
-		}
+int inputLayer::NextMission(MasterBoard* boardToInput)
+{
+	//Load the actual save game
+	std::ifstream loadGame;
+	bool loadsuccessful = false;
 
-		int buttonNumber = -1;
-
-		if (*Input == sf::Keyboard::Quote)
-		{
-			sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
-
-
-			if (myTile->symbol == 'h')
-			{
-
-				for (int i = 0; i < factoryButtons.size(); i++)
-				{
-					bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
-					//Prompt user and save game.
-					if (withinButton == true)
-					{
-						buttonNumber = i;
-					}
-				}
-
-				switch (buttonNumber)
-				{
-				case 0:
-					requestedPurchase = "Infantry";
-					break;
-				case 1:
-					requestedPurchase = "Specialist";
-					break;
-				case 2:
-					requestedPurchase = "Recon";
-					break;
-				case 3:
-					requestedPurchase = "APC";
-					break;
-				case 4:
-					requestedPurchase = "Artillery";
-					break;
-				case 5:
-					requestedPurchase = "Armor";
-					break;
-				case 6:
-					requestedPurchase = "Anti-Aircraft";
-					break;
-				case 7:
-					requestedPurchase = "Rocket_Artillery";
-					break;
-				case 8:
-					requestedPurchase = "Heavy_Armor";
-					break;
-				}
-			}
-
-			if (myTile->symbol == 'P')
-			{
-				for (int i = 0; i < portButtons.size(); i++)
-				{
-					bool withinButton = portButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
-					//Prompt user and save game.
-					if (withinButton == true)
-					{
-						buttonNumber = i;
-					}
-				}
-
-				if (buttonNumber == 0)
-					requestedPurchase = "Gunboat";
-				if (buttonNumber == 1)
-					requestedPurchase = "Cruiser";
-				if (buttonNumber == 2)
-					requestedPurchase = "Lander";
-				if (buttonNumber == 3)
-					requestedPurchase = "Submarine";
-				if (buttonNumber == 4)
-					requestedPurchase = "Battleship";
-				if (buttonNumber == 5)
-					requestedPurchase = "Aircraft_Carrier";
-
-			}
-
-			if (myTile->symbol == 'A')
-			{
-				for (int i = 0; i < airbaseButtons.size(); i++)
-				{
-					bool withinButton = airbaseButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
-					//Prompt user and save game.
-					if (withinButton == true)
-					{
-						buttonNumber = i;
-					}
-				}
-
-				if (buttonNumber == 0)
-					requestedPurchase = "Transport_Copter";
-				if (buttonNumber == 1)
-					requestedPurchase = "Attack_Copter";
-				if (buttonNumber == 2)
-					requestedPurchase = "Interceptor";
-				if (buttonNumber == 3)
-					requestedPurchase = "Bomber";
-
-
-			}
-
-		}
-
-
-		//Consult cost table:
-		int requestedUnitPrice = boardToInput->consultMinionCostChart(requestedPurchase, myTile->symbol);
-
-		//If it is a real unit we are trying to purchase
-		//Aka unitPrica is not -1 aka non-error
-		if (requestedUnitPrice > 0)
-		{
-			//Can we afford it
-			if (requestedUnitPrice <= treasury)
-			{
-				//Confirm purchase
-				int result = boardToInput->attemptPurchaseMinion(requestedPurchase, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag);
-
-				//Only leave if successfuly bought minion
-				if (result == 0)
-					status = gameBoard;
-			}
-		}
-
-		//Right click to exit menu
-		if (*Input == sf::Keyboard::Comma)
-		{
-			status = gameBoard;
-		}
-
-
-		return 0;
-	}
-
-
-	int inputLayer::exitToMainMenu(MasterBoard * boardToInput)
+	//Prompt user and load scenario
+	while (loadsuccessful == false)
 	{
 
-		//Clear up resources we used to avoid memory leak.
-		boardToInput->clearBoard(this);
+		std::string gameToLoad = MainMenu->nextMissionName;
 
-		MainMenu->menuStatus = topmenu;
-		MainMenu->skipOneInput = true;
+		loadGame.open(".\\campaigns\\" + boardToInput->campaignName + "\\" + gameToLoad + ".txt");
 
 
-		//Leave it all behind and start again.
-		//Do you... really think we could?
-		MainMenu->playGame(boardToInput, this);
+		if (loadGame.is_open())
+		{
+			std::cout << "Scenario/mission successfully loaded!\n";
+			loadsuccessful = true;
+		}
+		else
+		{
+			std::cout << "Could not load scenario or mission. Please check that it exists and the right spelling was used.\n";
 
+		}
+
+	}
+	std::string playerName = boardToInput->playerRoster[1].name;
+	//Actually load scenario. Initialize board, etc.
+	MainMenu->gameLoad(boardToInput, this, &loadGame);
+	boardToInput->playerRoster[1].name = playerName;
+	//NEED to transfer player information -  just the name for now.
+
+	//We don't always print mission briefing but we do here
+	printMissionBriefing(boardToInput);
+
+	status = gameBoard;
+
+	MainMenu->playGame(boardToInput, this);
+
+	return 0;
+
+}
+
+int inputLayer::propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput) {
+
+	tile* myTile = &boardToInput->Board[boardToInput->cursor.XCoord][boardToInput->cursor.YCoord];
+	std::string requestedPurchase = "NOBODY";
+	bool purchaseSuccess = false;
+	int treasury = boardToInput->playerRoster[boardToInput->playerFlag].treasury;
+
+	//Need char for shift
+	if (*Input == sf::Keyboard::Key::Num0)
+	{
+		if (minionVisibleStatus == hideMinions)
+		{
+			minionVisibleStatus = showMinions;
+		}
+		else if (minionVisibleStatus == showMinions)
+		{
+			minionVisibleStatus = hideMinions;
+		}
 		return 0;
 	}
+
+	if (*Input == sf::Keyboard::Key::Num9)
+	{
+		if (showRangeStatus == showRange)
+		{
+			showRangeStatus = hideRange;
+		}
+		else if (showRangeStatus == hideRange)
+		{
+			showRangeStatus = showRange;
+		}
+	}
+
+	if (*Input == sf::Keyboard::Quote)
+	{
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+
+
+		if (myTile->symbol == 'h')
+		{
+
+			for (int i = 0; i < factoryButtons.size(); i++)
+			{
+				bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+				//Prompt user and save game.
+				if (withinButton == true)
+				{
+					requestedPurchase = factoryButtons.at(i).myName;
+				}
+			}
+
+		}
+
+		if (myTile->symbol == 'P')
+		{
+			for (int i = 0; i < portButtons.size(); i++)
+			{
+				bool withinButton = portButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+				//Prompt user and save game.
+				if (withinButton == true)
+				{
+					requestedPurchase = portButtons.at(i).myName;
+				}
+			}
+
+		}
+
+		if (myTile->symbol == 'A')
+		{
+			for (int i = 0; i < airbaseButtons.size(); i++)
+			{
+				bool withinButton = airbaseButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+				//Prompt user and save game.
+				if (withinButton == true)
+				{
+					requestedPurchase = airbaseButtons.at(i).myName;
+				}
+			}
+
+		}
+
+	}
+
+
+	//Consult cost table:
+	int requestedUnitPrice = boardToInput->consultMinionCostChart(requestedPurchase, myTile->symbol);
+
+	//If it is a real unit we are trying to purchase
+	//Aka unitPrica is not -1 aka non-error
+	if (requestedUnitPrice > 0)
+	{
+		//Can we afford it
+		if (requestedUnitPrice <= treasury)
+		{
+			//Confirm purchase
+			int result = boardToInput->attemptPurchaseMinion(requestedPurchase, boardToInput->cursor.getX(), boardToInput->cursor.getY(), boardToInput->playerFlag);
+
+			//Only leave if successfuly bought minion
+			if (result == 0)
+				status = gameBoard;
+		}
+	}
+
+	//Right click to exit menu
+	if (*Input == sf::Keyboard::Comma)
+	{
+		status = gameBoard;
+	}
+
+
+	return 0;
+}
+
+
+int inputLayer::exitToMainMenu(MasterBoard* boardToInput)
+{
+
+	//Clear up resources we used to avoid memory leak.
+	boardToInput->clearBoard(this);
+
+	MainMenu->menuStatus = topmenu;
+	MainMenu->skipOneInput = true;
+
+
+	//Leave it all behind and start again.
+	//Do you... really think we could?
+	MainMenu->playGame(boardToInput, this);
+
+	return 0;
+}

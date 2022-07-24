@@ -1,3 +1,9 @@
+//Added faction choice graphical input
+//Todo : Add faction member to playerRosterEntry, and initialize properly.
+//	Todo : Add factionChoiceButtons to main menu.h
+//	Todo : Change player type choice to graphical
+//	Todo : Faction affect ability to purchase units - in progress
+
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	mainMenu.cpp
@@ -121,8 +127,9 @@ char playCharInput(sf::RenderWindow* myWindow)
 	return inputChar;
 }
 
-mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
-	std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic)
+mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
+					std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic,
+					std::vector <sf::Texture>* factionButtonTextureArray)
 {
 	myTexture = gameTexture;
 	introMusic = inputIntroMusic;
@@ -130,13 +137,12 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	mywindow = myWindow;
 	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
 
-	//Initialize the clearField sprite used for player string input
 
+	//Game menu buttons ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Assume existence of 2 separate Button vectors within mainMenu already. One for game menu, one for top menu.
 	//Overall menu area is:
 	int menuTop = 100;
 	int menuLeft = 400;
-
 
 	//See button.h - offset helps keep the enum alligned with button type
 	int buttonTypeOffset = 9;
@@ -166,13 +172,14 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 			//Only advance button position if it's a "unique" button. Not a sound/speed alternate button.
 			buttonPlacement++;
 		}
-
-		gameMenuButtons.emplace_back(menuLeft + leftMargin, y, buttonType, &(inputGameMenuButtonTextureArray->at(i)));
-
-
+		gameMenuButtons.emplace_back(menuLeft + leftMargin, y, buttonType, &(inputGameMenuButtonTextureArray->at(i)), "GameMenuButton");
 	}
+	//Game menu buttons ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+
+	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Top menu button numbers
 	//Overall menu area is:
 	int TopMenuTop = 200;
@@ -189,11 +196,6 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 
 	//Reset button placement index
 	buttonPlacement = 0;
-
-
-
-	sf::Vector2u topMenuTextureSize = (*topMenuButtonTextureArray).at(0).getSize();
-	int topButtonHeight = topMenuTextureSize.y;
 
 	//Top menu buttons new game, load game, toggle editor mode
 	for (int i = 0; i < 4; i++)
@@ -212,7 +214,7 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 			buttonPlacement++;
 		}
 
-		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y, i, &(topMenuButtonTextureArray->at(i)));
+		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y, i, &(topMenuButtonTextureArray->at(i)), "TopMenuButton");
 	}
 
 	//Top menu buttons - new skirmish, new campaign, go back
@@ -222,12 +224,43 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	for (int i = 4; i < 7; i++)
 	{
 		y = TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * buttonPlacement;
-		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y, i, &(topMenuButtonTextureArray->at(i)));
+		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y, i, &(topMenuButtonTextureArray->at(i)), "TopMenuButton");
 		buttonPlacement++;
 	}
+	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+	//Faction choice buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//Top menu button numbers
+
+	//Find button size
+	sf::Vector2u factionButtonSize = (*factionButtonTextureArray).at(0).getSize(); 	//Buttons must all be same height, so use the first button's height
+	int factionButtonHeight = factionButtonSize.y;
+
+	//Overall menu area is:
+	int factionButtonsTop = 200;
+	int factionButtonsLeft = 200;
+
+	//Offset between buttons
+	int factionBetweenMargin = 50;
+
+	//Factionbutton creation
+	for (int i = 0; i < factionButtonTextureArray->size(); i++)
+	{
+		int y = i * (factionButtonHeight + factionBetweenMargin) + factionButtonsTop;
+		factionChoiceButtons.emplace_back(factionButtonsLeft, y, i, &(factionButtonTextureArray->at(i)), "FactionButton");
+
+	}
+
+	//Faction choice buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 	//Take in other required textures
 	otherGameTextures = inputOtherTextureArray;
-
 }
 
 
@@ -305,13 +338,14 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 
 
 
-	saveGame << "Player_Data:_Name_PlayerType_StillAlive_Treasury" << std::endl;
+	saveGame << "Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction" << std::endl;
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
 		saveGame << boardToPrint->playerRoster[i].name << std::endl;
 		saveGame << int(boardToPrint->playerRoster[i].playerType) << std::endl;
 		saveGame << int(boardToPrint->playerRoster[i].stillAlive) << std::endl;
 		saveGame << boardToPrint->playerRoster[i].treasury << std::endl;
+		saveGame << boardToPrint->playerRoster[i].playerFaction << std::endl;
 	}
 
 	//Then save the game turn.
@@ -496,11 +530,33 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
 		int playerType = 0;
-
+		int factionType = 0;
+				
 		*saveGame >> boardToPrint->playerRoster[i].name;	//For new game this should be ~
 		*saveGame >> playerType;
 		*saveGame >> boardToPrint->playerRoster[i].stillAlive;
 		*saveGame >> boardToPrint->playerRoster[i].treasury;
+		*saveGame >> factionType;
+			
+		switch (factionType)
+		{
+		case(0):
+			boardToPrint->playerRoster[i].playerFaction = NeutralFaction;
+			break;
+		case(1):
+			boardToPrint->playerRoster[i].playerFaction = NorthRedonia;
+			break;
+		case(2):
+			boardToPrint->playerRoster[i].playerFaction = SouthRedonia;
+			break;
+		case(3):
+			boardToPrint->playerRoster[i].playerFaction = Ormosa;
+			break;
+		case(4):
+			boardToPrint->playerRoster[i].playerFaction = Torran;
+			break;
+		}
+
 
 		if (playerType == 0)
 			boardToPrint->playerRoster[i].playerType = humanPlayer;
@@ -1163,8 +1219,6 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			boardToPlay->playerRoster[i].name = inputName;
 
 			bool playerTypeDecided = false;
-
-
 			while (!playerTypeDecided)
 			{
 				char playerTypeInput = ' ';
@@ -1198,6 +1252,49 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 					}
 					playerTypeDecided = true;
 				}
+			}
+
+			bool factionDecided = false;
+			while (!factionDecided)
+			{
+				char playerTypeInput = ' ';
+				topMenuNewString = "Choose this player's faction. \n";
+				sf::Text factionChooseText(topMenuNewString, *myFont, menuTextSize);
+				factionChooseText.setPosition(300, 200);
+				factionChooseText.setFillColor(sf::Color::Black);
+
+				mywindow->clear();
+
+				sf::Sprite backgroundSprite;
+				backgroundSprite.setTexture(otherGameTextures->at(6));
+
+				mywindow->draw(backgroundSprite);
+				mywindow->draw(factionChooseText);
+
+				mywindow->display();
+
+				//Wait for a mouse click, then check if it's within a faction box.
+				sf::Event factionChoiceEvent;
+				do
+				{
+					mywindow->waitEvent(factionChoiceEvent);
+				} while (factionChoiceEvent.type != sf::Event::MouseButtonPressed);
+
+					//Check if within faction box
+					sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
+
+				for (int x = 0; x < factionChoiceButtons.size(); i++)
+				{
+					bool withinFactionButton = (factionChoiceButtons)[x].checkWithinButton(mousePosition.x, mousePosition.y);
+
+					if (withinFactionButton == true)
+					{
+						boardToPlay->playerRoster[i].playerFaction = x;
+						factionDecided = true;
+					}
+
+				}
+
 			}
 
 		}

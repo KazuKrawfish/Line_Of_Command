@@ -1,3 +1,13 @@
+//Add into masterboard.hpp below:
+//Faction 0 is neutral faction, which gets no special units.
+bool minionsAllowedForFaction[28][5] =  
+//                                          Inf     Insrg   Oper    Spec    recon   tech    APC     IFV     Arty    Armr    Asgun   Upgarm  antia   rockt   hvyarm  mdnarm  tcop    acop    int     advf    multi   bomb,   gboat   cruis   land    sub     ship    cvn      
+/*Neutral*/                                {true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,
+/*North Redonia*/                           true,   false,  false,  true,   true,   false,  true,   false,  false,  true,   true,   true,   true,   true,   true,   false,  true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   true,       
+/*South Redonia*/                           true,   false,  false,  true,   true,   false,  false,   true,  true,   true,   false,  false,  true,   true,   false,  true,   true,   true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,
+/*Ormosa*/                                  true,   true,   true,   true,   false,   true,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,
+/*Torran*/                                  true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   };
+
 //TODO: Add "Actions Avaiable" button for each context.Would be printed every status board.Clicking brings up a dialog box that explains possible actions in a given context.
 //	Similarly, add controls button in main menu, which gives exhaustive listing of controls in a dialog box.
 
@@ -1706,6 +1716,107 @@ int MasterBoard::setDropField(int inputX, int inputY)
 	return 0;
 }
 
+bool MasterBoard::checkFactionAvailability(std::string minionType, int inputPlayer)
+{
+    int playerFaction = playerRoster[inputPlayer].playerFaction;
+    int minionNumber = -1;
+
+
+    //Find ID number for minion type
+    if ( minionType == "Infantry")
+		minionNumber = 0;
+		else
+    if ( minionType == "Insurgent")
+        minionNumber = 1;
+        else
+	if( minionType == "Operative")
+		minionNumber = 2;
+		else
+	if ( minionType == "Specialist")
+		minionNumber = 3;
+		else
+	if ( minionType == "Recon")
+		minionNumber = 4;
+		else
+	if (minionType == "Technical")
+		minionNumber = 5;
+		else
+    if ( minionType == "APC")
+		minionNumber = 6;
+		else
+	if (minionType == "IFV")
+	    minionNumber = 7;
+		else
+    if ( minionType == "Artillery")
+	    minionNumber = 8;
+		else
+    if ( minionType == "Armor")
+	    minionNumber = 9;
+		else
+	if ( minionType == "Assault_Gun")
+		minionNumber = 10;
+		else
+    if ( minionType == "Upgunned_Armor")
+   	    minionNumber = 11;
+        else
+// Inf     Insrg   Oper    Spec    recon   tech    APC     IFV     Arty    Armr    Asgun   Upgarm  antia   rockt   hvyarm  mdnarm  tcop    acop    int     advf    multi   bomb,   gboat   cruis   land    sub     ship    cvn      
+	if ( minionType == "Rocket_Artillery")
+		price = 15000;
+		else
+	if ( minionType == "Heavy_Armor")
+		price = 16000;
+		else
+	if ( minionType == "Modern_Armor")
+		price = 20000;
+		else
+	if ( minionType == "Anti-Aircraft")
+		price = 8000;
+		else
+	if ( minionType == "Attack_Copter")
+		price = 9000;
+		else
+	if ( minionType == "Transport_Copter")
+		price = 5000;
+		else
+	if ( minionType == "Interceptor")
+		price = 15000;
+		else
+	if ( minionType == "Multirole")
+		price = 11000;
+		else
+	if ( minionType == "Bomber")
+		price = 18000;
+		else
+	if( minionType == "Advanced_Fighter")
+		price = 20000;
+		else
+	if ( minionType == "Aircraft_Carrier")
+		price = 25000;
+		else
+	if ( minionType == "Battleship")
+		price = 25000;
+		else
+	if ( minionType == "Gunboat")
+		price = 6000;
+		else
+	if ( minionType == "Cruiser")
+		price = 14000;
+		else
+	if ( minionType == "Submarine")
+		price = 18000;
+		else
+	if ( minionType == "Lander")
+		price = 12000;
+
+
+
+    if(minionNumber == -1)
+        return false;
+
+    bool allowed = minionsAllowedForFaction[minionNumber][playerFaction];
+    return allowed;
+}
+
 //attemptResult should return 1 if unsuccessful
 //Or 0 if successful
 int MasterBoard::attemptPurchaseMinion(std::string inputType, int inputX, int inputY, int inputTeam)
@@ -1716,6 +1827,8 @@ int MasterBoard::attemptPurchaseMinion(std::string inputType, int inputX, int in
 	if (std::find(banList.begin(), banList.end(), inputType) != banList.end())
 		return attemptResult;
 
+    //Then check to see if it's within the faction options
+    if()
 
 	if (playerRoster[playerFlag].treasury >= consultMinionCostChart(inputType, Board[inputX][inputY].symbol) && Board[inputX][inputY].hasMinionOnTop == false)
 	{

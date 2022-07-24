@@ -1,3 +1,4 @@
+//Changed production options to string.
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	inputLayer.hpp
@@ -24,7 +25,7 @@ class Button;
 enum otherImages { startScreenBackground, topMenuBackground, startScreenStatement, topMenuBox };
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer, compieTakingTurn, insertMinion, insertTile };
 enum specialKey { showMinions, hideMinions };
-enum rangeVisibleStatus { showRange, hideRange};
+enum rangeVisibleStatus { showRange, hideRange };
 enum colorCode {
 	unused, fogLandTile, waterTile, fogWaterTile, player1Minion,
 	player2Minion, player3Minion, player4Minion, player5Minion, player6Minion,
@@ -40,8 +41,8 @@ class inputLayer
 {
 public:
 
-	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, 
-		sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons ,std::vector <sf::Texture>* statusTextures);
+	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
+		sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures);
 
 	//Print Functions:///////////////////////////////////////////////////////
 	//Non-game play
@@ -102,17 +103,19 @@ public:
 
 
 	//MenuCrawlerObjects /////////////////////////
-	std::vector <Button> * menuButtons;
-	std::vector <char> factoryOptions{ 'i', 's', 'c', 'P', 'r', 'a','A','R', 'T' };			//"Infantry\t1000", "Specialist\t3000", "Cavalry\t4000","APC\t5000","Artillery\t6000", "Armor\t7000",
-																							//	"Anti-Aircraft\t8000", "Rocket Artillery\t15000", "Heavy Armor\t16000" };
+	std::vector <Button>* menuButtons;
+	std::vector <std::string> factoryOptions{ "Infantry", "Insurgent", "Operative", "Specialist", "Recon", "Technical",
+												"APC", "IFV", "Artillery", "Armor", "Assault_Gun", "Upgunned_Armor",
+												"Anti-Aircraft", "Rocket", "Heavy_Armor", "Modern_Armor" };
 	std::vector <Button> factoryButtons;
 
-	std::vector <char> airbaseOptions{	'h', 'v', 'f', 'b'};								///"Transport Copter\t5000", "Attack Copter\t9000", "Interceptor\t15000", "Bomber\t18000" };
+	std::vector <std::string> airbaseOptions{ "Transport_Copter", "Attack_Copter", "Interceptor",
+												"Advanced_Fighter", "Multirole", "Bomber" };
 	std::vector <Button> airbaseButtons;
-	
-	std::vector <char> portOptions{ 'G', 'C', 'L', 'U', 'B', 'V' };							//"Gunboat\t6000", "Cruiser\t14000", "Landing Ship\t12000", "Submarine\t18000", "Battleship\t25000", "Aircraft Carrier\t25000" };
+
+	std::vector <std::string> portOptions{ "Gunboat", "Cruiser", "Lander", "Submarine", "Battleship", "Aircraft_Carrier" };
 	std::vector <Button> portButtons;
-	
+
 	std::vector <Button> statusButtons;
 	//MenuCrawlerObjects /////////////////////////
 
