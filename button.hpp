@@ -1,5 +1,3 @@
-//Added button name to allow for easier searching
-
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	button.hpp

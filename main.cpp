@@ -87,6 +87,12 @@ int main()
 		statusTexturesArray.resize(statusTextureList.size());
 		initializeTextureArray("otherImages", statusTextureList, statusTexturesArray);
 
+		//Load status indicators
+		std::vector <std::string> factionTexturesList = { "NorthRedoniaFlag" , "SouthRedoniaFlag", "OrmosaFlag" , "TorranFlag" };
+		std::vector <sf::Texture> factionTexturesArray;
+		factionTexturesArray.resize(factionTexturesList.size());
+		initializeTextureArray("otherImages/Flags", factionTexturesList, factionTexturesArray);
+
 
 		sf::Texture mainTexture;
 		sf::Image mainImage;
@@ -154,7 +160,7 @@ int main()
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
 	
-	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &introMusic);
+	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &introMusic , &factionTexturesArray);
 
 	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, & MainMenu.gameMenuButtons, &statusTexturesArray);
 	MasterBoard GameBoard(&mainTexture);

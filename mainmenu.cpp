@@ -1,13 +1,8 @@
-//Added faction choice graphical input
-//Todo : Add faction member to playerRosterEntry, and initialize properly.
-//	Todo : Add factionChoiceButtons to main menu.h
-//	Todo : Change player type choice to graphical
-//	Todo : Faction affect ability to purchase units - in progress
-
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	mainMenu.cpp
 //
+
 
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
@@ -1270,7 +1265,10 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				mywindow->draw(backgroundSprite);
 				mywindow->draw(factionChooseText);
-
+				
+				for(int i = 1; i < factionChoiceButtons.size() ; i++)
+					mywindow->draw(factionChoiceButtons.at(i).mySprite);
+				
 				mywindow->display();
 
 				//Wait for a mouse click, then check if it's within a faction box.
@@ -1289,7 +1287,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 					if (withinFactionButton == true)
 					{
-						boardToPlay->playerRoster[i].playerFaction = x;
+						boardToPlay->playerRoster[i].playerFaction = factionType(x);
 						factionDecided = true;
 					}
 

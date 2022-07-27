@@ -1,4 +1,3 @@
-//Changed production options to string.
 //Copyright 2022, Supercontinent Software Ltd.
 //
 //	inputLayer.hpp
