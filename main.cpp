@@ -59,7 +59,7 @@ int initializeTextureArray(std::string directory, std::vector <std::string> imag
 
 int main()
 {
-
+		sf::Color colorWhite;
 		sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
 
 		//Load topMenuButton textures
@@ -149,7 +149,7 @@ int main()
 		soundEffects[i].setBuffer(soundEffectBuffers[i]);
 	}
 
-	sf::Color colorWhite;
+
 
 	//Transfer Images to Textures
 	mainImage.createMaskFromColor(colorWhite.White);

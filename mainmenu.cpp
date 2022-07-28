@@ -236,8 +236,8 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	int factionButtonWidth = factionButtonSize.x;
 
 	//Overall menu area is:
-	int factionButtonsTop = 200;
-	int factionButtonsLeft = 200;
+	int factionButtonsTop = 180;
+	int factionButtonsLeft = 350;
 
 	//Offset between buttons
 	int factionBetweenMargin = 50;
@@ -1262,7 +1262,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			{
 				topMenuNewString = "Choose this player's faction. \n";
 				sf::Text factionChooseText(topMenuNewString, *myFont, menuTextSize);
-				factionChooseText.setPosition(300, 200);
+				factionChooseText.setPosition(500, 140);
 				factionChooseText.setFillColor(sf::Color::Black);
 
 				mywindow->clear();
