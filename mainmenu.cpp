@@ -233,6 +233,7 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	//Find button size
 	sf::Vector2u factionButtonSize = (*factionButtonTextureArray).at(0).getSize(); 	//Buttons must all be same height, so use the first button's height
 	int factionButtonHeight = factionButtonSize.y;
+	int factionButtonWidth = factionButtonSize.x;
 
 	//Overall menu area is:
 	int factionButtonsTop = 200;
@@ -240,13 +241,18 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 
 	//Offset between buttons
 	int factionBetweenMargin = 50;
+	int factionNumber = 0;
 
 	//Factionbutton creation
-	for (int i = 0; i < factionButtonTextureArray->size(); i++)
+	for (int i = 0; i < 2; i++)
 	{
-		int y = i * (factionButtonHeight + factionBetweenMargin) + factionButtonsTop;
-		factionChoiceButtons.emplace_back(factionButtonsLeft, y, i, &(factionButtonTextureArray->at(i)), "FactionButton");
-
+		for (int j = 0; j < 2; j++) 
+		{
+			int y = i * (factionButtonHeight + factionBetweenMargin) + factionButtonsTop;
+			int x = j * (factionButtonWidth + factionBetweenMargin) + factionButtonsLeft;
+			factionChoiceButtons.emplace_back(x, y, factionButton, &(factionButtonTextureArray->at(factionNumber)), "FactionButton");
+			factionNumber++;
+		}
 	}
 
 	//Faction choice buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1249,10 +1255,11 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				}
 			}
 
+
+
 			bool factionDecided = false;
 			while (!factionDecided)
 			{
-				char playerTypeInput = ' ';
 				topMenuNewString = "Choose this player's faction. \n";
 				sf::Text factionChooseText(topMenuNewString, *myFont, menuTextSize);
 				factionChooseText.setPosition(300, 200);
@@ -1266,31 +1273,33 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->draw(backgroundSprite);
 				mywindow->draw(factionChooseText);
 				
-				for(int i = 1; i < factionChoiceButtons.size() ; i++)
+				for(int i = 0; i < factionChoiceButtons.size() ; i++)
 					mywindow->draw(factionChoiceButtons.at(i).mySprite);
 				
 				mywindow->display();
 
 				//Wait for a mouse click, then check if it's within a faction box.
 				sf::Event factionChoiceEvent;
-				do
-				{
-					mywindow->waitEvent(factionChoiceEvent);
-				} while (factionChoiceEvent.type != sf::Event::MouseButtonPressed);
+				mywindow->waitEvent(factionChoiceEvent);
 
+				//Keep polling until a legit player input, not just mouse movement.
+				if (factionChoiceEvent.type == sf::Event::MouseButtonPressed && factionChoiceEvent.mouseButton.button == sf::Mouse::Left)	//Must be mouse click
+				{
 					//Check if within faction box
 					sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
 
-				for (int x = 0; x < factionChoiceButtons.size(); i++)
-				{
-					bool withinFactionButton = (factionChoiceButtons)[x].checkWithinButton(mousePosition.x, mousePosition.y);
-
-					if (withinFactionButton == true)
+					for (int x = 0; x < factionChoiceButtons.size(); x++)
 					{
-						boardToPlay->playerRoster[i].playerFaction = factionType(x);
-						factionDecided = true;
-					}
+						bool withinFactionButton = (factionChoiceButtons)[x].checkWithinButton(mousePosition.x, mousePosition.y);
 
+						if (withinFactionButton == true)
+						{
+							//Have to offset for neutral player, since neutral faction type is 0, but [0] in the choice array is N. Redonia.
+							boardToPlay->playerRoster[i].playerFaction = factionType(x+1);
+							factionDecided = true;
+						}
+
+					}
 				}
 
 			}

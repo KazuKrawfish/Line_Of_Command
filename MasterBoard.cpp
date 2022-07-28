@@ -20,9 +20,9 @@ development, and since this is almost entirely a solo effort.
 #include <algorithm>
 
 //Faction 0 is neutral faction, which gets no special units.
-bool minionsAllowedForFaction[28][5] =
+bool minionsAllowedForFaction[5][28] =
 //                                          Inf     Insrg   Oper    Spec    recon   tech    APC     IFV     Arty    Armr    Asgun   Upgarm  antia   rockt   hvyarm  mdnarm  tcop    acop    int     advf    multi   bomb,   gboat   cruis   land    sub     ship    cvn      
-/*Neutral*/{ true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,
+/*Neutral*/								  { true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,
 /*North Redonia*/                           true,   false,  false,  true,   true,   false,  true,   false,  false,  true,   true,   true,   true,   true,   true,   false,  true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   true,
 /*South Redonia*/                           true,   false,  false,  true,   true,   false,  false,   true,  true,   true,   false,  false,  true,   true,   false,  true,   true,   true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,
 /*Ormosa*/                                  true,   true,   true,   true,   false,   true,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,
@@ -564,7 +564,7 @@ int MasterBoard::consultMinionCostChart(std::string minionType, char propertyTyp
 	if ((propertyType == 'n' || propertyType == 'H' || propertyType == 'Q' || propertyType == 'h') &&
 		(minionType == "Infantry" || minionType == "Specialist" || minionType == "Armor" || minionType == "Artillery" || minionType == "Rocket_Artillery"
 			|| minionType == "Heavy_Armor" || minionType == "Anti-Aircraft" || minionType == "Recon" || minionType == "APC" || minionType == "Upgunned_Armor"
-			|| minionType == "Assault_Gun" || minionType == "Insurgent" || minionType == "Operative" || minionType == "Modern_Armor" || minionType == "IFV"))
+			|| minionType == "Assault_Gun" || minionType == "Insurgent" || minionType == "Operative" || minionType == "Modern_Armor" || minionType == "IFV" || minionType == "Technical"))
 	{
 		canItBeBoughtHere = true;
 	}
@@ -1716,7 +1716,6 @@ bool MasterBoard::checkFactionAvailability(std::string minionType, int inputPlay
     int playerFaction = playerRoster[inputPlayer].playerFaction;
     int minionNumber = -1;
 
-
     //Find ID number for minion type
     if ( minionType == "Infantry")
 		minionNumber = 0;
@@ -1806,7 +1805,7 @@ bool MasterBoard::checkFactionAvailability(std::string minionType, int inputPlay
     if(minionNumber == -1)
         return false;
 
-    bool allowed = minionsAllowedForFaction[minionNumber][playerFaction];
+    bool allowed = minionsAllowedForFaction[playerFaction][minionNumber];
     return allowed;
 
 }

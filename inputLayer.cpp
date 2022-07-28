@@ -753,7 +753,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 	//Black border box
 	sf::Sprite effectsSprite;
 	effectsSprite.setTexture(*inputLayerTexture);
-	effectsSprite.setTextureRect(rectArray[25][4]);
+	effectsSprite.setTextureRect(rectArray[10][13]);
 
 	sf::Sprite grayBoxSprite;
 	grayBoxSprite.setTexture(*inputLayerTexture);
@@ -805,7 +805,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 			//Check if minion type is on ban-list
 			//Must NOT be on ban list in order to print
 
-			bool withinFaction = boardToPrint->checkFactionAvailability(factoryButtons.at(i).myName, boardToPrint->playerFlag);
+			bool withinFaction = boardToPrint->checkFactionAvailability(portButtons.at(i).myName, boardToPrint->playerFlag);
 
 			if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), portButtons.at(i).myName) == boardToPrint->banList.end() && withinFaction == true)
 			{
@@ -818,7 +818,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 				//If it is a real and non-banned minion, BUT is not affordable, print gray box effect.
 				if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 				{
-					grayBoxSprite.setPosition(factoryButtons.at(i).mySprite.getPosition());
+					grayBoxSprite.setPosition(portButtons.at(i).mySprite.getPosition());
 					inputLayerWindow->draw(grayBoxSprite);
 				}
 
@@ -826,7 +826,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 
 				//Also, if not on ban list, see if mouse is hovering over this button, and if so, add that string to the status print.
 
-				bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+				bool withinButton = portButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
 
 				if (withinButton == true)
 				{
@@ -845,7 +845,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 			//Check if minion type is on ban-list
 			//Must NOT be on ban list in order to print
 
-			bool withinFaction = boardToPrint->checkFactionAvailability(factoryButtons.at(i).myName, boardToPrint->playerFlag);
+			bool withinFaction = boardToPrint->checkFactionAvailability(airbaseButtons.at(i).myName, boardToPrint->playerFlag);
 			 
 			if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), airbaseButtons.at(i).myName) == boardToPrint->banList.end() && withinFaction == true)
 			{
@@ -858,7 +858,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 				//If it is a real and non-banned minion, BUT is not affordable, print gray box effect.
 				if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 				{
-					grayBoxSprite.setPosition(factoryButtons.at(i).mySprite.getPosition());
+					grayBoxSprite.setPosition(airbaseButtons.at(i).mySprite.getPosition());
 					inputLayerWindow->draw(grayBoxSprite);
 				}
 
@@ -866,7 +866,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 
 				//Also, if not on ban list, see if mouse is hovering over this button, and if so, add that string to the status print.
 
-				bool withinButton = factoryButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
+				bool withinButton = airbaseButtons.at(i).checkWithinButton(mousePosition.x, mousePosition.y);
 
 				if (withinButton == true)
 				{

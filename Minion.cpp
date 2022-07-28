@@ -241,7 +241,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = normal;
 		
-		mySprite.setTextureRect(rectArray[27][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -424,7 +424,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = smallTransport;
 		
-		mySprite.setTextureRect(rectArray[26][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
 		maxFuel = 70;
 
 		myAttackSound = antiAircraftCannon;
