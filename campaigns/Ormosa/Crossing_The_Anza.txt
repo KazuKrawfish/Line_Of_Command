@@ -20,15 +20,17 @@ Royalists once and for all, and unite our peoples.
 Tactical Advisor: The river is strongly fortified with artillery emplacements. Use landers to cross 
 the river safely and seize a factor on the opposite bank. This will give us a beachhed which we can 
 expand later.
-Player_Data:_Name_PlayerType_StillAlive_Treasury
+Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction
 ~
 0
 1
 0
+1
 South_Redonian_Army
 1
 1
 0
+2
 Game_turn_below:
 1
 Fog_Of_War:

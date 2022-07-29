@@ -20,15 +20,17 @@ only major bridge across the Prospect River. Their people cry for revenge. Redon
 she so desperately wants. 
 Tactical Advisor: Use your infantry to block the Ormosan columns, and artillery to destroy them while 
 they are exposed on the bridge and roads.
-Player_Data:_Name_PlayerType_StillAlive_Treasury
+Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction
 ~
 0
 1
 0
+1
 Ormosan_Army
 1
 1
 0
+3
 Game_turn_below:
 1
 Fog_Of_War

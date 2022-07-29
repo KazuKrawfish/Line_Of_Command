@@ -19,15 +19,17 @@ their troops are poorly equipped, they are numerous, and gaining more support ev
 occupied capital at all costs until help can arrive.
 Tactical Advisor: You must hold out for seven turns to achieve victory. Use your air force without 
 mercy- the enemy lacks any AA cover whatsoever.
-Player_Data:_Name_PlayerType_StillAlive_Treasury
+Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction
 ~
 0
 1
 0
+1
 Ormosan_Rebels
 1
 1
 0
+3
 Game_turn_below:
 1
 Fog_Of_War

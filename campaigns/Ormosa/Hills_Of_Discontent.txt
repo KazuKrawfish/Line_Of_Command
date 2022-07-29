@@ -23,15 +23,17 @@ and capture the guerilla base.
 Tactical Advisor: Move quickly to protect the headquarters before the rebels can bring their own 
 heavy weapons to bear on it. Additionally, all three garrisons have armored units that are low on 
 fuel and ammunition. If you can reach them with APCs in time, it may turn the tide of the battle.
-Player_Data:_Name_PlayerType_StillAlive_Treasury
+Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction
 ~
 0
 1
 0
+1
 Ormosan_Rebels
 1
 1
 0
+3
 Game_turn_below:
 1
 Fog_Of_War
