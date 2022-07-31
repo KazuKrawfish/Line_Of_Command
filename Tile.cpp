@@ -329,7 +329,7 @@ int tile::consultMovementChart(std::string minionType, char terrainType)
 	int x = -1;
 	int y = -1;
 
-	if (minionType == "Infantry" || minionType == "Insurgent")
+	if (minionType == "Infantry" || minionType == "Insurgent" || minionType == "Cavalry")
 		x = 0;
 	else
 	if (minionType == "Specialist" || minionType == "Operative")
@@ -344,10 +344,10 @@ int tile::consultMovementChart(std::string minionType, char terrainType)
 	if (minionType == "Recon" || minionType == "Technical")
 		x = 4;
 	else
-	if (minionType == "Rocket_Artillery")
+	if (minionType == "Rocket_Artillery" || minionType == "Victory_Launcher")
 		x = 5;
 	else
-	if (minionType == "Heavy_Armor")
+	if (minionType == "Heavy_Armor" || minionType == "Super_Heavy_Armor")
 		x = 6;
 	else
 	if (minionType == "Anti-Aircraft")

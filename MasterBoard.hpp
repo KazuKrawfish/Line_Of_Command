@@ -90,7 +90,7 @@ public:
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
 	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool& wouldAmmoBeUsed, int& weaponUsed, bool ignoreLimitations);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill);
-
+	int splashAttackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
 	//Combat Functions/////////////////////////
 
 	//Special Action Functions/////////////////

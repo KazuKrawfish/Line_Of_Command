@@ -20,13 +20,13 @@ development, and since this is almost entirely a solo effort.
 #include <algorithm>
 
 //Faction 0 is neutral faction, which gets no special units.
-bool minionsAllowedForFaction[5][28] =
-//                                          Inf     Insrg   Oper    Spec    recon   tech    APC     IFV     Arty    Armr    Asgun   Upgarm  antia   rockt   hvyarm  mdnarm  tcop    acop    int     advf    multi   bomb,   gboat   cruis   land    sub     ship    cvn      
-/*Neutral*/								  { true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,
-/*North Redonia*/                           true,   false,  false,  true,   true,   false,  true,   false,  false,  true,   true,   true,   true,   true,   true,   false,  true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   true,
-/*South Redonia*/                           true,   false,  false,  true,   true,   false,  false,   true,  true,   true,   false,  false,  true,   true,   false,  true,   true,   true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,
-/*Ormosa*/                                  true,   true,   true,   true,   false,   true,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,
-/*Torran*/                                  true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true, };
+bool minionsAllowedForFaction[5][31] =
+//                                          Inf     Insrg   Oper    Spec    recon   tech    APC     IFV     Arty    Armr    Asgun   Upgarm  antia   rockt   hvyarm  mdnarm  tcop    acop    int     advf    multi   bomb,   gboat   cruis   land    sub     ship    cvn     vctlau  shvy    cavlry  
+/*Neutral*/								  { true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false,
+/*North Redonia*/                           true,   false,  false,  true,   true,   false,  true,   false,  false,  true,   true,   true,   true,   true,   true,   false,  true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   true,   false,  false,  false,
+/*South Redonia*/                           true,   false,  false,  true,   true,   false,  false,   true,  true,   true,   false,  false,  true,   true,   false,  true,   true,   true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false,
+/*Ormosa*/                                  true,   true,   true,   true,   false,   true,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false,
+/*Torran*/                                  true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   true,   true,   true  };
 
 
 //If the two input coordinates are next to each other, return true. Otherwise, return false.
@@ -155,8 +155,8 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, i
 //Attacker vs defender matrix. Attacker determines row, while defender determines column.
 //In order they are Infantry, Specialist, Armor, Artillery, Cavalry, Rocket, Heavy Armor, and Anti-Air. AGN == Assault Gun. AFI == Advanced Fighter. MDN == Modern Armor. MUL == Multirole.
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, movement cost, and Minion(). (Tile, masteboard, minion.)
-//														i     s     a     r     c     R     T     A     v	  h		P  	  f		b	  L		B	  C	    G	  U		V		K/S    MDN		AFI
-const double ATTACK_VALUES_MATRIX[26][22] = {	/*i*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,     	0,		0,
+//														i     s     a     r     c     R     T     A     v	  h		P  	  f		b	  L		B	  C	    G	  U		V		K/S    MDN/SHV	AFI
+const double ATTACK_VALUES_MATRIX[27][22] = {	/*i*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0  ,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,     	0,		0,
 												/*s*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0,	0,	  0,    0,	  0,	0,		0.2,	0.15,	0,
 												/*a*/	0.0,  0.00, 0.55, 0.70, 0.70, 0.80, 0.20, 0.65, 0.00, 0.00, 0.70, 0,	0,	  0.25,	0,	  0,    0.25, 0,	0,		0.2,	0.15,	0,
 												/*r*/	0.90, 0.85, 0.70, 0.75, 0.75, 0.75, 0.40, 0.75, 0,	  0,	0.70, 0,	0,	  0.30,	0.30, 0.35, 0.45, 0,	0.30,	0.4,	0.3,	0,
@@ -181,12 +181,13 @@ const double ATTACK_VALUES_MATRIX[26][22] = {	/*i*/	0,    0,    0,    0,    0,  
 												/*MDN*/	0.0,  0.00, 0.75, 0.80, 0.80, 0.85, 0.55, 0.80, 0.00, 0.00, 0.90, 0,	0,	  0.15, 0,	  0,	0.15, 0,	0,		0.55, 	0.55 ,	0,
 												/*MUL*/	0,	  0,  	0.50, 0.60, 0.65, 0.70, 0.20, 0.50, 0.50, 0.70, 0.65, 0.35,	0.50, 0.25,	0.20, 0.15, 0.25, 0,	0.2,	0.2,	0.15 ,	0.25,
 												/*AFI*/	0,    0,    0,    0,    0,    0,    0,	  0,	0.80, 1.0,	0,	  0.60,	0.70, 0,	0,	  0,	0,	  0,	0,		0,		0,		0.6,
-												/*IFV*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.15, 0.25, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.02,	0 };
+												/*IFV*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.45, 0.05, 0.20, 0.15, 0.25, 0.40, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.02,	0 ,
+                                                /*VIC*/	1.0,  0.95, 0.70, 0.75, 0.85, 0.85, 0.4,  0.75, 0,	  0,	0.70, 0,	0,	  0.45, 0.30, 0.35, 0.55, 0,	0.30,	0.5,	0.3,	0};
 
 
 
-const double SECONDARY_ATTACK_VALUES_MATRIX[26][22] = {	
-												//		i     s     a     r     c     R     T     A     v     h     P	  f		b	  L		B	  C	    G	  U		V		K/S     MDN
+const double SECONDARY_ATTACK_VALUES_MATRIX[27][22] = {	
+												//		i     s     a     r     c     R     T     A     v     h     P	  f		b	  L		B	  C	    G	  U		V		K/S     MDN/SHV AFI
 												/*i*/	0.55, 0.50, 0.05, 0.10, 0.15, 0.25, 0.01, 0.05, 0.05, 0.10, 0.10, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.01,	0.01,	0,
 												/*s*/	0.60, 0.55, 0.08, 0.12, 0.18, 0.30, 0.02, 0.08, 0.08, 0.12, 0.12, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.02,	0.02,	0,
 												/*a*/	0.70, 0.65, 0.10, 0.20, 0.35, 0.45, 0.05, 0.10, 0.10, 0.15, 0.35, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.05,	0.02,	0,
@@ -212,7 +213,8 @@ const double SECONDARY_ATTACK_VALUES_MATRIX[26][22] = {
 												/*MDN*/	1.0,  0.95, 0.20, 0.30, 0.40, 0.50, 0.15, 0.20, 0.20, 0.35, 0.50, 0,	0,	  0.05,	0,	  0,	0.05, 0,	0,		0.15,   0.10,	0,
 												/*MUL*/	0.65, 0.60, 0.10, 0.15, 0.30, 0.40, 0.05, 0.10, 0.20, 0.25, 0.30, 0.25,	0.35, 0.05,	0.05, 0.05,	0.05, 0,	0.05,	0.05,	0.05,	0.20,
 												/*AFI*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,		0	,
-												/*IFV*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,		0 };
+												/*IFV*/	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0,		0, 
+                                                /*VIC*/	0,    0,    0,    0,    0,    0,    0,	  0,    0,    0,	0,	  0,	0,	  0,	0,	  0,	0,	  0,	0,		0,		0, 		0 };
 
 //Assign numeric values for different units to access attack values matrix easier.
 //Assumes attacking minion is selected. Otherwise withinRange won't work.
@@ -229,10 +231,10 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	int y = -1;
 
 
-	if (defendingMinion.type == "Infantry" || defendingMinion.type == "Insurgent" || defendingMinion.type == "Operative")
+	if (defendingMinion.type == "Infantry" || defendingMinion.type == "Operative" || defendingMinion.type == "Cavalry")
 		x = 0;
 	else
-	if (defendingMinion.type == "Specialist")
+	if (defendingMinion.type == "Specialist" || defendingMinion.type == "Insurgent")
 		x = 1;
 	else
 	if (defendingMinion.type == "Armor" || defendingMinion.type == "Upgunned_Armor" || defendingMinion.type == "Assault_Gun")
@@ -244,7 +246,7 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	if (defendingMinion.type == "Recon" || defendingMinion.type == "Technical")
 		x = 4;
 	else
-	if (defendingMinion.type == "Rocket_Artillery")
+	if (defendingMinion.type == "Rocket_Artillery" || defendingMinion.type == "Victory_Launcher")
 		x = 5;
 	else
 	if (defendingMinion.type == "Heavy_Armor")
@@ -289,15 +291,14 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	if (defendingMinion.type == "Artillery_Emplacement" || defendingMinion.type == "SAM_Site")
 		x = 19;
 	else
-	if (defendingMinion.type == "Modern_Armor")
+	if (defendingMinion.type == "Modern_Armor" || defendingMinion.type == "Super_Heavy_Armor")
 		x = 20;
 	else
 	if (defendingMinion.type == "Advanced_Fighter")
 		x = 21;
 
 
-
-	if (attackingMinion.type == "Infantry" || attackingMinion.type == "Operative")
+	if (attackingMinion.type == "Infantry" || attackingMinion.type == "Operative" || attackingMinion.type == "Cavalry")
 		y = 0;
 	else
 	if (attackingMinion.type == "Specialist" || attackingMinion.type == "Insurgent")
@@ -363,7 +364,7 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	if (attackingMinion.type == "Assault_Gun")
 		y = 21;
 	else
-	if (attackingMinion.type == "Modern_Armor")
+	if (attackingMinion.type == "Modern_Armor" || attackingMinion.type == "Super_Heavy_Armor")
 		y = 22;
 	else
 	if (attackingMinion.type == "Multirole")
@@ -374,6 +375,9 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	else
 	if (attackingMinion.type == "IFV")
 		y = 25;
+    else
+	if (attackingMinion.type == "Victory_Launcher")
+		y = 26;
 
 
 
@@ -564,7 +568,8 @@ int MasterBoard::consultMinionCostChart(std::string minionType, char propertyTyp
 	if ((propertyType == 'n' || propertyType == 'H' || propertyType == 'Q' || propertyType == 'h') &&
 		(minionType == "Infantry" || minionType == "Specialist" || minionType == "Armor" || minionType == "Artillery" || minionType == "Rocket_Artillery"
 			|| minionType == "Heavy_Armor" || minionType == "Anti-Aircraft" || minionType == "Recon" || minionType == "APC" || minionType == "Upgunned_Armor"
-			|| minionType == "Assault_Gun" || minionType == "Insurgent" || minionType == "Operative" || minionType == "Modern_Armor" || minionType == "IFV" || minionType == "Technical"))
+			|| minionType == "Assault_Gun" || minionType == "Insurgent" || minionType == "Operative" || minionType == "Modern_Armor" || minionType == "IFV" 
+            || minionType == "Technical" || minionType == "Cavalry" || minionType == "Super_Heavy_Armor" || minionType == "Victory_Launcher"))
 	{
 		canItBeBoughtHere = true;
 	}
@@ -587,6 +592,9 @@ int MasterBoard::consultMinionCostChart(std::string minionType, char propertyTyp
     if ( minionType == "Insurgent")
         price = 1500;
         else
+    if ( minionType == "Cavalry")
+		price = 3000;
+		else
 	if( minionType == "Operative")
 		price = 5000;
 		else
@@ -614,10 +622,16 @@ int MasterBoard::consultMinionCostChart(std::string minionType, char propertyTyp
 	if ( minionType == "Rocket_Artillery")
 		price = 15000;
 		else
+    if ( minionType == "Victory_Launcher")
+		price = 18000;
+		else
 	if ( minionType == "Heavy_Armor")
 		price = 16000;
 		else
-	if ( minionType == "Modern_Armor")
+	if ( minionType == "Super_Heavy_Armor")
+		price = 18000;
+		else
+    if ( minionType == "Modern_Armor")
 		price = 20000;
 		else
 	if ( minionType == "Anti-Aircraft")
@@ -1800,6 +1814,16 @@ bool MasterBoard::checkFactionAvailability(std::string minionType, int inputPlay
 		else
 	if ( minionType == "Aircraft_Carrier")
 		minionNumber = 27;
+        else
+	if ( minionType == "Victory_Launcher")
+		minionNumber = 28;
+        else
+    if ( minionType == "Super_Heavy_Armor")
+		minionNumber = 29;
+        else
+	if ( minionType == "Cavalry")
+		minionNumber = 30;
+
 
 
     if(minionNumber == -1)
@@ -2565,7 +2589,6 @@ int MasterBoard::deselectMinion()
 int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber)
 {
 
-
 	//Simplify by finding shorthand values first.
 	Minion* attackingMinion = cursor.selectMinionPointer;
 	Minion* defendingMinion = Board[inputX][inputY].minionOnTop;
@@ -2608,11 +2631,30 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 		return 1;
 	}
 
-	//Also, if artillery type, cannot attack if it's actually moved that turn.		
+    //Also, if artillery type, cannot attack if it's actually moved that turn.		
 	//Why is this just floating? Not sure
 
 	//Combat graphics for attacker
 	InputLayer->combatGraphics(this, observerNumber, &Board[attackingMinion->locationX][attackingMinion->locationY], &Board[inputX][inputY]);
+
+
+    //Splash attack occurs before main attack. This includes its own graphics.
+    if(attackingMinion->specialtyGroup == splashAttack)
+        {
+            //For each adjacent square, check if it has a minion on it, and deal damage to that minion, regardless of team.
+            if(inputX > 0 && Board[inputX-1][inputY].hasMinionOnTop == true)
+                splashAttackMinion(inputX-1, inputY, InputLayer, observerNumber);
+            
+            if(inputY > 0 && Board[inputX][inputY-1].hasMinionOnTop == true)
+                splashAttackMinion(inputX, inputY-1, InputLayer, observerNumber);
+            
+            if(inputX < BOARD_WIDTH - 1 && Board[inputX+1][inputY].hasMinionOnTop == true)
+                splashAttackMinion(inputX + 1, inputY, InputLayer, observerNumber);
+        
+            if(inputY < BOARD_HEIGHT - 1 && Board[inputX ][inputY + 1].hasMinionOnTop == true)
+                splashAttackMinion(inputX , inputY + 1, InputLayer, observerNumber);
+        }
+
 
 	isAmmoUsed = false;
 	//Decrease defender's health by attack value. Decrease ammo as needed.
@@ -2697,6 +2739,46 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 	}
 
 	return 0;
+
+}
+
+//This function executes a splash damage attack, which deals damage to all adjacent minions of X and Y.
+//This occurs before main attack since the attacking minion may be destroyed in that attack.
+int MasterBoard::splashAttackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber)
+{
+    Minion* splashAttackingMinion = cursor.selectMinionPointer;
+    Minion* splashDefendingMinion = Board[inputX][inputY].minionOnTop;
+
+    if(Board[inputX][inputY].hasMinionOnTop == false)
+        return -1;
+
+    //Return values will be ignored since this is splash, no ammo used, etc.
+	bool isAmmoUsed = false;
+	int weaponUsed = 0;
+	bool ignoreRealMapLimitations = false;
+	
+    //Decrease defender's health by attack value. No ammo used in splash attack.
+	int randomFactor = (rand() % 10);       //Rand now adds between 0-9.
+	int damageDealt = randomFactor + calculateDamageDealt(splashAttackingMinion, splashDefendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+	
+    //Splash modifier: 25% of normal attack, rounding down.
+    damageDealt = damageDealt / 4;
+    
+    if (damageDealt < 0)
+		damageDealt = 0;
+	splashDefendingMinion->health -= damageDealt;
+	
+
+	// below this line still needs work:
+	//Need to compare against attackMinion to ensure everything is in parallel
+	if (splashDefendingMinion->health < 5)
+	{
+		//If defender falls below 4, it dies.
+		bool printMessage = true;
+		int defendingPlayer = splashDefendingMinion->team;
+		destroyMinion(splashDefendingMinion, printMessage, InputLayer, false);
+		setVisionField(defendingPlayer);	//Change vision field to account for dead minion.
+	}
 
 }
 

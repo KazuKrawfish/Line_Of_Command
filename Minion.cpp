@@ -145,6 +145,21 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		
 	}
 	else
+    	if (inputType == "Cavalry")
+	{
+		description = "Cavalry";
+		movementRange = 5;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = infantry;
+		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = -1;
+		maxSecAmmo = 0;
+		
+	}
+	else
 	if(inputType == "Armor")
 	{
 		description = "Armor";
@@ -183,7 +198,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 	{
 		description = "Assault Gun";
 		movementRange = 6;
-		attackRange = 1;
+		attackRange = 2;
+        minAttackRange = 1;
 		visionRange = 3;
 		rangeType = hybridRange;
 		specialtyGroup = normal;
@@ -243,6 +259,24 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		
 		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
 		maxFuel = 70;
+		maxPriAmmo = 9;
+		maxSecAmmo = 0;
+		myAttackSound = cannon;
+		myMoveSound = vehicleMove;
+		
+	}
+	else
+    if(inputType == "Super_Heavy_Armor")
+	{
+		description = "Super Heavy Armor";
+		movementRange = 5;
+		attackRange = 1;
+		visionRange = 2;
+		rangeType = directFire;
+		specialtyGroup = normal;
+		
+		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
+		maxFuel = 60;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
 		myAttackSound = cannon;
@@ -315,6 +349,25 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		minAttackRange = 2;
 		specialtyGroup = normal;
 		mySprite.setTextureRect(rectArray[8][inputTeam + 4]);
+		maxFuel = 50;
+		maxPriAmmo = 6;
+		maxSecAmmo = -1;
+
+		myAttackSound = cannon;
+		myMoveSound = vehicleMove;
+		
+	}
+	else
+    if(inputType == "Victory_Launcher")
+	{
+		description = "Victory Launcher";
+		movementRange = 4;
+		attackRange = 5;
+		visionRange = 2;
+		rangeType = rangedFire;
+		minAttackRange = 2;
+		specialtyGroup = splashAttack;
+		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
