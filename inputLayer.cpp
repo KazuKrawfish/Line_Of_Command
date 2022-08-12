@@ -22,11 +22,11 @@ when necessary, ie. when game ends or player wants to leave the current game.
 #include "SFML/System/Time.hpp"
 #include "SFML/System/Clock.hpp"
 
-	char playCharInput(sf::RenderWindow* myWindow);
+char playCharInput(sf::RenderWindow* myWindow);
 
-inputLayer::inputLayer(	mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, 
-						sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, 
-						std::vector <sf::Texture>* statusTextures)
+inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
+	sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons,
+	std::vector <sf::Texture>* statusTextures)
 {
 	inputLayerTexture = gameTexture;
 	inputLayerFont = cour;
@@ -767,7 +767,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 			//Check if minion type is on ban-list
 			//Must NOT be on ban list in order to print
 			bool withinFaction = boardToPrint->checkFactionAvailability(factoryButtons.at(i).myName, boardToPrint->playerFlag);
-		
+
 			if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), factoryButtons.at(i).myName) == boardToPrint->banList.end() && withinFaction == true)
 			{
 				inputLayerWindow->draw(factoryButtons.at(i).mySprite);
@@ -846,7 +846,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 			//Must NOT be on ban list in order to print
 
 			bool withinFaction = boardToPrint->checkFactionAvailability(airbaseButtons.at(i).myName, boardToPrint->playerFlag);
-			 
+
 			if (std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), airbaseButtons.at(i).myName) == boardToPrint->banList.end() && withinFaction == true)
 			{
 				inputLayerWindow->draw(airbaseButtons.at(i).mySprite);
@@ -1180,7 +1180,7 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	return 0;
 }
 
-int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, tile* tileAttacking, tile* tileBeingAttacked)
+int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, tile* tileAttacking, tile* tileBeingAttacked, bool splashGraphicsOn)
 {
 	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
 	if (observerNumber == -1)
@@ -1198,9 +1198,13 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 		(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].play();
 	}
 
+	//Determine if this is landmine attack, if it is, we are not showing attacker graphics.
+	bool landmineAttack = false;
+	if (tileAttacking == tileBeingAttacked)
+		landmineAttack = true;
 
 	//If within vision, we will watch attackerVisible
-	if (tileAttacking->withinVision[observerNumber] == true)
+	if (tileAttacking->withinVision[observerNumber] == true && landmineAttack == false)
 	{
 
 		//Create new sprite for animation
@@ -1238,46 +1242,90 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 		}
 	}
 
-	//If within vision, we will watch attackerVisible
-	if (tileBeingAttacked->withinVision[observerNumber] == true)
+
+	//Animations for defending tile(s) has slightly reversed order - it checks withinVision for each individual tile, and so
+	//Iterates through the 5 steps before checking, instead of above which is opposite.
+
+	//Create new sprite for animation
+	tileBeingAttacked->animationSprite = new sf::Sprite;
+	//Set texture
+	tileBeingAttacked->animationSprite->setTexture(*inputLayerTexture);
+
+	if (splashGraphicsOn == true)
 	{
-
-		//Create new sprite for animation
-		tileBeingAttacked->animationSprite = new sf::Sprite;
-
-		//Set texture
-		tileBeingAttacked->animationSprite->setTexture(*inputLayerTexture);
-
-		//Now do animation sequence. Custom for combat.
-		//Remember the last tile which is blank, to "clear" the effect
-		for (int i = 0; i < 5; i++)
+		//Create sprite and assign texture for any adjacent legal tile, if splash is on
+		if (tileBeingAttacked->locationX > 0)
 		{
-			tileBeingAttacked->animationSprite->setTextureRect(rectArray[i][14]);
-			bool withinAnimation = true;
-			printScreen(boardToPrint, observerNumber, withinAnimation);
-
-			//Delay after printing;
-			sf::Clock timer;
-
-			timer.restart();
-			sf::Time elapsedTime;
-
-			while (elapsedTime.asSeconds() < float(0.07 / speedFactor))
-			{
-				elapsedTime = timer.getElapsedTime();
-			}
-			//std::this_thread::sleep_for(std::chrono::milliseconds(70 / speedFactor));
+			boardToPrint->Board[tileBeingAttacked->locationX - 1][tileBeingAttacked->locationY].animationSprite = new sf::Sprite;
+			boardToPrint->Board[tileBeingAttacked->locationX - 1][tileBeingAttacked->locationY].animationSprite->setTexture(*inputLayerTexture);
 		}
-
-		//Clean up afterwards if necessary
-		if (tileBeingAttacked->animationSprite != NULL)
+		if (tileBeingAttacked->locationY > 0)
 		{
-			delete tileBeingAttacked->animationSprite;
-			tileBeingAttacked->animationSprite = NULL;
+			boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY - 1].animationSprite = new sf::Sprite;
+			boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY - 1].animationSprite->setTexture(*inputLayerTexture);
 		}
-
+		if (tileBeingAttacked->locationX < boardToPrint->BOARD_WIDTH - 1)
+		{
+			boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY].animationSprite = new sf::Sprite;
+			boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY].animationSprite->setTexture(*inputLayerTexture);
+		}
+		if (tileBeingAttacked->locationY < boardToPrint->BOARD_HEIGHT - 1)
+		{
+			boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].animationSprite = new sf::Sprite;
+			boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].animationSprite->setTexture(*inputLayerTexture);
+		}
 
 	}
+
+	//Now do animation sequence. Custom for combat.
+	for (int i = 0; i < 5; i++)
+	{
+		//If within vision, we will watch tile being attacked
+		if (tileBeingAttacked->withinVision[observerNumber] == true)
+		{
+			//Set center tile
+			tileBeingAttacked->animationSprite->setTextureRect(rectArray[i][14]);
+		}
+
+		//Potentially set adjacent tiles sprites for explosions
+		//They must be legal squares and also within vision.
+		//You may see part of a splash damage if some tiles not visible.
+		if (splashGraphicsOn == true)
+		{
+			//For each adjacent square, check if it has a minion on it, and deal damage to that minion, regardless of team.
+			if (tileBeingAttacked->locationX > 0 && boardToPrint->Board[tileBeingAttacked->locationX - 1][tileBeingAttacked->locationY].withinVision[observerNumber] == true)
+				boardToPrint->Board[tileBeingAttacked->locationX - 1][tileBeingAttacked->locationY].animationSprite->setTextureRect(rectArray[i][14]);
+
+			if (tileBeingAttacked->locationY > 0 && boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY - 1].withinVision[observerNumber] == true)
+				boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY - 1].animationSprite->setTextureRect(rectArray[i][14]);
+
+			if (tileBeingAttacked->locationX < boardToPrint->BOARD_WIDTH - 1 && boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY].withinVision[observerNumber] == true)
+				boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY].animationSprite->setTextureRect(rectArray[i][14]);
+
+			if (tileBeingAttacked->locationY < boardToPrint->BOARD_HEIGHT - 1 && boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].withinVision[observerNumber] == true)
+				boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].animationSprite->setTextureRect(rectArray[i][14]);
+		}
+
+		bool withinAnimation = true;
+		printScreen(boardToPrint, observerNumber, withinAnimation);
+
+		//Delay after printing;
+		sf::Clock timer;
+		timer.restart();
+		sf::Time elapsedTime;
+		while (elapsedTime.asSeconds() < float(0.07 / speedFactor))
+		{
+			elapsedTime = timer.getElapsedTime();
+		}
+	}
+
+	//Clean up afterwards if necessary
+	if (tileBeingAttacked->animationSprite != NULL)
+	{
+		delete tileBeingAttacked->animationSprite;
+		tileBeingAttacked->animationSprite = NULL;
+	}
+
 	if (soundsOn == true)
 	{
 		(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].stop();
@@ -2126,8 +2174,8 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 					if (boardToInput->cursor.XCoord == myMinion->locationX &&
 						boardToInput->cursor.YCoord == myMinion->locationY)
 					{
-						//If minion is infantry that has already moved, attempt to capture
-						if (myMinion->specialtyGroup == infantry &&
+						//If minion is capture-capable that has already moved, attempt to capture
+						if (myMinion->captureCapable == true &&
 							(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
 							* Input = sf::Keyboard::Key::C;
 						else
@@ -2338,7 +2386,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	if (*Input == sf::Keyboard::Key::C && boardToInput->cursor.selectMinionFlag == true)
 		if ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired
 			|| boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-			&& boardToInput->cursor.selectMinionPointer->specialtyGroup == infantry)
+			&& boardToInput->cursor.selectMinionPointer->captureCapable == true)
 		{
 			tile* tileToCheck = &boardToInput->Board[boardToInput->cursor.selectMinionPointer->locationX][boardToInput->cursor.selectMinionPointer->locationY];
 			playerPotentiallyDefeated = tileToCheck->controller;

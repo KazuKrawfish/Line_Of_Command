@@ -84,13 +84,15 @@ public:
 	int deselectMinion();
 	int moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber);
 	int validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching, bool transportMove);
+	int landmineCheck(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
 	//Select and Move Functions////////////////
 
 	//Combat Functions/////////////////////////
 	int attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
 	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool& wouldAmmoBeUsed, int& weaponUsed, bool ignoreLimitations);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill);
-	int splashAttackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
+	int landmineAttack(int attackingX, int attackingY, inputLayer* InputLayer, int observerNumber);
+	int splashAttackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber, int splashFactorInverse);
 	//Combat Functions/////////////////////////
 
 	//Special Action Functions/////////////////

@@ -83,6 +83,43 @@ bool MasterBoard::hasAdjacentMinion(int inputX, int inputY, int observerNumber)
 	return adjacentMinionExists;
 }
 
+//Check all adjacent tiles if an enemy landmine is there, and if so, that landmine attacks.
+//This function is called after movement.
+//Multiple landmines may be activated after a move, even if the minion is destroyed by the first attack.
+int MasterBoard::landmineCheck(int inputX, int inputY, inputLayer* InputLayer, int observerNumber)
+{
+	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].hasMinionOnTop == true
+		&& Board[inputX + 1][inputY].minionOnTop->team != playerFlag
+		&& Board[inputX + 1][inputY].minionOnTop->type == "Landmine")
+	{
+ 		landmineAttack( inputX + 1, inputY, InputLayer, observerNumber);
+	}
+
+	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].hasMinionOnTop == true
+		&& Board[inputX][inputY + 1].minionOnTop->team == observerNumber
+		&& Board[inputX ][inputY + 1].minionOnTop->type == "Landmine")
+	{
+		landmineAttack( inputX , inputY + 1, InputLayer, observerNumber);
+	}
+
+	if (inputY > 0 && Board[inputX][inputY - 1].hasMinionOnTop == true
+		&& Board[inputX][inputY - 1].minionOnTop->team == observerNumber
+		&& Board[inputX ][inputY - 1].minionOnTop->type == "Landmine")
+	{
+		landmineAttack( inputX, inputY - 1, InputLayer, observerNumber);
+	}
+	
+	if (inputX > 0 && Board[inputX - 1][inputY].hasMinionOnTop == true
+		&& Board[inputX - 1][inputY].minionOnTop->team == observerNumber
+		&& Board[inputX - 1][inputY].minionOnTop->type == "Landmine")
+	{
+		landmineAttack( inputX - 1, inputY, InputLayer, observerNumber);
+	}
+
+	return 0;
+
+}
+
 int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber)
 {
 
@@ -231,7 +268,7 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	int y = -1;
 
 
-	if (defendingMinion.type == "Infantry" || defendingMinion.type == "Operative" || defendingMinion.type == "Cavalry")
+	if (defendingMinion.type == "Infantry" || defendingMinion.type == "Operative" || defendingMinion.type == "Cavalry" || defendingMinion.type == "Landmine")
 		x = 0;
 	else
 	if (defendingMinion.type == "Specialist" || defendingMinion.type == "Insurgent")
@@ -307,7 +344,7 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	if (attackingMinion.type == "Armor")
 		y = 2;
 	else
-	if (attackingMinion.type == "Artillery")
+	if (attackingMinion.type == "Artillery" || attackingMinion.type == "Landmine")
 		y = 3;
 	else
 	if (attackingMinion.type == "Recon" || attackingMinion.type == "Technical")
@@ -388,8 +425,6 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	}
 
 	double attackScore = 0;
-
-
 
 	if (attackingMinion.rangeType == hybridRange)
 	{
@@ -547,8 +582,8 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 //For instance, to determine if a unit even exists, or what its price is.
 int MasterBoard::consultMinionCostChart(std::string minionType, char propertyType)
 {
-	//Can't purchase defenses
-	if (minionType == "Artillery_Emplacement" || minionType == "SAM_Site")
+	//Can't purchase defenses or landmines
+	if (minionType == "Artillery_Emplacement" || minionType == "SAM_Site" || minionType == "Landmine")
 	{
 		return  100000;
 	}
@@ -1915,6 +1950,9 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 		(Board[inputX][inputY].minionOnTop->status == hasmovedhasntfired && Board[inputX][inputY].minionOnTop->rangeType != rangedFire) ||
 			Board[inputX][inputY].minionOnTop->status == gaveupmovehasntfired))
 	{
+		//Cannot select minion if landmine type.
+		if(Board[inputX][inputY].minionOnTop->type != "Landmine")
+		{
 		cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
 		cursor.selectMinionFlag = true;
 
@@ -1947,6 +1985,7 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 						setDropField(inputX, inputY);
 					return 0;
 				}
+		}
 	}
 	return 1;
 }
@@ -2174,17 +2213,18 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 		return 0;
 	}
 
-	inputX = selectedMinion->locationX;
-	inputY = selectedMinion->locationY;
+	//Track minion location. As we validate path, these new values may change.
+	int newX = selectedMinion->locationX;
+	int newY = selectedMinion->locationY;
 
 	//This is the "trap" check. If it appears movable, but has a minion, you get trapped.
 	//validatePath will potentially change inputX and inputY.
 	bool loadMove = false;
-	int didTrapHappen = validatePath(inputX, inputY, InputLayer, observerNumber, loadMove);
+	int didTrapHappen = validatePath(newX, newY, InputLayer, observerNumber, loadMove);
 
 	//If the inputX/inputY has not changed, that means we got trapped and couldn't move at all.
 	//Still counts as moving.
-	if (inputX == selectedMinion->locationX && inputY == selectedMinion->locationY)
+	if (newX == selectedMinion->locationX && newY == selectedMinion->locationY)
 	{
 		cursor.selectMinionPointer->status = hasmovedhasntfired;
 		deselectMinion();
@@ -2199,9 +2239,9 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 
 		//Clear the old tile, set the new tile.
 		Board[oldX][oldY].hasMinionOnTop = false;
-		Board[inputX][inputY].hasMinionOnTop = true;
+		Board[newX][newY].hasMinionOnTop = true;
 
-		Board[inputX][inputY].minionOnTop = Board[oldX][oldY].minionOnTop;
+		Board[newX][newY].minionOnTop = Board[oldX][oldY].minionOnTop;
 		Board[oldX][oldY].minionOnTop = NULL;
 
 		//Reset capture points for tile.
@@ -2210,10 +2250,10 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 		selectedMinion->isCapturing = false;
 
 		//"Move" the minion to the new location.
-		selectedMinion->locationX = inputX;
-		selectedMinion->locationY = inputY;
+		selectedMinion->locationX = newX;
+		selectedMinion->locationY = newY;
 
-		cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[inputX][inputY].distanceFromMinion;
+		cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[newX][newY].distanceFromMinion;
 
 		cursor.selectMinionPointer->status = hasmovedhasntfired;
 		deselectMinion();
@@ -2224,7 +2264,6 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 	{
 		InputLayer->trapGraphics(this, observerNumber, selectedMinion, inputX, inputY);
 	}
-
 
 	//Set stealth mode for an insurgent type that moved into a forest, building, or mountain.
 	if (selectedMinion->type == "Insurgent" && (Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'h'
@@ -2238,7 +2277,9 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 	{
 		selectedMinion->stealthMode = true;
 	}
-
+	
+	//If moved next to a landmine, it now attacks.
+	landmineCheck(newX, newY, InputLayer, observerNumber);
 
 	setVisionField(playerFlag);
 
@@ -2431,6 +2472,8 @@ int MasterBoard::dropOffMinion()
 	return 0;
 }
 
+//Capture property - any minion with captureCapable can capture property. Takes 20 cap points to capture, and does 1 per health per turn.
+//Nominally should take two turns for a minion to cap a property.
 std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, inputLayer* InputLayer, int  observerNumber)
 {
 	int previousOwner = inputTile->controller;
@@ -2439,6 +2482,12 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 	if (inputTile->checkForProperty(inputTile->symbol) != true)
 	{
 		return "Not a property";
+	}
+
+	//Check for ability to capture this  tile
+	if(inputMinion->captureCapable == false)
+	{
+		return "Not capture capable";
 	}
 
 	std::string textToReturn = "";
@@ -2584,6 +2633,43 @@ int MasterBoard::deselectMinion()
 	return 0;
 }
 
+//Landmine attack is the only way a landmine does damage. It does not counterfire and it doesn't use normal attackMinion.
+int MasterBoard::landmineAttack(int attackingX, int attackingY, inputLayer* InputLayer, int observerNumber)
+{
+
+	
+	//Simplify by finding shorthand values first.
+	Minion* attackingMinion = Board[attackingX][attackingY].minionOnTop;
+
+	//For each adjacent square, check if it has a minion on it, and deal damage to that minion, regardless of team.
+	//Landmines don't receive splash damage from other landmines.
+	if(attackingX > 0 && Board[attackingX-1][attackingY].hasMinionOnTop == true  && Board[attackingX-1][attackingY].minionOnTop->type != "Landmine"  )
+		splashAttackMinion(attackingX-1, attackingY, InputLayer, observerNumber , 2);
+	
+	if(attackingY > 0 && Board[attackingX][attackingY-1].hasMinionOnTop == true && Board[attackingX][attackingY-1].minionOnTop->type != "Landmine")
+		splashAttackMinion(attackingX, attackingY-1, InputLayer, observerNumber, 2);
+	
+	if(attackingX < BOARD_WIDTH - 1 && Board[attackingX+1][attackingY].hasMinionOnTop == true && Board[attackingX+1][attackingY].minionOnTop->type != "Landmine")
+		splashAttackMinion(attackingX + 1, attackingY, InputLayer, observerNumber , 2);
+
+	if(attackingY < BOARD_HEIGHT - 1 && Board[attackingX ][attackingY + 1].hasMinionOnTop == true && Board[attackingX][attackingY + 1].minionOnTop->type != "Landmine")
+		splashAttackMinion(attackingX , attackingY + 1, InputLayer, observerNumber , 2);
+
+	//Set graphics for splash damage sprites
+	bool splashGraphicsOn = true;			
+
+	//Combat graphics for landmine, with both tiles equivalent, to cause graphics to be landmine-style.
+	InputLayer->combatGraphics(this, observerNumber, &Board[attackingX][attackingY], &Board[attackingX][attackingY] , splashGraphicsOn);
+
+	//Landmine is autodestroyed.
+	destroyMinion(attackingMinion, false, InputLayer, false);
+	setVisionField(playerFlag);
+
+
+	return 0;
+}
+
+
 //Additionally, can only attack once. If artillery, cannot have moved or be adjacent.
 //If hybrid, different attack based on if you have moved or not.
 int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber)
@@ -2609,12 +2695,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 	if (calculateDamageDealt(attackingMinion, defendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations) <= 0)
 		return 1;
 
-
 	//Can't attack if you can't see.
 	if (Board[inputX][inputY].withinVision[playerFlag] == false)
 		return 1;
-
-
 
 	bool defenderAlive = true;
 
@@ -2631,29 +2714,29 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 		return 1;
 	}
 
-    //Also, if artillery type, cannot attack if it's actually moved that turn.		
-	//Why is this just floating? Not sure
-
-	//Combat graphics for attacker
-	InputLayer->combatGraphics(this, observerNumber, &Board[attackingMinion->locationX][attackingMinion->locationY], &Board[inputX][inputY]);
-
-
-    //Splash attack occurs before main attack. This includes its own graphics.
+    //Splash attack occurs before main attack. 
+	bool splashGraphicsOn = false;
     if(attackingMinion->specialtyGroup == splashAttack)
-        {
-            //For each adjacent square, check if it has a minion on it, and deal damage to that minion, regardless of team.
-            if(inputX > 0 && Board[inputX-1][inputY].hasMinionOnTop == true)
-                splashAttackMinion(inputX-1, inputY, InputLayer, observerNumber);
+    {
+        //For each adjacent square, check if it has a minion on it, and deal damage to that minion, regardless of team.
+        if(inputX > 0 && Board[inputX-1][inputY].hasMinionOnTop == true)
+            splashAttackMinion(inputX-1, inputY, InputLayer, observerNumber , 4);
             
-            if(inputY > 0 && Board[inputX][inputY-1].hasMinionOnTop == true)
-                splashAttackMinion(inputX, inputY-1, InputLayer, observerNumber);
+        if(inputY > 0 && Board[inputX][inputY-1].hasMinionOnTop == true )
+            splashAttackMinion(inputX, inputY-1, InputLayer, observerNumber , 4);
             
-            if(inputX < BOARD_WIDTH - 1 && Board[inputX+1][inputY].hasMinionOnTop == true)
-                splashAttackMinion(inputX + 1, inputY, InputLayer, observerNumber);
+        if(inputX < BOARD_WIDTH - 1 && Board[inputX+1][inputY].hasMinionOnTop == true )
+            splashAttackMinion(inputX + 1, inputY, InputLayer, observerNumber , 4);
         
-            if(inputY < BOARD_HEIGHT - 1 && Board[inputX ][inputY + 1].hasMinionOnTop == true)
-                splashAttackMinion(inputX , inputY + 1, InputLayer, observerNumber);
-        }
+        if(inputY < BOARD_HEIGHT - 1 && Board[inputX ][inputY + 1].hasMinionOnTop == true )
+            splashAttackMinion(inputX , inputY + 1, InputLayer, observerNumber , 4);
+		
+		//Set graphics for splash damage sprites
+		splashGraphicsOn = true;			
+    }
+	
+	//Combat graphics for attacker
+	InputLayer->combatGraphics(this, observerNumber, &Board[attackingMinion->locationX][attackingMinion->locationY], &Board[inputX][inputY] , splashGraphicsOn);
 
 
 	isAmmoUsed = false;
@@ -2680,7 +2763,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 		int defendingPlayer = defendingMinion->team;
 		destroyMinion(defendingMinion, printMessage, InputLayer, false);
 		defenderAlive = false;
-		if (attackingMinion->veterancy < 3)
+		if (attackingMinion->veterancy < 3 )
 		{
 			attackingMinion->veterancy++;
 		}
@@ -2691,44 +2774,49 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 			&& (defendingMinion->rangeType == directFire || defendingMinion->rangeType == hybridRange)
 			&& (isAdjacent(cursor.getX(), attackingMinion->locationX, cursor.getY(), attackingMinion->locationY)))
 		{
-			//If defender still alive, then perform defensive counterfire.
-			//Same calculations as above - includes veterancy
-			isAmmoUsed = false;
-
-			//Determine base damage to see if unit actually does ANY damage.
-			int randomFactor = (rand() % 10);       //Rand now adds between 0-9.
-			int baseDamage = calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
-			int damageDealt = 0;
-
-			//If base damage is above 0, add random factor and move on.
-			if (baseDamage > 0)
-				damageDealt = randomFactor + baseDamage;
-			else damageDealt = 0;       //If not above 0, then damagedealt is 0.
-
-			attackingMinion->health -= damageDealt;
-
-			if (isAmmoUsed == true)
+			//Defending landmine does not perform counterfire.
+			if(defendingMinion->type != "Landmine")	
 			{
-				if (weaponUsed == 1)
-					attackingMinion->currentPriAmmo--;
-				if (weaponUsed == 2)
-					attackingMinion->currentSecAmmo--;
+				//If defender still alive, then perform defensive counterfire.
+				//Same calculations as above - includes veterancy
+				isAmmoUsed = false;
+
+				//Determine base damage to see if unit actually does ANY damage.
+				int randomFactor = (rand() % 10);       //Rand now adds between 0-9.
+				int baseDamage = calculateDamageDealt(defendingMinion, attackingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+				int damageDealt = 0;
+
+				//If base damage is above 0, add random factor and move on.
+				if (baseDamage > 0)
+					damageDealt = randomFactor + baseDamage;
+				else damageDealt = 0;       //If not above 0, then damagedealt is 0.
+
+				attackingMinion->health -= damageDealt;
+
+				if (isAmmoUsed == true)
+				{
+					if (weaponUsed == 1)
+						attackingMinion->currentPriAmmo--;
+					if (weaponUsed == 2)
+						attackingMinion->currentSecAmmo--;
+				}
+
+				//Combat graphics for defender
+				//Defender never does splash damage.
+				if (damageDealt > 0)
+					InputLayer->combatGraphics(this, observerNumber, &Board[inputX][inputY], &Board[attackingMinion->locationX][attackingMinion->locationY], false);
+
 			}
-
-			//Combat graphics for defender
-			if (damageDealt > 0)
-				InputLayer->combatGraphics(this, observerNumber, &Board[inputX][inputY], &Board[attackingMinion->locationX][attackingMinion->locationY]);
-
 		}
 
-	if (attackingMinion->health < 5)			//The attacker can be destroyed too!
+	if (attackingMinion->health < 5 )			//The attacker can be destroyed too!
 	{
 		bool printMessage = true;
-		destroyMinion(attackingMinion, printMessage, InputLayer, false);
-		if (defenderAlive == true && defendingMinion->veterancy <= 3)
+		if (defenderAlive == true && defendingMinion->veterancy <= 3 )
 		{
 			defendingMinion->veterancy++;
 		}
+		destroyMinion(attackingMinion, printMessage, InputLayer, false);
 		setVisionField(playerFlag);
 	}
 	else
@@ -2744,7 +2832,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 
 //This function executes a splash damage attack, which deals damage to all adjacent minions of X and Y.
 //This occurs before main attack since the attacking minion may be destroyed in that attack.
-int MasterBoard::splashAttackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber)
+int MasterBoard::splashAttackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber, int splashFactorInverse)
 {
     Minion* splashAttackingMinion = cursor.selectMinionPointer;
     Minion* splashDefendingMinion = Board[inputX][inputY].minionOnTop;
@@ -2761,8 +2849,8 @@ int MasterBoard::splashAttackMinion(int inputX, int inputY, inputLayer* InputLay
 	int randomFactor = (rand() % 10);       //Rand now adds between 0-9.
 	int damageDealt = randomFactor + calculateDamageDealt(splashAttackingMinion, splashDefendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
 	
-    //Splash modifier: 25% of normal attack, rounding down.
-    damageDealt = damageDealt / 4;
+    //Splash modifier: Usually 25% of normal attack, rounding down. For landmine it's 50%.
+    damageDealt = damageDealt / splashFactorInverse;
     
     if (damageDealt < 0)
 		damageDealt = 0;

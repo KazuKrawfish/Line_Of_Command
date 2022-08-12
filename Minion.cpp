@@ -91,6 +91,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
+        captureCapable = true;
 		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
@@ -105,7 +106,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		
+		captureCapable = true;
 		mySprite.setTextureRect(rectArray[30][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 1;
@@ -120,7 +121,8 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 4;
 		rangeType = directFire;
 		specialtyGroup = infantry;
-		stealthMode = true;
+		captureCapable = true;
+        stealthMode = true;
 		
 		mySprite.setTextureRect(rectArray[29][inputTeam + 4]);
 		maxFuel = 70;
@@ -136,6 +138,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 3;
 		rangeType = directFire;
 		specialtyGroup = infantry;
+        captureCapable = true;
 		mySprite.setTextureRect(rectArray[1][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
@@ -152,7 +155,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		attackRange = 1;
 		visionRange = 3;
 		rangeType = directFire;
-		specialtyGroup = infantry;
+		captureCapable = true;
 		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
@@ -329,7 +332,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 4;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		
+		captureCapable = true;
 		mySprite.setTextureRect(rectArray[31][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
@@ -557,6 +560,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		mySprite.setTextureRect(rectArray[12][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
+        maxSecAmmo = -1;
 
 		myAttackSound = cannon;
 		myMoveSound = aircraftMove;
@@ -577,6 +581,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		mySprite.setTextureRect(rectArray[13][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
+        maxSecAmmo = -1;
 
 		myAttackSound = cannon;
 
@@ -644,6 +649,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		mySprite.setTextureRect(rectArray[18][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
+        maxSecAmmo = -1;
 		
 	}
 	else
@@ -659,7 +665,22 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		mySprite.setTextureRect(rectArray[17][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
+        maxSecAmmo = -1;
 		
+	}
+    else
+	if(inputType == "Landmine")
+	{
+		description = "Landmine";
+		movementRange = 0;
+		attackRange = 1;
+		visionRange = 1;
+		rangeType = directFire;
+        stealthMode = true;
+		domain = land;
+		mySprite.setTextureRect(rectArray[36][inputTeam + 4]);
+		maxFuel = 0;
+		maxPriAmmo = 1;
 	}
 	
 	team = inputTeam;

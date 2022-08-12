@@ -56,6 +56,7 @@ public:
 	int attackRange = 0;
 	int minAttackRange = 0;	//Only matters for ranged attacks (Whether Hybrid or rangedFire)
 	int visionRange = 0;
+	bool captureCapable = false;
 	bool isCapturing = false;
 	bool stealthMode = false;
 
