@@ -70,7 +70,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	factoryButtons.at(4).mySprite.setTextureRect(rectArray[2][4]);      //Recon
 	factoryButtons.at(5).mySprite.setTextureRect(rectArray[31][4]);     //Technical
 	factoryButtons.at(6).mySprite.setTextureRect(rectArray[4][4]);      //APC
-	factoryButtons.at(7).mySprite.setTextureRect(rectArray[26][4]);     //IFV
+	factoryButtons.at(7).mySprite.setTextureRect(rectArray[25][4]);     //IFV
 	factoryButtons.at(8).mySprite.setTextureRect(rectArray[5][4]);      //Artillery	
 	factoryButtons.at(9).mySprite.setTextureRect(rectArray[3][4]);      //Armor
 	factoryButtons.at(10).mySprite.setTextureRect(rectArray[28][4]);     //Assault gun
@@ -78,7 +78,10 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	factoryButtons.at(12).mySprite.setTextureRect(rectArray[7][4]);      //Anti-Aircraft
 	factoryButtons.at(13).mySprite.setTextureRect(rectArray[8][4]);      //Rocket
 	factoryButtons.at(14).mySprite.setTextureRect(rectArray[6][4]);      //Heavy Armor
-	factoryButtons.at(15).mySprite.setTextureRect(rectArray[27][4]);      //Modern Armor
+	factoryButtons.at(15).mySprite.setTextureRect(rectArray[26][4]);      //Modern Armor
+	factoryButtons.at(16).mySprite.setTextureRect(rectArray[34][4]);      //Super Heavy Armor
+	factoryButtons.at(17).mySprite.setTextureRect(rectArray[33][4]);      //Victory Launcher
+	factoryButtons.at(18).mySprite.setTextureRect(rectArray[35][4]);      //Cavalry
 
 
 	//Airbase buttons
@@ -100,9 +103,9 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	airbaseButtons.at(0).mySprite.setTextureRect(rectArray[10][4]);  //Transport_Copter
 	airbaseButtons.at(1).mySprite.setTextureRect(rectArray[9][4]);   //Attack_Copter
 	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[11][4]);  //Interceptor
-	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[25][4]);  //Advanced_Fighter
-	airbaseButtons.at(2).mySprite.setTextureRect(rectArray[21][4]);  //Multirole
-	airbaseButtons.at(3).mySprite.setTextureRect(rectArray[12][4]);  //Bomber
+	airbaseButtons.at(3).mySprite.setTextureRect(rectArray[24][4]);  //Advanced_Fighter
+	airbaseButtons.at(4).mySprite.setTextureRect(rectArray[20][4]);  //Multirole
+	airbaseButtons.at(5).mySprite.setTextureRect(rectArray[12][4]);  //Bomber
 
 	//Naval buttons
 	y = 0;	//Reset counters
@@ -302,9 +305,10 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 					else if (tileToPrint->withinRange == true		//Attack and transport square 
 						&& (boardToPrint->cursor.selectMinionPointer->status == gaveupmovehasntfired
 							|| boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired)
-						&& (boardToPrint->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToPrint->cursor.selectMinionPointer->specialtyGroup == largeTransport))
+						&& (boardToPrint->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToPrint->cursor.selectMinionPointer->specialtyGroup == largeTransport)
+						&& (tileToPrint->hasMinionOnTop == false || tileToPrint->minionOnTop->team == boardToPrint->playerFlag))
 					{
-						//If this tile is within range for drop off
+						//If this tile is within range for drop off AND doesn't have enemy minion
 						effectsSprite.setTextureRect(rectArray[4][2]);
 						inputLayerWindow->draw(effectsSprite);
 					}

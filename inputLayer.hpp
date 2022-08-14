@@ -105,7 +105,8 @@ public:
 	std::vector <Button>* menuButtons;
 	std::vector <std::string> factoryOptions{ "Infantry", "Insurgent", "Operative", "Specialist", "Recon", "Technical",
 												"APC", "IFV", "Artillery", "Armor", "Assault_Gun", "Upgunned_Armor",
-												"Anti-Aircraft", "Rocket", "Heavy_Armor", "Modern_Armor" };
+												"Anti-Aircraft", "Rocket", "Heavy_Armor", "Modern_Armor", "Super_Heavy_Armor",
+												"Victory_Launcher", "Cavalry"};
 	std::vector <Button> factoryButtons;
 
 	std::vector <std::string> airbaseOptions{ "Transport_Copter", "Attack_Copter", "Interceptor",
