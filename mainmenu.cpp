@@ -821,6 +821,10 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 					boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
 					veryFirstTurn = false;
 				}
+				else    //Still want to update vision even if we're not doing upkeep.
+				{
+					boardToPlay->setVisionField(boardToPlay->playerFlag);
+				}
 
 				if (InputLayer->status == gameBoard)
 				{

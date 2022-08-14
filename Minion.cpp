@@ -156,7 +156,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 3;
 		rangeType = directFire;
 		captureCapable = true;
-		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[35][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -260,7 +260,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = normal;
 		
-		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[26][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -277,8 +277,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
-		
-		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[34][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -370,7 +369,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = rangedFire;
 		minAttackRange = 2;
 		specialtyGroup = splashAttack;
-		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[33][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -517,7 +516,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		domain = air;
 		
-		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[24][inputTeam + 4]);
 		maxFuel = 75;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -537,7 +536,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		domain = air;
 		
-		mySprite.setTextureRect(rectArray[21][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[20][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 6;
 		maxSecAmmo = 0;
@@ -678,7 +677,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
         stealthMode = true;
 		domain = land;
-		mySprite.setTextureRect(rectArray[36][inputTeam + 4]);
+		mySprite.setTextureRect(rectArray[32][inputTeam + 4]);
 		maxFuel = 0;
 		maxPriAmmo = 1;
 	}

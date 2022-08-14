@@ -1177,8 +1177,8 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 							return 1;
 						}
 
-						//If infantry, attempt to capture local properties.
-						if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry)
+						//If capable of capping properties, attempt to do so.
+						if (boardToUse->cursor.selectMinionPointer->captureCapable == true)
 						{
 							int distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY, selectedMinionRecord);
 							if (distance < 999 && selectedMinionRecord->potentialMoveTile != NULL)
@@ -1405,8 +1405,9 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 		//Still need to defendHQ.
 
 		for (int i = 0; i < compieMinionRoster.size(); i++)
-		{
-			if (compieMinionRoster[i] != NULL && compieMinionRoster[i]->taskingStatus != taskingExecuted)
+		{	
+			//Make sure minion hasn't already done tasking, and also that it's not a landmine.
+			if (compieMinionRoster[i] != NULL && compieMinionRoster[i]->taskingStatus != taskingExecuted && compieMinionRoster[i]->recordedMinion->type != "Landmine")
 
 			{
 				//Move cursor, then select minion
