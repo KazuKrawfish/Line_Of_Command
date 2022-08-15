@@ -19,17 +19,15 @@ Mission_Briefing
 interior. This assault will be supported by squadrons of the Redonian Air Force.
 Tactical Advisor: Ormosa's capital is protected by a series of fixed artillery emplacements and anti-
 air missiles. Beware of their firepower, and try to out-flank them if you can.
-Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction
+Player_Data:_Name_PlayerType_StillAlive_Treasury
 ~
 0
 1
 0
-1
 Ormosan_Army
 0
 1
 0
-3
 Game_turn_below:
 1
 Fog_Of_War:

@@ -13,12 +13,12 @@ TurnLimit_Or_0_ForOff
 Who_wins_after_turn_limit
 2
 Name_of_next_mission_(Same_Directory)
-ENDENDEND
+Counterattack
 Mission_Briefing 6 Now that Ormosa has been pacified, Redonian High Commmand has turned its sights to the South. 
 Two decades after the first civil war divided Redonia in two, the time has come to destroy the southern 
 Royalists once and for all, and unite our peoples. 
 Tactical Advisor: The river is strongly fortified with artillery emplacements. Use landers to cross 
-the river safely and seize a factor on the opposite bank. This will give us a beachhed which we can 
+the river safely and seize a factory on the opposite bank. This will give us a beachhed which we can 
 expand later.
 Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction
 ~

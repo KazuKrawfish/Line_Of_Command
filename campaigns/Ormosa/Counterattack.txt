@@ -1,0 +1,66 @@
+Savegame_YesNo
+0
+Number_of_players_below:
+2
+Mission_On_Off
+1
+CampaignName
+Ormosa
+ScenarioOrMissionName
+Counterattack
+TurnLimit_Or_0_ForOff
+0
+Who_wins_after_turn_limit
+1
+Name_of_next_mission_(Same_Directory)
+_______
+Mission_Briefing 5 The initial landing has been successful, but the Southerners are marshalling their reserves to crush
+our troops along the river before they can expand the beachhead. You must meet the South Redonian armored
+brigades head on and crush them, or our invasion will be short-lived.
+Tactical Advisor: The Royalist armor is a modernized and well-armed force. Take advantage of the forests 
+to hide your anti-tank units and assault guns. They will be outmatched in open terrain.
+Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction
+~
+0
+1
+0
+1
+South_Redonia
+1
+1
+0
+2
+Game_turn_below:
+1
+Fog_Of_War
+1
+Map_width_below:
+13
+Map_height_below:
+8
+Player_whose_turn_it_is_below:
+1
+Map_terrain_below:
+.....+...++..
+...+++.+.+...
+.+..+.n+...+.
+......+++...Q
+Q++..+..n+++.
+...+++n......
+.....+..+++..
+.++.....+....
+Property_controller_number_below:
+0000000000000
+0000000000000
+0000000000000
+0000000000000
+0000000000000
+0000000000000
+0000000000000
+0000000000000
+Number_Of_Banned_Minion_Types
+0
+List_Of_Banned_Minion_Types
+Total_minions_below:
+0
+Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,Ammo):
