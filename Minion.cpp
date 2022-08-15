@@ -482,6 +482,9 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
 		maxFuel = 70;
 
+		maxPriAmmo = 9;
+		maxSecAmmo = -1;
+
 		myAttackSound = antiAircraftCannon;
 		myMoveSound = vehicleMove;
 		

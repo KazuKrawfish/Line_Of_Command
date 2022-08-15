@@ -296,7 +296,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 					inputLayerWindow->draw(effectsSprite);
 				}
 				else
-					if (tileToPrint->withinApparentRange == true)
+					if (tileToPrint->withinApparentRange == true)		//This should apply to movement only I believe
 					{
 						//If this tile is within apparent range.
 						effectsSprite.setTextureRect(rectArray[3][2]);
@@ -1330,6 +1330,29 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 		tileBeingAttacked->animationSprite = NULL;
 	}
 
+	//Clean up splash tiles as necessary
+	if (tileBeingAttacked->locationX > 0 && boardToPrint->Board[tileBeingAttacked->locationX - 1][tileBeingAttacked->locationY].animationSprite != NULL)
+	{
+		delete boardToPrint->Board[tileBeingAttacked->locationX - 1][tileBeingAttacked->locationY].animationSprite;
+		boardToPrint->Board[tileBeingAttacked->locationX - 1][tileBeingAttacked->locationY].animationSprite = NULL;
+	}
+	if (tileBeingAttacked->locationY > 0 && boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY - 1].animationSprite != NULL)
+	{
+		delete boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY - 1].animationSprite;
+		boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY - 1].animationSprite = NULL;
+	}
+	if (tileBeingAttacked->locationX < boardToPrint->BOARD_WIDTH - 1 && boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY].animationSprite != NULL)
+	{
+		delete boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY ].animationSprite;
+		boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY ].animationSprite = NULL;
+	}
+	if (tileBeingAttacked->locationY < boardToPrint->BOARD_HEIGHT - 1 && boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].animationSprite != NULL)
+	{
+		delete boardToPrint->Board[tileBeingAttacked->locationX ][tileBeingAttacked->locationY + 1].animationSprite;
+		boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].animationSprite = NULL;
+	}
+
+
 	if (soundsOn == true)
 	{
 		(*soundEffects)[tileAttacking->minionOnTop->myAttackSound].stop();
@@ -2183,7 +2206,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
 							* Input = sf::Keyboard::Key::C;
 						else
-							//If minion is transport that already moved, attempt to supply.
+							//If minion is transport that already moved, attempt to supply if there is friendly minion there.
 							if ((myMinion->specialtyGroup == smallTransport || myMinion->specialtyGroup == largeTransport) &&
 								(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
 							{
@@ -2203,7 +2226,6 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 								|| ((myMinion->rangeType == rangedFire || myMinion->rangeType == hybridRange) &&
 								(myMinion->status == gaveupmovehasntfired)))
 							)
-
 						{
 							*Input = sf::Keyboard::Key::R;
 						}
@@ -2366,7 +2388,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	//Also, must not be stealth if we have no one adjacent.
 
 
-	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true && (boardToInput->cursor.selectMinionPointer->specialtyGroup != smallTransport && boardToInput->cursor.selectMinionPointer->specialtyGroup != largeTransport))
+	if (*Input == sf::Keyboard::Key::R && boardToInput->cursor.selectMinionFlag == true)
 		if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true)
 			if ((cursorX != boardToInput->cursor.selectMinionPointer->locationX) || (cursorY != boardToInput->cursor.selectMinionPointer->locationY))//Can attack if minion is selected
 				if (boardToInput->Board[cursorX][cursorY].minionOnTop->team != boardToInput->cursor.selectMinionPointer->team)//And it's enemy team's.

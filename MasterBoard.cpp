@@ -1628,11 +1628,9 @@ int MasterBoard::setAttackField(int inputX, int inputY, int inputRange)		//Prima
 	int distanceX = 0;
 	int distanceY = 0;
 
-	//Transport cannot attack so its attack field is 0.
 	//If out of ammo for both weapons, and neither weapon is infinite (Maxammo = 0), return.
-	if ((cursor.selectMinionPointer->specialtyGroup == smallTransport || cursor.selectMinionPointer->specialtyGroup == largeTransport) ||
-		(cursor.selectMinionPointer->currentPriAmmo <= 0 && cursor.selectMinionPointer->maxPriAmmo != 0
-			&& cursor.selectMinionPointer->currentSecAmmo <= 0 && cursor.selectMinionPointer->maxSecAmmo != 0))
+	if (cursor.selectMinionPointer->currentPriAmmo <= 0 && cursor.selectMinionPointer->maxPriAmmo != 0
+			&& cursor.selectMinionPointer->currentSecAmmo <= 0 && cursor.selectMinionPointer->maxSecAmmo != 0)
 	{
 		return 1;
 	}
@@ -1963,16 +1961,16 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 			return 0;
 		}
 		else //If minion has moved but hasn't fired, and is direct combat, display attack range.
-			//And is not transport
+			//And is not carrying a guy
 			if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire
-				|| cursor.selectMinionPointer->rangeType == hybridRange) && cursor.selectMinionPointer->specialtyGroup != largeTransport && cursor.selectMinionPointer->specialtyGroup != smallTransport)
+				|| cursor.selectMinionPointer->rangeType == hybridRange) &&  cursor.selectMinionPointer->firstMinionBeingTransported == NULL)
 			{
 				setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 				return 0;
 			}
 
-			else //If minion stood in place and hasn't fired, display attack range.
-				if (cursor.selectMinionPointer->status == gaveupmovehasntfired && cursor.selectMinionPointer->specialtyGroup != smallTransport && cursor.selectMinionPointer->specialtyGroup != largeTransport)
+			else //If minion stood in place and hasn't fired, display attack range. And is not carrying a guy.
+				if (cursor.selectMinionPointer->status == gaveupmovehasntfired && cursor.selectMinionPointer->firstMinionBeingTransported == NULL)
 				{
 					setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 					return 0;
@@ -1981,6 +1979,8 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 					&& (cursor.selectMinionPointer->specialtyGroup == largeTransport || cursor.selectMinionPointer->specialtyGroup == smallTransport))
 				{
 					//If minion is transport and has a guy embarked, show drop field.
+					//The new assumption here is that a transport MUST have a one range direct attack weapon, because if it is carrying a minion, its "withinRange" is being set 
+					//based on the drop range, which is always one.
 					if (cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
 						setDropField(inputX, inputY);
 					return 0;
@@ -2847,8 +2847,12 @@ int MasterBoard::splashAttackMinion(int inputX, int inputY, inputLayer* InputLay
 	
     //Decrease defender's health by attack value. No ammo used in splash attack.
 	int randomFactor = (rand() % 10);       //Rand now adds between 0-9.
-	int damageDealt = randomFactor + calculateDamageDealt(splashAttackingMinion, splashDefendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
+	int damageDealt = calculateDamageDealt(splashAttackingMinion, splashDefendingMinion, isAmmoUsed, weaponUsed, ignoreRealMapLimitations);
 	
+	//Must be greater than 0 to get rando, otherwise it was either -1 or 0 (Illegal attack)
+	if (damageDealt > 0)
+		damageDealt += randomFactor;
+
     //Splash modifier: Usually 25% of normal attack, rounding down. For landmine it's 50%.
     damageDealt = damageDealt / splashFactorInverse;
     
