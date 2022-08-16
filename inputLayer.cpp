@@ -302,13 +302,15 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 						effectsSprite.setTextureRect(rectArray[3][2]);
 						inputLayerWindow->draw(effectsSprite);
 					}
-					else if (tileToPrint->withinRange == true		//Attack and transport square 
+					else if (tileToPrint->withinRange == true		//Attack and transport/landmine square 
 						&& (boardToPrint->cursor.selectMinionPointer->status == gaveupmovehasntfired
 							|| boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired)
-						&& (boardToPrint->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToPrint->cursor.selectMinionPointer->specialtyGroup == largeTransport)
+						&& (boardToPrint->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToPrint->cursor.selectMinionPointer->specialtyGroup == largeTransport
+							|| boardToPrint->cursor.selectMinionPointer->type == "Operative")
 						&& (tileToPrint->hasMinionOnTop == false || tileToPrint->minionOnTop->team == boardToPrint->playerFlag))
 					{
 						//If this tile is within range for drop off AND doesn't have enemy minion
+						//Can also indicate that operative can deploy landmine here.
 						effectsSprite.setTextureRect(rectArray[4][2]);
 						inputLayerWindow->draw(effectsSprite);
 					}
@@ -388,7 +390,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			}
 
 			//Minion exists and is below 1/3 fuel
-			if ((minionToPrint->currentFuel == 0 || (double(minionToPrint->maxFuel) / double(minionToPrint->currentFuel)) >= 3))
+			if (((minionToPrint->currentFuel == 0 && minionToPrint->maxFuel != 0)|| (double(minionToPrint->maxFuel) / double(minionToPrint->currentFuel)) >= 3))
 			{
 				effectsSprite.setTextureRect(rectArray[1][3]);
 				inputLayerWindow->draw(effectsSprite);
@@ -2236,6 +2238,13 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 						{
 							*Input = sf::Keyboard::Key::O;
 						}
+						else  //If this is empty space and is operative that already moved/gave up move
+						if (boardToInput->cursor.selectMinionPointer->type == "Operative" &&
+							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+								boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
+						{
+							*Input = sf::Keyboard::Key::B;      //B for build. Either operative dropping a landmine, or engineer building something.
+							}
 						else  //Otherwise attempt to move there.
 						{
 							*Input = sf::Keyboard::Key::M;
@@ -2380,6 +2389,15 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		&& boardToInput->Board[cursorX][cursorY].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[cursorX][cursorY].symbol) != 99)
 	{
 		if (boardToInput->dropOffMinion() == 0)
+			status = gameBoard;
+	}
+
+	//Must be operative, must have moved already.
+	if (*Input == sf::Keyboard::Key::B && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->cursor.selectMinionPointer->type == "Operative"
+		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
+	{
+		if (boardToInput->deployLandmine(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 			status = gameBoard;
 	}
 

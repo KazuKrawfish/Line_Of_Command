@@ -96,21 +96,21 @@ int MasterBoard::landmineCheck(int inputX, int inputY, inputLayer* InputLayer, i
 	}
 
 	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].hasMinionOnTop == true
-		&& Board[inputX][inputY + 1].minionOnTop->team == observerNumber
+		&& Board[inputX][inputY + 1].minionOnTop->team != playerFlag
 		&& Board[inputX ][inputY + 1].minionOnTop->type == "Landmine")
 	{
 		landmineAttack( inputX , inputY + 1, InputLayer, observerNumber);
 	}
 
 	if (inputY > 0 && Board[inputX][inputY - 1].hasMinionOnTop == true
-		&& Board[inputX][inputY - 1].minionOnTop->team == observerNumber
+		&& Board[inputX][inputY - 1].minionOnTop->team != playerFlag
 		&& Board[inputX ][inputY - 1].minionOnTop->type == "Landmine")
 	{
 		landmineAttack( inputX, inputY - 1, InputLayer, observerNumber);
 	}
 	
 	if (inputX > 0 && Board[inputX - 1][inputY].hasMinionOnTop == true
-		&& Board[inputX - 1][inputY].minionOnTop->team == observerNumber
+		&& Board[inputX - 1][inputY].minionOnTop->team != playerFlag
 		&& Board[inputX - 1][inputY].minionOnTop->type == "Landmine")
 	{
 		landmineAttack( inputX - 1, inputY, InputLayer, observerNumber);
@@ -415,7 +415,6 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
     else
 	if (attackingMinion.type == "Victory_Launcher")
 		y = 26;
-
 
 
 	if (x == -1 || y == -1)
@@ -1895,6 +1894,41 @@ int MasterBoard::attemptPurchaseMinion(std::string inputType, int inputX, int in
 
 }
 
+//deployLandmine() will check for tile terrain constraints and cost constraints, as well as no one on that tile constraint..
+//deployLandmine() will invoke a similar graphic to repair, making the landmine blink several times.
+//within masterboard:
+int MasterBoard::deployLandmine(inputLayer* InputLayer, int inputX, int inputY)
+{
+	//First check for terrain constraints:
+	tile* myTile = &Board[inputX][inputY];
+
+	//Prevent landmine insertion on top of another and prevent landmine deploy within sea/river
+	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart("Landmine", myTile->symbol) == 99)
+	{
+		return 1;
+	}
+
+	//If player cannot afford cost, return failure. Otherwise subtract 2k and build.
+	if (playerRoster[playerFlag].treasury < 2000)
+	{
+		return 1;
+	}
+	else
+	{
+		playerRoster[playerFlag].treasury -= 2000;
+		createMinion("Landmine", inputX, inputY, playerFlag, 100, 0, 0, 0, -1, -1, -1);
+		InputLayer->status = gameBoard;
+		InputLayer->repairGraphics(this, playerFlag, myTile->minionOnTop, inputX, inputY);
+
+	}
+
+	//If we made it this far we did a successful deploy, so deselect
+	deselectMinion();
+
+	return 0;
+}
+
+
 int MasterBoard::createMinion(std::string inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo)
 {
 	//Cannot create minion illegally (On top of another, or in bad location)
@@ -2644,16 +2678,16 @@ int MasterBoard::landmineAttack(int attackingX, int attackingY, inputLayer* Inpu
 	//For each adjacent square, check if it has a minion on it, and deal damage to that minion, regardless of team.
 	//Landmines don't receive splash damage from other landmines.
 	if(attackingX > 0 && Board[attackingX-1][attackingY].hasMinionOnTop == true  && Board[attackingX-1][attackingY].minionOnTop->type != "Landmine"  )
-		splashAttackMinion(attackingX-1, attackingY, InputLayer, observerNumber , 2);
+		splashAttackMinion(attackingMinion, attackingX-1, attackingY, InputLayer, observerNumber , 2);
 	
 	if(attackingY > 0 && Board[attackingX][attackingY-1].hasMinionOnTop == true && Board[attackingX][attackingY-1].minionOnTop->type != "Landmine")
-		splashAttackMinion(attackingX, attackingY-1, InputLayer, observerNumber, 2);
+		splashAttackMinion(attackingMinion, attackingX, attackingY-1, InputLayer, observerNumber, 2);
 	
 	if(attackingX < BOARD_WIDTH - 1 && Board[attackingX+1][attackingY].hasMinionOnTop == true && Board[attackingX+1][attackingY].minionOnTop->type != "Landmine")
-		splashAttackMinion(attackingX + 1, attackingY, InputLayer, observerNumber , 2);
+		splashAttackMinion(attackingMinion  , attackingX + 1, attackingY, InputLayer, observerNumber , 2);
 
 	if(attackingY < BOARD_HEIGHT - 1 && Board[attackingX ][attackingY + 1].hasMinionOnTop == true && Board[attackingX][attackingY + 1].minionOnTop->type != "Landmine")
-		splashAttackMinion(attackingX , attackingY + 1, InputLayer, observerNumber , 2);
+		splashAttackMinion(attackingMinion, attackingX , attackingY + 1, InputLayer, observerNumber , 2);
 
 	//Set graphics for splash damage sprites
 	bool splashGraphicsOn = true;			
@@ -2720,16 +2754,16 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
     {
         //For each adjacent square, check if it has a minion on it, and deal damage to that minion, regardless of team.
         if(inputX > 0 && Board[inputX-1][inputY].hasMinionOnTop == true)
-            splashAttackMinion(inputX-1, inputY, InputLayer, observerNumber , 4);
+            splashAttackMinion(attackingMinion, inputX-1, inputY, InputLayer, observerNumber , 4);
             
         if(inputY > 0 && Board[inputX][inputY-1].hasMinionOnTop == true )
-            splashAttackMinion(inputX, inputY-1, InputLayer, observerNumber , 4);
+            splashAttackMinion(attackingMinion, inputX, inputY-1, InputLayer, observerNumber , 4);
             
         if(inputX < BOARD_WIDTH - 1 && Board[inputX+1][inputY].hasMinionOnTop == true )
-            splashAttackMinion(inputX + 1, inputY, InputLayer, observerNumber , 4);
+            splashAttackMinion(attackingMinion , inputX + 1, inputY, InputLayer, observerNumber , 4);
         
         if(inputY < BOARD_HEIGHT - 1 && Board[inputX ][inputY + 1].hasMinionOnTop == true )
-            splashAttackMinion(inputX , inputY + 1, InputLayer, observerNumber , 4);
+            splashAttackMinion(attackingMinion, inputX , inputY + 1, InputLayer, observerNumber , 4);
 		
 		//Set graphics for splash damage sprites
 		splashGraphicsOn = true;			
@@ -2832,9 +2866,8 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 
 //This function executes a splash damage attack, which deals damage to all adjacent minions of X and Y.
 //This occurs before main attack since the attacking minion may be destroyed in that attack.
-int MasterBoard::splashAttackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber, int splashFactorInverse)
+int MasterBoard::splashAttackMinion( Minion * splashAttackingMinion , int inputX, int inputY, inputLayer* InputLayer, int observerNumber, int splashFactorInverse)
 {
-    Minion* splashAttackingMinion = cursor.selectMinionPointer;
     Minion* splashDefendingMinion = Board[inputX][inputY].minionOnTop;
 
     if(Board[inputX][inputY].hasMinionOnTop == false)

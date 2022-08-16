@@ -84,7 +84,7 @@ public:
 	int deselectMinion();
 	int moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber);
 	int validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching, bool transportMove);
-	int landmineCheck(int inputX, int inputY, inputLayer* InputLayer, int observerNumber);
+	int landmineCheck(int inputX, int inputY, inputLayer* InputLayer, int observerNumber );
 	//Select and Move Functions////////////////
 
 	//Combat Functions/////////////////////////
@@ -92,7 +92,7 @@ public:
 	double calculateDamageDealt(Minion* attackingMinion, Minion* defendingMinion, bool& wouldAmmoBeUsed, int& weaponUsed, bool ignoreLimitations);
 	int destroyMinion(Minion* inputMinion, bool printMessage, inputLayer* InputLayer, bool AdminKill);
 	int landmineAttack(int attackingX, int attackingY, inputLayer* InputLayer, int observerNumber);
-	int splashAttackMinion(int inputX, int inputY, inputLayer* InputLayer, int observerNumber, int splashFactorInverse);
+	int splashAttackMinion(Minion* splashAttackingMinion , int inputX, int inputY, inputLayer* InputLayer, int observerNumber, int splashFactorInverse);
 	//Combat Functions/////////////////////////
 
 	//Special Action Functions/////////////////
@@ -105,6 +105,7 @@ public:
 	int attemptPurchaseMinion(std::string inputType, int inputX, int inputY, int inputTeam);
 	int consultMinionCostChart(std::string minionType, char propertyType);
 	bool checkFactionAvailability(std::string minionType, int inputPlayer);
+	int deployLandmine(inputLayer* InputLayer, int inputX, int inputY);
 	int createMinion(std::string, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
 	//Purchase Functions///////////////////////
 
