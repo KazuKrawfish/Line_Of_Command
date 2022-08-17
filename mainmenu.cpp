@@ -800,8 +800,6 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 				{
 					Input = sf::Keyboard::Comma;	//This is right click indicator
 				}
-
-
 		}
 
 
@@ -848,7 +846,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 				}
 				else if (InputLayer->status == insertMinion)
 				{
-					InputLayer->insertMinionInput(&Input, boardToPlay);
+					InputLayer->insertMinionInput(&playerInput, boardToPlay);
 				}
 				else if (InputLayer->status == insertTile)
 				{

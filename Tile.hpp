@@ -23,7 +23,7 @@ class Masterboard;
 
 //When updating ATTACK_VALUES_MATRIX, also update consultAttackValuesChart, consultMinionCostChart, and Minion().
 //When updating move values matrix for new terrain, also update set characteristics in mainmenu and checkForProperty in tile.
-//												        . 	+ 	^ 	M  	H 	m 	n 	h 	Q 	= 	~  	- 	A	P	*
+//																	. 	+ 	^ 	M  	H 	m 	n 	h 	Q 	= 	~  	- 	A	P	*
 const int MOVE_VALUES_MATRIX[22][15] =					 /*i/ISG*/{ 1,	1,	2,	3,	1,	1,	1,	1,	1,	1,	99,	2,	1,	1,	1,
 															/*s*/	1,	1,	1,	1,	1,	1,	1,	1,	1,	1,	99,	1,	1,	1, 	1,
 													/*a/UPG/MDN*/	1,	2,	2,	99,	1,	1,	1,	1,	1,	1,	99,	99,	1,	1, 	2,
@@ -43,8 +43,8 @@ const int MOVE_VALUES_MATRIX[22][15] =					 /*i/ISG*/{ 1,	1,	2,	3,	1,	1,	1,	1,	1
 															/*G*/	99,	99,	99,	99,	99,	99,	99,	99,	99,	99,	1,	99,	99,	1,	1,
 															/*U*/	99,	99,	99,	99,	99,	99,	99,	99,	99,	99,	1,	99,	99,	1,	99,
 															/*V*/	99,	99,	99,	99,	99,	99,	99,	99,	99,	99,	1,	99,	99,	1,	99,
-															/*K*/	1,	1,	2,	3,	1,	1,	1,	1,	1,	1,	99,	2,	1,	1,	1,
-															/*S*/	1,	1,	2,	3,	1,	1,	1,	1,	1,	1,	99,	2,	1,	1,	1,
+															/*K*/	1,	1,	2,	3,	1,	1,	1,	1,	1,	1,	99,	99,	1,	1,	1,
+															/*S*/	1,	1,	2,	3,	1,	1,	1,	1,	1,	1,	99,	99,	1,	1,	1,
 														/*IFV*/  	1,	2,	2,	99,	1,	1,	1,	1,	1,	1,	99,	2,	1,	1, 	2 };
 
 

@@ -386,7 +386,7 @@ int tile::consultMovementChart(std::string minionType, char terrainType)
 	if (minionType == "Aircraft_Carrier")
 		x = 18;
 	else
-	if (minionType == "Artillery_Emplacement")
+	if (minionType == "Artillery_Emplacement" || minionType == "Landmine")
 		x = 19;
 	else
 	if (minionType == "SAM_Site")

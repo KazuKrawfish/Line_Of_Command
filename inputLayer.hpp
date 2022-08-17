@@ -76,7 +76,7 @@ public:
 
 	//Non-Print Functions:////////////////////////////////////////////////////
 	//Inputs
-	int insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
+	int insertMinionInput(sf::Event* Input, MasterBoard* boardToInput);
 	int deleteMinionInput(MasterBoard* boardToInput);
 	int insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
 	int gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
@@ -93,6 +93,7 @@ public:
 	//End Non-Print Functions ////////////////////////////////////////////////
 
 	std::string eventText = "";
+	sf::String savedInsertMinionInput = "";
 
 	gameInputLayer status = gameBoard;
 	specialKey minionVisibleStatus = showMinions;

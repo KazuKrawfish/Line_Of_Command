@@ -625,7 +625,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 						inputLayerWindow->draw(effectsSprite);
 
 					}
-					if (currentMinion->rangeType == directFire)
+					if (currentMinion->rangeType == directFire || currentMinion->rangeType == hybridRange)
 					{
 						//Print yellow pause image -- 15, 1
 						effectsSprite.setTextureRect(rectArray[1][15]);
@@ -1002,10 +1002,14 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) 
 
 }
 
+//Use trigraph instead of single letter. Means invoke getString instead of getChar.
+//Assumes existance of savedInsertMinionInput within inputLayer.hpp, which is string.
+
 int inputLayer::printInsertMinion(MasterBoard* boardToPrint)
 {
 
-	sf::String boardMessage = "Insert a minion by typing its symbol\nExit insert minion menu(x) \n";
+	sf::String boardMessage = "Insert a minion by typing its first three letters.\nExit (ESC)    Current input: ";
+	boardMessage += savedInsertMinionInput;
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
@@ -1715,173 +1719,212 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 	return 0;
 }
 
-int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
+int inputLayer::insertMinionInput(sf::Event* Input, MasterBoard* boardToInput)
 {
-	Cursor* myCursor = &boardToInput->cursor;
-	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
-
-	//Shift must be used like Caps Lock
-	if (*Input == sf::Keyboard::Key::LShift || *Input == sf::Keyboard::Key::RShift)
-	{
-		if (capsLockOn == false)
-			capsLockOn = true;
-		else if (capsLockOn == true)
-			capsLockOn = false;
-
-		return 1;
-	}
-
-
-	//Return to gameBoard if player presses 'x'.
-	if (*Input == sf::Keyboard::Key::X)
+	//Return to gameBoard if player presses "ESC"".
+    //Clear out saved input.
+	if (Input->key.code == sf::Keyboard::Key::Escape)
 	{
 		status = gameBoard;
+        savedInsertMinionInput.clear();
 		return 1;
 	}
 
+    //This clear may need to happen at the end of the function.
+    //If at three or more chars in saved string, clear it to make way for the new input.
+    if(savedInsertMinionInput.getSize() >= 3 || savedInsertMinionInput == "x")
+        savedInsertMinionInput.clear();
+
+    if (Input->type == sf::Event::EventType::TextEntered)
+        savedInsertMinionInput += Input->text.unicode;
+    else return 1;
 
 	//Convert valid keyboard input to char
 	std::string convertedInput = "~";
 
-	if (capsLockOn == false)
-	{
-		//Lower case letters
-		switch (*Input)
-		{
-		case sf::Keyboard::I:
-		{
-			convertedInput = "Infantry";
-			break;
-		}
+    //Standard minions
+    if(savedInsertMinionInput == "inf" || savedInsertMinionInput == "Inf")
+    {
+        convertedInput = "Infantry";
+    }
+    else
+    if(savedInsertMinionInput == "spe" || savedInsertMinionInput == "Spe")
+    {
+        convertedInput = "Specialist";
+    }
+    else
+    if(savedInsertMinionInput == "arm" || savedInsertMinionInput == "Arm")
+    {
+        convertedInput = "Armor";
+    }
+    else
+    if(savedInsertMinionInput == "hea" || savedInsertMinionInput == "Hea")
+    {
+        convertedInput = "Heavy_Armor";
+    }
+    else
+    if(savedInsertMinionInput == "art" || savedInsertMinionInput == "Art")
+    {
+        convertedInput = "Artillery";
+    }
+    else
+    if(savedInsertMinionInput == "rec" || savedInsertMinionInput == "Rec")
+    {
+        convertedInput = "Recon";
+    }
+    else
+    if(savedInsertMinionInput == "Emp" || savedInsertMinionInput == "emp")
+    {
+        convertedInput = "Artillery_Emplacement";
+    }
+    else
+    if(savedInsertMinionInput == "att" || savedInsertMinionInput == "Att")
+    {
+        convertedInput = "Attack_Copter";
+    }
+    else
+    if(savedInsertMinionInput == "tra" || savedInsertMinionInput == "Tra")
+    {
+        convertedInput = "Transport_Copter";
+    }
+    else
+    if(savedInsertMinionInput == "APC" || savedInsertMinionInput == "apc")
+    {
+        convertedInput = "APC";
+    }
+    else
+    if(savedInsertMinionInput == "int" || savedInsertMinionInput == "Int")
+    {
+        convertedInput = "Interceptor";
+    }
+    else
+    if(savedInsertMinionInput == "bom" || savedInsertMinionInput == "Bom")
+    {
+        convertedInput = "Bomber";
+    }
+    else
+    if(savedInsertMinionInput == "Gun" || savedInsertMinionInput == "gun")
+    {
+        convertedInput = "Gunboat";
+    }
+    else
+    if(savedInsertMinionInput == "lan" || savedInsertMinionInput == "Lan")
+    {
+        convertedInput = "Lander";
+    }
+    else
+    if(savedInsertMinionInput == "sub" || savedInsertMinionInput == "Sub")
+    {
+        convertedInput = "Submarine";
+    }
+    else
+    if(savedInsertMinionInput == "ant" || savedInsertMinionInput == "Ant")
+    {
+        convertedInput = "Anti-Aircraft";
+    }
+    else
+    if(savedInsertMinionInput == "air" || savedInsertMinionInput == "Air")
+    {
+        convertedInput = "Aircraft_Carrier";
+    }
+    else
+    if(savedInsertMinionInput == "roc" || savedInsertMinionInput == "Roc")
+    {
+        convertedInput = "Rocket_Artillery";
+    }
+    else
+    if(savedInsertMinionInput == "bat" || savedInsertMinionInput == "Bat")
+    {
+        convertedInput = "Battleship";
+    }
+    else
+    if(savedInsertMinionInput == "cru" || savedInsertMinionInput == "Cru")
+    {
+        convertedInput = "Cruiser";
+    }
+    else
+    if(savedInsertMinionInput == "SAM" || savedInsertMinionInput == "sam")
+    {
+        convertedInput = "SAM_Site";
+    }
+    else
+    if(savedInsertMinionInput == "min" || savedInsertMinionInput == "Min")
+    {
+        convertedInput = "Landmine";
+    }
 
-		case(sf::Keyboard::S):
-		{
-			convertedInput = "Specialist";
-			break;
-		}
+    //Faction-specific minions
+    else    //ARNR
+    if(savedInsertMinionInput == "upg" || savedInsertMinionInput == "Upg")
+    {
+        convertedInput = "Upgunned_Armor";
+    }
+    else
+    if(savedInsertMinionInput == "ass" || savedInsertMinionInput == "Ass")
+    {
+        convertedInput = "Assault_Gun";
+    }
+    else
+    if(savedInsertMinionInput == "mul" || savedInsertMinionInput == "Mul")
+    {
+        convertedInput = "Multirole";
+    }
+    else    //South Redonia
+    if(savedInsertMinionInput == "mod" || savedInsertMinionInput == "Mod")
+    {
+        convertedInput = "Modern_Armor";
+    }
+    else
+    if(savedInsertMinionInput == "adv" || savedInsertMinionInput == "Adv")
+    {
+        convertedInput = "Advanced_Fighter";
+    }
+    else
+    if(savedInsertMinionInput == "ifv" || savedInsertMinionInput == "IFV")
+    {
+        convertedInput = "IFV";
+    }
+    else    //Ormosa
+    if(savedInsertMinionInput == "ins" || savedInsertMinionInput == "Ins")
+    {
+        convertedInput = "Insurgent";
+    }
+    else
+    if(savedInsertMinionInput == "ope" || savedInsertMinionInput == "Ope")
+    {
+        convertedInput = "Operative";
+    }
+    else
+    if(savedInsertMinionInput == "Tec" || savedInsertMinionInput == "tec")
+    {
+        convertedInput = "Technical";
+    }
+    else    //Torran
+    if(savedInsertMinionInput == "sup" || savedInsertMinionInput == "Sup")
+    {
+        convertedInput = "Super_Heavy_Armor";
+    }
+    else
+    if(savedInsertMinionInput == "vic" || savedInsertMinionInput == "Vic")
+    {
+        convertedInput = "Victory_Launcher";
+    }
+    else
+    if(savedInsertMinionInput == "cav" || savedInsertMinionInput == "Cav")
+    {
+        convertedInput = "Cavalry";
+    }
 
-		case(sf::Keyboard::A):
-		{
-			convertedInput = "Armor";
-			break;
-		}
 
-		case(sf::Keyboard::T):
-		{
-			convertedInput = "Heavy_Armor";
-			break;
-		}
-
-		case(sf::Keyboard::R):
-		{
-			convertedInput = "Artillery";
-			break;
-		}
-
-		case(sf::Keyboard::C):
-		{
-			convertedInput = "Recon";
-			break;
-		}
-
-		case(sf::Keyboard::K):
-		{
-			convertedInput = "Artillery_Emplacement";
-			break;
-		}
-
-		case(sf::Keyboard::V):
-		{
-			convertedInput = "Attack_Copter";
-			break;
-		}
-
-		case(sf::Keyboard::H):
-		{
-			convertedInput = "Transport_Copter";
-			break;
-		}
-
-		case(sf::Keyboard::P):
-		{
-			convertedInput = "APC";
-			break;
-		}
-
-		case(sf::Keyboard::F):
-		{
-			convertedInput = "Interceptor";
-			break;
-		}
-
-		case(sf::Keyboard::B):
-		{
-			convertedInput = "Bomber";
-			break;
-		}
-
-		case(sf::Keyboard::G):
-		{
-			convertedInput = "Gunboat";
-			break;
-		}
-
-		case(sf::Keyboard::L):
-		{
-			convertedInput = "Lander";
-			break;
-		}
-
-		case(sf::Keyboard::U):
-		{
-			convertedInput = "Submarine";
-			break;
-		}
-
-		}
-	}
-	else //Shift-required characters
-	{
-		switch (*Input)
-		{
-		case(sf::Keyboard::A):
-		{
-			convertedInput = "Anti-Aircraft";
-			break;
-		}
-		case(sf::Keyboard::V):
-		{
-			convertedInput = "Aircraft_Carrier";
-			break;
-		}
-
-		case(sf::Keyboard::R):
-		{
-			convertedInput = "Rocket_Artillery";
-			break;
-		}
-		case(sf::Keyboard::B):
-		{
-
-			convertedInput = "Battleship";
-			break;
-		}
-		case(sf::Keyboard::C):
-		{
-			convertedInput = "Cruiser";
-			break;
-		}
-		case(sf::Keyboard::S):
-		{
-			convertedInput = "SAM_Site";
-			break;
-		}
-		}
-	}
+	Cursor* myCursor = &boardToInput->cursor;
+	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
 
 	//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
 	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart(convertedInput, myTile->symbol) == 99)
-		return 1;
+	{  
+        savedInsertMinionInput.clear();
+        return 1;
+    }
 
 	int requestedUnitPrice = boardToInput->consultMinionCostChart(convertedInput, '~');
 
@@ -1890,12 +1933,14 @@ int inputLayer::insertMinionInput(sf::Keyboard::Key* Input, MasterBoard* boardTo
 	{
 		boardToInput->createMinion(convertedInput, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1, -1);
 		status = gameBoard;
+        savedInsertMinionInput.clear();
 		return 0;
 	}
 
 	return 1;
 
 }
+
 
 //If there is a minion underneath, destroy it regardless of any status.
 //Activate with debug mode and "z" input.
