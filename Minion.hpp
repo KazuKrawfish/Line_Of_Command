@@ -20,9 +20,9 @@ enum minionStatus { hasntmovedorfired, hasmovedhasntfired, hasfired, gaveupmoveh
 //Can stand still and fire pri or sec. Primary always has a minimum range of 1, and sec always has max range of 1.
 //Thus AA can fire at ground units next to regardless of move status, but can only shoot air units outside 1, if it stood still.
 enum RangeType { directFire, rangedFire, hybridRange };
-enum specialtyGroupType { normal, infantry, smallTransport, largeTransport, stealth, defense, splashAttack };
+enum specialtyGroupType { normal, infantry, smallTransport, largeTransport, aircraftCarrier ,  defense, splashAttack };
 //Domain type is used not for terrain but everything else. Defensive bonus from terrain, fuel requirement, refuel, move through enemy units, etc.
-enum domainType { land, air, sea, helo };
+enum domainType { land, air, sea };
 
 enum soundEffectType {machineGun, rpg, cannon, antiAircraftCannon, infantryMove, vehicleMove, aircraftMove, buildUnit, capture, resupply, repair , trapped};
 

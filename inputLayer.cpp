@@ -261,13 +261,26 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			&& tileToPrint->minionOnTop->invisible == false)
 		{
 			//Last check - must not be stealth minion and unseen
-			if (tileToPrint->minionOnTop->specialtyGroup != stealth || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber)
+			if (tileToPrint->minionOnTop->stealthMode == false || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber)
 			{
 				tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50, screenY * 50);
 				inputLayerWindow->draw(tileToPrint->minionOnTop->mySprite);
 			}
 		}
 
+		//Get mouse position to see if it's hovering over a potential action tile
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+		int windowX = mousePosition.x / 50;
+		int windowY = mousePosition.y / 50;
+		int mouseTileX = windowX + boardToPrint->windowLocationX;       //May take out windowLocationX if this isn't working
+		int mouseTileY = windowY + boardToPrint->windowLocationY;       //May take out windowLocationY if this isn't working
+		bool mouseHovering = false;
+
+		//See if mouse is over this current tile
+		if (actualX == mouseTileX && actualY == mouseTileY)
+		{
+			mouseHovering = true;
+		}
 
 		//Will only print  "selection" effects if human player's turn, or debug mode 
 		//AND if not in the middle of animation - indicated by the invisible flag on minion for movement
@@ -278,15 +291,31 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			&& boardToPrint->cursor.selectMinionPointer->invisible == false
 			&& withinAnimation == false)
 		{
+			//All the various selection effect squares like within movement, attack, and drop range
 			if (boardToPrint->cursor.selectMinionFlag == true
 				&& boardToPrint->cursor.selectMinionPointer->locationX == actualX
 				&& boardToPrint->cursor.selectMinionPointer->locationY == actualY
 				&& tileToPrint->withinVision[playerNumber] == true)
 			{
-				//If minion is selected here, print the selected square.
+				//If minion is selected here, print the "selected" square.
 				//We'll print selected square regardless of compie or player
 				effectsSprite.setTextureRect(rectArray[1][2]);
 				inputLayerWindow->draw(effectsSprite);
+
+				//If minion can capture and is on top of capturable property, show capturable flag
+				if (mouseHovering == true && boardToPrint->cursor.selectMinionPointer->captureCapable == true
+					&& tileToPrint->checkForProperty(tileToPrint->symbol) == true
+					&& tileToPrint->controller != boardToPrint->playerFlag)
+				{
+					effectsSprite.setTextureRect(rectArray[6][15]); //Draw little flag
+					inputLayerWindow->draw(effectsSprite);
+				}
+				else 
+				if (mouseHovering == true && boardToPrint->cursor.selectMinionPointer->type == "APC")
+				{
+					effectsSprite.setTextureRect(rectArray[8][15]); //Draw supply image
+					inputLayerWindow->draw(effectsSprite);
+				}
 			}
 			else
 				if (tileToPrint->withinCursorPath == true)
@@ -294,6 +323,12 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 					//If this tile is on cursor's path
 					effectsSprite.setTextureRect(rectArray[6][2]);
 					inputLayerWindow->draw(effectsSprite);
+					
+					if (mouseHovering == true)
+					{
+						effectsSprite.setTextureRect(rectArray[9][15]); //Draw boot
+						inputLayerWindow->draw(effectsSprite);
+					}
 				}
 				else
 					if (tileToPrint->withinApparentRange == true)		//This should apply to movement only I believe
@@ -301,11 +336,19 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 						//If this tile is within apparent range.
 						effectsSprite.setTextureRect(rectArray[3][2]);
 						inputLayerWindow->draw(effectsSprite);
+
+						if (mouseHovering == true)
+						{
+							effectsSprite.setTextureRect(rectArray[9][15]); //Draw boot
+							inputLayerWindow->draw(effectsSprite);
+						}
+
 					}
 					else if (tileToPrint->withinRange == true		//Attack and transport/landmine square 
 						&& (boardToPrint->cursor.selectMinionPointer->status == gaveupmovehasntfired
 							|| boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired)
-						&& (boardToPrint->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToPrint->cursor.selectMinionPointer->specialtyGroup == largeTransport
+						&& (boardToPrint->cursor.selectMinionPointer->specialtyGroup == smallTransport
+							|| boardToPrint->cursor.selectMinionPointer->specialtyGroup == largeTransport
 							|| boardToPrint->cursor.selectMinionPointer->type == "Operative")
 						&& (tileToPrint->hasMinionOnTop == false || tileToPrint->minionOnTop->team == boardToPrint->playerFlag))
 					{
@@ -313,14 +356,31 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 						//Can also indicate that operative can deploy landmine here.
 						effectsSprite.setTextureRect(rectArray[4][2]);
 						inputLayerWindow->draw(effectsSprite);
+
+						if (mouseHovering == true)
+						{
+							//Differentiate between operative and transport for potential action
+							if (boardToPrint->cursor.selectMinionPointer->type == "Operative")
+								effectsSprite.setTextureRect(rectArray[4][15]); //Draw landmine drop
+							else effectsSprite.setTextureRect(rectArray[7][15]); //Draw bag drop
+
+							inputLayerWindow->draw(effectsSprite);
+						}
+
 					}
-					else if (tileToPrint->withinRange == true
+					else if (tileToPrint->withinRange == true && boardToPrint->cursor.selectMinionPointer->attackRange != 0
 						&& (boardToPrint->cursor.selectMinionPointer->status == gaveupmovehasntfired
 							|| boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired))
 					{
 						//If minion can fire and if this tile is within range.
 						effectsSprite.setTextureRect(rectArray[2][2]);
 						inputLayerWindow->draw(effectsSprite);
+
+						if (mouseHovering == true)
+						{
+							effectsSprite.setTextureRect(rectArray[3][15]); //Draw crosshairs
+							inputLayerWindow->draw(effectsSprite);
+						}
 					}
 
 		}
@@ -360,7 +420,8 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 		//Must be visible to see effects!
 		if (tileToPrint->hasMinionOnTop == true && minionToPrint != NULL && tileToPrint->withinVision[playerNumber] == true
-			&& minionVisibleStatus == showMinions && (minionToPrint->invisible == false || adjacentObservers == true))
+			&& minionVisibleStatus == showMinions && minionToPrint->invisible == false  
+			&& ( tileToPrint->minionOnTop->stealthMode == false  || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber))
 		{
 
 			//Print if transporting or capturing // Specialty moves
@@ -390,7 +451,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			}
 
 			//Minion exists and is below 1/3 fuel
-			if (((minionToPrint->currentFuel == 0 && minionToPrint->maxFuel != 0)|| (double(minionToPrint->maxFuel) / double(minionToPrint->currentFuel)) >= 3))
+			if (((minionToPrint->currentFuel == 0 && minionToPrint->maxFuel != 0) || (double(minionToPrint->maxFuel) / double(minionToPrint->currentFuel)) >= 3))
 			{
 				effectsSprite.setTextureRect(rectArray[1][3]);
 				inputLayerWindow->draw(effectsSprite);
@@ -469,6 +530,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 	}
 }
 
+
 //Updated printStatus
 int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 {
@@ -527,7 +589,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 		//See if enemy minion here.
 		bool stealthEnemyHere = false;
-		if (currentTile->hasMinionOnTop == true && currentTile->minionOnTop->team != boardToPrint->playerFlag && currentTile->minionOnTop->specialtyGroup == stealth)
+		if (currentTile->hasMinionOnTop == true && currentTile->minionOnTop->team != boardToPrint->playerFlag && currentTile->minionOnTop->stealthMode == true)
 			stealthEnemyHere = true;
 
 		bool unseenStealthEnemyHere = false;
@@ -1150,7 +1212,7 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	//If within vision, change specific tile's animationSprite to match the movement graphics.
 	//Also, must not be a stealth type minion if not our turn
 	if (boardToPrint->Board[locationX][locationY].withinVision[observerNumber] == true
-		&& (minionToMove->team == observerNumber || minionToMove->specialtyGroup != stealth))
+		&& (minionToMove->team == observerNumber || minionToMove->stealthMode == false))
 	{
 		boardToPrint->Board[locationX][locationY].animationSprite = &(minionToMove->mySprite);
 	}
@@ -2354,7 +2416,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	//See if enemy minion here.
 	bool stealthEnemyHere = false;
 	if (boardToInput->Board[cursorX][cursorY].hasMinionOnTop == true && boardToInput->Board[cursorX][cursorY].minionOnTop->team != boardToInput->playerFlag
-		&& boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == stealth)
+		&& boardToInput->Board[cursorX][cursorY].minionOnTop->stealthMode == true)
 		stealthEnemyHere = true;
 
 	bool unseenStealthEnemyHere = false;
@@ -2443,7 +2505,10 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
 	{
 		if (boardToInput->deployLandmine(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+		{
 			status = gameBoard;
+
+		}
 	}
 
 	bool lastMinionDestroyed = false;

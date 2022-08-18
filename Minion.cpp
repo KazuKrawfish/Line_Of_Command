@@ -642,7 +642,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 	{
 		description = "Submarine";
 		movementRange = 6;
-		attackRange = 0;
+		attackRange = 1;
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;

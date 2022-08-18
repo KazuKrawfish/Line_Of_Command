@@ -1923,6 +1923,7 @@ int MasterBoard::deployLandmine(inputLayer* InputLayer, int inputX, int inputY)
 	}
 
 	//If we made it this far we did a successful deploy, so deselect
+	cursor.selectMinionPointer->status = hasfired;
 	deselectMinion();
 
 	return 0;
