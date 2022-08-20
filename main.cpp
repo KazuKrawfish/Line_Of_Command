@@ -76,7 +76,7 @@ int main()
 
 		//Load other textures
 		std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox", "Sidebar", "loadGameBackground", 
-			"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground" };
+			"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", "dialogBox" };
 		std::vector <sf::Texture> otherTextureArray;
 		otherTextureArray.resize(otherImagesList.size());
 		initializeTextureArray("otherImages", otherImagesList, otherTextureArray);

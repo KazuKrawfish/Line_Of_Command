@@ -22,7 +22,7 @@ enum mainMenuStatus { topmenu, playingMap };
 enum interactionMethod { unchosen, localSkirmish, localCampaign };
 
 //Forward declare global utilities
-char playCharInput(sf::RenderWindow* myWindow);
+char getValidPlayerInput(sf::RenderWindow* myWindow);
 
 
 

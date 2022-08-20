@@ -89,7 +89,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 	return inputString;
 }
 
-char playCharInput(sf::RenderWindow* myWindow)
+char getValidPlayerInput(sf::RenderWindow* myWindow)
 {
 	char inputChar = '~';
 	sf::Event event;
@@ -1064,7 +1064,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	}
 
 	//Await player input to move past the selected item.
-	playCharInput(mywindow);
+	getValidPlayerInput(mywindow);
 
 
 	//Load the actual map
@@ -1106,7 +1106,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->display();
 
 				//Wait for one input.
-				playCharInput(mywindow);
+				getValidPlayerInput(mywindow);
 
 				loadsuccessful = true;
 			}
@@ -1169,7 +1169,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->display();
 
 				//Wait for one input.
-				playCharInput(mywindow);
+				getValidPlayerInput(mywindow);
 
 
 
@@ -1240,7 +1240,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				mywindow->display();
 
-				playerTypeInput = playCharInput(mywindow);
+				playerTypeInput = getValidPlayerInput(mywindow);
 
 				if (playerTypeInput == 'c' || playerTypeInput == 'h')
 				{
@@ -1386,7 +1386,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 			loadsuccessful = true;
 
-			playCharInput(mywindow);
+			getValidPlayerInput(mywindow);
 		}
 		else
 		{

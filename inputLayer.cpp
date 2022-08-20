@@ -22,7 +22,7 @@ when necessary, ie. when game ends or player wants to leave the current game.
 #include "SFML/System/Time.hpp"
 #include "SFML/System/Clock.hpp"
 
-char playCharInput(sf::RenderWindow* myWindow);
+char getValidPlayerInput(sf::RenderWindow* myWindow);
 
 inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
 	sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons,
@@ -531,6 +531,100 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 }
 
 
+//New function:
+int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
+{
+	char pointerToPrint[100];
+
+	//Always print dialog box below text
+	int xCoord = 250;
+	int yCoord = 200;
+	sf::Sprite dialogBoxSprite;
+	dialogBoxSprite.setTexture(MainMenu->otherGameTextures->at(11));
+	dialogBoxSprite.setPosition(xCoord, yCoord);
+	inputLayerWindow->draw(dialogBoxSprite);
+
+	//Then print text based on which dialog box it is
+	switch (dialogBoxOpen)
+	{
+	case(0):
+	{
+		//Print defense explain:
+		sf::String defenseExplainString = "Each tile provides a defense bonus from 0 to 5.\nEach point reduces damage by 5 % in combat.";
+			sf::Text defenseExplainText(defenseExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		defenseExplainText.setPosition(265, 220);
+		defenseExplainText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(defenseExplainText);
+		break;
+	}
+	case(1):
+	{
+		//Print production explain:
+		sf::String productionExplainString = "Friendly properties produce gold to support the war effort.\nMost produce 1000 per turn but some produce more.";
+			sf::Text productionExplainText(productionExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		productionExplainText.setPosition(265, 220);
+		productionExplainText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(productionExplainText);
+		break;
+	}
+	case(2):
+	{
+		//Print capture explain:
+		sf::String capExplainString = "Capture points. Infantry and technicals can capture\nenemy properties at 1 point per health per turn.\n20 points are needed to capture a property.";
+			sf::Text capExplainText(capExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		capExplainText.setPosition(265, 220);
+		capExplainText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(capExplainText);
+		break;
+	}
+	case(3):
+	{
+		//Print health explain:
+		sf::String healthExplainString = "Minion hit points. All minions start with 100 and die at 0.\nMinions repair 20 hit points per turn on a friendly property.\nAttack and capture is proportional to hit points.";
+			sf::Text healthExplainText(healthExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		healthExplainText.setPosition(265, 220);
+		healthExplainText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(healthExplainText);
+		break;
+	}
+	case(4):
+	{
+		//Print movement/fuel explain:
+		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use fuel based on their\ntype and the terrain they cross.Also, aircraft use 5 fuel\nand ships 2 fuel during upkeep.If they run out, they die.";
+			sf::Text fuelExplainText(fuelExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		fuelExplainText.setPosition(265, 220);
+		fuelExplainText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(fuelExplainText);
+		break;
+	}
+	case(5):
+	{
+		//Print ammo explain:
+		sf::String ammoExplainString = "Minions require ammo to attack with each weapon.\nAmmo left and max ammo.Pri.ammo on top, sec.ammo on bottom.\nINF indicates infinite ammo for that weapon.";
+			sf::Text ammoExplainText(ammoExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		ammoExplainText.setPosition(265, 220);
+		ammoExplainText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(ammoExplainText);
+		break;
+	}
+	case(6):
+	{
+		//Print move-state explain:
+		sf::String moveExplainString = "Green arrow - Can move and then attack/other action.\nYellow pause - Can now attack, unload, supply, etc.\nRed stop - Has performed all possible moves this turn.";
+		sf::Text moveExplainText(moveExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		moveExplainText.setPosition(265, 220);
+		moveExplainText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(moveExplainText);
+		break;
+	}
+
+	}
+
+	return 0;
+}
+
+
+
 //Updated printStatus
 int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 {
@@ -560,7 +654,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	playerStatusText.setFillColor(sf::Color::Black);
 	inputLayerWindow->draw(playerStatusText);
 
-
 	//Reset event text
 	eventText = "";
 
@@ -568,6 +661,9 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	//Do not print status for compie moves
 	if (status != propertyAction && boardToPrint->playerRoster[boardToPrint->playerFlag].playerType != computerPlayer)
 	{
+		//Draw boxes first
+		for (int i = 0; i < statusButtons.size(); i++)
+			inputLayerWindow->draw(statusButtons.at(i).mySprite);
 
 		if (observerNumber == boardToPrint->playerFlag)
 		{
@@ -604,7 +700,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			if (currentTile->capturePoints != 20)
 			{
 				//First draw box for capture status
-				inputLayerWindow->draw(statusButtons.at(2).mySprite);
 				snprintf(pointerToPrint, 100, "%d", currentTile->capturePoints);
 				sf::Text newText(pointerToPrint, *inputLayerFont, MainMenu->menuTextSize + 6);
 				newText.setPosition(statusButtons.at(2).xCoord + 78, statusButtons.at(2).yCoord + 18);
@@ -622,8 +717,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 
 			//Print health:
-			//First draw box 
-			inputLayerWindow->draw(statusButtons.at(3).mySprite);
 			//Then print actual number
 			snprintf(pointerToPrint, 100, "%d", int(currentMinion->health));
 			sf::String healthNumberString = pointerToPrint;
@@ -633,8 +726,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			inputLayerWindow->draw(healthNumberText);
 
 			//Print out fuel status
-			//Start with box
-			inputLayerWindow->draw(statusButtons.at(4).mySprite);
 			//Then print actual number
 			snprintf(pointerToPrint, 100, "%d/%d", currentMinion->currentFuel, currentMinion->maxFuel);
 			sf::String fuelNumberString = pointerToPrint;
@@ -644,9 +735,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			inputLayerWindow->draw(fuelNumberText);
 
 			//Print ammo box:
-			//First draw box 
-			inputLayerWindow->draw(statusButtons.at(5).mySprite);
-
 			//Then determine combo of pri/sec ammo:
 			if (currentMinion->maxPriAmmo > 0 && currentMinion->maxSecAmmo > 0)		//Both pri/sec have ammo
 				snprintf(pointerToPrint, 100, "%d/%d\n%d/%d", currentMinion->currentPriAmmo, currentMinion->maxPriAmmo, currentMinion->currentSecAmmo, currentMinion->maxSecAmmo);
@@ -667,7 +755,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			inputLayerWindow->draw(ammoNumberText);
 
 			//Print move state of minion
-			inputLayerWindow->draw(statusButtons.at(6).mySprite);
 			sf::Sprite effectsSprite;
 			effectsSprite.setTexture(*inputLayerTexture);
 			effectsSprite.setPosition(statusButtons.at(6).xCoord + 35, statusButtons.at(6).yCoord + 10);
@@ -719,8 +806,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		inputLayerWindow->draw(newText);
 
 		//Printout defense bonus status for tile
-		//Start with box
-		inputLayerWindow->draw(statusButtons.at(0).mySprite);
 		//Then print actual number
 		snprintf(pointerToPrint, 100, "%d", int(round((currentTile->defenseFactor - 1.0) * 10)));
 		sf::String defenseBonusNumber = pointerToPrint;
@@ -733,8 +818,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		if (currentTile->production > 0)
 		{
 			//Print out production status
-			//Start with box
-			inputLayerWindow->draw(statusButtons.at(1).mySprite);
 			//Then print actual number
 			snprintf(pointerToPrint, 100, "%d", currentTile->production);
 			sf::String productionNumberString = pointerToPrint;
@@ -1137,7 +1220,7 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	inputLayerWindow->pollEvent(event);
 
 	//Wait for one input.
-	playCharInput(inputLayerWindow);
+	getValidPlayerInput(inputLayerWindow);
 
 	inputLayerWindow->pollEvent(event);
 
@@ -1160,6 +1243,12 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber, 
 			printSingleTile((j - windowX), (i - windowY), j, i, boardToPrint, observerNumber, withinAnimation);
 		}
 
+	}
+
+	//After printing out whole board, we may print a dialogbox over that for status.
+	if (dialogBoxOpen != -1)
+	{
+		printStatusDialogBox(boardToPrint);
 	}
 
 	return 0;
@@ -1753,7 +1842,7 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 
 int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 {
-	playCharInput(inputLayerWindow);
+	getValidPlayerInput(inputLayerWindow);
 
 	//Only lasts one input.
 	status = gameBoard;
@@ -2153,14 +2242,20 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 
 int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 {
-	//Must be mouse click
+	//If we had a dialog box open, one click/key closes it, and no other action is taken.
+	if (dialogBoxOpen != -1)
+	{
+		getValidPlayerInput(inputLayerWindow);
+		dialogBoxOpen = -1;
+		return 0;
+	}
 
+	//Quote indicates mouse click
 	if (*Input == sf::Keyboard::Quote)
 	{
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
 
 		//If mouse click is within map, 
-
 		int windowX = mousePosition.x / 50;
 		int windowY = mousePosition.y / 50;
 		int tileX = windowX + boardToInput->windowLocationX;
@@ -2180,7 +2275,21 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 					*Input = sf::Keyboard::Key::T; //Select that tile.
 				}
 		}
+		else	//Check if mouse clicked within status buttons:
+		{
+			//If within a status button, assign dialogBoxOpen that value:
+			for (int i = 0; i < statusButtons.size(); i++)
+			{
+				if ((statusButtons)[i].checkWithinButton(mousePosition.x, mousePosition.y) == true)
+				{
+					if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
+					{
+						dialogBoxOpen = i;
+					}
+				}
+			}
 
+		}
 	}
 
 
@@ -2270,26 +2379,33 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 	return 0;
 }
 
-//Update minionInput:
-//Left click to select and deselect. Right click to move.
 
 int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput) {
 
+	//If we had a dialog box open, one click/key closes it, and no other action is taken.
+	if (dialogBoxOpen != -1)
+	{
+		getValidPlayerInput(inputLayerWindow);
+		dialogBoxOpen = -1;
+		return 0;
+	}
+
 	//This tracks who may lose after an action. Only one player can lose per action, so only need one number.
 	int playerPotentiallyDefeated = 0;
+
+	sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
+
+	//Get mouse click information
+	int windowX = mousePosition.x / 50;
+	int windowY = mousePosition.y / 50;
+	int tileX = windowX + boardToInput->windowLocationX;
+	int tileY = windowY + boardToInput->windowLocationY;
 
 	//If right click occurred, may move, may not move.
 	//This is to avoid accidentally moving in place after selecting a minion.
 	//Requires left, then right click, to move in place.
 	if (*Input == sf::Keyboard::Comma)
 	{
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
-
-		//Get mouse click information
-		int windowX = mousePosition.x / 50;
-		int windowY = mousePosition.y / 50;
-		int tileX = windowX + boardToInput->windowLocationX;
-		int tileY = windowY + boardToInput->windowLocationY;
 
 		//If mouse click is within map, 
 		if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
@@ -2358,13 +2474,26 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 						}
 				}
 		}
-
 	}
-
+	else
 	//If left click, deselect.	
+	//Must also be in map.
 	if (*Input == sf::Keyboard::Quote)
 	{
-		*Input = sf::Keyboard::Key::T;
+		if( tileX < boardToInput->BOARD_WIDTH&& tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
+			*Input = sf::Keyboard::Key::T;
+		else 
+		//If within a status button, assign dialogBoxOpen that value:
+		for (int i = 0; i < statusButtons.size(); i++)
+		{
+			if ((statusButtons)[i].checkWithinButton(mousePosition.x, mousePosition.y) == true)
+			{
+				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
+				{
+					dialogBoxOpen = i;
+				}
+			}
+		}
 	}
 
 	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
@@ -2581,7 +2710,7 @@ int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 	inputLayerWindow->pollEvent(event);
 
 	//Wait for one input.
-	playCharInput(inputLayerWindow);
+	getValidPlayerInput(inputLayerWindow);
 
 
 	return 0;
@@ -2608,7 +2737,7 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 	inputLayerWindow->pollEvent(event);
 
 	//Wait for one input.
-	playCharInput(inputLayerWindow);
+	getValidPlayerInput(inputLayerWindow);
 
 	return 0;
 }
@@ -2666,7 +2795,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			sf::Event throwAwayEvent;
 			while (inputLayerWindow->pollEvent(throwAwayEvent));
 
-			playCharInput(inputLayerWindow);
+			getValidPlayerInput(inputLayerWindow);
 
 			status = gameBoard;
 
@@ -2722,7 +2851,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			sf::Event throwAwayEvent;
 			while (inputLayerWindow->pollEvent(throwAwayEvent));
 			//Give player a chance to click.
-			playCharInput(inputLayerWindow);
+			getValidPlayerInput(inputLayerWindow);
 
 			status = gameBoard;
 		}

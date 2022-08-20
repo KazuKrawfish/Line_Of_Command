@@ -43,7 +43,7 @@ Map_width_below:
 Map_height_below:
 20
 Player_whose_turn_it_is_below:
-2
+1
 Map_terrain_below:
 MM.M.=...M..MMMM
 .MMM.=A.MMMMMMMM

@@ -57,6 +57,7 @@ public:
 	int printMenu(MasterBoard* boardToPrint);
 	int printInsertMinion(MasterBoard* boardToPrint);
 	int printInsertTile(MasterBoard* boardToPrint);
+	int printStatusDialogBox(MasterBoard* boardToPrint);
 
 	//Print Whole Screen
 	int printStatus(MasterBoard* boardToPrint, int observerNumber);
@@ -95,6 +96,7 @@ public:
 	std::string eventText = "";
 	sf::String savedInsertMinionInput = "";
 
+	int dialogBoxOpen = -1;
 	gameInputLayer status = gameBoard;
 	specialKey minionVisibleStatus = showMinions;
 	rangeVisibleStatus showRangeStatus = hideRange;

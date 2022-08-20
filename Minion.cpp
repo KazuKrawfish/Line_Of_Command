@@ -608,21 +608,21 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		
 	}
 	else
-	if(inputType == "Gunboat")
-	{
+		if (inputType == "Gunboat")
+		{
 		description = "Gunboat";
 		movementRange = 7;
 		attackRange = 1;
 		visionRange = 3;
 		rangeType = directFire;
-		specialtyGroup = normal;
+		specialtyGroup = smallTransport;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[16][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 1;
 		maxSecAmmo = -1;
-		
-	}
+
+		}
 	else
 	if(inputType == "Lander")
 	{
@@ -655,21 +655,21 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		
 	}
 	else
-	if(inputType == "Aircraft_Carrier")
-	{
+		if (inputType == "Aircraft_Carrier")
+		{
 		description = "Aircraft Carrier";
 		movementRange = 7;
 		attackRange = 0;
 		visionRange = 3;
 		rangeType = directFire;
-		specialtyGroup = smallTransport;
+		specialtyGroup = aircraftCarrier;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[17][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
-        maxSecAmmo = -1;
-		
-	}
+		maxSecAmmo = -1;
+
+		}
     else
 	if(inputType == "Landmine")
 	{
