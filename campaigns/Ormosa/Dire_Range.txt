@@ -35,79 +35,75 @@ Game_turn_below:
 Fog_Of_War
 1
 Map_width_below:
-20
+15
 Map_height_below:
 20
 Player_whose_turn_it_is_below:
 2
 Map_terrain_below:
-......MMhHAM...=....
-..MM...M=MM....=.MM.
-....M...Mn+n.===^^..
-...M...Mn.===..M...M
-..^.^...=^..MMM^..M.
-...MM..M=n...^...^^.
-..^...M..^=MM.M.....
-....^..MMM=..Mn^M.^^
-..M..^MQ=AM..^M++...
-......^^^M^n.n..^.MM
-...M.M...n=..M..M...
-....M....M=.^M^...MM
-..MM.nMMM.=.M.M...^.
-.....^...^...MM.....
-..M....^..=M....MMM^
-M...MM..^.=h..M.....
-.M..^..^..=+M.M.^^..
-.M..M.^.+.n...M.....
-...^.^.^.h=H^....^..
-.......M.H=n.^.^....
+.....+MMhHAM...
+..MM..+M=MM....
++..nM..+MA+n.==
+.+.M...Mn.===..
+..^.^...=^M.MMM
+...MM.MM=n..+^.
+..^..+M+.^=MM.M
+....^.+M^^=..^n
+..M+.^^Q=n^.+^M
+......^^^M^n.n.
+...M+M..+n=+.M.
+...+M..+.M=.^M^
+..MM+nM..M=+M.M
+.....^..+^+..MM
+..M.+.M^.+=M...
+M..+MM+.^.=h.+M
+.M..^.+^..=+M.M
+.M.+M.^++.n.MMM
+...^.^.^.h=H^..
+.+.....M.H=n.^.
 Property_controller_number_below:
-00000000111000000000
-00000000000000000000
-00000000010100000000
-00000000000000000000
-00000000000000000000
-00000000010000000000
-00000000000000000000
-00000000000000100000
-00000001010000000000
-00000000000101000000
-00000000010000000000
-00000000000000000000
-00000100000000000000
-00000000000000000000
-00000000000000000000
-00000000000200000000
-00000000000000000000
-00000000002000000000
-00000000020200000000
-00000000020200000000
-Number_Of_Banned_Minion_Types
-4
-List_Of_Banned_Minion_Types
+000000001110000
+000000000000000
+000200000101000
+000000000000000
+000000000000000
+000200000100000
+000000000000000
+000000000000001
+000000010100000
+000000000001010
+000000000100000
+000000000000000
+000001000000000
+000000000000000
+000000000000000
+000000000002000
+000000000000000
+000000000020000
+000000000202000
+000000000202000
+Number_Of_Banned_Minions
+6
+Banned_Minion_List
 Bomber
 Interceptor
 Transport_Copter
 Attack_Copter
+Anti-Aircraft
+Multirole
 Total_minions_below:
-35
-Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,Ammo):
+36
+Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,PriAmmo,SecAmmo):
 Infantry 4 15 2 0 0 100 0 20 0 70 -1 0 
 Infantry 3 12 2 1 0 100 0 20 0 70 -1 0 
 Specialist 2 12 2 2 0 100 0 20 0 70 3 0 
 Specialist 2 1 2 3 0 100 0 20 0 70 3 0 
 Infantry 4 4 2 4 0 100 0 20 0 70 -1 0 
-Infantry 17 1 2 5 0 100 0 20 0 70 -1 0 
 Infantry 14 4 2 6 0 100 0 20 0 70 -1 0 
 Infantry 13 5 2 7 0 100 0 20 0 70 -1 0 
-Specialist 15 4 2 8 0 100 0 20 0 70 3 0 
-Specialist 16 7 2 9 0 100 0 20 0 70 3 0 
 Specialist 12 11 2 10 0 100 0 20 0 70 3 0 
 Specialist 13 11 2 11 0 100 0 20 0 70 3 0 
 Infantry 12 12 2 12 0 100 0 20 0 70 -1 0 
-Infantry 18 9 2 13 0 100 0 20 0 70 -1 0 
-Infantry 18 10 2 14 0 100 0 20 0 70 -1 0 
-Specialist 17 10 2 15 0 100 0 20 0 70 3 0 
 Specialist 11 14 2 16 0 100 0 20 0 70 3 0 
 Artillery 10 19 2 17 0 100 0 20 0 50 6 -1 
 Recon 10 18 2 18 0 100 0 20 0 70 -1 0 
@@ -121,9 +117,16 @@ Infantry 14 7 1 25 0 100 0 20 0 70 -1 0
 Infantry 13 9 1 26 0 100 0 20 0 70 -1 0 
 Infantry 9 2 1 27 0 100 0 20 0 70 -1 0 
 Infantry 11 2 1 28 0 100 0 20 0 70 -1 0 
-Recon 15 0 1 29 0 100 0 20 0 70 -1 0 
 Artillery 14 0 1 30 0 100 0 20 0 50 6 -1 
 Armor 13 0 1 31 0 100 0 20 0 70 9 0 
 Specialist 6 3 2 32 0 100 0 20 0 70 3 0 
 Specialist 5 2 2 33 0 100 0 20 0 70 3 0 
-Infantry 5 3 2 34 0 100 0 20 0 70 -1 0
+Infantry 5 3 2 34 0 100 0 20 0 70 -1 0 
+Technical 8 16 2 35 0 100 0 20 0 70 -1 0 
+Technical 8 18 2 36 0 100 0 20 0 70 -1 0 
+Technical 8 19 2 37 0 100 0 20 0 70 -1 0 
+Technical 4 3 2 38 0 100 0 20 0 70 -1 0 
+Technical 11 5 2 39 0 100 0 20 0 70 -1 0 
+Transport_Copter 8 1 1 40 0 100 0 20 0 80 -1 -1 
+Transport_Copter 8 7 1 41 0 100 0 20 0 80 -1 -1 
+Infantry 8 0 1 42 2 100 0 20 0 70 -1 0 
