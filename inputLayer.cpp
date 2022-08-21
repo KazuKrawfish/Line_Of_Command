@@ -1236,9 +1236,9 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber, 
 	int windowX = boardToPrint->windowLocationX;
 
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
-	for (int i = windowY; i < (windowY + boardToPrint->WINDOW_HEIGHT); i++)
+	for (int i = windowY; i < (windowY + boardToPrint->WINDOW_HEIGHT ); i++)
 	{
-		for (int j = windowX; j < (windowX + boardToPrint->WINDOW_WIDTH); j++)
+		for (int j = windowX; j < (windowX + boardToPrint->WINDOW_WIDTH ); j++)
 		{
 			printSingleTile((j - windowX), (i - windowY), j, i, boardToPrint, observerNumber, withinAnimation);
 		}

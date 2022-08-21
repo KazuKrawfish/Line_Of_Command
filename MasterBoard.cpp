@@ -1244,6 +1244,9 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 {
 	//Need a way to clear board before loading. Using constructor doesn't do the trick.
 
+	windowLocationX = 0;
+	windowLocationY = 0;
+
 	cursor.XCoord = 1;
 	cursor.YCoord = 1;
 

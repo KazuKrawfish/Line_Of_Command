@@ -607,7 +607,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 	//Resize the map based on new data.
 	//Not sure why we have to give an additional line but it segfaulted otherwise
-	boardToPrint->Board.resize(boardToPrint->BOARD_WIDTH + 1);
+	boardToPrint->Board.resize(boardToPrint->BOARD_WIDTH );	//+1)
 	for (int i = 0; i < boardToPrint->BOARD_WIDTH; i++)
 	{
 		boardToPrint->Board[i].resize(boardToPrint->BOARD_HEIGHT);

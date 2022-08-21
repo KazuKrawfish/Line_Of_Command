@@ -1577,8 +1577,10 @@ int compie::determineProduction(MasterBoard* boardToUse)
 
 		//Look at enemy units and count total air units
 		//Must be able to see those units, otherwise compie is cheating
+		//Must not be in transport, since that location is -1/-1
 		if (boardToUse->minionRoster[i] != NULL && boardToUse->minionRoster[i]->team != boardToUse->playerFlag
-			&& boardToUse->Board[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].withinVision[boardToUse->playerFlag] == true)
+			&& boardToUse->minionRoster[i]->locationX != -1
+			&& boardToUse->Board[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].withinVision[boardToUse->playerFlag] == true )
 		{
 			if (boardToUse->minionRoster[i]->type == "Interceptor" ||
 				boardToUse->minionRoster[i]->type == "Attack_Copter" ||

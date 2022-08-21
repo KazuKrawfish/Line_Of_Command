@@ -131,6 +131,8 @@ public:
 		capturePoints = 20;
 		withinCursorPath = false;
 
+		textureRectAnchorX = 0;
+		textureRectAnchorY = 0;
 
 		return 0;
 	}
