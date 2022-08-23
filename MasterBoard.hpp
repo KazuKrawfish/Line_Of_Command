@@ -113,6 +113,7 @@ public:
 	int endTurn(inputLayer* InputLayer);
 	int upkeep(inputLayer* InputLayer, int observerNumber);
 	int playerDefeat(int playerNumber, int winningPlayer, inputLayer* InputLayer);
+	int playerVictory(int winningPlayer, inputLayer* InputLayer);
 	//Begin/End Turn Functions/////////////////
 
 	//Upkeep Functions/////////////////////////

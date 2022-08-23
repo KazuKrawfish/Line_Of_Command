@@ -756,9 +756,6 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	}
 	mywindow->clear();
 
-	//introMusic->stop();
-
-
 	playGame(boardToPlay, InputLayer);
 
 
@@ -812,6 +809,9 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		else
 			if (menuStatus == playingMap)
 			{
+				if(introMusic->getStatus() == sf::SoundSource::Playing)
+					introMusic->stop();
+
 				//Only call upkeep before play commences if it is a new game AND very first turn
 				//And not compie. Compie performs upkeep in its own function.
 				if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == humanPlayer)

@@ -2569,11 +2569,30 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 	return textToReturn;
 }
 
+
+//Does player victory process. Can be called after playerDefeat, or directly if a victory condition was met.
+int MasterBoard::playerVictory(int winningPlayer, inputLayer* InputLayer)
+{
+
+	InputLayer->printPlayerVictory(winningPlayer, this);
+
+	if (missionFlag == false || playerRoster[winningPlayer].playerType == computerPlayer)
+		InputLayer->exitToMainMenu(this);
+	else
+	{
+		InputLayer->NextMission(this);
+	}
+
+	return 0;
+
+}
+
 //Destroys all units owned by loser.
 //Transfers properties to either the HQ capper, or neutral.
 //Does NOT discriminate - you must set winningPlayer = 0 if all minions were destroyed.
 int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* InputLayer)
 {
+
 	playerRoster[losingPlayer].stillAlive = false;
 
 	bool throwAway = false;
@@ -2602,7 +2621,6 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 		}
 	}
 
-
 	//Change over to defeat screen for that player.		
 	InputLayer->printPlayerDefeat(losingPlayer, this);
 
@@ -2629,15 +2647,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 			}
 		}
 
-		InputLayer->printPlayerVictory(winningPlayer, this);
-
-		if (missionFlag == false || playerRoster[winningPlayer].playerType == computerPlayer)
-			InputLayer->exitToMainMenu(this);
-		else
-		{
-			InputLayer->NextMission(this);
-		}
-
+		playerVictory(winningPlayer , InputLayer);
 		gameOver = true;
 	}
 
@@ -3021,6 +3031,13 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 //Upkeep always collects income. It is only called on the first turn of a new game, or at the end of a turn.
 int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 {
+
+	//If we have reached the end of the mission based on turn length, then end the mission with a winner.
+	if (missionTurnLength != 0 && InputLayer->MainMenu->gameTurn >= missionTurnLength)
+	{
+		playerVictory(whoHoldsOut, InputLayer);
+	}
+
 	//Set vision field for current player
 	setVisionField(playerFlag);
 
