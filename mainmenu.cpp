@@ -123,11 +123,11 @@ char getValidPlayerInput(sf::RenderWindow* myWindow)
 }
 
 mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
-					std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic,
+					std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
 					std::vector <sf::Texture>* factionButtonTextureArray)
 {
 	myTexture = gameTexture;
-	introMusic = inputIntroMusic;
+	musicArray = inputMusicArray;
 	myFont = cour;
 	mywindow = myWindow;
 	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
@@ -736,7 +736,7 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 	mywindow->clear();
 
-	introMusic->play();
+	musicArray[0].play();
 
 	mywindow->draw(startWallpaperSprite);
 	mywindow->draw(startScreenStatementSprite);
@@ -755,6 +755,8 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		}
 	}
 	mywindow->clear();
+
+
 
 	playGame(boardToPlay, InputLayer);
 
@@ -809,8 +811,8 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		else
 			if (menuStatus == playingMap)
 			{
-				if(introMusic->getStatus() == sf::SoundSource::Playing)
-					introMusic->stop();
+				if(musicArray[0].getStatus() == sf::SoundSource::Playing)
+					musicArray[0].stop();
 
 				//Only call upkeep before play commences if it is a new game AND very first turn
 				//And not compie. Compie performs upkeep in its own function.
@@ -1333,6 +1335,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	else boardToPlay->isItSinglePlayerGame = false;
 
 	menuStatus = playingMap;
+
+	//If we start new game, stop menu music since we're getting briefing music
+	musicArray[0].stop();
 
 	//Before entering play, make sure to print out briefing.
 	InputLayer->printMissionBriefing(boardToPlay);

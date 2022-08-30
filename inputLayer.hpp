@@ -41,7 +41,8 @@ class inputLayer
 public:
 
 	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
-		sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures);
+		sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures,
+		sf::Music * inputGameMusic);
 
 	//Print Functions:///////////////////////////////////////////////////////
 	//Non-game play
@@ -124,6 +125,7 @@ public:
 
 	//SFML Objects		/////////////////////////
 	std::vector <sf::Sound>* soundEffects;
+	 sf::Music* gameMusic;
 	bool soundsOn = true;
 	int speedFactor = 1;		//1 is normal. 3 is "high". 10 is ultra fast.
 	sf::Texture* inputLayerTexture;

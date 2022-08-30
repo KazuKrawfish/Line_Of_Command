@@ -32,7 +32,7 @@ public:
 
 	//CONSTRUCTOR///////////////////////////////
 	mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
-				std::vector <sf::Texture>* gameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputIntroMusic,
+				std::vector <sf::Texture>* gameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
 				std::vector <sf::Texture>* factionButtonTextureArray);
 	//CONSTRUCTOR///////////////////////////////
 
@@ -94,7 +94,7 @@ public:
 	sf::Texture* myTexture;
 	sf::Font* myFont;
 	std::vector <sf::Texture>* otherGameTextures;
-	sf::Music* introMusic;
+	sf::Music* musicArray;
 	//SFML Objects///////////////////////////////
 
 };

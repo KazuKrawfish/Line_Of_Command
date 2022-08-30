@@ -26,7 +26,7 @@ char getValidPlayerInput(sf::RenderWindow* myWindow);
 
 inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
 	sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons,
-	std::vector <sf::Texture>* statusTextures)
+	std::vector <sf::Texture>* statusTextures,  sf::Music * inputGameMusic)
 {
 	inputLayerTexture = gameTexture;
 	inputLayerFont = cour;
@@ -35,6 +35,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	soundEffects = inputSoundEffects;
 	menuButtons = inputMenuButtons;
 	showRangeStatus = hideRange;
+	gameMusic = inputGameMusic;
 
 	//Create buttons for property menus using the gameTexture
 	//Overall property menu area is:
@@ -310,12 +311,12 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 					effectsSprite.setTextureRect(rectArray[6][15]); //Draw little flag
 					inputLayerWindow->draw(effectsSprite);
 				}
-				else 
-				if (mouseHovering == true && boardToPrint->cursor.selectMinionPointer->type == "APC")
-				{
-					effectsSprite.setTextureRect(rectArray[8][15]); //Draw supply image
-					inputLayerWindow->draw(effectsSprite);
-				}
+				else
+					if (mouseHovering == true && boardToPrint->cursor.selectMinionPointer->type == "APC")
+					{
+						effectsSprite.setTextureRect(rectArray[8][15]); //Draw supply image
+						inputLayerWindow->draw(effectsSprite);
+					}
 			}
 			else
 				if (tileToPrint->withinCursorPath == true)
@@ -323,7 +324,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 					//If this tile is on cursor's path
 					effectsSprite.setTextureRect(rectArray[6][2]);
 					inputLayerWindow->draw(effectsSprite);
-					
+
 					if (mouseHovering == true)
 					{
 						effectsSprite.setTextureRect(rectArray[9][15]); //Draw boot
@@ -420,8 +421,8 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 		//Must be visible to see effects!
 		if (tileToPrint->hasMinionOnTop == true && minionToPrint != NULL && tileToPrint->withinVision[playerNumber] == true
-			&& minionVisibleStatus == showMinions && minionToPrint->invisible == false  
-			&& ( tileToPrint->minionOnTop->stealthMode == false  || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber))
+			&& minionVisibleStatus == showMinions && minionToPrint->invisible == false
+			&& (tileToPrint->minionOnTop->stealthMode == false || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber))
 		{
 
 			//Print if transporting or capturing // Specialty moves
@@ -551,7 +552,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	{
 		//Print defense explain:
 		sf::String defenseExplainString = "Each tile provides a defense bonus from 0 to 5.\nEach point reduces damage by 5 % in combat.";
-			sf::Text defenseExplainText(defenseExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		sf::Text defenseExplainText(defenseExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		defenseExplainText.setPosition(265, 220);
 		defenseExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(defenseExplainText);
@@ -561,7 +562,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	{
 		//Print production explain:
 		sf::String productionExplainString = "Friendly properties produce gold to support the war effort.\nMost produce 1000 per turn but some produce more.";
-			sf::Text productionExplainText(productionExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		sf::Text productionExplainText(productionExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		productionExplainText.setPosition(265, 220);
 		productionExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(productionExplainText);
@@ -571,7 +572,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	{
 		//Print capture explain:
 		sf::String capExplainString = "Capture points. Infantry and technicals can capture\nenemy properties at 1 point per health per turn.\n20 points are needed to capture a property.";
-			sf::Text capExplainText(capExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		sf::Text capExplainText(capExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		capExplainText.setPosition(265, 220);
 		capExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(capExplainText);
@@ -581,7 +582,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	{
 		//Print health explain:
 		sf::String healthExplainString = "Minion hit points. All minions start with 100 and die at 0.\nMinions repair 20 hit points per turn on a friendly property.\nAttack and capture is proportional to hit points.";
-			sf::Text healthExplainText(healthExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		sf::Text healthExplainText(healthExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		healthExplainText.setPosition(265, 220);
 		healthExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(healthExplainText);
@@ -591,7 +592,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	{
 		//Print movement/fuel explain:
 		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use fuel based on their\ntype and the terrain they cross.Also, aircraft use 5 fuel\nand ships 2 fuel during upkeep.If they run out, they die.";
-			sf::Text fuelExplainText(fuelExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		sf::Text fuelExplainText(fuelExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		fuelExplainText.setPosition(265, 220);
 		fuelExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(fuelExplainText);
@@ -601,7 +602,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	{
 		//Print ammo explain:
 		sf::String ammoExplainString = "Minions require ammo to attack with each weapon.\nAmmo left and max ammo.Pri.ammo on top, sec.ammo on bottom.\nINF indicates infinite ammo for that weapon.";
-			sf::Text ammoExplainText(ammoExplainString, *inputLayerFont, MainMenu->menuTextSize);
+		sf::Text ammoExplainText(ammoExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		ammoExplainText.setPosition(265, 220);
 		ammoExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(ammoExplainText);
@@ -1191,6 +1192,13 @@ int inputLayer::printInsertTile(MasterBoard* boardToPrint)
 int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 {
 	inputLayerWindow->clear();
+
+	//If not playing music already, play music
+	if (soundsOn == true && gameMusic[1].getStatus() != sf::SoundSource::Status::Playing)
+	{
+		gameMusic[1].play();
+	}
+
 	sf::String boardMessage;
 
 	sf::Sprite backgroundSprite;
@@ -1224,6 +1232,10 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 
 	inputLayerWindow->pollEvent(event);
 
+	//Turn off music
+	gameMusic[1].stop();
+
+
 	return 0;
 
 }
@@ -1236,9 +1248,9 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber, 
 	int windowX = boardToPrint->windowLocationX;
 
 	//Go through the whole "board", staying within the bounds of window's x and y coordinates.
-	for (int i = windowY; i < (windowY + boardToPrint->WINDOW_HEIGHT ); i++)
+	for (int i = windowY; i < (windowY + boardToPrint->WINDOW_HEIGHT); i++)
 	{
-		for (int j = windowX; j < (windowX + boardToPrint->WINDOW_WIDTH ); j++)
+		for (int j = windowX; j < (windowX + boardToPrint->WINDOW_WIDTH); j++)
 		{
 			printSingleTile((j - windowX), (i - windowY), j, i, boardToPrint, observerNumber, withinAnimation);
 		}
@@ -1500,12 +1512,12 @@ int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, ti
 	}
 	if (tileBeingAttacked->locationX < boardToPrint->BOARD_WIDTH - 1 && boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY].animationSprite != NULL)
 	{
-		delete boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY ].animationSprite;
-		boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY ].animationSprite = NULL;
+		delete boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY].animationSprite;
+		boardToPrint->Board[tileBeingAttacked->locationX + 1][tileBeingAttacked->locationY].animationSprite = NULL;
 	}
 	if (tileBeingAttacked->locationY < boardToPrint->BOARD_HEIGHT - 1 && boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].animationSprite != NULL)
 	{
-		delete boardToPrint->Board[tileBeingAttacked->locationX ][tileBeingAttacked->locationY + 1].animationSprite;
+		delete boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].animationSprite;
 		boardToPrint->Board[tileBeingAttacked->locationX][tileBeingAttacked->locationY + 1].animationSprite = NULL;
 	}
 
@@ -1834,6 +1846,25 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 	}
 	else printWaitingScreen(boardToPrint);
 
+
+	//If not playing music already, play music for that player's faction
+	if (soundsOn == true)
+	{
+		int factionMusicOffset = int(boardToPrint->playerRoster[boardToPrint->playerFlag].playerFaction) + 3; //Number of songs before faction themes
+
+		//Crude method to ensure we stopped playing previous faction music if it was different
+		for (int i = 3; i < 7; i++)
+		{
+			if (factionMusicOffset != i)
+				gameMusic[i].stop();
+		}
+
+		//Then play the actual appropriate music for this faction
+		if (gameMusic[factionMusicOffset].getStatus() != sf::SoundSource::Status::Playing)
+			gameMusic[factionMusicOffset].play();
+
+	}
+
 	//Reset line tracker after each print.
 	menuLineTracker = 1;
 
@@ -1873,198 +1904,198 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 int inputLayer::insertMinionInput(sf::Event* Input, MasterBoard* boardToInput)
 {
 	//Return to gameBoard if player presses "ESC"".
-    //Clear out saved input.
+	//Clear out saved input.
 	if (Input->key.code == sf::Keyboard::Key::Escape)
 	{
 		status = gameBoard;
-        savedInsertMinionInput.clear();
+		savedInsertMinionInput.clear();
 		return 1;
 	}
 
-    //This clear may need to happen at the end of the function.
-    //If at three or more chars in saved string, clear it to make way for the new input.
-    if(savedInsertMinionInput.getSize() >= 3 || savedInsertMinionInput == "x")
-        savedInsertMinionInput.clear();
+	//This clear may need to happen at the end of the function.
+	//If at three or more chars in saved string, clear it to make way for the new input.
+	if (savedInsertMinionInput.getSize() >= 3 || savedInsertMinionInput == "x")
+		savedInsertMinionInput.clear();
 
-    if (Input->type == sf::Event::EventType::TextEntered)
-        savedInsertMinionInput += Input->text.unicode;
-    else return 1;
+	if (Input->type == sf::Event::EventType::TextEntered)
+		savedInsertMinionInput += Input->text.unicode;
+	else return 1;
 
 	//Convert valid keyboard input to char
 	std::string convertedInput = "~";
 
-    //Standard minions
-    if(savedInsertMinionInput == "inf" || savedInsertMinionInput == "Inf")
-    {
-        convertedInput = "Infantry";
-    }
-    else
-    if(savedInsertMinionInput == "spe" || savedInsertMinionInput == "Spe")
-    {
-        convertedInput = "Specialist";
-    }
-    else
-    if(savedInsertMinionInput == "arm" || savedInsertMinionInput == "Arm")
-    {
-        convertedInput = "Armor";
-    }
-    else
-    if(savedInsertMinionInput == "hea" || savedInsertMinionInput == "Hea")
-    {
-        convertedInput = "Heavy_Armor";
-    }
-    else
-    if(savedInsertMinionInput == "art" || savedInsertMinionInput == "Art")
-    {
-        convertedInput = "Artillery";
-    }
-    else
-    if(savedInsertMinionInput == "rec" || savedInsertMinionInput == "Rec")
-    {
-        convertedInput = "Recon";
-    }
-    else
-    if(savedInsertMinionInput == "Emp" || savedInsertMinionInput == "emp")
-    {
-        convertedInput = "Artillery_Emplacement";
-    }
-    else
-    if(savedInsertMinionInput == "att" || savedInsertMinionInput == "Att")
-    {
-        convertedInput = "Attack_Copter";
-    }
-    else
-    if(savedInsertMinionInput == "tra" || savedInsertMinionInput == "Tra")
-    {
-        convertedInput = "Transport_Copter";
-    }
-    else
-    if(savedInsertMinionInput == "APC" || savedInsertMinionInput == "apc")
-    {
-        convertedInput = "APC";
-    }
-    else
-    if(savedInsertMinionInput == "int" || savedInsertMinionInput == "Int")
-    {
-        convertedInput = "Interceptor";
-    }
-    else
-    if(savedInsertMinionInput == "bom" || savedInsertMinionInput == "Bom")
-    {
-        convertedInput = "Bomber";
-    }
-    else
-    if(savedInsertMinionInput == "Gun" || savedInsertMinionInput == "gun")
-    {
-        convertedInput = "Gunboat";
-    }
-    else
-    if(savedInsertMinionInput == "lan" || savedInsertMinionInput == "Lan")
-    {
-        convertedInput = "Lander";
-    }
-    else
-    if(savedInsertMinionInput == "sub" || savedInsertMinionInput == "Sub")
-    {
-        convertedInput = "Submarine";
-    }
-    else
-    if(savedInsertMinionInput == "ant" || savedInsertMinionInput == "Ant")
-    {
-        convertedInput = "Anti-Aircraft";
-    }
-    else
-    if(savedInsertMinionInput == "air" || savedInsertMinionInput == "Air")
-    {
-        convertedInput = "Aircraft_Carrier";
-    }
-    else
-    if(savedInsertMinionInput == "roc" || savedInsertMinionInput == "Roc")
-    {
-        convertedInput = "Rocket_Artillery";
-    }
-    else
-    if(savedInsertMinionInput == "bat" || savedInsertMinionInput == "Bat")
-    {
-        convertedInput = "Battleship";
-    }
-    else
-    if(savedInsertMinionInput == "cru" || savedInsertMinionInput == "Cru")
-    {
-        convertedInput = "Cruiser";
-    }
-    else
-    if(savedInsertMinionInput == "SAM" || savedInsertMinionInput == "sam")
-    {
-        convertedInput = "SAM_Site";
-    }
-    else
-    if(savedInsertMinionInput == "min" || savedInsertMinionInput == "Min")
-    {
-        convertedInput = "Landmine";
-    }
+	//Standard minions
+	if (savedInsertMinionInput == "inf" || savedInsertMinionInput == "Inf")
+	{
+		convertedInput = "Infantry";
+	}
+	else
+		if (savedInsertMinionInput == "spe" || savedInsertMinionInput == "Spe")
+		{
+			convertedInput = "Specialist";
+		}
+		else
+			if (savedInsertMinionInput == "arm" || savedInsertMinionInput == "Arm")
+			{
+				convertedInput = "Armor";
+			}
+			else
+				if (savedInsertMinionInput == "hea" || savedInsertMinionInput == "Hea")
+				{
+					convertedInput = "Heavy_Armor";
+				}
+				else
+					if (savedInsertMinionInput == "art" || savedInsertMinionInput == "Art")
+					{
+						convertedInput = "Artillery";
+					}
+					else
+						if (savedInsertMinionInput == "rec" || savedInsertMinionInput == "Rec")
+						{
+							convertedInput = "Recon";
+						}
+						else
+							if (savedInsertMinionInput == "Emp" || savedInsertMinionInput == "emp")
+							{
+								convertedInput = "Artillery_Emplacement";
+							}
+							else
+								if (savedInsertMinionInput == "att" || savedInsertMinionInput == "Att")
+								{
+									convertedInput = "Attack_Copter";
+								}
+								else
+									if (savedInsertMinionInput == "tra" || savedInsertMinionInput == "Tra")
+									{
+										convertedInput = "Transport_Copter";
+									}
+									else
+										if (savedInsertMinionInput == "APC" || savedInsertMinionInput == "apc")
+										{
+											convertedInput = "APC";
+										}
+										else
+											if (savedInsertMinionInput == "int" || savedInsertMinionInput == "Int")
+											{
+												convertedInput = "Interceptor";
+											}
+											else
+												if (savedInsertMinionInput == "bom" || savedInsertMinionInput == "Bom")
+												{
+													convertedInput = "Bomber";
+												}
+												else
+													if (savedInsertMinionInput == "Gun" || savedInsertMinionInput == "gun")
+													{
+														convertedInput = "Gunboat";
+													}
+													else
+														if (savedInsertMinionInput == "lan" || savedInsertMinionInput == "Lan")
+														{
+															convertedInput = "Lander";
+														}
+														else
+															if (savedInsertMinionInput == "sub" || savedInsertMinionInput == "Sub")
+															{
+																convertedInput = "Submarine";
+															}
+															else
+																if (savedInsertMinionInput == "ant" || savedInsertMinionInput == "Ant")
+																{
+																	convertedInput = "Anti-Aircraft";
+																}
+																else
+																	if (savedInsertMinionInput == "air" || savedInsertMinionInput == "Air")
+																	{
+																		convertedInput = "Aircraft_Carrier";
+																	}
+																	else
+																		if (savedInsertMinionInput == "roc" || savedInsertMinionInput == "Roc")
+																		{
+																			convertedInput = "Rocket_Artillery";
+																		}
+																		else
+																			if (savedInsertMinionInput == "bat" || savedInsertMinionInput == "Bat")
+																			{
+																				convertedInput = "Battleship";
+																			}
+																			else
+																				if (savedInsertMinionInput == "cru" || savedInsertMinionInput == "Cru")
+																				{
+																					convertedInput = "Cruiser";
+																				}
+																				else
+																					if (savedInsertMinionInput == "SAM" || savedInsertMinionInput == "sam")
+																					{
+																						convertedInput = "SAM_Site";
+																					}
+																					else
+																						if (savedInsertMinionInput == "min" || savedInsertMinionInput == "Min")
+																						{
+																							convertedInput = "Landmine";
+																						}
 
-    //Faction-specific minions
-    else    //ARNR
-    if(savedInsertMinionInput == "upg" || savedInsertMinionInput == "Upg")
-    {
-        convertedInput = "Upgunned_Armor";
-    }
-    else
-    if(savedInsertMinionInput == "ass" || savedInsertMinionInput == "Ass")
-    {
-        convertedInput = "Assault_Gun";
-    }
-    else
-    if(savedInsertMinionInput == "mul" || savedInsertMinionInput == "Mul")
-    {
-        convertedInput = "Multirole";
-    }
-    else    //South Redonia
-    if(savedInsertMinionInput == "mod" || savedInsertMinionInput == "Mod")
-    {
-        convertedInput = "Modern_Armor";
-    }
-    else
-    if(savedInsertMinionInput == "adv" || savedInsertMinionInput == "Adv")
-    {
-        convertedInput = "Advanced_Fighter";
-    }
-    else
-    if(savedInsertMinionInput == "ifv" || savedInsertMinionInput == "IFV")
-    {
-        convertedInput = "IFV";
-    }
-    else    //Ormosa
-    if(savedInsertMinionInput == "ins" || savedInsertMinionInput == "Ins")
-    {
-        convertedInput = "Insurgent";
-    }
-    else
-    if(savedInsertMinionInput == "ope" || savedInsertMinionInput == "Ope")
-    {
-        convertedInput = "Operative";
-    }
-    else
-    if(savedInsertMinionInput == "Tec" || savedInsertMinionInput == "tec")
-    {
-        convertedInput = "Technical";
-    }
-    else    //Torran
-    if(savedInsertMinionInput == "sup" || savedInsertMinionInput == "Sup")
-    {
-        convertedInput = "Super_Heavy_Armor";
-    }
-    else
-    if(savedInsertMinionInput == "vic" || savedInsertMinionInput == "Vic")
-    {
-        convertedInput = "Victory_Launcher";
-    }
-    else
-    if(savedInsertMinionInput == "cav" || savedInsertMinionInput == "Cav")
-    {
-        convertedInput = "Cavalry";
-    }
+	//Faction-specific minions
+																						else    //ARNR
+																							if (savedInsertMinionInput == "upg" || savedInsertMinionInput == "Upg")
+																							{
+																								convertedInput = "Upgunned_Armor";
+																							}
+																							else
+																								if (savedInsertMinionInput == "ass" || savedInsertMinionInput == "Ass")
+																								{
+																									convertedInput = "Assault_Gun";
+																								}
+																								else
+																									if (savedInsertMinionInput == "mul" || savedInsertMinionInput == "Mul")
+																									{
+																										convertedInput = "Multirole";
+																									}
+																									else    //South Redonia
+																										if (savedInsertMinionInput == "mod" || savedInsertMinionInput == "Mod")
+																										{
+																											convertedInput = "Modern_Armor";
+																										}
+																										else
+																											if (savedInsertMinionInput == "adv" || savedInsertMinionInput == "Adv")
+																											{
+																												convertedInput = "Advanced_Fighter";
+																											}
+																											else
+																												if (savedInsertMinionInput == "ifv" || savedInsertMinionInput == "IFV")
+																												{
+																													convertedInput = "IFV";
+																												}
+																												else    //Ormosa
+																													if (savedInsertMinionInput == "ins" || savedInsertMinionInput == "Ins")
+																													{
+																														convertedInput = "Insurgent";
+																													}
+																													else
+																														if (savedInsertMinionInput == "ope" || savedInsertMinionInput == "Ope")
+																														{
+																															convertedInput = "Operative";
+																														}
+																														else
+																															if (savedInsertMinionInput == "Tec" || savedInsertMinionInput == "tec")
+																															{
+																																convertedInput = "Technical";
+																															}
+																															else    //Torran
+																																if (savedInsertMinionInput == "sup" || savedInsertMinionInput == "Sup")
+																																{
+																																	convertedInput = "Super_Heavy_Armor";
+																																}
+																																else
+																																	if (savedInsertMinionInput == "vic" || savedInsertMinionInput == "Vic")
+																																	{
+																																		convertedInput = "Victory_Launcher";
+																																	}
+																																	else
+																																		if (savedInsertMinionInput == "cav" || savedInsertMinionInput == "Cav")
+																																		{
+																																			convertedInput = "Cavalry";
+																																		}
 
 
 	Cursor* myCursor = &boardToInput->cursor;
@@ -2072,10 +2103,10 @@ int inputLayer::insertMinionInput(sf::Event* Input, MasterBoard* boardToInput)
 
 	//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
 	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart(convertedInput, myTile->symbol) == 99)
-	{  
-        savedInsertMinionInput.clear();
-        return 1;
-    }
+	{
+		savedInsertMinionInput.clear();
+		return 1;
+	}
 
 	int requestedUnitPrice = boardToInput->consultMinionCostChart(convertedInput, '~');
 
@@ -2084,7 +2115,7 @@ int inputLayer::insertMinionInput(sf::Event* Input, MasterBoard* boardToInput)
 	{
 		boardToInput->createMinion(convertedInput, myCursor->getX(), myCursor->getY(), boardToInput->playerFlag, 100, 0, 0, 0, -1, -1, -1);
 		status = gameBoard;
-        savedInsertMinionInput.clear();
+		savedInsertMinionInput.clear();
 		return 0;
 	}
 
@@ -2462,39 +2493,39 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							*Input = sf::Keyboard::Key::O;
 						}
 						else  //If this is empty space and is operative that already moved/gave up move
-						if (boardToInput->cursor.selectMinionPointer->type == "Operative" &&
-							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
-								boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
-						{
-							*Input = sf::Keyboard::Key::B;      //B for build. Either operative dropping a landmine, or engineer building something.
+							if (boardToInput->cursor.selectMinionPointer->type == "Operative" &&
+								(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+									boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
+							{
+								*Input = sf::Keyboard::Key::B;      //B for build. Either operative dropping a landmine, or engineer building something.
 							}
-						else  //Otherwise attempt to move there.
-						{
-							*Input = sf::Keyboard::Key::M;
-						}
+							else  //Otherwise attempt to move there.
+							{
+								*Input = sf::Keyboard::Key::M;
+							}
 				}
 		}
 	}
 	else
-	//If left click, deselect.	
-	//Must also be in map.
-	if (*Input == sf::Keyboard::Quote)
-	{
-		if( tileX < boardToInput->BOARD_WIDTH&& tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
-			*Input = sf::Keyboard::Key::T;
-		else 
-		//If within a status button, assign dialogBoxOpen that value:
-		for (int i = 0; i < statusButtons.size(); i++)
+		//If left click, deselect.	
+		//Must also be in map.
+		if (*Input == sf::Keyboard::Quote)
 		{
-			if ((statusButtons)[i].checkWithinButton(mousePosition.x, mousePosition.y) == true)
-			{
-				if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
+			if (tileX < boardToInput->BOARD_WIDTH && tileX >= 0 && tileY < boardToInput->BOARD_HEIGHT && tileY >= 0)
+				* Input = sf::Keyboard::Key::T;
+			else
+				//If within a status button, assign dialogBoxOpen that value:
+				for (int i = 0; i < statusButtons.size(); i++)
 				{
-					dialogBoxOpen = i;
+					if ((statusButtons)[i].checkWithinButton(mousePosition.x, mousePosition.y) == true)
+					{
+						if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
+						{
+							dialogBoxOpen = i;
+						}
+					}
 				}
-			}
 		}
-	}
 
 	if (*Input == sf::Keyboard::Key::A || *Input == sf::Keyboard::Key::D || *Input == sf::Keyboard::Key::S || *Input == sf::Keyboard::Key::W)
 	{
@@ -2720,6 +2751,12 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 {
 	inputLayerWindow->clear();
 
+	//If not playing music already, play music
+	if (soundsOn == true && gameMusic[2].getStatus() != sf::SoundSource::Status::Playing)
+	{
+		gameMusic[2].play();
+	}
+
 	sf::Sprite backgroundSprite;
 	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
 	inputLayerWindow->draw(backgroundSprite);
@@ -2738,6 +2775,8 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 
 	//Wait for one input.
 	getValidPlayerInput(inputLayerWindow);
+
+	gameMusic[2].stop();
 
 	return 0;
 }

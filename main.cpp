@@ -42,7 +42,7 @@ std::vector <std::vector<sf::IntRect>> rectArray;
 
 
 
-int initializeTextureArray(std::string directory, std::vector <std::string> imageNameList, std::vector <sf::Texture>& buttonTextureArray ) //, std::vector <sf::Image> & imageList)
+int initializeTextureArray(std::string directory, std::vector <std::string> imageNameList, std::vector <sf::Texture>& buttonTextureArray) //, std::vector <sf::Image> & imageList)
 {
 	//Need longer list of actual buttons
 
@@ -50,7 +50,7 @@ int initializeTextureArray(std::string directory, std::vector <std::string> imag
 	{
 		if (!buttonTextureArray[i].loadFromFile(directory + "/" + imageNameList[i] + ".png"))
 		{
-			std::cout << "Couldn't load button: "<< imageNameList[i] << std::endl;
+			std::cout << "Couldn't load button: " << imageNameList[i] << std::endl;
 
 		}
 	}
@@ -59,53 +59,62 @@ int initializeTextureArray(std::string directory, std::vector <std::string> imag
 
 int main()
 {
-		sf::Color colorWhite;
-		sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
+	sf::Color colorWhite;
+	sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
 
-		//Load topMenuButton textures
-		std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off", "top_Editor_Mode_On", "top_New_Campaign", "top_New_Skirmish", "top_Back", "top_Load_Campaign"};
-		std::vector <sf::Texture> topMenuButtonTextureArray;
-		topMenuButtonTextureArray.resize(imageList.size());
-		initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
+	//Load topMenuButton textures
+	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off", "top_Editor_Mode_On", "top_New_Campaign", "top_New_Skirmish", "top_Back", "top_Load_Campaign" };
+	std::vector <sf::Texture> topMenuButtonTextureArray;
+	topMenuButtonTextureArray.resize(imageList.size());
+	initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
 
-		//Load gameMenuButton textures
-		std::vector <std::string> gameMenuButtonImageList = { "exit_To_Main_Menu", "save_Game", "load_Game" , "restart", "sound_On", "sound_Off", "speed_Normal", "speed_Fast",  "end_Turn", "resume_Play", };
-		std::vector <sf::Texture> gameMenuButtonTextureArray;
-		gameMenuButtonTextureArray.resize(gameMenuButtonImageList.size());
-		initializeTextureArray("menuButtons", gameMenuButtonImageList, gameMenuButtonTextureArray);
+	//Load gameMenuButton textures
+	std::vector <std::string> gameMenuButtonImageList = { "exit_To_Main_Menu", "save_Game", "load_Game" , "restart", "sound_On", "sound_Off", "speed_Normal", "speed_Fast",  "end_Turn", "resume_Play", };
+	std::vector <sf::Texture> gameMenuButtonTextureArray;
+	gameMenuButtonTextureArray.resize(gameMenuButtonImageList.size());
+	initializeTextureArray("menuButtons", gameMenuButtonImageList, gameMenuButtonTextureArray);
 
-		//Load other textures
-		std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox", "Sidebar", "loadGameBackground", 
-			"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", "dialogBox" };
-		std::vector <sf::Texture> otherTextureArray;
-		otherTextureArray.resize(otherImagesList.size());
-		initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
+	//Load other textures
+	std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox", "Sidebar", "loadGameBackground",
+		"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", "dialogBox" };
+	std::vector <sf::Texture> otherTextureArray;
+	otherTextureArray.resize(otherImagesList.size());
+	initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
 
-		//Load status indicators
-		std::vector <std::string> statusTextureList = { "statusBar_DefenseBonusBox", "statusBar_ProductionBox", "statusBar_CaptureBox", "statusBar_HealthBox", "statusBar_FuelBox", "statusBar_AmmoBox",  "statusBar_MoveState" };
-		std::vector <sf::Texture> statusTexturesArray;
-		statusTexturesArray.resize(statusTextureList.size());
-		initializeTextureArray("otherImages", statusTextureList, statusTexturesArray);
+	//Load status indicators
+	std::vector <std::string> statusTextureList = { "statusBar_DefenseBonusBox", "statusBar_ProductionBox", "statusBar_CaptureBox", "statusBar_HealthBox", "statusBar_FuelBox", "statusBar_AmmoBox",  "statusBar_MoveState" };
+	std::vector <sf::Texture> statusTexturesArray;
+	statusTexturesArray.resize(statusTextureList.size());
+	initializeTextureArray("otherImages", statusTextureList, statusTexturesArray);
 
-		//Load status indicators
-		std::vector <std::string> factionTexturesList = { "NorthRedoniaFlag" , "SouthRedoniaFlag", "OrmosaFlag" , "TorranFlag" };
-		std::vector <sf::Texture> factionTexturesArray;
-		factionTexturesArray.resize(factionTexturesList.size());
-		initializeTextureArray("otherImages/Flags", factionTexturesList, factionTexturesArray);
+	//Load status indicators
+	std::vector <std::string> factionTexturesList = { "NorthRedoniaFlag" , "SouthRedoniaFlag", "OrmosaFlag" , "TorranFlag" };
+	std::vector <sf::Texture> factionTexturesArray;
+	factionTexturesArray.resize(factionTexturesList.size());
+	initializeTextureArray("otherImages/Flags", factionTexturesList, factionTexturesArray);
 
+	//Load music
+	std::vector <std::string> gameMusicList = { "introTheme", "briefingTheme" , "victoryTheme" , "ARNRTheme", "southRedoniaTheme", "ormosaTheme", "torranTheme" };
+	sf::Music gameMusicArray[7];
+	//gameMusicArray.resize(gameMusicList.size());
+	for (int i = 0; i < 7; i++)
+	{
+		if (!gameMusicArray[i].openFromFile("music/" + gameMusicList[i] + ".wav"))
+		{
+			std::cout << "Couldn't load music: " << gameMusicList[i] << std::endl;
 
-		sf::Texture mainTexture;
-		sf::Image mainImage;
+		}
+	}
 
-		//Load Sounds/Music
-		sf::Music introMusic;
+	sf::Texture mainTexture;
+	sf::Image mainImage;
 
-		//Initialize Sounds Array
-		const int numberOfSoundEffects = 20;
-		std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "antiAircraftCannon", "infantryMove", "vehicleMove", "aircraftMove", "buildUnit", "capture", "resupply", "repair", "trapped" };
-		std::vector <sf::SoundBuffer > soundEffectBuffers;
-		std::vector <sf::Sound> soundEffects;
-		soundEffects.resize(numberOfSoundEffects + 1);
+	//Initialize Sounds Array
+	const int numberOfSoundEffects = 20;
+	std::vector <std::string> soundEffectNames = { "machineGun", "rpg", "cannon", "antiAircraftCannon", "infantryMove", "vehicleMove", "aircraftMove", "buildUnit", "capture", "resupply", "repair", "trapped" };
+	std::vector <sf::SoundBuffer > soundEffectBuffers;
+	std::vector <sf::Sound> soundEffects;
+	soundEffects.resize(numberOfSoundEffects + 1);
 
 
 	//Initialize intRect grid
@@ -129,10 +138,6 @@ int main()
 	if (!mainImage.loadFromFile("tilesAndUnits.png"))
 	{
 		std::cout << "Couldn't load image!" << std::endl;
-	}
-	if (!introMusic.openFromFile("music\\01_ACO-Bach-BrandenburgConcertono3mvt3allegro.wav"))
-	{
-		std::cout << "Couldn't load intro theme!" << std::endl;
 	}
 
 	//Init sound effect buffer and sound arrays
@@ -159,14 +164,14 @@ int main()
 	{
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
-	
-	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &introMusic , &factionTexturesArray);
 
-	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, & MainMenu.gameMenuButtons, &statusTexturesArray);
+	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray);
+
+	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, &MainMenu.gameMenuButtons, &statusTexturesArray , &(gameMusicArray[0]));
 	MasterBoard GameBoard(&mainTexture);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);
-	   
+
 }
 
 
