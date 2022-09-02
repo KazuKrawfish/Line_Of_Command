@@ -1850,7 +1850,7 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 	//If not playing music already, play music for that player's faction
 	if (soundsOn == true)
 	{
-		int factionMusicOffset = int(boardToPrint->playerRoster[boardToPrint->playerFlag].playerFaction) + 3; //Number of songs before faction themes
+		int factionMusicOffset = int(boardToPrint->playerRoster[boardToPrint->playerFlag].playerFaction) + 2; //Number of songs before faction themes
 
 		//Crude method to ensure we stopped playing previous faction music if it was different
 		for (int i = 3; i < 7; i++)
