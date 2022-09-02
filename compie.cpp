@@ -1099,112 +1099,124 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 	}
 	Minion* myMinion = boardToUse->cursor.selectMinionPointer;
 
-	//If already repairing, keep repairing
-	//As long as consultCost doesn't return -1, the minion CAN be repaired there
-	//We may still attack guys next to us
-	if (myMinion->health < 100
-		&& boardToUse->Board[myMinion->locationX][myMinion->locationY].controller == compiePlayerFlag
-		&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol) != -1)
+	//Reset defaults.
+	selectedMinionRecord->tasking = holdPosition;
+	selectedMinionRecord->taskingStatus = immediateExecute;
+
+	//Check for minion status since we're now calling this function from multiple locations
+	if (myMinion->status == hasntmovedorfired)
 	{
-		selectedMinionRecord->tasking = holdPosition;
-		selectedMinionRecord->taskingStatus = immediateExecute;
 
-	}
-	else
-	{
-		int distanceToAirbase = -1;
-		//Air minions need to accurately assess their chance of reaching a fuel point.
-		if (myMinion->domain == air)
+		//If already repairing, keep repairing
+		//As long as consultCost doesn't return -1, the minion CAN be repaired there
+		//We may still attack guys next to us
+		if (myMinion->health < 100
+			&& boardToUse->Board[myMinion->locationX][myMinion->locationY].controller == compiePlayerFlag
+			&& boardToUse->consultMinionCostChart(myMinion->type, boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol) != -1)
 		{
-			tile* closestAirbase = findClosestAirbase(boardToUse, myMinion);
-			if (closestAirbase != NULL)
-			{
-				distanceToAirbase = boardToUse->computeDistance(closestAirbase->locationX, myMinion->locationX, closestAirbase->locationY, myMinion->locationY);
-
-			}
-
-		}
-
-		//If highly damaged or Air and far from base/needs to refuel soon / out of ammo
-		//Far from base means - current fuel less than distance to closest base, including 2 turns of fuel burn (+10) and a fuel margin (+10) to actually make it.
-		if (myMinion->health < 50 || (myMinion->domain == air
-			&& (myMinion->currentFuel < distanceToAirbase + 20 || myMinion->currentFuel < (myMinion->maxFuel / 3)
-				|| myMinion->currentPriAmmo == 0 || myMinion->currentSecAmmo == 0)))
-		{
-			int distance = strategicWithdraw(boardToUse, selectedMinionRecord);
-			if (distance < 999 && distance >= 0)	//Error code is -1
-			{
-				selectedMinionRecord->tasking = withdraw;
-				selectedMinionRecord->taskingStatus = immediateExecute;
-
-				return 1;
-			}
+			selectedMinionRecord->tasking = holdPosition;
+			selectedMinionRecord->taskingStatus = immediateExecute;
 		}
 		else
-			//Otherwise
-				//If already capturing continue that regardless.
-			if (myMinion->isCapturing == true)
+		{
+			int distanceToAirbase = -1;
+			//Air minions need to accurately assess their chance of reaching a fuel point.
+			if (myMinion->domain == air)
 			{
-				selectedMinionRecord->potentialMoveTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY];
-				selectedMinionRecord->objectiveTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY];
-				selectedMinionRecord->tasking = captureLocalProperty;
-				selectedMinionRecord->taskingStatus = immediateExecute;
-				return 1;
+				tile* closestAirbase = findClosestAirbase(boardToUse, myMinion);
+				if (closestAirbase != NULL)
+				{
+					distanceToAirbase = boardToUse->computeDistance(closestAirbase->locationX, myMinion->locationX, closestAirbase->locationY, myMinion->locationY);
+
+				}
+
 			}
-			else
-				if (defendHeadquarters(boardToUse, selectedMinionRecord) == 1)
-				{	//Not sure if this is actually happening, may need to add tasking and taskingStatus.
-					std::cout << "Headquarters under attack!" << std::endl;
+
+			//If highly damaged or Air and far from base/needs to refuel soon / out of ammo
+			//Far from base means - current fuel less than distance to closest base, including 2 turns of fuel burn (+10) and a fuel margin (+10) to actually make it.
+			if (myMinion->health < 50 || 
+				(myMinion->domain == air && 
+					(myMinion->currentFuel < distanceToAirbase + 20 || myMinion->currentFuel < (myMinion->maxFuel / 3)
+					|| (myMinion->currentPriAmmo == 0 && myMinion->maxPriAmmo != -1)  //Actually has pri weapon, and that weapon is out of ammo
+					|| (myMinion->currentSecAmmo == 0 && myMinion->maxSecAmmo != -1) ) ) )	//Actually has secondary weapon which is out of ammo 
+			{
+				int distance = strategicWithdraw(boardToUse, selectedMinionRecord);
+				if (distance < 999 && distance >= 0)	//Error code is -1
+				{
+					selectedMinionRecord->tasking = withdraw;
+					selectedMinionRecord->taskingStatus = immediateExecute;
+
 					return 1;
 				}
-				else		//DefendProperty ensures that defending prop has higher priority than attacking a local minion regardless of cost
-					if (defendProperty(boardToUse, selectedMinionRecord) == 1)
-					{
-						selectedMinionRecord->tasking = defendProp;
-						selectedMinionRecord->taskingStatus = immediateExecute;
+			}
+			else
+				//Otherwise
+					//If already capturing continue that regardless.
+				if (myMinion->isCapturing == true)
+				{
+					selectedMinionRecord->potentialMoveTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY];
+					selectedMinionRecord->objectiveTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY];
+					selectedMinionRecord->tasking = captureLocalProperty;
+					selectedMinionRecord->taskingStatus = immediateExecute;
+					return 1;
+				}
+				else
+					if (defendHeadquarters(boardToUse, selectedMinionRecord) == 1)
+					{	//Not sure if this is actually happening, may need to add tasking and taskingStatus.
+						std::cout << "Headquarters under attack!" << std::endl;
 						return 1;
-
 					}
-					else
-					{
-
-						//Otherwise see if there are enemies in local area within range and suitable to attack.
-						double relativeSuitabilityScore = findBestValuedEnemyWithinLocalArea(boardToUse, selectedMinionRecord);
-						if (relativeSuitabilityScore > 0 && selectedMinionRecord->potentialAttackTile != NULL)
+					else		//DefendProperty ensures that defending prop has higher priority than attacking a local minion regardless of cost
+						if (defendProperty(boardToUse, selectedMinionRecord) == 1)
 						{
-							selectedMinionRecord->tasking = attackLocalMinion;
+							selectedMinionRecord->tasking = defendProp;
 							selectedMinionRecord->taskingStatus = immediateExecute;
 							return 1;
-						}
 
-						//If capable of capping properties, attempt to do so.
-						if (boardToUse->cursor.selectMinionPointer->captureCapable == true)
+						}
+						else
 						{
-							int distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY, selectedMinionRecord);
-							if (distance < 999 && selectedMinionRecord->potentialMoveTile != NULL)
+
+							//Otherwise see if there are enemies in local area within range and suitable to attack.
+							double relativeSuitabilityScore = findBestValuedEnemyWithinLocalArea(boardToUse, selectedMinionRecord);
+							if (relativeSuitabilityScore > 0 && selectedMinionRecord->potentialAttackTile != NULL)
 							{
-								selectedMinionRecord->tasking = captureLocalProperty;
+								selectedMinionRecord->tasking = attackLocalMinion;
 								selectedMinionRecord->taskingStatus = immediateExecute;
 								return 1;
 							}
+
+							//If capable of capping properties, attempt to do so.
+							if (boardToUse->cursor.selectMinionPointer->captureCapable == true)
+							{
+								int distance = findPropertyWithinLocalArea(boardToUse, &returnX, &returnY, selectedMinionRecord);
+								if (distance < 999 && selectedMinionRecord->potentialMoveTile != NULL)
+								{
+									selectedMinionRecord->tasking = captureLocalProperty;
+									selectedMinionRecord->taskingStatus = immediateExecute;
+									return 1;
+								}
+							}
+
+
+							int distance = strategicAdvance(boardToUse, selectedMinionRecord);
+							if (distance < 999 && distance >= 0)	//Error code is -1
+							{
+								selectedMinionRecord->tasking = advance;
+								selectedMinionRecord->taskingStatus = immediateExecute;
+								return 1;
+							}
+
 						}
 
 
-						int distance = strategicAdvance(boardToUse, selectedMinionRecord);
-						if (distance < 999 && distance >= 0)	//Error code is -1
-						{
-							selectedMinionRecord->tasking = advance;
-							selectedMinionRecord->taskingStatus = immediateExecute;
-							return 1;
-						}
-
-					}
-
+		}
 
 	}
 
 
 	//Check adjacent tiles if we want to attack them, even if we stood still.
+	//This also will get checked if we strategic moved, since determineTasking is now called after strat move.
 	double suitabilityScore = 0;
 
 	checkAdjacentTilesForBestValuedEnemy(selectedMinionRecord->recordedMinion->locationX, selectedMinionRecord->recordedMinion->locationY,
@@ -1291,17 +1303,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 	}
 
-	if (selectedMinionRecord->tasking == advance)
-	{
-		//Move cursor
-		boardToUse->cursor.relocate(selectedMinionRecord->potentialMoveTile->locationX, selectedMinionRecord->potentialMoveTile->locationY);
-
-		//moveMinion needs to contain all the status elements too.
-		boardToUse->moveMinion(boardToUse->cursor.XCoord, boardToUse->cursor.YCoord, InputLayer, whoIsWatching);
-
-	}
-
-	if (selectedMinionRecord->tasking == withdraw)
+	if (selectedMinionRecord->tasking == advance || selectedMinionRecord->tasking == withdraw)
 	{
 		//Move cursor
 		boardToUse->cursor.relocate(selectedMinionRecord->potentialMoveTile->locationX, selectedMinionRecord->potentialMoveTile->locationY);
@@ -1316,8 +1318,17 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		//Do nothing
 	}
 
-
 	boardToUse->deselectMinion();
+
+	//See if we moved next to an enemy and attack if so
+	determinePotentialMinionTasking( boardToUse,  selectedMinionRecord);
+	if (selectedMinionRecord->tasking == attackLocalMinion)
+	{
+		boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
+		//Place cursor on tile being attacked.
+		boardToUse->cursor.relocate(selectedMinionRecord->potentialAttackTile->locationX, selectedMinionRecord->potentialAttackTile->locationY);
+		boardToUse->attackMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY(), InputLayer, whoIsWatching);
+	}
 
 	boardToUse->setVisionField(whoIsWatching);
 	boardToUse->checkWindow();
