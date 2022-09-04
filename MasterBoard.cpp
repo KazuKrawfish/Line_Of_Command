@@ -120,66 +120,90 @@ int MasterBoard::landmineCheck(int inputX, int inputY, inputLayer* InputLayer, i
 
 }
 
+//Are the currentfuel vs max fuel checks needed ?
 int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber)
 {
 
 	int x = SupplyUnit->locationX;
 	int y = SupplyUnit->locationY;
 
-	//Unit must be APC
-	if (SupplyUnit->type != "APC")
-		return 1;
+	//Check each surrounding tile for a ground or sea unit and resupply them if this is APC
+	//Or if this is ac carrier and they're air.
+	if (x < BOARD_WIDTH - 1 && Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team == playerFlag)
+		if ((Board[x + 1][y].minionOnTop->domain != air && SupplyUnit->type != "APC")
+			|| (Board[x + 1][y].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
+		{
+			if (Board[x + 1][y].minionOnTop->currentFuel != Board[x + 1][y].minionOnTop->maxFuel ||
+				Board[x + 1][y].minionOnTop->currentPriAmmo != Board[x + 1][y].minionOnTop->maxPriAmmo ||
+				Board[x + 1][y].minionOnTop->currentSecAmmo != Board[x + 1][y].minionOnTop->maxSecAmmo)
+			{
+				Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
+				Board[x + 1][y].minionOnTop->currentPriAmmo = Board[x + 1][y].minionOnTop->maxPriAmmo;
+				Board[x + 1][y].minionOnTop->currentSecAmmo = Board[x + 1][y].minionOnTop->maxSecAmmo;
+				InputLayer->supplyGraphics(this, observerNumber, Board[x + 1][y].minionOnTop, Board[x + 1][y].minionOnTop->locationX, Board[x + 1][y].minionOnTop->locationY);
+			}
+		}
 
-	//Check each surrounding tile for a ground or sea unit and resupply them.
-	if (x < BOARD_WIDTH - 1 && Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team == playerFlag && Board[x + 1][y].minionOnTop->domain != air)
-	{
-		if (Board[x + 1][y].minionOnTop->currentFuel != Board[x + 1][y].minionOnTop->maxFuel ||
-			Board[x + 1][y].minionOnTop->currentPriAmmo != Board[x + 1][y].minionOnTop->maxPriAmmo ||
-			Board[x + 1][y].minionOnTop->currentSecAmmo != Board[x + 1][y].minionOnTop->maxSecAmmo)
+	if (x > 0 && Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team == playerFlag)
+		if ((Board[x - 1][y].minionOnTop->domain != air && SupplyUnit->type != "APC")
+			|| (Board[x - 1][y].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
 		{
-			Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
-			Board[x + 1][y].minionOnTop->currentPriAmmo = Board[x + 1][y].minionOnTop->maxPriAmmo;
-			Board[x + 1][y].minionOnTop->currentSecAmmo = Board[x + 1][y].minionOnTop->maxSecAmmo;
-			InputLayer->supplyGraphics(this, observerNumber, Board[x + 1][y].minionOnTop, Board[x + 1][y].minionOnTop->locationX, Board[x + 1][y].minionOnTop->locationY);
+			if (Board[x - 1][y].minionOnTop->currentFuel != Board[x - 1][y].minionOnTop->maxFuel ||
+				Board[x - 1][y].minionOnTop->currentPriAmmo != Board[x - 1][y].minionOnTop->maxPriAmmo ||
+				Board[x - 1][y].minionOnTop->currentSecAmmo != Board[x - 1][y].minionOnTop->maxSecAmmo)
+			{
+				Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
+				Board[x - 1][y].minionOnTop->currentPriAmmo = Board[x - 1][y].minionOnTop->maxPriAmmo;
+				Board[x - 1][y].minionOnTop->currentSecAmmo = Board[x - 1][y].minionOnTop->maxSecAmmo;
+				InputLayer->supplyGraphics(this, observerNumber, Board[x - 1][y].minionOnTop, Board[x - 1][y].minionOnTop->locationX, Board[x - 1][y].minionOnTop->locationY);
+			}
 		}
-	}
-	if (x > 0 && Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team == playerFlag && Board[x - 1][y].minionOnTop->domain != air)
-	{
-		if (Board[x - 1][y].minionOnTop->currentFuel != Board[x - 1][y].minionOnTop->maxFuel ||
-			Board[x - 1][y].minionOnTop->currentPriAmmo != Board[x - 1][y].minionOnTop->maxPriAmmo ||
-			Board[x - 1][y].minionOnTop->currentSecAmmo != Board[x - 1][y].minionOnTop->maxSecAmmo)
+
+	if (y < BOARD_HEIGHT - 1 && Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->team == playerFlag)
+		if ((Board[x][y + 1].minionOnTop->domain != air && SupplyUnit->type != "APC")
+			|| (Board[x][y + 1].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
 		{
-			Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
-			Board[x - 1][y].minionOnTop->currentPriAmmo = Board[x - 1][y].minionOnTop->maxPriAmmo;
-			Board[x - 1][y].minionOnTop->currentSecAmmo = Board[x - 1][y].minionOnTop->maxSecAmmo;
-			InputLayer->supplyGraphics(this, observerNumber, Board[x - 1][y].minionOnTop, Board[x - 1][y].minionOnTop->locationX, Board[x - 1][y].minionOnTop->locationY);
+			if (Board[x][y + 1].minionOnTop->currentFuel != Board[x][y + 1].minionOnTop->maxFuel ||
+				Board[x][y + 1].minionOnTop->currentPriAmmo != Board[x][y + 1].minionOnTop->maxPriAmmo ||
+				Board[x][y + 1].minionOnTop->currentSecAmmo != Board[x][y + 1].minionOnTop->maxSecAmmo)
+			{
+				Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
+				Board[x][y + 1].minionOnTop->currentPriAmmo = Board[x][y + 1].minionOnTop->maxPriAmmo;
+				Board[x][y + 1].minionOnTop->currentSecAmmo = Board[x][y + 1].minionOnTop->maxSecAmmo;
+				InputLayer->supplyGraphics(this, observerNumber, Board[x][y + 1].minionOnTop, Board[x][y + 1].minionOnTop->locationX, Board[x][y + 1].minionOnTop->locationY);
+			}
 		}
-	}
-	if (y < BOARD_HEIGHT - 1 && Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->team == playerFlag && Board[x][y + 1].minionOnTop->domain != air)
-	{
-		if (Board[x][y + 1].minionOnTop->currentFuel != Board[x][y + 1].minionOnTop->maxFuel ||
-			Board[x][y + 1].minionOnTop->currentPriAmmo != Board[x][y + 1].minionOnTop->maxPriAmmo ||
-			Board[x][y + 1].minionOnTop->currentSecAmmo != Board[x][y + 1].minionOnTop->maxSecAmmo)
+
+	if (y > 0 && Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->team == playerFlag)
+		if ((Board[x][y - 1].minionOnTop->domain != air && SupplyUnit->type != "APC")
+			|| (Board[x][y - 1].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
 		{
-			Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
-			Board[x][y + 1].minionOnTop->currentPriAmmo = Board[x][y + 1].minionOnTop->maxPriAmmo;
-			Board[x][y + 1].minionOnTop->currentSecAmmo = Board[x][y + 1].minionOnTop->maxSecAmmo;
-			InputLayer->supplyGraphics(this, observerNumber, Board[x][y + 1].minionOnTop, Board[x][y + 1].minionOnTop->locationX, Board[x][y + 1].minionOnTop->locationY);
+			if (Board[x][y - 1].minionOnTop->currentFuel != Board[x][y - 1].minionOnTop->maxFuel ||
+				Board[x][y - 1].minionOnTop->currentPriAmmo != Board[x][y - 1].minionOnTop->maxPriAmmo ||
+				Board[x][y - 1].minionOnTop->currentSecAmmo != Board[x][y - 1].minionOnTop->maxSecAmmo)
+			{
+				Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
+				Board[x][y - 1].minionOnTop->currentPriAmmo = Board[x][y - 1].minionOnTop->maxPriAmmo;
+				Board[x][y - 1].minionOnTop->currentSecAmmo = Board[x][y - 1].minionOnTop->maxSecAmmo;
+				InputLayer->supplyGraphics(this, observerNumber, Board[x][y - 1].minionOnTop, Board[x][y - 1].minionOnTop->locationX, Board[x][y - 1].minionOnTop->locationY);
+			}
 		}
-	}
-	if (y > 0 && Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->team == playerFlag && Board[x][y - 1].minionOnTop->domain != air)
+
+	//Carrier gets to resupply its carried minion
+	if (SupplyUnit->type != "Aircraft_Carrier" && SupplyUnit->firstMinionBeingTransported != NULL)
 	{
-		if (Board[x][y - 1].minionOnTop->currentFuel != Board[x][y - 1].minionOnTop->maxFuel ||
-			Board[x][y - 1].minionOnTop->currentPriAmmo != Board[x][y - 1].minionOnTop->maxPriAmmo ||
-			Board[x][y - 1].minionOnTop->currentSecAmmo != Board[x][y - 1].minionOnTop->maxSecAmmo)
+		if (SupplyUnit->firstMinionBeingTransported->currentFuel != SupplyUnit->firstMinionBeingTransported->maxFuel ||
+			SupplyUnit->firstMinionBeingTransported->currentPriAmmo != SupplyUnit->firstMinionBeingTransported->maxPriAmmo ||
+			SupplyUnit->firstMinionBeingTransported->currentSecAmmo != SupplyUnit->firstMinionBeingTransported->maxSecAmmo)
 		{
-			Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
-			Board[x][y - 1].minionOnTop->currentPriAmmo = Board[x][y - 1].minionOnTop->maxPriAmmo;
-			Board[x][y - 1].minionOnTop->currentSecAmmo = Board[x][y - 1].minionOnTop->maxSecAmmo;
-			InputLayer->supplyGraphics(this, observerNumber, Board[x][y - 1].minionOnTop, Board[x][y - 1].minionOnTop->locationX, Board[x][y - 1].minionOnTop->locationY);
+			SupplyUnit->firstMinionBeingTransported->currentFuel = SupplyUnit->firstMinionBeingTransported->maxFuel;
+			SupplyUnit->firstMinionBeingTransported->currentPriAmmo = SupplyUnit->firstMinionBeingTransported->maxPriAmmo;
+			SupplyUnit->firstMinionBeingTransported->currentSecAmmo = SupplyUnit->firstMinionBeingTransported->maxSecAmmo;
+			InputLayer->supplyGraphics(this, observerNumber, SupplyUnit, SupplyUnit->locationX, SupplyUnit->locationY);
 		}
 	}
 
+	//Unless during upkeep then this counts as a move.
 	if (isItDuringUpkeep == false)
 	{
 		SupplyUnit->status = hasfired;
@@ -2200,8 +2224,7 @@ int MasterBoard::validatePath(int& inputX, int& inputY, inputLayer* graphicsLaye
 
 }
 
-//Note re observerNumber: Don't know a better way to "know" who is supposed to watch, since the prints are supposed to be "interrupts"
-//Unfortunately it makes a rather circular input of observerNumber- it depends on input layer/compie functions, then transmits to inputlayer functions.
+
 int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber)
 {
 	Minion* selectedMinion = cursor.selectMinionPointer;
@@ -2265,7 +2288,6 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 	if (newX == selectedMinion->locationX && newY == selectedMinion->locationY)
 	{
 		cursor.selectMinionPointer->status = hasmovedhasntfired;
-		deselectMinion();
 	}
 	else
 	{
@@ -2294,7 +2316,6 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 		cursor.selectMinionPointer->currentFuel -= cursor.selectMinionPointer->truePathMap[newX][newY].distanceFromMinion;
 
 		cursor.selectMinionPointer->status = hasmovedhasntfired;
-		deselectMinion();
 	}
 
 	//A trap may have happened, even if we moved. 
@@ -2304,18 +2325,24 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 	}
 
 	//Set stealth mode for an insurgent type that moved into a forest, building, or mountain.
-	if (selectedMinion->type == "Insurgent" && (Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'h'
-		|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'H'
-		|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'Q'
-		|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'P'
-		|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'A'
-		|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'n'
-		|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == '+'
-		|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'M'))
-	{
-		selectedMinion->stealthMode = true;
-	}
-	
+	//If that minion is in a non-stealth terrain, set to false.
+	if (selectedMinion->type == "Insurgent")
+		if (Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'h'
+			|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'H'
+			|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'Q'
+			|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'P'
+			|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'A'
+			|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'n'
+			|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == '+'
+			|| Board[selectedMinion->locationX][selectedMinion->locationY].symbol == 'M')
+		{
+			selectedMinion->stealthMode = true;
+		}
+		else selectedMinion->stealthMode = false;
+
+	//Deselect minion after moving
+	deselectMinion();
+
 	//If moved next to a landmine, it now attacks.
 	landmineCheck(newX, newY, InputLayer, observerNumber);
 
@@ -2323,6 +2350,32 @@ int MasterBoard::moveMinion(int inputX, int inputY, inputLayer* InputLayer, int 
 
 	return 0;
 }
+
+//Depending on sub's status, either submerges or surfaces, and changes the sprite to reflect that as well.
+int MasterBoard::diveOrSurfaceSub()
+{
+	if (cursor.selectMinionPointer == NULL || cursor.selectMinionPointer->type != "Submarine")
+		return 1;
+
+	if (cursor.selectMinionPointer->stealthMode == true)
+	{
+		cursor.selectMinionPointer->stealthMode = false;
+		cursor.selectMinionPointer->mySprite.setTextureRect(rectArray[18][playerFlag + 4]);
+	}
+	else
+	{
+		cursor.selectMinionPointer->stealthMode = true;
+		cursor.selectMinionPointer->mySprite.setTextureRect(rectArray[19][playerFlag + 4]);
+	}
+	
+	//Dive/surface takes a fire move.
+	cursor.selectMinionPointer->status = hasfired;
+	deselectMinion();
+
+	return 0;
+}
+
+
 
 int MasterBoard::pickUpMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber)
 {
@@ -2353,7 +2406,8 @@ int MasterBoard::pickUpMinion(int inputX, int inputY, inputLayer* InputLayer, in
 		//Infantry with small transport, with first slot empty.
 		//Any land unit with large transport, with first or second slot empty
 		if ((selectedMinion->specialtyGroup == infantry && Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == smallTransport && Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported == NULL)
-			|| (selectedMinion->domain == land && Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == largeTransport && (Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported == NULL || Board[cursor.getX()][cursor.getY()].minionOnTop->secondMinionBeingTransported == NULL)))
+			|| (selectedMinion->domain == land && Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == largeTransport && (Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported == NULL || Board[cursor.getX()][cursor.getY()].minionOnTop->secondMinionBeingTransported == NULL))
+			|| (selectedMinion->domain == air && Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == aircraftCarrier && Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported == NULL))
 		{
 			inputX = selectedMinion->locationX;
 			inputY = selectedMinion->locationY;
@@ -2406,9 +2460,9 @@ int MasterBoard::pickUpMinion(int inputX, int inputY, inputLayer* InputLayer, in
 			{   //Successful load occurred.
 
 				//Put the minion in the transport.
-				//If small transport, can only do first slot.
+				//If small transport or aircraft carrier, can only do first slot.
 				//Otherwise, choose whichever slot is empty.
-				if (Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == smallTransport)
+				if (Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == smallTransport || Board[cursor.getX()][cursor.getY()].minionOnTop->specialtyGroup == aircraftCarrier)
 				{
 					Board[cursor.getX()][cursor.getY()].minionOnTop->firstMinionBeingTransported = selectedMinion;
 				}
@@ -3027,7 +3081,6 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 
 }
 
-//Upkeep
 //Upkeep always collects income. It is only called on the first turn of a new game, or at the end of a turn.
 int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 {
@@ -3083,6 +3136,11 @@ int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 				if (minionRoster[i]->domain == sea && Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol != 'P')
 				{
 					minionRoster[i]->currentFuel -= 2;
+
+					//Submarine costs more fuel to stay submerged.
+					if (minionRoster[i]->type == "Submarine" && minionRoster[i]->stealthMode == true)
+						minionRoster[i]->currentFuel -= 3;
+
 					if (minionRoster[i]->currentFuel <= 0)
 					{
 						destroyMinion(minionRoster[i], "No fuel", InputLayer, false);
@@ -3102,45 +3160,64 @@ int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 	//This was terminating "early" since it would hit a NULL spot so minions wouldn't get seen to be healed.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
-		//If it's a minion you own and it's not being transported
-		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag && minionRoster[i]->transporter == NULL)
+		bool repairThisMinion = false;
+
+
+		if (minionRoster[i] != NULL && minionRoster[i]->team == playerFlag)
 		{
-			tile* tileToExamine = &Board[minionRoster[i]->locationX][minionRoster[i]->locationY];
-			//If it is on a player controlled tile, and that tile is a "repairing" tile for the given unit.
-			if (tileToExamine->controller == playerFlag && consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) != -1)
+			//If it is air minion being carried by carrier, that carrier can repair.
+			if (minionRoster[i]->transporter != NULL && minionRoster[i]->transporter->type == "Aircraft_Carrier")
 			{
 				if (minionRoster[i]->health < 100)
 				{
-					InputLayer->repairGraphics(this, observerNumber, minionRoster[i], minionRoster[i]->locationX, minionRoster[i]->locationY);
-
-					//silent repair
-					if (minionRoster[i]->health > 94)
+					repairThisMinion = true;
+				}
+			}
+			else //If it's a minion you own and it's not being transported
+			{
+				tile* tileToExamine = &Board[minionRoster[i]->locationX][minionRoster[i]->locationY];
+				//If it is on a player controlled tile, and that tile is a "repairing" tile for the given unit.
+				if (tileToExamine->controller == playerFlag && consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) != -1)
+				{
+					if (minionRoster[i]->health < 100)
 					{
-						minionRoster[i]->health = 100;
-					}
-					//"1 health" repair
-					else if (minionRoster[i]->health <= 94 && minionRoster[i]->health > 84)
-					{
-						minionRoster[i]->health = 100;
-						playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 10);
-					}
-					//"2" repair, but close enough to not just add
-					else if (minionRoster[i]->health <= 84 && minionRoster[i]->health > 80)
-					{
-						minionRoster[i]->health = 100;
-						playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
-					}
-					//Standard "2" repair
-					else
-					{
-						minionRoster[i]->health += 20;
-						playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
+						repairThisMinion = true;
 					}
 				}
 			}
 		}
 
+		if (repairThisMinion == true)
+		{
+			InputLayer->repairGraphics(this, observerNumber, minionRoster[i], minionRoster[i]->locationX, minionRoster[i]->locationY);
+
+			//silent repair
+			if (minionRoster[i]->health > 94)
+			{
+				minionRoster[i]->health = 100;
+			}
+			//"1 health" repair
+			else if (minionRoster[i]->health <= 94 && minionRoster[i]->health > 84)
+			{
+				minionRoster[i]->health = 100;
+				playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 10);
+			}
+			//"2" repair, but close enough to not just add
+			else if (minionRoster[i]->health <= 84 && minionRoster[i]->health > 80)
+			{
+				minionRoster[i]->health = 100;
+				playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
+			}
+			//Standard "2" repair
+			else
+			{
+				minionRoster[i]->health += 20;
+				playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
+			}
+		}
+
 	}
+
 	return 0;
 }
 

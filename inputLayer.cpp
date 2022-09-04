@@ -350,6 +350,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 							|| boardToPrint->cursor.selectMinionPointer->status == hasmovedhasntfired)
 						&& (boardToPrint->cursor.selectMinionPointer->specialtyGroup == smallTransport
 							|| boardToPrint->cursor.selectMinionPointer->specialtyGroup == largeTransport
+							|| boardToPrint->cursor.selectMinionPointer->specialtyGroup == aircraftCarrier
 							|| boardToPrint->cursor.selectMinionPointer->type == "Operative")
 						&& (tileToPrint->hasMinionOnTop == false || tileToPrint->minionOnTop->team == boardToPrint->playerFlag))
 					{
@@ -2410,7 +2411,6 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 	return 0;
 }
 
-
 int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput) {
 
 	//If we had a dialog box open, one click/key closes it, and no other action is taken.
@@ -2463,10 +2463,14 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							* Input = sf::Keyboard::Key::C;
 						else
 							//If minion is transport that already moved, attempt to supply if there is friendly minion there.
-							if ((myMinion->specialtyGroup == smallTransport || myMinion->specialtyGroup == largeTransport) &&
+							if ((myMinion->specialtyGroup == smallTransport || myMinion->specialtyGroup == largeTransport || myMinion->specialtyGroup == aircraftCarrier) &&
 								(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
 							{
 								*Input = sf::Keyboard::Key::I;
+							}
+							else if (myMinion->type == "Submarine")
+							{
+								*Input = sf::Keyboard::Key::U;	//If submarine, either dive or surface.
 							}
 							else
 							{
@@ -2486,7 +2490,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							*Input = sf::Keyboard::Key::R;
 						}
 					//If empty space and this is a transport that already moved, attempt to drop there.
-						else	if ((boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport) &&
+						else	if ((boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == aircraftCarrier) &&
 							(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 								boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
 						{
@@ -2602,9 +2606,11 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				status = gameBoard;
 			}
 			else
-				//If that minion is a transport and is same team
-				if ((boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == smallTransport ||
-					boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == largeTransport)
+				//If that minion is a ground transport and is same team
+				//OR If that minion is aircraft carrier and same team
+				if (((boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == smallTransport && boardToInput->cursor.selectMinionPointer->domain == land) ||
+					(boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == largeTransport && boardToInput->cursor.selectMinionPointer->domain == land) ||
+					(boardToInput->Board[cursorX][cursorY].minionOnTop->specialtyGroup == aircraftCarrier && boardToInput->cursor.selectMinionPointer->domain == air))
 					&& boardToInput->Board[cursorX][cursorY].minionOnTop->team == boardToInput->cursor.selectMinionPointer->team)
 				{
 					status = gameBoard;	//Set status to gameboard to make it through pickupMinion
@@ -2630,12 +2636,12 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 	//'i' is supply
 	//Must have minion selected.
-	//Must be APC, hasn't taken second action, cursor is on minion, and regardless of transport status.
+	//Must be APC/AC Carrier, hasn't taken second action, cursor is on minion, and regardless of transport status.
 	if (*Input == sf::Keyboard::Key::I && boardToInput->cursor.selectMinionFlag == true
-		&& boardToInput->cursor.selectMinionPointer->type == "APC"
-		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-		&& cursorX == boardToInput->cursor.selectMinionPointer->locationX
-		&& cursorY == boardToInput->cursor.selectMinionPointer->locationY)
+		&& (boardToInput->cursor.selectMinionPointer->type == "APC" || boardToInput->cursor.selectMinionPointer->type == "Aircraft_Carrier"
+			&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+			&& cursorX == boardToInput->cursor.selectMinionPointer->locationX
+			&& cursorY == boardToInput->cursor.selectMinionPointer->locationY) )
 	{
 		//May not be successful, so not necessarily return 0
 		if (boardToInput->individualResupply(boardToInput->cursor.selectMinionPointer, false, this, boardToInput->playerFlag) == 0)
@@ -2647,9 +2653,8 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	//Must be transport, hasn't taken second action, has a minion to drop, and tile within range, and not blocked by another minion.
 	//Also must not be impassable.
 	if (*Input == sf::Keyboard::Key::O && boardToInput->cursor.selectMinionFlag == true
-		&& (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport)
-		&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
-			boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+		&& (boardToInput->cursor.selectMinionPointer->specialtyGroup == smallTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == largeTransport || boardToInput->cursor.selectMinionPointer->specialtyGroup == aircraftCarrier)
+		&& ((boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
 			&& boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
 		&& boardToInput->Board[cursorX][cursorY].hasMinionOnTop == false
 		&& boardToInput->Board[cursorX][cursorY].withinRange == true
@@ -2667,8 +2672,18 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		if (boardToInput->deployLandmine(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 		{
 			status = gameBoard;
-
 		}
+	}
+
+	//'U' - If submarine, attempt to surface or dive
+	//Cursor must be on top of selected minion.
+	if (*Input == sf::Keyboard::Key::U && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->cursor.selectMinionPointer->type == "Submarine"
+		&& cursorX == boardToInput->cursor.selectMinionPointer->locationX
+		&& cursorY == boardToInput->cursor.selectMinionPointer->locationY)
+	{
+		boardToInput->diveOrSurfaceSub();
+		status = gameBoard;
 	}
 
 	bool lastMinionDestroyed = false;

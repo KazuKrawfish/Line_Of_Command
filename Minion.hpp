@@ -90,7 +90,7 @@ public:
 	//GRAPHICS ///////////////////////////
 	sf::Sprite mySprite;
 	sf::Texture* myTexture;
-	bool invisible = false;
+	bool invisible = false;	//Used for movement graphics, not for stealth.
 	//GRAPHICS ///////////////////////////
 	
 	//SOUND EFFECTS //////////////////////

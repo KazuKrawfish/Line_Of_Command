@@ -83,6 +83,7 @@ public:
 	int setCursorPath(bool firstTime, int inputX, int inputY);
 	int deselectMinion();
 	int moveMinion(int inputX, int inputY, inputLayer* InputLayer, int  observerNumber);
+	int diveOrSurfaceSub();
 	int validatePath(int& inputX, int& inputY, inputLayer* graphicsLayer, int whoIsWatching, bool transportMove);
 	int landmineCheck(int inputX, int inputY, inputLayer* InputLayer, int observerNumber );
 	//Select and Move Functions////////////////

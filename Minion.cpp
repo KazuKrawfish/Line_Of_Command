@@ -646,7 +646,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		visionRange = 2;
 		rangeType = directFire;
 		specialtyGroup = normal;
-        stealthMode = true;
+        stealthMode = false;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[18][inputTeam + 4]);
 		maxFuel = 80;
