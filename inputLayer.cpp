@@ -317,6 +317,11 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 						effectsSprite.setTextureRect(rectArray[8][15]); //Draw supply image
 						inputLayerWindow->draw(effectsSprite);
 					}
+					else if (mouseHovering == true && boardToPrint->cursor.selectMinionPointer->type == "Submarine")
+					{
+						effectsSprite.setTextureRect(rectArray[10][15]); //Draw periscope
+						inputLayerWindow->draw(effectsSprite);
+					}
 			}
 			else
 				if (tileToPrint->withinCursorPath == true)
