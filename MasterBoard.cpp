@@ -1755,7 +1755,8 @@ int MasterBoard::setDropField(int inputX, int inputY)
 {
 
 	//If not transport its drop field is zero.
-	if (cursor.selectMinionPointer->specialtyGroup != smallTransport && cursor.selectMinionPointer->specialtyGroup != largeTransport)
+	if (cursor.selectMinionPointer->specialtyGroup != smallTransport && cursor.selectMinionPointer->specialtyGroup != largeTransport
+		&& cursor.selectMinionPointer->specialtyGroup != aircraftCarrier)
 	{
 		return 1;
 	}
@@ -2038,7 +2039,7 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 					return 0;
 				}		//If transport that either moved or stood in place, we still select. But may not display drop field.
 				else if ((cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)
-					&& (cursor.selectMinionPointer->specialtyGroup == largeTransport || cursor.selectMinionPointer->specialtyGroup == smallTransport))
+					&& (cursor.selectMinionPointer->specialtyGroup == largeTransport || cursor.selectMinionPointer->specialtyGroup == smallTransport || cursor.selectMinionPointer->specialtyGroup == aircraftCarrier))
 				{
 					//If minion is transport and has a guy embarked, show drop field.
 					//The new assumption here is that a transport MUST have a one range direct attack weapon, because if it is carrying a minion, its "withinRange" is being set 
@@ -2529,7 +2530,7 @@ int MasterBoard::dropOffMinion()
 	Board[cursor.getX()][cursor.getY()].hasMinionOnTop = true;
 
 	//Small transport drops off its first guy and stops.
-	if (cursor.selectMinionPointer->specialtyGroup == smallTransport)
+	if (cursor.selectMinionPointer->specialtyGroup == smallTransport || cursor.selectMinionPointer->specialtyGroup == aircraftCarrier)
 	{
 		Board[cursor.getX()][cursor.getY()].minionOnTop = cursor.selectMinionPointer->firstMinionBeingTransported;
 		cursor.selectMinionPointer->firstMinionBeingTransported = NULL;
