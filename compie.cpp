@@ -898,6 +898,11 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 	attackerCost = boardToUse->consultMinionCostChart(myCursor->selectMinionPointer->type, '~');
 	defenderCost = boardToUse->consultMinionCostChart(boardToUse->Board[defenderX][defenderY].minionOnTop->type, '~');
 
+	//For infantry, double the defenderCost to double overall score for damage dealt to it.
+	if (boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Infantry" || boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Specialist"
+		|| boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Cavalry" || boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Insurgent")
+		defenderCost *= 2;
+
 	bool willAmmoBeUsed = false;
 	int weaponUsed = 0;
 	bool ignoreLimitations = true;
@@ -911,7 +916,10 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 
 	//If ranged unit, defender  cannot counterattack.
 	//If defender is ranged unit, also cannot counterattack
-	if (myCursor->selectMinionPointer->rangeType == rangedFire || boardToUse->Board[defenderX][defenderY].minionOnTop->rangeType == rangedFire)
+	//If attacker is hybrid but standing in place for ranged attack, defender will not counterattack.
+	if (myCursor->selectMinionPointer->rangeType == rangedFire 
+		|| (myCursor->selectMinionPointer->rangeType == hybridRange && myCursor->selectMinionPointer->status == gaveupmovehasntfired )
+		|| boardToUse->Board[defenderX][defenderY].minionOnTop->rangeType == rangedFire)
 		defenderCounterAttackDamageDealt = 0;
 
 	//This is the potential "value added" from combat, based on what we might lose vs gain.

@@ -710,7 +710,8 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	}
 
 	//Initialize all compies at this stage if a mission (We are certain who is a compie)
-	if (boardToPrint->missionFlag == true)
+	//Or if it's a load game
+	if (boardToPrint->missionFlag == true || isItSaveGame == true)
 	{
 		computerPlayerRoster.resize(boardToPrint->NUMBEROFPLAYERS + 1);
 		for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)

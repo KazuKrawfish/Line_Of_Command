@@ -544,7 +544,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	char pointerToPrint[100];
 
 	//Always print dialog box below text
-	int xCoord = 250;
+	int xCoord = 240;
 	int yCoord = 200;
 	sf::Sprite dialogBoxSprite;
 	dialogBoxSprite.setTexture(MainMenu->otherGameTextures->at(11));
@@ -567,7 +567,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(1):
 	{
 		//Print production explain:
-		sf::String productionExplainString = "Friendly properties produce gold to support the war effort.\nMost produce 1000 per turn but some produce more.";
+		sf::String productionExplainString = "Friendly properties produce gold to support the\nwar effort. Most produce 1000 per turn,\nbut some produce more.";
 		sf::Text productionExplainText(productionExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		productionExplainText.setPosition(265, 220);
 		productionExplainText.setFillColor(sf::Color::Black);
@@ -587,7 +587,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(3):
 	{
 		//Print health explain:
-		sf::String healthExplainString = "Minion hit points. All minions start with 100 and die at 0.\nMinions repair 20 hit points per turn on a friendly property.\nAttack and capture is proportional to hit points.";
+		sf::String healthExplainString = "Minion hit points. All minions start with 100 and\n die at 0. Minions repair 20 hit points per turn\non a friendly property. Attack and capture is\nproportional to hit points.";
 		sf::Text healthExplainText(healthExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		healthExplainText.setPosition(265, 220);
 		healthExplainText.setFillColor(sf::Color::Black);

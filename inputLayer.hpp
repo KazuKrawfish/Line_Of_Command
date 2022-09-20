@@ -25,15 +25,7 @@ enum otherImages { startScreenBackground, topMenuBackground, startScreenStatemen
 enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer, compieTakingTurn, insertMinion, insertTile };
 enum specialKey { showMinions, hideMinions };
 enum rangeVisibleStatus { showRange, hideRange };
-enum colorCode {
-	unused, fogLandTile, waterTile, fogWaterTile, player1Minion,
-	player2Minion, player3Minion, player4Minion, player5Minion, player6Minion,
-	player1Tile, player2Tile, player3Tile, player4Tile, player5Tile, player6Tile,
-	fogPlayer1Tile, fogPlayer2Tile, fogPlayer3Tile, fogPlayer4Tile,
-	fogPlayer5Tile, fogPlayer6Tile, neutralTile, fogNeutralTile, landTile, cursorSymbol,
-	attackRangeSymbol, moveRangeSymbol, player1MinionInverse, player2MinionInverse,
-	player3MinionInverse, player4MinionInverse, player5MinionInverse, player6MinionInverse
-};
+
 
 
 class inputLayer
