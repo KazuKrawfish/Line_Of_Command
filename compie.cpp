@@ -8,6 +8,8 @@
 #include <iostream>
 #include "mainmenu.h"
 
+bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2);
+
 //Compie calculates its closest objective by using buildPath and finding potential objective that has the best distance.
 //Then it builds a compie pathMap again on that objective
 //SelectMinion now builds an apparentPathMap that overrides the initial one. Shouldn't matter for strategic considerations.
@@ -867,6 +869,13 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defenderX, int defenderY, Cursor* myCursor, MasterBoard* boardToUse, double* relativeSuitabilityScore, compieMinionRecord* selectedMinionRecord)
 {
 
+	bool willAmmoBeUsed = false;
+	bool ignoreLimitations = true;
+
+	//Track primary vs secondary weapon used and use to determine if this single tile combo can actually work. Direct attack must only use 2, while ranged uses 1, for hybrid.
+	int attackerWeaponUsed = 0;
+	int defenderWeaponUsed = 0;
+
 	//Any return of 1 will not have touched relativeSuitability or the compieRoster objective tiles so we're okay to just return.
 	if (attackerX < 0 || defenderX < 0 || attackerY < 0 || defenderY < 0)
 	{
@@ -903,12 +912,10 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 		|| boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Cavalry" || boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Insurgent")
 		defenderCost *= 2;
 
-	bool willAmmoBeUsed = false;
-	int weaponUsed = 0;
-	bool ignoreLimitations = true;
 
-	int attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[defenderX][defenderY].minionOnTop, willAmmoBeUsed, weaponUsed, ignoreLimitations);
-	int defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[defenderX][defenderY].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed, weaponUsed, ignoreLimitations)
+
+	int attackerDamageDealt = boardToUse->calculateDamageDealt(myCursor->selectMinionPointer, boardToUse->Board[defenderX][defenderY].minionOnTop, willAmmoBeUsed, attackerWeaponUsed, ignoreLimitations);
+	int defenderCounterAttackDamageDealt = boardToUse->calculateDamageDealt(boardToUse->Board[defenderX][defenderY].minionOnTop, myCursor->selectMinionPointer, willAmmoBeUsed, defenderWeaponUsed, ignoreLimitations)
 		* (boardToUse->Board[defenderX][defenderY].minionOnTop->health - attackerDamageDealt) / 100;
 
 	if (defenderCounterAttackDamageDealt < 0)
@@ -916,9 +923,9 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 
 	//If ranged unit, defender  cannot counterattack.
 	//If defender is ranged unit, also cannot counterattack
-	//If attacker is hybrid but standing in place for ranged attack, defender will not counterattack.
-	if (myCursor->selectMinionPointer->rangeType == rangedFire 
-		|| (myCursor->selectMinionPointer->rangeType == hybridRange && myCursor->selectMinionPointer->status == gaveupmovehasntfired )
+	//If attacker is hybrid but standing in place for ranged attack (weaponUsed = 1), defender will not counterattack.
+	if (myCursor->selectMinionPointer->rangeType == rangedFire
+		|| (myCursor->selectMinionPointer->rangeType == hybridRange && attackerWeaponUsed == 1)
 		|| boardToUse->Board[defenderX][defenderY].minionOnTop->rangeType == rangedFire)
 		defenderCounterAttackDamageDealt = 0;
 
@@ -928,14 +935,17 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 	//If it's a better score, switch targets.
 	if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
 	{
-		//New criteria: defender's damage dealt must be less than 50
-		if (defenderCounterAttackDamageDealt < 50)
-		{
-			*relativeSuitabilityScore = newRelativeSuitabilityScore;
-			selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[attackerX][attackerY]);
-			selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[defenderX][defenderY]);
-			//No return, we want to check all tiles
-		}
+		//If either non-hybrid, OR hybrid AND uses the right weapon based on the range (IE primary weapon for ranged attack)
+		if (myCursor->selectMinionPointer->rangeType != hybridRange
+			|| (myCursor->selectMinionPointer->rangeType == hybridRange && attackerWeaponUsed == 1 && false == isAdjacent(attackerX, defenderX, attackerY, defenderY))
+			|| (myCursor->selectMinionPointer->rangeType == hybridRange && attackerWeaponUsed == 2 && true == isAdjacent(attackerX, defenderX, attackerY, defenderY)))
+			//Also, defender's damage dealt must be less than 50
+			if (defenderCounterAttackDamageDealt < 50)
+			{
+				*relativeSuitabilityScore = newRelativeSuitabilityScore;
+				selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[attackerX][attackerY]);
+				selectedMinionRecord->potentialAttackTile = &(boardToUse->Board[defenderX][defenderY]);
+			}
 	}
 
 	return 0;
@@ -956,8 +966,10 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 	int minY = 0;
 	int maxY = 0;
 
-
-	if (myCursor->selectMinionPointer->rangeType == directFire)
+	//Then determine the search box based on range or movement, based on fire type.
+	//For hybrid, use whatever is larger, the move range or the fire range.
+	if (myCursor->selectMinionPointer->rangeType == directFire
+		|| (myCursor->selectMinionPointer->rangeType == hybridRange && myCursor->selectMinionPointer->movementRange > myCursor->selectMinionPointer->attackRange))
 	{
 		minX = myCursor->selectMinionPointer->locationX - myCursor->selectMinionPointer->movementRange;
 		maxX = myCursor->selectMinionPointer->locationX + myCursor->selectMinionPointer->movementRange;
@@ -966,15 +978,17 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 		maxY = myCursor->selectMinionPointer->locationY + myCursor->selectMinionPointer->movementRange;
 
 	}
-	if (myCursor->selectMinionPointer->rangeType == rangedFire)
+	else
+	if (myCursor->selectMinionPointer->rangeType == rangedFire || myCursor->selectMinionPointer->rangeType == hybridRange)
 	{
 		minX = myCursor->selectMinionPointer->locationX - myCursor->selectMinionPointer->attackRange;
 		maxX = myCursor->selectMinionPointer->locationX + myCursor->selectMinionPointer->attackRange;
 
 		minY = myCursor->selectMinionPointer->locationY - myCursor->selectMinionPointer->attackRange;
 		maxY = myCursor->selectMinionPointer->locationY + myCursor->selectMinionPointer->attackRange;
-
 	}
+
+
 
 	if (minX < 0)
 	{
@@ -1002,7 +1016,7 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 			//If the current tile DOES not have minion on top (IE we will be able to move there)
 			//Also must be within range
 			//Direct fire only
-			if (selectedMinionRecord->recordedMinion->rangeType == directFire &&
+			if ((selectedMinionRecord->recordedMinion->rangeType == directFire || selectedMinionRecord->recordedMinion->rangeType == hybridRange) &&
 				(boardToUse->Board[x][y].hasMinionOnTop == false ||
 				(myCursor->selectMinionPointer->locationY == y && myCursor->selectMinionPointer->locationX == x))
 				&& boardToUse->Board[x][y].withinRange == true)
@@ -1012,7 +1026,7 @@ double compie::findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compi
 			}
 			//Check each tile if suitable for artillery fire
 			//Must be visible
-			if (selectedMinionRecord->recordedMinion->rangeType == rangedFire)
+			if (selectedMinionRecord->recordedMinion->rangeType == rangedFire || selectedMinionRecord->recordedMinion->rangeType == hybridRange)
 				if (boardToUse->Board[x][y].hasMinionOnTop == true
 					&& boardToUse->Board[x][y].withinVision[myCursor->selectMinionPointer->team] == true
 					&& myCursor->selectMinionPointer->team != boardToUse->Board[x][y].minionOnTop->team)
