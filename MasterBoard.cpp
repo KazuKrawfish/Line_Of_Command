@@ -298,10 +298,10 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	if (defendingMinion.type == "Specialist" || defendingMinion.type == "Insurgent")
 		x = 1;
 	else
-	if (defendingMinion.type == "Armor" || defendingMinion.type == "Upgunned_Armor" || defendingMinion.type == "Assault_Gun")
+	if (defendingMinion.type == "Armor" || defendingMinion.type == "Upgunned_Armor" )
 		x = 2;
 	else
-	if (defendingMinion.type == "Artillery")
+	if (defendingMinion.type == "Artillery" || defendingMinion.type == "Assault_Gun" )
 		x = 3;
 	else
 	if (defendingMinion.type == "Recon" || defendingMinion.type == "Technical")
@@ -1961,7 +1961,7 @@ int MasterBoard::deployLandmine(inputLayer* InputLayer, int inputX, int inputY)
 int MasterBoard::createMinion(std::string inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo)
 {
 	//Cannot create minion illegally (On top of another, or in bad location)
-	if (Board[inputX][inputY].hasMinionOnTop == true || Board[inputX][inputY].consultMovementChart(inputType, Board[inputX][inputY].symbol) == 99)
+	if ( (Board[inputX][inputY].hasMinionOnTop == true && beingTransported == 0 ) || Board[inputX][inputY].consultMovementChart(inputType, Board[inputX][inputY].symbol) == 99)
 		return 1;
 
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
@@ -1978,6 +1978,19 @@ int MasterBoard::createMinion(std::string inputType, int inputX, int inputY, int
 				if (beingTransported == 0) //Only access the board if minion has legit location
 				{
 					Board[inputX][inputY].minionOnTop = minionRoster[i];
+				}
+				//If it's being transported, load it into the transport. This assumes it has valid transport at its location.
+				else if(Board[inputX][inputY].minionOnTop->specialtyGroup == smallTransport || Board[inputX][inputY].minionOnTop->specialtyGroup == largeTransport || Board[inputX][inputY].minionOnTop->specialtyGroup == aircraftCarrier)
+				{
+					if(Board[inputX][inputY].minionOnTop->firstMinionBeingTransported == NULL)
+						Board[inputX][inputY].minionOnTop->firstMinionBeingTransported = minionRoster[i];
+					else
+						Board[inputX][inputY].minionOnTop->secondMinionBeingTransported = minionRoster[i];
+
+					minionRoster[i]->transporter = Board[inputX][inputY].minionOnTop;
+
+					minionRoster[i]->locationX = -1;
+					minionRoster[i]->locationY = -1;
 				}
 				setVisionField(inputTeam);
 
