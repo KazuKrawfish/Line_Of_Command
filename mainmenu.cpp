@@ -972,6 +972,7 @@ int mainMenu::printWaitingScreen()
 	return 0;
 }
 
+
 int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 	if (computerPlayerRoster.empty() == false)
@@ -1277,10 +1278,10 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				mywindow->draw(backgroundSprite);
 				mywindow->draw(factionChooseText);
-				
-				for(int i = 0; i < factionChoiceButtons.size() ; i++)
+
+				for (int i = 0; i < factionChoiceButtons.size(); i++)
 					mywindow->draw(factionChoiceButtons.at(i).mySprite);
-				
+
 				mywindow->display();
 
 				//Wait for a mouse click, then check if it's within a faction box.
@@ -1300,7 +1301,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 						if (withinFactionButton == true)
 						{
 							//Have to offset for neutral player, since neutral faction type is 0, but [0] in the choice array is N. Redonia.
-							boardToPlay->playerRoster[i].playerFaction = factionType(x+1);
+							boardToPlay->playerRoster[i].playerFaction = factionType(x + 1);
 							factionDecided = true;
 						}
 
@@ -1338,7 +1339,8 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	menuStatus = playingMap;
 
 	//If we start new game, stop menu music since we're getting briefing music
-	musicArray[0].stop();
+	if (musicArray[0].getStatus() == sf::SoundSource::Playing)
+		musicArray[0].stop();
 
 	//Before entering play, make sure to print out briefing.
 	InputLayer->printMissionBriefing(boardToPlay);

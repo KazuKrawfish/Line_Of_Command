@@ -3196,6 +3196,22 @@ int inputLayer::exitToMainMenu(MasterBoard* boardToInput)
 	MainMenu->skipOneInput = true;
 
 
+	//Stop whatever music was happening before.
+	if (soundsOn == true)
+	{
+
+		//Turn off all music playing
+		for (int i = 0; i < 7; i++)
+		{
+			gameMusic[i].stop();
+		}
+
+		//Play main menu music again.
+		if (gameMusic[0].getStatus() != sf::SoundSource::Playing)
+			gameMusic[0].play();
+
+	}
+
 	//Leave it all behind and start again.
 	//Do you... really think we could?
 	MainMenu->playGame(boardToInput, this);
