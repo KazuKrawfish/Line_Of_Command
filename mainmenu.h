@@ -97,6 +97,15 @@ public:
 	sf::Music* musicArray;
 	//SFML Objects///////////////////////////////
 
+	//Battle Lab/////////////////////////////////
+	bool battleLabOn = false; 
+	int battleLabTurnLimit = 0;
+	int battleLabNumberDraws = 0;
+	int battleLabnumberPlayerOneWins = 0;
+	int battleLabnumberPlayerTwoWins = 0;
+	int runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile);
+	//Battle Lab/////////////////////////////////
+
 };
 
 #endif /* MAINMENU_HPP__ */

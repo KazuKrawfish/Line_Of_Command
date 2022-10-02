@@ -727,6 +727,32 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
+	//BATLELAB
+	//First open battle lab config and determine if we are in battle lab mode.
+	//Normal play is 0, 1 is battle lab   
+	std::ifstream battleLabConfigFile;
+	battleLabConfigFile.open(".\\battleLab\\battleLabConfig.txt");
+	battleLabOn = false;		//Global
+	std::string ThrowawayString;
+
+	if (battleLabConfigFile.is_open() == true)
+	{
+		battleLabConfigFile >> ThrowawayString;
+		battleLabConfigFile >> battleLabOn;
+	}
+	else
+	{
+		std::cout << "Could not open battle lab config file." << std::endl;
+	}
+
+	//If ordered, run battle lab.
+	if (battleLabOn == true)
+	{
+		std::cout << "Running Battle Lab" << std::endl;
+		runBattleLab(boardToPlay, InputLayer, &battleLabConfigFile);
+	}
+	//END_BATTLELAB
+
 
 	sf::Sprite startWallpaperSprite;
 	startWallpaperSprite.setTexture((otherGameTextures->at(0)));
@@ -765,13 +791,101 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	return 0;
 }
 
+int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile)
+{
+	//Battle lab expects the following in config file:
+	//runBattleLab_0_Off_1_On
+	//0
+	//Number_Of_Runs
+	//100
+	//TurnLimit
+	//200
+	//Scenario_Name
+	//midway.txt
+
+	battleLabTurnLimit = 0;
+	battleLabNumberDraws = 0;
+	battleLabnumberPlayerOneWins = 0;
+	battleLabnumberPlayerTwoWins = 0;
+
+	std::string ThrowawayString;
+	int numberOfRuns = 0;
+
+	*configFile >> ThrowawayString;
+	*configFile >> numberOfRuns;
+
+	*configFile >> ThrowawayString;
+	*configFile >> battleLabTurnLimit; //Global within mainMenu.cpp
+
+	std::string scenarioName = "";
+	*configFile >> ThrowawayString;
+	*configFile >> scenarioName;
+
+	//Run given scenario according to number of runs directed
+	for (int i = 0; i < numberOfRuns; i++)
+	{
+
+		if (computerPlayerRoster.empty() == false)
+		{
+			computerPlayerRoster.clear();
+		}
+
+		gameType = localSkirmish;
+
+		//Load the actual map
+		std::ifstream newGameMap;
+
+		//Need to print out mission/scenario printout here
+		if (gameType == localSkirmish)
+		{
+			newGameMap.open(".\\scenarios\\" + scenarioName + ".txt");
+			if (newGameMap.is_open() == false)
+			{
+				std::cout << "Could not open scenario. Aborting battle lab." << std::endl;
+				return 1;
+			}
+		}
+
+		//Actually load scenario. Initialize board, etc.
+		//gameLoad initializes compies.
+		gameLoad(boardToPlay, InputLayer, &newGameMap);
+		newGameMap.close();
+
+		boardToPlay->isItSinglePlayerGame = true;
+
+		menuStatus = playingMap;
+
+		skipOneInput = true;
+
+		//After loading scenario for this iteration, play game.
+		//Does every path return after playGame? Not sure.
+		playGame(boardToPlay, InputLayer);
+
+		//Put out status
+		std::cout << "********** Completed game number: " << i<< " ****************"<<std::endl;
+		std::cout << "\tPlayer 1 wins: " << battleLabnumberPlayerOneWins << std::endl;
+		std::cout << "\tPlayer 2 wins: " << battleLabnumberPlayerTwoWins << std::endl;
+		std::cout << "\tNumber of draws: " << battleLabNumberDraws << std::endl << std::endl;
+
+	}
+
+	return 0;
+}
+
+
 int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
-
-
+	
 	//Run as long as the user wants. Infinite while loop.
 	while (true)
 	{
+		//If battle lab is running, check for game draw.
+		if (battleLabOn == true && gameTurn >= battleLabTurnLimit)
+		{
+			battleLabNumberDraws++;
+			return 0;
+		}
+
 		sf::Event playerInput;
 		enum sf::Keyboard::Key Input = sf::Keyboard::F1;
 
@@ -866,10 +980,14 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 				//This prints the screen AFTER the latest input has taken effect.
 				//Is this messing with remote play? Not sure.
-				boardToPlay->checkWindow();
+				//As long as battlelab is not on, print the screen.
+				if (battleLabOn == false)
+				{
+					boardToPlay->checkWindow();
 
-				InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
-
+					InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
+				}
+			
 			}
 
 
