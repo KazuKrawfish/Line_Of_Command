@@ -99,6 +99,7 @@ public:
 
 	//Battle Lab/////////////////////////////////
 	bool battleLabOn = false; 
+	bool battleLabReset = false;
 	int battleLabTurnLimit = 0;
 	int battleLabNumberDraws = 0;
 	int battleLabnumberPlayerOneWins = 0;

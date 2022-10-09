@@ -1296,8 +1296,6 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 		}
 	}
 
-
-
 	return 0;
 }
 
@@ -2639,13 +2637,33 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 
 
 //Does player victory process. Can be called after playerDefeat, or directly if a victory condition was met.
+//Only print victory if human player present.
 int MasterBoard::playerVictory(int winningPlayer, inputLayer* InputLayer)
 {
+	bool humanPlayerPresent = false;
+	for (int i = 1; i < playerRoster.size(); i++)
+	{
+		if (playerRoster[i].playerType == humanPlayer)
+			humanPlayerPresent = true;
+	}
 
-	InputLayer->printPlayerVictory(winningPlayer, this);
+	if (humanPlayerPresent == true)
+		InputLayer->printPlayerVictory(winningPlayer, this);
 
 	if (missionFlag == false || playerRoster[winningPlayer].playerType == computerPlayer)
+	{
 		InputLayer->exitToMainMenu(this);
+		
+		//Track number of wins
+		if (InputLayer->MainMenu->battleLabOn == true)
+		{
+			if (winningPlayer == 1)
+				InputLayer->MainMenu->battleLabnumberPlayerOneWins++;
+			if (winningPlayer == 2)
+				InputLayer->MainMenu->battleLabnumberPlayerTwoWins++;
+			InputLayer->MainMenu->battleLabReset = true;
+		}
+	}
 	else
 	{
 		InputLayer->NextMission(this);
@@ -2655,9 +2673,11 @@ int MasterBoard::playerVictory(int winningPlayer, inputLayer* InputLayer)
 
 }
 
-//Destroys all units owned by loser.
+
+//Destroys all minions owned by loser.
 //Transfers properties to either the HQ capper, or neutral.
 //Does NOT discriminate - you must set winningPlayer = 0 if all minions were destroyed.
+//Doesn't print defeat if both computer players are playing
 int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* InputLayer)
 {
 
@@ -2689,9 +2709,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 		}
 	}
 
-	//Change over to defeat screen for that player.		
-	InputLayer->printPlayerDefeat(losingPlayer, this);
-
+	bool humanPlayerPresent = false;
 	int playersLeft = 0;
 	//Determine if this was the last player alive
 	for (int i = 1; i < playerRoster.size(); i++)
@@ -2700,9 +2718,16 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 		{
 			playersLeft++;
 		}
+
+		if (playerRoster[i].playerType == humanPlayer)
+			humanPlayerPresent = true;
 	}
 
-	//ExitToMain also sets compie to stop playing in case this is his turn.
+	//As long as at least one player is a human player, print the defeat screen. Otherwise carry on.
+	if (humanPlayerPresent == true)
+		InputLayer->printPlayerDefeat(losingPlayer, this);
+
+
 	bool gameOver = false;
 	if (playersLeft <= 1)
 	{
@@ -2715,7 +2740,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 			}
 		}
 
-		playerVictory(winningPlayer , InputLayer);
+		playerVictory(winningPlayer, InputLayer);
 		gameOver = true;
 	}
 
@@ -2726,7 +2751,11 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 		endTurn(InputLayer);
 	}
 
-	return 0;
+	//Return game over code if needed
+	if (gameOver == true)
+		return 999;
+	else 	
+		return 0;
 }
 
 int MasterBoard::deselectMinion()
@@ -2794,6 +2823,9 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 	//Simplify by finding shorthand values first.
 	Minion* attackingMinion = cursor.selectMinionPointer;
 	Minion* defendingMinion = Board[inputX][inputY].minionOnTop;
+
+	//If a minion dies and causes the game to end, need to track that.
+	int gameOverCode = 0;
 
 	if (attackingMinion == NULL || defendingMinion == NULL)
 	{
@@ -2877,7 +2909,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 		//If defender falls below 4, it dies.
 		bool printMessage = true;
 		int defendingPlayer = defendingMinion->team;
-		destroyMinion(defendingMinion, printMessage, InputLayer, false);
+		gameOverCode = destroyMinion(defendingMinion, printMessage, InputLayer, false);
 		defenderAlive = false;
 		if (attackingMinion->veterancy < 3 )
 		{
@@ -2925,24 +2957,33 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 			}
 		}
 
-	if (attackingMinion->health < 5 )			//The attacker can be destroyed too!
+	//Is game over? (999)
+	if (gameOverCode != 999)
 	{
-		bool printMessage = true;
-		if (defenderAlive == true && defendingMinion->veterancy <= 3 )
+		if (attackingMinion->health < 5)			//The attacker can be destroyed too!
 		{
-			defendingMinion->veterancy++;
+			bool printMessage = true;
+			if (defenderAlive == true && defendingMinion->veterancy <= 3)
+			{
+				defendingMinion->veterancy++;
+			}
+			gameOverCode = destroyMinion(attackingMinion, printMessage, InputLayer, false);
+			setVisionField(playerFlag);
 		}
-		destroyMinion(attackingMinion, printMessage, InputLayer, false);
-		setVisionField(playerFlag);
-	}
-	else
-	{
-		//If the attacker survived, deselect.
-		attackingMinion->status = hasfired;
-		deselectMinion();
+		else
+		{
+			//If the attacker survived, deselect.
+			attackingMinion->status = hasfired;
+			deselectMinion();
+		}
+
 	}
 
-	return 0;
+	//If game ended from a miniond dying, return game end code
+	if (gameOverCode == 999)
+		return 999;
+	else
+		return 0;
 
 }
 
@@ -3035,6 +3076,8 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 	minionRoster[inputMinion->seniority] = NULL;
 	delete inputMinion;
 
+	int gameEndCode = 0;	//999 indicates game over
+
 	//Decrease player minion count.
 	playerRoster[minionController].numberOfMinions--;
 
@@ -3043,12 +3086,12 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 		//"Neutral" player will be the "winner" of a defeat via destruction of all minions.
 		if (playerRoster[minionController].stillAlive == true)
 		{
-			playerDefeat(minionController, 0, InputLayer);
+			gameEndCode = playerDefeat(minionController, 0, InputLayer);
 		}
 
 	}
 
-	return 0;
+	return gameEndCode;
 }
 
 int MasterBoard::endTurn(inputLayer* InputLayer) {

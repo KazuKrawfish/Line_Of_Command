@@ -1110,6 +1110,9 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 //This function assumes the minion is already selected.
 int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
+	if (selectedMinionRecord->recordedMinion == NULL)
+		return 1;
+
 	std::cout << "Determining task for " << selectedMinionRecord->recordedMinion->description << " " << selectedMinionRecord->recordedMinion->seniority << std::endl;
 
 	int returnX = 0;
@@ -1261,6 +1264,8 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 
 int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
+	int gameEndCode = 0;
+
 	std::cout << "Moving " << selectedMinionRecord->recordedMinion->description << " " << selectedMinionRecord->recordedMinion->seniority << std::endl;
 
 	int whoIsWatching = -1;		//-1 Is "default" meaning in a standard multiplayer game, nothing is printed during compie turn. It's hidden from view.
@@ -1297,7 +1302,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 			boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
 			//Place cursor on tile being attacked.
 			boardToUse->cursor.relocate(selectedMinionRecord->potentialAttackTile->locationX, selectedMinionRecord->potentialAttackTile->locationY);
-			boardToUse->attackMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY(), InputLayer, whoIsWatching);
+			gameEndCode = boardToUse->attackMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY(), InputLayer, whoIsWatching);
 
 		}
 
@@ -1340,16 +1345,20 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 		//Do nothing
 	}
 
-	boardToUse->deselectMinion();
 
-	//See if we moved next to an enemy and attack if so
-	determinePotentialMinionTasking( boardToUse,  selectedMinionRecord);
+	//If advance or withdraw, stay selected and re-determine tasking to check for adjacent enemy to attack.
+	if (selectedMinionRecord->tasking == advance || selectedMinionRecord->tasking == withdraw)
+		determinePotentialMinionTasking(boardToUse, selectedMinionRecord);
+	else //Otherwise deselect and carry out orders.
+	boardToUse->deselectMinion();
+		
 	if (selectedMinionRecord->tasking == attackLocalMinion)
 	{
 		boardToUse->selectMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY());
 		//Place cursor on tile being attacked.
 		boardToUse->cursor.relocate(selectedMinionRecord->potentialAttackTile->locationX, selectedMinionRecord->potentialAttackTile->locationY);
-		boardToUse->attackMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY(), InputLayer, whoIsWatching);
+		if(gameEndCode != 999)
+			boardToUse->attackMinion(boardToUse->cursor.getX(), boardToUse->cursor.getY(), InputLayer, whoIsWatching);
 	}
 
 	boardToUse->setVisionField(whoIsWatching);
@@ -1376,8 +1385,15 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 	selectedMinionRecord->taskingStatus = taskingExecuted;
 
 
-
-	return 1;
+	if (gameEndCode == 999)
+	{
+		return gameEndCode;
+	}
+	else
+	{
+		return 1;
+	}
+	
 }
 
 int compie::takeMyTurn(MasterBoard* boardToUse)
@@ -1404,7 +1420,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 	bool allMinionsHaveMoved = false;
 	int waveIterator = 0;
-
+	int gameEndCode = 0;
 
 	//Very first move: Artillery fire at targets of opportunity.
 	for (int i = 0; i < compieMinionRoster.size(); i++)
@@ -1418,7 +1434,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 
 			if (compieMinionRoster[i]->tasking == attackLocalMinion)
 			{
-				executeMinionTasks(boardToUse, compieMinionRoster[i]);
+				gameEndCode = executeMinionTasks(boardToUse, compieMinionRoster[i]);
 			}
 			else //If we couldn't find someone to shoot, reset to awaiting tasking, and move on.
 			{
@@ -1427,6 +1443,9 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 			}
 			boardToUse->deselectMinion();
 		}
+
+		if (gameEndCode == 999)
+			return 999;
 	}
 
 	//Go through minionRecord and determine tasking.
@@ -1459,8 +1478,10 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 				//Should already be selected
 				if (compieMinionRoster[i]->taskingStatus == (immediateExecute))
 				{
-					executeMinionTasks(boardToUse, compieMinionRoster[i]);
+					gameEndCode = executeMinionTasks(boardToUse, compieMinionRoster[i]);
 				}
+				if (gameEndCode == 999)
+					return 999;
 
 				//If a single minion has not finished its tasking, set to false
 				if (compieMinionRoster[i]->taskingStatus != taskingExecuted)
@@ -1471,8 +1492,10 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 				//If we are on Wave 3, execute, regardless of priority.
 				if (waveIterator == 3)
 				{
-					executeMinionTasks(boardToUse, compieMinionRoster[i]);
+					gameEndCode = executeMinionTasks(boardToUse, compieMinionRoster[i]);
 				}
+				if (gameEndCode == 999)
+					return 999;
 
 				boardToUse->deselectMinion();
 
@@ -1604,6 +1627,11 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			if (boardToUse->minionRoster[i]->type ==  "Anti-Aicraft" || boardToUse->minionRoster[i]->type ==  "Interceptor")
 			{
 				numberOfAA++;
+			}
+
+			if (boardToUse->minionRoster[i]->type == "Gunboat" || boardToUse->minionRoster[i]->type == "Cruiser" || boardToUse->minionRoster[i]->type == "Battleship")
+			{
+				numberOfSeaCombatants++;
 			}
 			
 		}
@@ -1848,11 +1876,14 @@ int compie::buildCompieMinionRoster(MasterBoard* boardToUse)
 			numberOfCompieMinions++;
 			compieMinionRoster[i] = new compieMinionRecord(boardToUse->minionRoster[i]);
 
-			//Also count number of infantry/total units in this land mass.
-			compieLandMassMap.roster[compieLandMassMap.grid[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].landMassNumber].armySizeHere++;
-			if (boardToUse->minionRoster[i]->specialtyGroup == infantry)
+			//Also count number of infantry/total units in this land mass. Must not be naval minion.
+			if (compieLandMassMap.grid[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].landMassNumber > 0)
 			{
-				compieLandMassMap.roster[compieLandMassMap.grid[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].landMassNumber].onlyInfantryArmySizeHere++;
+				compieLandMassMap.roster[compieLandMassMap.grid[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].landMassNumber].armySizeHere++;
+				if (boardToUse->minionRoster[i]->specialtyGroup == infantry)
+				{
+					compieLandMassMap.roster[compieLandMassMap.grid[boardToUse->minionRoster[i]->locationX][boardToUse->minionRoster[i]->locationY].landMassNumber].onlyInfantryArmySizeHere++;
+				}
 			}
 		}
 	}

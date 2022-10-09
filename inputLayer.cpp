@@ -3212,9 +3212,12 @@ int inputLayer::exitToMainMenu(MasterBoard* boardToInput)
 
 	}
 
-	//Leave it all behind and start again.
-	//Do you... really think we could?
-	MainMenu->playGame(boardToInput, this);
+	//If battle lab is on, we need to get back to that instance of playGame()
+	if (MainMenu->battleLabOn == false)
+	{
+		MainMenu->playGame(boardToInput, this);
+	}
+	else
 
 	return 0;
 }

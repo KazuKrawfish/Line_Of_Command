@@ -791,6 +791,8 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	return 0;
 }
 
+//Modified - Turn off mission flag.
+//Make sure all compie paths return to main menu.
 int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile)
 {
 	//Battle lab expects the following in config file:
@@ -821,9 +823,15 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	*configFile >> ThrowawayString;
 	*configFile >> scenarioName;
 
+
+	//Increase speed and turn off sound
+	InputLayer->speedFactor = 10;
+	InputLayer->soundsOn = false;
+
 	//Run given scenario according to number of runs directed
 	for (int i = 0; i < numberOfRuns; i++)
 	{
+		battleLabReset = false;
 
 		if (computerPlayerRoster.empty() == false)
 		{
@@ -847,9 +855,18 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		}
 
 		//Actually load scenario. Initialize board, etc.
-		//gameLoad initializes compies.
 		gameLoad(boardToPlay, InputLayer, &newGameMap);
 		newGameMap.close();
+
+		//Initialize compies if not done by gameLoad (They were initialized if it is a mission or a savegame)
+		if (boardToPlay->missionFlag == false)
+		{
+			computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
+			for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
+			{
+				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
+			}
+		}
 
 		boardToPlay->isItSinglePlayerGame = true;
 
@@ -857,15 +874,17 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 
 		skipOneInput = true;
 
+		//Turn off mission flag so we come back to main menu after the game is resolved.
+		boardToPlay->missionFlag = false;
+
 		//After loading scenario for this iteration, play game.
-		//Does every path return after playGame? Not sure.
 		playGame(boardToPlay, InputLayer);
 
 		//Put out status
-		std::cout << "********** Completed game number: " << i<< " ****************"<<std::endl;
+		std::cout << "********** Completed game number: " << i << " ****************" << std::endl;
 		std::cout << "\tPlayer 1 wins: " << battleLabnumberPlayerOneWins << std::endl;
 		std::cout << "\tPlayer 2 wins: " << battleLabnumberPlayerTwoWins << std::endl;
-		std::cout << "\tNumber of draws: " << battleLabNumberDraws << std::endl << std::endl;
+		std::cout << "\tNumber of draws: " << battleLabNumberDraws << std::endl << std::endl << std::endl;
 
 	}
 
@@ -880,10 +899,19 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	while (true)
 	{
 		//If battle lab is running, check for game draw.
-		if (battleLabOn == true && gameTurn >= battleLabTurnLimit)
+		//Check for game reset due to one player winning.
+		if (battleLabOn == true)
 		{
-			battleLabNumberDraws++;
-			return 0;
+			if (gameTurn >= battleLabTurnLimit)
+			{
+				battleLabNumberDraws++;
+				return 0;
+			}
+			else
+				if (battleLabReset == true)
+				{
+					return 0;
+				}
 		}
 
 		sf::Event playerInput;
