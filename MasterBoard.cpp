@@ -2657,10 +2657,7 @@ int MasterBoard::playerVictory(int winningPlayer, inputLayer* InputLayer)
 		//Track number of wins
 		if (InputLayer->MainMenu->battleLabOn == true)
 		{
-			if (winningPlayer == 1)
-				InputLayer->MainMenu->battleLabnumberPlayerOneWins++;
-			if (winningPlayer == 2)
-				InputLayer->MainMenu->battleLabnumberPlayerTwoWins++;
+			InputLayer->MainMenu->battleLabWinningPlayer = winningPlayer ;
 			InputLayer->MainMenu->battleLabReset = true;
 		}
 	}

@@ -571,12 +571,15 @@ compie::compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInp
 	return;
 }
 
-int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse)
+int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse, int inputRepairThreshold)
 {
 	InputLayer = providedInputLayer;
 	menuPointer = inputMenu;
 	compiePlayerFlag = inputPlayerFlag;
 	compieMinionRoster.resize(GLOBALSUPPLYCAP);
+
+	//Battlelab input
+	repairThreshold = inputRepairThreshold;
 
 
 	compieLandMassMap.grid.resize(boardToUse->BOARD_WIDTH + 1);
@@ -1159,7 +1162,7 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 
 			//If highly damaged or Air and far from base/needs to refuel soon / out of ammo
 			//Far from base means - current fuel less than distance to closest base, including 2 turns of fuel burn (+10) and a fuel margin (+10) to actually make it.
-			if (myMinion->health < 50 || 
+			if (myMinion->health < repairThreshold ||
 				(myMinion->domain == air && 
 					(myMinion->currentFuel < distanceToAirbase + 20 || myMinion->currentFuel < (myMinion->maxFuel / 3)
 					|| (myMinion->currentPriAmmo == 0 && myMinion->maxPriAmmo != -1)  //Actually has pri weapon, and that weapon is out of ammo

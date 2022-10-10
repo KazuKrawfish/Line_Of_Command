@@ -101,10 +101,10 @@ public:
 	bool battleLabOn = false; 
 	bool battleLabReset = false;
 	int battleLabTurnLimit = 0;
-	int battleLabNumberDraws = 0;
-	int battleLabnumberPlayerOneWins = 0;
-	int battleLabnumberPlayerTwoWins = 0;
+	int battleLabWinningPlayer = 0;
 	int runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile);
+
+	int variableRepairThreshold = 10;
 	//Battle Lab/////////////////////////////////
 
 };

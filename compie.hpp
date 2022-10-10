@@ -77,7 +77,7 @@ class compie
 public:
 	compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer);
 	compie() { return; };
-	int initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse);
+	int initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse , int inputRepairThreshold);
 	int strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);	//Does a long-term move for either attack or capture
 	int strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord); //Does a long term move for either refuel or repair
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY, compieMinionRecord* selectedMinionRecord);
@@ -119,8 +119,9 @@ public:
 	int totalPropertiesOnMap = 0;
 
 
-
-
+	//BattleLab machine learning numbers
+	int repairThreshold = 40;	//10-90 represents when a minion will attempt to repair.
+	
 };
 
 #endif /* COMPIE_H__ */

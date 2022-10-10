@@ -717,7 +717,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 		for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 		{
 			if (boardToPrint->playerRoster[i].playerType == computerPlayer)
-				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPrint);
+				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPrint, variableRepairThreshold);
 		}
 	}
 
@@ -805,9 +805,9 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	//midway.txt
 
 	battleLabTurnLimit = 0;
-	battleLabNumberDraws = 0;
-	battleLabnumberPlayerOneWins = 0;
-	battleLabnumberPlayerTwoWins = 0;
+	int battleLabNumberDraws = 0;
+	int battleLabnumberPlayerOneWins = 0;
+	int battleLabnumberPlayerTwoWins = 0;
 
 	std::string ThrowawayString;
 	int numberOfRuns = 0;
@@ -822,6 +822,12 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	*configFile >> ThrowawayString;
 	*configFile >> scenarioName;
 
+	std::string outputName = "";
+	*configFile >> ThrowawayString;
+	*configFile >> outputName;
+
+	std::ofstream outputFile;
+	outputFile.open(".\\battlelab\\" + outputName );
 
 	//Increase speed and turn off sound
 	InputLayer->speedFactor = 10;
@@ -856,17 +862,26 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 			}
 		}
 
+		//Change repair threshold for each run.
+		if(variableRepairThreshold <= 80)
+			variableRepairThreshold += 10;
+
 		//Actually load scenario. Initialize board, etc.
 		gameLoad(boardToPlay, InputLayer, &newGameMap);
 		newGameMap.close();
 
 		//Initialize compies if not done by gameLoad (They were initialized if it is a mission or a savegame)
+		
 		if (boardToPlay->missionFlag == false)
 		{
 			computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
 			for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 			{
-				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
+				int controlledRepairThreshold = 50;
+
+				if(i == 2)
+					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay , controlledRepairThreshold );
+				else computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, variableRepairThreshold);
 			}
 		}
 
@@ -883,10 +898,13 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		playGame(boardToPlay, InputLayer);
 
 		//Put out status
-		std::cout << "********** Completed game number: " << i << " ****************" << std::endl;
-		std::cout << "\tPlayer 1 wins: " << battleLabnumberPlayerOneWins << std::endl;
-		std::cout << "\tPlayer 2 wins: " << battleLabnumberPlayerTwoWins << std::endl;
-		std::cout << "\tNumber of draws: " << battleLabNumberDraws << std::endl << std::endl << std::endl;
+		outputFile << "********** Completed game number: " << i << " ****************" << std::endl;
+		outputFile << "Winner: Player " << battleLabWinningPlayer << std::endl;
+		outputFile << "Number of turns in this game: " << gameTurn << std::endl;
+		outputFile << "Repair threshold for player 1: " << variableRepairThreshold << std::endl;
+		outputFile << "\tPlayer 1 wins: " << battleLabnumberPlayerOneWins << std::endl;
+		outputFile << "\tPlayer 2 wins: " << battleLabnumberPlayerTwoWins << std::endl;
+		outputFile << "\tNumber of draws: " << battleLabNumberDraws << std::endl << std::endl << std::endl;
 
 	}
 
@@ -906,7 +924,8 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		{
 			if (gameTurn >= battleLabTurnLimit)
 			{
-				battleLabNumberDraws++;
+				battleLabWinningPlayer = 0;
+				battleLabReset = true;
 				return 0;
 			}
 			else
@@ -1403,7 +1422,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 					else if (playerTypeInput == 'c')
 					{
 						boardToPlay->playerRoster[i].playerType = computerPlayer;
-						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay);
+						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, variableRepairThreshold);
 					}
 					playerTypeDecided = true;
 				}
