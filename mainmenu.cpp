@@ -791,7 +791,6 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	return 0;
 }
 
-//Modified - Turn off mission flag.
 //Make sure all compie paths return to main menu.
 int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile)
 {
@@ -827,6 +826,9 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	//Increase speed and turn off sound
 	InputLayer->speedFactor = 10;
 	InputLayer->soundsOn = false;
+
+	//Track several characteristics to describe compie's behavior:
+	int armySizeFactor[2] = { 1,1 };	//From 1 to 10
 
 	//Run given scenario according to number of runs directed
 	for (int i = 0; i < numberOfRuns; i++)

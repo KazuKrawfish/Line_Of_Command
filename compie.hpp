@@ -117,7 +117,7 @@ public:
 	int headquartersX = 0;
 	int headquartersY = 0;
 	int totalPropertiesOnMap = 0;
-	double armamentFactor = 1;
+
 
 
 
