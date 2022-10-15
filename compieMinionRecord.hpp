@@ -17,7 +17,7 @@ class inputLayer;
 class Cursor;
 class mainMenu;
 
-enum minionTaskingType { attackLocalMinion, captureLocalProperty, advance, holdPosition, withdraw, defendHQ, defendProp};
+enum minionTaskingType { attackLocalMinion, captureLocalProperty, advance, holdPosition, withdraw, defendHQ, defendProp, pickUp, dropOff, dropOffNow };
 enum minionTaskingStatus { awaitingTasking, pendingConfirmation, taskingExecuted, immediateExecute };
 
 
@@ -41,6 +41,8 @@ public:
 	tile* potentialMoveTile = NULL;
 	tile* potentialAttackTile = NULL;
 	tile* potentialGuardTile = NULL;
+	tile* firstDropTile = NULL;
+	tile* secondDropTile = NULL;
 	
 	//Points to tile the minion is going towards long-term, like for capping or attacking.
 	tile* objectiveTile = NULL;

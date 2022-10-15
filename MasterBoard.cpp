@@ -2014,6 +2014,13 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 		return -1;
 	}
 
+	//Return if already selected
+	if (cursor.selectMinionFlag == true)
+	{
+		std::cout << "Minion already selected." << std::endl;
+		return 1;
+	}
+
 	//Friendly minion
 	//Has either not moved at all, or moved but not fired and isn't ranged
 	//Or gave up move, hasn't fired
@@ -2023,47 +2030,46 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 			Board[inputX][inputY].minionOnTop->status == gaveupmovehasntfired))
 	{
 		//Cannot select minion if landmine type.
-		if(Board[inputX][inputY].minionOnTop->type != "Landmine")
+		if (Board[inputX][inputY].minionOnTop->type != "Landmine")
 		{
-		cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
-		cursor.selectMinionFlag = true;
+			cursor.selectMinionPointer = Board[inputX][inputY].minionOnTop;
+			cursor.selectMinionFlag = true;
 
-		//If minion hasn't moved or fired yet, display its movement range.
-		if (cursor.selectMinionPointer->status == hasntmovedorfired)
-		{
-			setRangeField(inputX, inputY);
-			return 0;
-		}
-		else //If minion has moved but hasn't fired, and is direct combat, display attack range.
-			//And is not carrying a guy
-			if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire
-				|| cursor.selectMinionPointer->rangeType == hybridRange) &&  cursor.selectMinionPointer->firstMinionBeingTransported == NULL)
+			//If minion hasn't moved or fired yet, display its movement range.
+			if (cursor.selectMinionPointer->status == hasntmovedorfired)
 			{
-				setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
+				setRangeField(inputX, inputY);
 				return 0;
 			}
-
-			else //If minion stood in place and hasn't fired, display attack range. And is not carrying a guy.
-				if (cursor.selectMinionPointer->status == gaveupmovehasntfired && cursor.selectMinionPointer->firstMinionBeingTransported == NULL)
+			else //If minion has moved but hasn't fired, and is direct combat, display attack range.
+				//And is not carrying a guy
+				if (cursor.selectMinionPointer->status == hasmovedhasntfired && (cursor.selectMinionPointer->rangeType == directFire
+					|| cursor.selectMinionPointer->rangeType == hybridRange) && cursor.selectMinionPointer->firstMinionBeingTransported == NULL)
 				{
 					setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
 					return 0;
-				}		//If transport that either moved or stood in place, we still select. But may not display drop field.
-				else if ((cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)
-					&& (cursor.selectMinionPointer->specialtyGroup == largeTransport || cursor.selectMinionPointer->specialtyGroup == smallTransport || cursor.selectMinionPointer->specialtyGroup == aircraftCarrier))
-				{
-					//If minion is transport and has a guy embarked, show drop field.
-					//The new assumption here is that a transport MUST have a one range direct attack weapon, because if it is carrying a minion, its "withinRange" is being set 
-					//based on the drop range, which is always one.
-					if (cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
-						setDropField(inputX, inputY);
-					return 0;
 				}
+
+				else //If minion stood in place and hasn't fired, display attack range. And is not carrying a guy.
+					if (cursor.selectMinionPointer->status == gaveupmovehasntfired && cursor.selectMinionPointer->firstMinionBeingTransported == NULL)
+					{
+						setAttackField(inputX, inputY, cursor.selectMinionPointer->attackRange);
+						return 0;
+					}		//If transport that either moved or stood in place, we still select. But may not display drop field.
+					else if ((cursor.selectMinionPointer->status == hasmovedhasntfired || cursor.selectMinionPointer->status == gaveupmovehasntfired)
+						&& (cursor.selectMinionPointer->specialtyGroup == largeTransport || cursor.selectMinionPointer->specialtyGroup == smallTransport || cursor.selectMinionPointer->specialtyGroup == aircraftCarrier))
+					{
+						//If minion is transport and has a guy embarked, show drop field.
+						//The new assumption here is that a transport MUST have a one range direct attack weapon, because if it is carrying a minion, its "withinRange" is being set 
+						//based on the drop range, which is always one.
+						if (cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
+							setDropField(inputX, inputY);
+						return 0;
+					}
 		}
 	}
 	return 1;
 }
-
 
 //Must find the closest valid tile where we can move, starting with inputX/inputY.
 //Return 0 means successfully made it to location
@@ -2758,6 +2764,12 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 int MasterBoard::deselectMinion()
 {
 
+	if (cursor.selectMinionFlag == false)
+	{
+		std::cout << "Minion already de-selected." << std::endl;
+		return 1;
+	}
+
 	for (int x = 0; x < BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -3227,7 +3239,8 @@ int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 					repairThisMinion = true;
 				}
 			}
-			else //If it's a minion you own and it's not being transported
+			else 
+			if(minionRoster[i]->transporter == NULL)	//If it's a minion you own and it's not being transported
 			{
 				tile* tileToExamine = &Board[minionRoster[i]->locationX][minionRoster[i]->locationY];
 				//If it is on a player controlled tile, and that tile is a "repairing" tile for the given unit.

@@ -78,9 +78,13 @@ public:
 	compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer);
 	compie() { return; };
 	int initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse , int inputRepairThreshold);
+	int transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
+	int transportSearchForDrop(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
+	int transportAttemptDropOff(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);	//Does a long-term move for either attack or capture
 	int strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord); //Does a long term move for either refuel or repair
 	int findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, int* returnY, compieMinionRecord* selectedMinionRecord);
+	int findClosestTileToObjective(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	double findBestValuedEnemyWithinLocalArea(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int defendHeadquarters(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);
 	int defendProperty(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord);

@@ -104,7 +104,7 @@ public:
 	int battleLabWinningPlayer = 0;
 	int runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile);
 
-	int variableRepairThreshold = 10;
+	int variableRepairThreshold = 0;
 	//Battle Lab/////////////////////////////////
 
 };
