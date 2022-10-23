@@ -314,6 +314,8 @@ int compie::analyzeSingleLandMass(MasterBoard* boardToUse, int landMassNumber)
 //Helps compie determine semi-constant map elements.
 int compie::analyzeMap(MasterBoard* boardToUse)
 {
+	std::cout << "Analyzing map for a compie player" << std::endl;
+
 	//Go through each square on the board
 	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
 	{
@@ -584,6 +586,10 @@ int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer
 	repairThreshold = inputRepairThreshold;
 
 
+
+	compieLandMassMap.grid.clear();
+	compieLandMassMap.roster.clear();
+
 	compieLandMassMap.grid.resize(boardToUse->BOARD_WIDTH + 1);
 
 	for (int i = 0; i < boardToUse->BOARD_WIDTH; i++)
@@ -820,11 +826,15 @@ int compie::findClosestTileToObjective(MasterBoard* boardToUse, compieMinionReco
 					{
 						//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
 						int rangeBetweenTileAndObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion;
-						if (rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)	//Might have been some jenkery with distances on pathMap.
+						if ( ( (selectedMinionRecord->recordedMinion->specialtyGroup == largeTransport || selectedMinionRecord->recordedMinion->specialtyGroup == smallTransport) 
+								&& rangeBetweenTileAndObjective >= 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)
+							|| ( rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective))						
 						{
+							//If transport, the objective tile is the drop point, so range can (And ideally should be) zero
 							selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
 							bestDistanceTileToObjective = rangeBetweenTileAndObjective;
 						}
+						
 					}
 				}
 		}
@@ -940,8 +950,10 @@ int compie::transportSearchForDrop(MasterBoard* boardToUse, compieMinionRecord* 
 
 								for (int j = 0; j < boardToUse->BOARD_HEIGHT; j++)
 								{
-									//Enemy controlled property
-									if (boardToUse->Board[i][j].checkForProperty(boardToUse->Board[i][j].symbol) == true && boardToUse->Board[i][j].controller != boardToUse->playerFlag)
+									//Enemy controlled property on same landmass
+									if (boardToUse->Board[i][j].checkForProperty(boardToUse->Board[i][j].symbol) == true && boardToUse->Board[i][j].controller != boardToUse->playerFlag
+										&& compieLandMassMap.grid[i][j].landMassNumber == compieLandMassMap.grid[x][y].landMassNumber)
+
 									{
 										factoryHere = true;
 										break;
@@ -1160,6 +1172,19 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 						selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
 					}
 				}
+				else //Finally, the other option is a friendly large transport within valid range, that has room.
+						//Can't check if it has the right flag, because too hard to check minionRoster from the minion itself.
+					if ( boardToUse->Board[x][y].hasMinionOnTop == true && boardToUse->Board[x][y].minionOnTop->team == boardToUse->playerFlag
+						&& boardToUse->Board[x][y].minionOnTop->specialtyGroup == largeTransport
+						&& (boardToUse->Board[x][y].minionOnTop->firstMinionBeingTransported == NULL || boardToUse->Board[x][y].minionOnTop->secondMinionBeingTransported == NULL))
+						{
+							int rangeToTransport = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
+								if (rangeToTransport != -1 && rangeToTransport < distanceFromMinionToObjective)
+								{
+									distanceFromMinionToObjective = rangeToTransport;
+										selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
+								}
+						}
 
 		}
 	}
@@ -1495,7 +1520,7 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 	selectedMinionRecord->tasking = holdPosition;
 	selectedMinionRecord->taskingStatus = immediateExecute;
 
-	if (selectedMinionRecord->recordedMinion->type == "APC")
+	if (selectedMinionRecord->recordedMinion->type == "Lander")
 		std::cout << "Hello" << std::endl;
 
 	//Check for minion status since we're now calling this function from multiple locations

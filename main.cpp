@@ -7,6 +7,7 @@
 
 
 #include <iostream>
+#include <string_view>
 #include <ctype.h>
 #include <fstream>
 #include "MasterBoard.hpp"
@@ -42,7 +43,8 @@ std::vector <std::vector<sf::IntRect>> rectArray;
 
 
 
-int initializeTextureArray(std::string directory, std::vector <std::string> imageNameList, std::vector <sf::Texture>& buttonTextureArray) //, std::vector <sf::Image> & imageList)
+
+int initializeTextureArray(std::string directory, const std::vector <std::string>& imageNameList,  std::vector <sf::Texture>& buttonTextureArray) //, std::vector <sf::Image> & imageList)
 {
 	//Need longer list of actual buttons
 

@@ -830,7 +830,7 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	outputFile.open(".\\battlelab\\" + outputName );
 
 	//Increase speed and turn off sound
-	InputLayer->speedFactor = 10;
+	InputLayer->speedFactor = 1000;
 	InputLayer->soundsOn = false;
 
 	//Track several characteristics to describe compie's behavior:
