@@ -704,7 +704,7 @@ int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord
 									break;
 								}*/
 								//Friendly factory on same landmass
-								if (boardToUse->Board[i][j].checkForProperty(boardToUse->Board[i][j].symbol) == true && boardToUse->Board[i][j].controller == boardToUse->playerFlag
+								if (boardToUse->Board[i][j].symbol == 'h' && boardToUse->Board[i][j].controller == boardToUse->playerFlag
 									&& compieLandMassMap.grid[i][j].landMassNumber == compieLandMassMap.grid[x][y].landMassNumber)
 
 								{
@@ -801,6 +801,7 @@ int compie::findClosestTileToObjective(MasterBoard* boardToUse, compieMinionReco
 			//First a minion can try to load into a transport that is on the x,y square, which has room.
 			//Must be infantry for small transport too.		
 			if (boardToUse->Board[x][y].hasMinionOnTop == true && boardToUse->Board[x][y].withinRange == true
+				&& selectedMinionRecord->recordedMinion->domain == land
 				&& ((boardToUse->Board[x][y].minionOnTop->specialtyGroup == smallTransport && boardToUse->Board[x][y].minionOnTop->firstMinionBeingTransported == NULL && selectedMinionRecord->recordedMinion->specialtyGroup == infantry)
 					|| (boardToUse->Board[x][y].minionOnTop->specialtyGroup == largeTransport && (boardToUse->Board[x][y].minionOnTop->firstMinionBeingTransported == NULL || boardToUse->Board[x][y].minionOnTop->secondMinionBeingTransported == NULL))))
 			{
@@ -834,10 +835,11 @@ int compie::findClosestTileToObjective(MasterBoard* boardToUse, compieMinionReco
 						)
 					{
 						//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
+						//Problem is right here, it's finding the best place to move, and then throwing it out in favor of the current tile, every time.
 						int rangeBetweenTileAndObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion;
-						if ( ( (selectedMinionRecord->recordedMinion->specialtyGroup == largeTransport || selectedMinionRecord->recordedMinion->specialtyGroup == smallTransport) 
-								&& rangeBetweenTileAndObjective >= 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective)
-							|| ( rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective))						
+						if ( ((selectedMinionRecord->recordedMinion->specialtyGroup == largeTransport || selectedMinionRecord->recordedMinion->specialtyGroup == smallTransport) 
+									&& ( rangeBetweenTileAndObjective >= 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective ))
+							|| ( rangeBetweenTileAndObjective > 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective))					
 						{
 							//If transport, the objective tile is the drop point, so range can (And ideally should be) zero
 							selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
@@ -1023,7 +1025,7 @@ int compie::transportAttemptDropOff(MasterBoard* boardToUse, compieMinionRecord*
 		else    //Must be sea transport
 		{
 			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
-			if (boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P'
+			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
 				&& compieLandMassMap.grid[myMinion->locationX - 1][myMinion->locationY].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
 				&& boardToUse->Board[myMinion->locationX - 1][myMinion->locationY].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX - 1][myMinion->locationY].symbol) < 99)
 			{
@@ -1053,7 +1055,7 @@ int compie::transportAttemptDropOff(MasterBoard* boardToUse, compieMinionRecord*
 		else    //Must be sea transport
 		{
 			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
-			if (boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P'
+			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
 				&& compieLandMassMap.grid[myMinion->locationX][myMinion->locationY - 1].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
 				&& boardToUse->Board[myMinion->locationX][myMinion->locationY - 1].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX][myMinion->locationY - 1].symbol) < 99)
 			{
@@ -1083,7 +1085,7 @@ int compie::transportAttemptDropOff(MasterBoard* boardToUse, compieMinionRecord*
 		else    //Must be sea transport
 		{
 			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
-			if (boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P'
+			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
 				&& compieLandMassMap.grid[myMinion->locationX + 1][myMinion->locationY].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
 				&& boardToUse->Board[myMinion->locationX + 1][myMinion->locationY].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX + 1][myMinion->locationY].symbol) < 99)
 			{
@@ -1113,7 +1115,7 @@ int compie::transportAttemptDropOff(MasterBoard* boardToUse, compieMinionRecord*
 		else    //Must be sea transport
 		{
 			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
-			if (boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P'
+			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
 				&& compieLandMassMap.grid[myMinion->locationX][myMinion->locationY + 1].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
 				&& boardToUse->Board[myMinion->locationX][myMinion->locationY + 1].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX][myMinion->locationY + 1].symbol) < 99)
 			{

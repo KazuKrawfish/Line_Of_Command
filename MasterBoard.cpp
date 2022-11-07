@@ -2538,7 +2538,8 @@ int MasterBoard::dropOffMinion()
 	}
 
 	//If not in range cannot drop off
-	if (Board[cursor.getX()][cursor.getY()].withinRange == false)
+	//Also, if any minion on this tile, even if in range, can't drop off
+	if (Board[cursor.getX()][cursor.getY()].withinRange == false || Board[cursor.getX()][cursor.getY()].hasMinionOnTop == true)
 	{
 		return 1;
 	}
