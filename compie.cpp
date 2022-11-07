@@ -811,7 +811,8 @@ int compie::findClosestTileToObjective(MasterBoard* boardToUse, compieMinionReco
 				int distanceFromMinionToObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[selectedMinionRecord->recordedMinion->locationX][selectedMinionRecord->recordedMinion->locationY].distanceFromMinion;
 
 				//Give transport a little boost distance-wise, since it's faster.
-				if (distanceFromTransportToObjective - 2 <= distanceFromMinionToObjective)
+				//Can only do "tactical" pickup with air/land, for sea it has to be 20 away
+				if (distanceFromTransportToObjective - 20 <= distanceFromMinionToObjective  || (distanceFromTransportToObjective - 2 <= distanceFromMinionToObjective  && boardToUse->Board[x][y].minionOnTop->domain != sea))
 				{
 					selectedMinionRecord->potentialMoveTile = &(boardToUse->Board[x][y]);
 					bestDistanceTileToObjective = distanceFromTransportToObjective;
@@ -835,7 +836,6 @@ int compie::findClosestTileToObjective(MasterBoard* boardToUse, compieMinionReco
 						)
 					{
 						//If the current tile is closest to the potentialObjectiveTile (NOT THE MINION!).
-						//Problem is right here, it's finding the best place to move, and then throwing it out in favor of the current tile, every time.
 						int rangeBetweenTileAndObjective = boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion;
 						if ( ((selectedMinionRecord->recordedMinion->specialtyGroup == largeTransport || selectedMinionRecord->recordedMinion->specialtyGroup == smallTransport) 
 									&& ( rangeBetweenTileAndObjective >= 0 && rangeBetweenTileAndObjective < bestDistanceTileToObjective ))
