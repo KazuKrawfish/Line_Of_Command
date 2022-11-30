@@ -816,7 +816,7 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 		}
 	}
 
-	if (Board[x][y].consultMovementChart(inputMinion->type, Board[x][y].symbol) == 99)
+	if (Board[x][y].consultMovementChart(inputMinion->type) == 99)
 		return 0;
 
 
@@ -868,7 +868,7 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 	}
 	else
 	{
-		inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(inputMinion->type, Board[x][y].symbol);
+		inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(inputMinion->type);
 	}
 
 	inputMinion->terrainOnlyPathMap[x][y].wasVisited = true;
@@ -880,9 +880,9 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 	if (x - 1 >= 0)
 	{
 		//Terrain only path will ignore all minions.
-		if ((Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 && inputMinion->terrainOnlyPathMap[x - 1][y].wasVisited != true) ||
-			(Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 &&
-			(inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+		if ((Board[x - 1][y].consultMovementChart(inputMinion->type) != 99 && inputMinion->terrainOnlyPathMap[x - 1][y].wasVisited != true) ||
+			(Board[x - 1][y].consultMovementChart(inputMinion->type) != 99 &&
+			(inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
 		{
 			buildTerrainOnlyPathMap(false, x - 1, y, inputMinion);
 		}
@@ -891,9 +891,9 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 	if (y - 1 >= 0)
 	{
 		//Terrain only path will ignore all minions.
-		if ((Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && inputMinion->terrainOnlyPathMap[x][y - 1].wasVisited != true) ||
-			(Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 &&
-			(inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+		if ((Board[x][y - 1].consultMovementChart(inputMinion->type) != 99 && inputMinion->terrainOnlyPathMap[x][y - 1].wasVisited != true) ||
+			(Board[x][y - 1].consultMovementChart(inputMinion->type) != 99 &&
+			(inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
 		{
 			buildTerrainOnlyPathMap(false, x, y - 1, inputMinion);
 		}
@@ -902,9 +902,9 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 	if (x + 1 < BOARD_WIDTH)
 	{
 		//Terrain only path will ignore all minions.
-		if ((Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
-			&& inputMinion->terrainOnlyPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
-				&& (inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+		if ((Board[x + 1][y].consultMovementChart(inputMinion->type) != 99
+			&& inputMinion->terrainOnlyPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type) != 99
+				&& (inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
 		{
 			buildTerrainOnlyPathMap(false, x + 1, y, inputMinion);
 		}
@@ -913,8 +913,8 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 	if (y + 1 < BOARD_HEIGHT)
 	{
 		//Terrain only path will ignore all minions.
-		if ((Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 && inputMinion->terrainOnlyPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 &&
-			(inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+		if ((Board[x][y + 1].consultMovementChart(inputMinion->type) != 99 && inputMinion->terrainOnlyPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type) != 99 &&
+			(inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
 		{
 			buildTerrainOnlyPathMap(false, x, y + 1, inputMinion);
 		}
@@ -943,7 +943,7 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 		}
 	}
 
-	if (Board[x][y].consultMovementChart(inputMinion->type, Board[x][y].symbol) == 99)
+	if (Board[x][y].consultMovementChart(inputMinion->type) == 99)
 		return 0;
 
 
@@ -995,7 +995,7 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 	}
 	else
 	{
-		inputMinion->apparentPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(inputMinion->type, Board[x][y].symbol);
+		inputMinion->apparentPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(inputMinion->type);
 	}
 
 	inputMinion->apparentPathMap[x][y].wasVisited = true;
@@ -1021,9 +1021,9 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
-		if ((Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 && inputMinion->apparentPathMap[x - 1][y].wasVisited != true) ||
-			(Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol) != 99 &&
-			(inputMinion->apparentPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type, Board[x - 1][y].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
+		if ((Board[x - 1][y].consultMovementChart(inputMinion->type) != 99 && inputMinion->apparentPathMap[x - 1][y].wasVisited != true) ||
+			(Board[x - 1][y].consultMovementChart(inputMinion->type) != 99 &&
+			(inputMinion->apparentPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
 			if (Board[x - 1][y].withinVision[playerFlag] == false || Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team || unseenStealthEnemyHere == true
 				|| (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
 			{
@@ -1044,9 +1044,9 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
-		if ((Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 && inputMinion->apparentPathMap[x][y - 1].wasVisited != true) ||
-			(Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol) != 99 &&
-			(inputMinion->apparentPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type, Board[x][y - 1].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
+		if ((Board[x][y - 1].consultMovementChart(inputMinion->type) != 99 && inputMinion->apparentPathMap[x][y - 1].wasVisited != true) ||
+			(Board[x][y - 1].consultMovementChart(inputMinion->type) != 99 &&
+			(inputMinion->apparentPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
 			if (Board[x][y - 1].withinVision[playerFlag] == false || Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team || unseenStealthEnemyHere == true
 				|| (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
 			{
@@ -1067,9 +1067,9 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
-		if ((Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
-			&& inputMinion->apparentPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol) != 99
-				&& (inputMinion->apparentPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type, Board[x + 1][y].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
+		if ((Board[x + 1][y].consultMovementChart(inputMinion->type) != 99
+			&& inputMinion->apparentPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type) != 99
+				&& (inputMinion->apparentPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
 			if (Board[x + 1][y].withinVision[playerFlag] == false || Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || unseenStealthEnemyHere == true
 				|| (cursor.selectMinionPointer->domain != air && Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
 			{
@@ -1090,8 +1090,8 @@ int MasterBoard::buildApparentPathMap(bool isItInitialCall, int x, int y, Minion
 		}
 
 		//Apparent path will assume a non-visible tile has no minion in it. Thus how it "appears" to the player.
-		if ((Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 && inputMinion->apparentPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol) != 99 &&
-			(inputMinion->apparentPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type, Board[x][y + 1].symbol)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
+		if ((Board[x][y + 1].consultMovementChart(inputMinion->type) != 99 && inputMinion->apparentPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type) != 99 &&
+			(inputMinion->apparentPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type)) > inputMinion->apparentPathMap[x][y].distanceFromMinion))
 			if (Board[x][y + 1].withinVision[playerFlag] == false || Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || unseenStealthEnemyHere == true ||
 				(cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air)
 				|| (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
@@ -1122,7 +1122,7 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, std::string minio
 		}
 	}
 
-	if (Board[x][y].consultMovementChart(minionType, Board[x][y].symbol) == 99)
+	if (Board[x][y].consultMovementChart(minionType) == 99)
 		return 0;
 
 
@@ -1175,7 +1175,7 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, std::string minio
 	}
 	else
 	{
-		pathMapPointer[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(minionType, Board[x][y].symbol);
+		pathMapPointer[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(minionType);
 	}
 
 	pathMapPointer[x][y].wasVisited = true;
@@ -1188,8 +1188,8 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, std::string minio
 	//This does not include air and non-air. They can pass through each other.
 	if (x - 1 >= 0)
 	{
-		if ((Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && pathMapPointer[x - 1][y].wasVisited != true) ||
-			(Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol) != 99 && (pathMapPointer[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(minionType, Board[x - 1][y].symbol)) > pathMapPointer[x][y].distanceFromMinion))
+		if ((Board[x - 1][y].consultMovementChart(minionType) != 99 && pathMapPointer[x - 1][y].wasVisited != true) ||
+			(Board[x - 1][y].consultMovementChart(minionType) != 99 && (pathMapPointer[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(minionType)) > pathMapPointer[x][y].distanceFromMinion))
 			if (Board[x - 1][y].hasMinionOnTop != true || Board[x - 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x - 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x - 1][y].minionOnTop->domain != air))
 			{
 				buildPath(false, x - 1, y, minionType, pathMapPointer);
@@ -1198,7 +1198,7 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, std::string minio
 
 	if (y - 1 >= 0)
 	{
-		if ((Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && pathMapPointer[x][y - 1].wasVisited != true) || (Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol) != 99 && (pathMapPointer[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(minionType, Board[x][y - 1].symbol)) > pathMapPointer[x][y].distanceFromMinion))
+		if ((Board[x][y - 1].consultMovementChart(minionType) != 99 && pathMapPointer[x][y - 1].wasVisited != true) || (Board[x][y - 1].consultMovementChart(minionType) != 99 && (pathMapPointer[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(minionType)) > pathMapPointer[x][y].distanceFromMinion))
 			if (Board[x][y - 1].hasMinionOnTop != true || Board[x][y - 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y - 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y - 1].minionOnTop->domain != air))
 			{
 				buildPath(false, x, y - 1, minionType, pathMapPointer);
@@ -1207,7 +1207,7 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, std::string minio
 
 	if (x + 1 < BOARD_WIDTH)
 	{
-		if ((Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && pathMapPointer[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol) != 99 && (pathMapPointer[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType, Board[x + 1][y].symbol)) > pathMapPointer[x][y].distanceFromMinion))
+		if ((Board[x + 1][y].consultMovementChart(minionType) != 99 && pathMapPointer[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(minionType) != 99 && (pathMapPointer[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(minionType)) > pathMapPointer[x][y].distanceFromMinion))
 			if (Board[x + 1][y].hasMinionOnTop != true || Board[x + 1][y].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x + 1][y].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x + 1][y].minionOnTop->domain != air))
 			{
 				buildPath(false, x + 1, y, minionType, pathMapPointer);
@@ -1216,7 +1216,7 @@ int MasterBoard::buildPath(bool isItInitialCall, int x, int y, std::string minio
 
 	if (y + 1 < BOARD_HEIGHT)
 	{
-		if ((Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && pathMapPointer[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol) != 99 && (pathMapPointer[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType, Board[x][y + 1].symbol)) > pathMapPointer[x][y].distanceFromMinion))
+		if ((Board[x][y + 1].consultMovementChart(minionType) != 99 && pathMapPointer[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(minionType) != 99 && (pathMapPointer[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(minionType)) > pathMapPointer[x][y].distanceFromMinion))
 			if (Board[x][y + 1].hasMinionOnTop != true || Board[x][y + 1].minionOnTop->team == cursor.selectMinionPointer->team || (cursor.selectMinionPointer->domain != air && Board[x][y + 1].minionOnTop->domain == air) || (cursor.selectMinionPointer->domain == air && Board[x][y + 1].minionOnTop->domain != air))
 			{
 				buildPath(false, x, y + 1, minionType, pathMapPointer);
@@ -1768,16 +1768,16 @@ int MasterBoard::setDropField(int inputX, int inputY)
 
 
 	//Check each adjacent tile, if it is not impassible or off map, put in range for transport.
-	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type, Board[inputX + 1][inputY].symbol) != 99)
+	if (inputX < BOARD_WIDTH - 1 && Board[inputX + 1][inputY].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type) != 99)
 		Board[inputX + 1][inputY].withinRange = true;
 
-	if (inputX > 0 && Board[inputX - 1][inputY].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type, Board[inputX - 1][inputY].symbol) != 99)
+	if (inputX > 0 && Board[inputX - 1][inputY].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type) != 99)
 		Board[inputX - 1][inputY].withinRange = true;
 
-	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type, Board[inputX][inputY + 1].symbol) != 99)
+	if (inputY < BOARD_HEIGHT - 1 && Board[inputX][inputY + 1].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type) != 99)
 		Board[inputX][inputY + 1].withinRange = true;
 
-	if (inputY > 0 && Board[inputX][inputY - 1].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type, Board[inputX][inputY - 1].symbol) != 99)
+	if (inputY > 0 && Board[inputX][inputY - 1].consultMovementChart(cursor.selectMinionPointer->firstMinionBeingTransported->type) != 99)
 		Board[inputX][inputY - 1].withinRange = true;
 
 	return 0;
@@ -1929,7 +1929,7 @@ int MasterBoard::deployLandmine(inputLayer* InputLayer, int inputX, int inputY)
 	tile* myTile = &Board[inputX][inputY];
 
 	//Prevent landmine insertion on top of another and prevent landmine deploy within sea/river
-	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart("Landmine", myTile->symbol) == 99)
+	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart("Landmine") == 99)
 	{
 		return 1;
 	}
@@ -1959,7 +1959,7 @@ int MasterBoard::deployLandmine(inputLayer* InputLayer, int inputX, int inputY)
 int MasterBoard::createMinion(std::string inputType, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo)
 {
 	//Cannot create minion illegally (On top of another, or in bad location)
-	if ( (Board[inputX][inputY].hasMinionOnTop == true && beingTransported == 0 ) || Board[inputX][inputY].consultMovementChart(inputType, Board[inputX][inputY].symbol) == 99)
+	if ( (Board[inputX][inputY].hasMinionOnTop == true && beingTransported == 0 ) || Board[inputX][inputY].consultMovementChart(inputType) == 99)
 		return 1;
 
 	//Loop through and find the next NULL pointer indicating a non-allocated part of the array.
@@ -2590,7 +2590,7 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 	int previousOwner = inputTile->controller;
 
 	//Check for actual property before we capture
-	if (inputTile->checkForProperty(inputTile->symbol) != true)
+	if (inputTile->checkForProperty() != true)
 	{
 		return "Not a property";
 	}

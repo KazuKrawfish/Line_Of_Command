@@ -305,7 +305,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 
 				//If minion can capture and is on top of capturable property, show capturable flag
 				if (mouseHovering == true && boardToPrint->cursor.selectMinionPointer->captureCapable == true
-					&& tileToPrint->checkForProperty(tileToPrint->symbol) == true
+					&& tileToPrint->checkForProperty() == true
 					&& tileToPrint->controller != boardToPrint->playerFlag)
 				{
 					effectsSprite.setTextureRect(rectArray[6][15]); //Draw little flag
@@ -567,7 +567,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(1):
 	{
 		//Print production explain:
-		sf::String productionExplainString = "Friendly properties produce gold to support the\nwar effort. Most produce 1000 per turn,\nbut some produce more.";
+		sf::String productionExplainString = "Friendly properties produce gold to support the\nwar effort. Most produce 1000 per turn, but some\nproduce more.";
 		sf::Text productionExplainText(productionExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		productionExplainText.setPosition(265, 220);
 		productionExplainText.setFillColor(sf::Color::Black);
@@ -587,7 +587,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(3):
 	{
 		//Print health explain:
-		sf::String healthExplainString = "Minion hit points. All minions start with 100 and\n die at 0. Minions repair 20 hit points per turn\non a friendly property. Attack and capture is\nproportional to hit points.";
+		sf::String healthExplainString = "Minion hit points. All minions start with 100 and\die at 0. Minions repair 20 hit points per turn on\na friendly property. Attack and capture is\nproportional to hit points.";
 		sf::Text healthExplainText(healthExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		healthExplainText.setPosition(265, 220);
 		healthExplainText.setFillColor(sf::Color::Black);
@@ -597,7 +597,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(4):
 	{
 		//Print movement/fuel explain:
-		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use fuel based on their\ntype and the terrain they cross.Also, aircraft use 5 fuel\nand ships 2 fuel during upkeep.If they run out, they die.";
+		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use fuel based\non their type and the terrain they cross. Also, aircraft use\n5 fuel and ships use 2 fuel during upkeep.\nIf they run out, they die.";
 		sf::Text fuelExplainText(fuelExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		fuelExplainText.setPosition(265, 220);
 		fuelExplainText.setFillColor(sf::Color::Black);
@@ -607,7 +607,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(5):
 	{
 		//Print ammo explain:
-		sf::String ammoExplainString = "Minions require ammo to attack with each weapon.\nAmmo left and max ammo.Pri.ammo on top, sec.ammo on bottom.\nINF indicates infinite ammo for that weapon.";
+		sf::String ammoExplainString = "Minions require ammo to attack with each weapon.\nIndicates current and maximum ammo.\nPrimary ammo on top, secondary ammo on bottom.\nINF indicates infinite ammo for that weapon.";
 		sf::Text ammoExplainText(ammoExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		ammoExplainText.setPosition(265, 220);
 		ammoExplainText.setFillColor(sf::Color::Black);
@@ -2108,7 +2108,7 @@ int inputLayer::insertMinionInput(sf::Event* Input, MasterBoard* boardToInput)
 	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
 
 	//Prevent minion insertion on top of another, and prevent insertion somewhere that minion couldn't actually move.
-	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart(convertedInput, myTile->symbol) == 99)
+	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart(convertedInput) == 99)
 	{
 		savedInsertMinionInput.clear();
 		return 1;
@@ -2250,18 +2250,18 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 	}
 
 	//If input tile symbol is invalid, return 1.
-	if (myTile->consultMovementChart("Infantry", inputChar) == -1)
+	if (myTile->consultMovementChart("Infantry") == -1)
 		return 1;
 
 	//Prevent terrain from being somewhere that minion couldn't actually move.
-	if (myTile->hasMinionOnTop == true && myTile->consultMovementChart(myTile->minionOnTop->type, inputChar) == 99)
+	if (myTile->hasMinionOnTop == true && myTile->consultMovementChart(myTile->minionOnTop->type) == 99)
 		return 1;
 
 	//If it is real tile, change the underlying tile.
 	myTile->symbol = inputChar;
 	myTile->capturePoints = 20;
 
-	if (myTile->checkForProperty(myTile->symbol) == true)
+	if (myTile->checkForProperty() == true)
 	{
 		myTile->controller = boardToInput->playerFlag;
 	}
@@ -2663,7 +2663,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			&& boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported != NULL)
 		&& boardToInput->Board[cursorX][cursorY].hasMinionOnTop == false
 		&& boardToInput->Board[cursorX][cursorY].withinRange == true
-		&& boardToInput->Board[cursorX][cursorY].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToInput->Board[cursorX][cursorY].symbol) != 99)
+		&& boardToInput->Board[cursorX][cursorY].consultMovementChart(boardToInput->cursor.selectMinionPointer->firstMinionBeingTransported->type) != 99)
 	{
 		if (boardToInput->dropOffMinion() == 0)
 			status = gameBoard;
@@ -2725,7 +2725,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			tile* tileToCheck = &boardToInput->Board[boardToInput->cursor.selectMinionPointer->locationX][boardToInput->cursor.selectMinionPointer->locationY];
 			playerPotentiallyDefeated = tileToCheck->controller;
 			//Must be property and must not be the current player's property (Could be neutral).
-			if (tileToCheck->checkForProperty(tileToCheck->symbol) && tileToCheck->controller != boardToInput->playerFlag)
+			if (tileToCheck->checkForProperty() && tileToCheck->controller != boardToInput->playerFlag)
 			{
 
 				eventText = boardToInput->captureProperty(tileToCheck, boardToInput->cursor.selectMinionPointer, this, boardToInput->playerFlag);

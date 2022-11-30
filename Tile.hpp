@@ -83,9 +83,9 @@ public:
 	}
 
 	//Takes a given minion and terrain type, consults the movement chart, and returns the cost to move on this particular tile.
-	int consultMovementChart(std::string minionType, char terrainType);
+	int consultMovementChart(std::string minionType);
 	
-	bool checkForProperty(char terrainType);
+	bool checkForProperty();
 	
 
 	int determineRiverRoadType(bool thisTileChanged, MasterBoard* boardToSet);

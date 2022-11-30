@@ -31,7 +31,7 @@ tile* compie::findClosestAirbase(MasterBoard* boardToUse, Minion* inputMinion)
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
+			if (boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
 			{
 				if (boardToUse->Board[x][y].symbol == 'A')
 				{
@@ -78,7 +78,7 @@ int compie::statusUpdate(MasterBoard* boardToUse)
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
+			if (boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
 			{
 				if (boardToUse->Board[x][y].symbol == 'h')
 				{
@@ -330,11 +330,11 @@ int compie::analyzeMap(MasterBoard* boardToUse)
 			}
 
 			//Count number of properties on map
-			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true)
+			if (boardToUse->Board[x][y].checkForProperty() == true)
 				totalPropertiesOnMap++;
 
 			//Here we find which properties are impassible to an infantry, which helps determine the boundaries for compie's land mass map.
-			int movementCostHere = boardToUse->Board[x][y].consultMovementChart("Infantry", boardToUse->Board[x][y].symbol);
+			int movementCostHere = boardToUse->Board[x][y].consultMovementChart("Infantry");
 			if (movementCostHere == -1)
 			{
 				std::cout << "Error while analyzing map, incorrect symbol" << std::endl;
@@ -603,7 +603,6 @@ int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer
 	return 0;
 }
 
-//Modified: Transport looks for suitable place to wait to pick up troops.
 //Land/air transport - Look for closest factory. Move within 2 squares of that factory.
 //Sea transport - Look for closest beach/port which is on same landmass as a friendly factory.
 int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
@@ -659,7 +658,7 @@ int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord
 				//Also, an infantry must be able to access that tile.
 				int distance = boardToUse->computeDistance(objectiveFactoryTile->locationX, x, objectiveFactoryTile->locationY, y);
 				if (distance <= 2 && distance > 0 && (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop == myMinion)
-					&& boardToUse->Board[x][y].consultMovementChart("Infantry", boardToUse->Board[x][y].symbol) == 99)
+					&& boardToUse->Board[x][y].consultMovementChart("Infantry") == 99)
 				{
 					//Can we get there? Is it closer than previous distance?
 					int rangeToTile = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
@@ -733,7 +732,6 @@ int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord
 
 }
 
-//Modified:
 //Assuming a minion has a valid objective tile, finds the closest tile to that objective, and sets the potentialMoveTile to that tile.
 //Checks for ranged, transport, etc, to keep them away from enemies.
 int compie::findClosestTileToObjective(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
@@ -757,8 +755,8 @@ int compie::findClosestTileToObjective(MasterBoard* boardToUse, compieMinionReco
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 		{
-			boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].symbol);
-			boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type, boardToUse->Board[x][y].symbol);
+			boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion += selectedMinionRecord->objectiveTile->consultMovementChart(boardToUse->cursor.selectMinionPointer->type);
+			boardToUse->cursor.selectMinionPointer->terrainOnlyPathMap[x][y].distanceFromMinion -= boardToUse->Board[x][y].consultMovementChart(boardToUse->cursor.selectMinionPointer->type);
 		}
 	}
 
@@ -856,7 +854,6 @@ int compie::findClosestTileToObjective(MasterBoard* boardToUse, compieMinionReco
 
 }
 
-//Modified: Loaded transport looks for suitable place to drop off troops.
 //Land transport - Look for closest enemy property/minion on this landmass. Move torwards that.
 //Air transport - Look for closest enemy property, regardless of landmass. Move towards that.
 //Sea transport - look for closest beach/port which is on same landmass as enemy property, which is not this landmass.
@@ -898,7 +895,7 @@ int compie::transportSearchForDrop(MasterBoard* boardToUse, compieMinionRecord* 
 				else
 					//Other option is it's a property tile, not ours, and not being capped by our units (No one friendly on top).
 					//Also, we must be transporting infantry for this option.
-					if (boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->specialtyGroup == infantry && boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
+					if (boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->specialtyGroup == infantry && boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
 						&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag))
 					{
 						int rangeToProp = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
@@ -921,7 +918,7 @@ int compie::transportSearchForDrop(MasterBoard* boardToUse, compieMinionRecord* 
 				for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 				{
 					//If it's a property tile, not ours, and not being capped by our units (No one friendly on top).
-					if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
+					if (boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
 						&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag))
 					{
 						int rangeToProp = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
@@ -961,7 +958,7 @@ int compie::transportSearchForDrop(MasterBoard* boardToUse, compieMinionRecord* 
 								for (int j = 0; j < boardToUse->BOARD_HEIGHT; j++)
 								{
 									//Enemy controlled property on same landmass
-									if (boardToUse->Board[i][j].checkForProperty(boardToUse->Board[i][j].symbol) == true && boardToUse->Board[i][j].controller != boardToUse->playerFlag
+									if (boardToUse->Board[i][j].checkForProperty() == true && boardToUse->Board[i][j].controller != boardToUse->playerFlag
 										&& compieLandMassMap.grid[i][j].landMassNumber == compieLandMassMap.grid[x][y].landMassNumber)
 
 									{
@@ -992,9 +989,9 @@ int compie::transportSearchForDrop(MasterBoard* boardToUse, compieMinionRecord* 
 
 }
 
-//Modified: New function
+//Modified - clean up with lambda
+//Also edited what looks like small bug - was previously checking objectiveTile - 1 , but should have been just objectiveTile, for computeDistance().
 //Assumes valid objective and potential move tile.
-//Need to refactor to use a function to check individual tiles for drop off, and set parameters via reference
 int compie::transportAttemptDropOff(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
 	//Check for valid objective and valid selected minion, and must be currently transporting minion
@@ -1009,137 +1006,69 @@ int compie::transportAttemptDropOff(MasterBoard* boardToUse, compieMinionRecord*
 	//Search for viable drop point in four adjacent tiles
 	int distanceBetweenAdjacentAndObjective = 999;
 
+	//Lambda for each adjacent tile
+	auto checkTileForPotentialDropPoint = [&](int inputX, int inputY)
+	{
+		if (myMinion->domain != sea) //If not sea transport, look for tile within 2 of objective
+		{
+			//Must also be passable to transported minion.
+			int potentialDistance = boardToUse->computeDistance(selectedMinionRecord->objectiveTile->locationX, inputX, selectedMinionRecord->objectiveTile->locationY, inputY);
+			if (potentialDistance < 3 && potentialDistance < distanceBetweenAdjacentAndObjective
+				&& boardToUse->Board[inputX][inputY].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type) < 99)
+			{
+				distanceBetweenAdjacentAndObjective = potentialDistance;
+				selectedMinionRecord->firstDropTile = &boardToUse->Board[inputX][inputY];
+			}
+		}
+		else    //Must be sea transport
+		{
+			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
+			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
+				&& compieLandMassMap.grid[inputX][inputY].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
+				&& boardToUse->Board[inputX][inputY].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type) < 99)
+			{
+				if (selectedMinionRecord->firstDropTile == NULL)
+					selectedMinionRecord->firstDropTile = &boardToUse->Board[inputX][inputY];
+				else
+					if (selectedMinionRecord->secondDropTile == NULL && myMinion->secondMinionBeingTransported != NULL)
+						selectedMinionRecord->secondDropTile = &boardToUse->Board[inputX][inputY];
+
+			}
+		}
+	};
+
 	if (myMinion->locationX > 0)
 	{
-		if (myMinion->domain != sea) //If not sea transport, look for tile within 2 of objective
-		{
-			//Must also be passable to transported minion.
-			int potentialDistance = boardToUse->computeDistance(selectedMinionRecord->objectiveTile->locationX - 1, myMinion->locationX, selectedMinionRecord->objectiveTile->locationY, myMinion->locationY);
-			if (potentialDistance < 3 && potentialDistance < distanceBetweenAdjacentAndObjective
-				&& boardToUse->Board[myMinion->locationX - 1][myMinion->locationY].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX - 1][myMinion->locationY].symbol) < 99)
-			{
-				distanceBetweenAdjacentAndObjective = potentialDistance;
-				selectedMinionRecord->firstDropTile = &boardToUse->Board[myMinion->locationX - 1][myMinion->locationY];
-			}
-		}
-		else    //Must be sea transport
-		{
-			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
-			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
-				&& compieLandMassMap.grid[myMinion->locationX - 1][myMinion->locationY].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
-				&& boardToUse->Board[myMinion->locationX - 1][myMinion->locationY].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX - 1][myMinion->locationY].symbol) < 99)
-			{
-				if (selectedMinionRecord->firstDropTile == NULL)
-					selectedMinionRecord->firstDropTile = & boardToUse->Board[myMinion->locationX - 1][myMinion->locationY];
-				else
-					if (selectedMinionRecord->secondDropTile == NULL && myMinion->secondMinionBeingTransported != NULL)
-						selectedMinionRecord->secondDropTile = &boardToUse->Board[myMinion->locationX - 1][myMinion->locationY];
-
-			}
-		}
+		checkTileForPotentialDropPoint(myMinion->locationX - 1, myMinion->locationY);
 	}
-	    //... other tile locations
+	//... other tile locations
 	if (myMinion->locationY > 0)
 	{
-		if (myMinion->domain != sea) //If not sea transport, look for tile within 2 of objective
-		{
-			//Must also be passable to transported minion.
-			int potentialDistance = boardToUse->computeDistance(selectedMinionRecord->objectiveTile->locationX, myMinion->locationX, selectedMinionRecord->objectiveTile->locationY - 1, myMinion->locationY);
-			if (potentialDistance < 3 && potentialDistance < distanceBetweenAdjacentAndObjective
-				&& boardToUse->Board[myMinion->locationX][myMinion->locationY - 1].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX][myMinion->locationY - 1].symbol) < 99)
-			{
-				distanceBetweenAdjacentAndObjective = potentialDistance;
-				selectedMinionRecord->firstDropTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY - 1];
-			}
-		}
-		else    //Must be sea transport
-		{
-			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
-			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
-				&& compieLandMassMap.grid[myMinion->locationX][myMinion->locationY - 1].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
-				&& boardToUse->Board[myMinion->locationX][myMinion->locationY - 1].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX][myMinion->locationY - 1].symbol) < 99)
-			{
-				if (selectedMinionRecord->firstDropTile == NULL)
-					selectedMinionRecord->firstDropTile =& boardToUse->Board[myMinion->locationX][myMinion->locationY - 1];
-				else
-					if (selectedMinionRecord->secondDropTile == NULL && myMinion->secondMinionBeingTransported != NULL)
-						selectedMinionRecord->secondDropTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY - 1];
-
-			}
-		}
+		checkTileForPotentialDropPoint(myMinion->locationX, myMinion->locationY - 1);
 	}
-		
+
 	if (myMinion->locationX < boardToUse->BOARD_WIDTH - 1)
 	{
-		if (myMinion->domain != sea) //If not sea transport, look for tile within 2 of objective
-		{
-			//Must also be passable to transported minion.
-			int potentialDistance = boardToUse->computeDistance(selectedMinionRecord->objectiveTile->locationX + 1, myMinion->locationX, selectedMinionRecord->objectiveTile->locationY, myMinion->locationY);
-			if (potentialDistance < 3 && potentialDistance < distanceBetweenAdjacentAndObjective
-				&& boardToUse->Board[myMinion->locationX + 1][myMinion->locationY].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX + 1][myMinion->locationY].symbol) < 99)
-			{
-				distanceBetweenAdjacentAndObjective = potentialDistance;
-				selectedMinionRecord->firstDropTile = &boardToUse->Board[myMinion->locationX + 1][myMinion->locationY];
-			}
-		}
-		else    //Must be sea transport
-		{
-			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
-			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
-				&& compieLandMassMap.grid[myMinion->locationX + 1][myMinion->locationY].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
-				&& boardToUse->Board[myMinion->locationX + 1][myMinion->locationY].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX + 1][myMinion->locationY].symbol) < 99)
-			{
-				if (selectedMinionRecord->firstDropTile == NULL)
-					selectedMinionRecord->firstDropTile = &boardToUse->Board[myMinion->locationX + 1][myMinion->locationY];
-				else
-					if (selectedMinionRecord->secondDropTile == NULL && myMinion->secondMinionBeingTransported != NULL)
-						selectedMinionRecord->secondDropTile = &boardToUse->Board[myMinion->locationX + 1][myMinion->locationY];
-
-			}
-		}
+		checkTileForPotentialDropPoint(myMinion->locationX + 1, myMinion->locationY);
 	}
 	//... other tile locations
 	if (myMinion->locationY < boardToUse->BOARD_HEIGHT - 1)
 	{
-		if (myMinion->domain != sea) //If not sea transport, look for tile within 2 of objective
-		{
-			//Must also be passable to transported minion.
-			int potentialDistance = boardToUse->computeDistance(selectedMinionRecord->objectiveTile->locationX, myMinion->locationX, selectedMinionRecord->objectiveTile->locationY + 1, myMinion->locationY);
-			if (potentialDistance < 3 && potentialDistance < distanceBetweenAdjacentAndObjective
-				&& boardToUse->Board[myMinion->locationX][myMinion->locationY + 1].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX][myMinion->locationY + 1].symbol) < 99)
-			{
-				distanceBetweenAdjacentAndObjective = potentialDistance;
-				selectedMinionRecord->firstDropTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY + 1];
-			}
-		}
-		else    //Must be sea transport
-		{
-			//Is transport on a beach, and shares the landmass with the objective, and the adjacent tile is passable
-			if ((boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == '*' || boardToUse->Board[myMinion->locationX][myMinion->locationY].symbol == 'P')
-				&& compieLandMassMap.grid[myMinion->locationX][myMinion->locationY + 1].landMassNumber == compieLandMassMap.grid[selectedMinionRecord->objectiveTile->locationX][selectedMinionRecord->objectiveTile->locationY].landMassNumber
-				&& boardToUse->Board[myMinion->locationX][myMinion->locationY + 1].consultMovementChart(boardToUse->cursor.selectMinionPointer->firstMinionBeingTransported->type, boardToUse->Board[myMinion->locationX][myMinion->locationY + 1].symbol) < 99)
-			{
-				if (selectedMinionRecord->firstDropTile == NULL)
-					selectedMinionRecord->firstDropTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY + 1];
-				else
-					if (selectedMinionRecord->secondDropTile == NULL && myMinion->secondMinionBeingTransported != NULL)
-						selectedMinionRecord->secondDropTile = &boardToUse->Board[myMinion->locationX][myMinion->locationY + 1];
-
-			}
-		}
+		checkTileForPotentialDropPoint(myMinion->locationX, myMinion->locationY + 1);
 	}
 
 	return distanceBetweenAdjacentAndObjective;
 
 }
 
-//Modified
+//MODIFIED - Added check to give higher priority to advancing on its own, vs taking transport
 //Depends on minion health. If <5, looks for repair location.
 //Otherwise, searches the map, first checking for an enemy minion to attack, and then checking for enemy property to capture, if infantry type.
 //Now assumes a pathMap was built for this- ie minion was selected.
 int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
 	int distanceFromMinionToObjective = 999;
+	bool currentObjectiveIsTransport = false;
 
 	if (boardToUse->cursor.selectMinionPointer == NULL)
 		return -1;
@@ -1162,39 +1091,45 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 			{
 				//If it is closer than what we previously had targeted, set it as the objective.
 				//Must also be valid, ie. not -1. Can actually get there!
+				//Also checks if current objective is transport - will always choose to advance towards an objective it can get to on its own, rather than take a transport there.
 				int rangeToEnemy = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
-				if (rangeToEnemy != -1 && rangeToEnemy < distanceFromMinionToObjective)
+				if (rangeToEnemy != -1 && (rangeToEnemy < distanceFromMinionToObjective || currentObjectiveIsTransport == true))
 				{
 					distanceFromMinionToObjective = rangeToEnemy;
+					currentObjectiveIsTransport = false;
 					selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
 				}
 			}
 			else
 				//Other option is it's a property tile, not ours, and not being capped by our units (No one friendly on top).
 				//Also, we must be infantry for this option.
-				if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry && boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
+				//Also checks if current objective is transport - will always choose to advance towards an objective it can get to on its own, rather than take a transport there.
+				if (boardToUse->cursor.selectMinionPointer->specialtyGroup == infantry && boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag
 					&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop->team != boardToUse->playerFlag))
 				{
 					int rangeToProp = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
-					if (rangeToProp != -1 && rangeToProp < distanceFromMinionToObjective)
+					if (rangeToProp != -1 && (rangeToProp < distanceFromMinionToObjective || currentObjectiveIsTransport == true))
 					{
 						distanceFromMinionToObjective = rangeToProp;
+						currentObjectiveIsTransport = false;
 						selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
 					}
 				}
 				else //Finally, the other option is a friendly large transport within valid range, that has room.
 						//Can't check if it has the right flag, because too hard to check minionRoster from the minion itself.
-					if ( boardToUse->Board[x][y].hasMinionOnTop == true && boardToUse->Board[x][y].minionOnTop->team == boardToUse->playerFlag
+						//This should always be lower priority to prevent minions from re-loading onto a transport that just dropped them off.
+					if (boardToUse->Board[x][y].hasMinionOnTop == true && boardToUse->Board[x][y].minionOnTop->team == boardToUse->playerFlag
 						&& boardToUse->Board[x][y].minionOnTop->specialtyGroup == largeTransport
 						&& (boardToUse->Board[x][y].minionOnTop->firstMinionBeingTransported == NULL || boardToUse->Board[x][y].minionOnTop->secondMinionBeingTransported == NULL))
+					{
+						int rangeToTransport = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
+						if (rangeToTransport != -1 && rangeToTransport < distanceFromMinionToObjective)
 						{
-							int rangeToTransport = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
-								if (rangeToTransport != -1 && rangeToTransport < distanceFromMinionToObjective)
-								{
-									distanceFromMinionToObjective = rangeToTransport;
-										selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
-								}
+							distanceFromMinionToObjective = rangeToTransport;
+							currentObjectiveIsTransport = true;
+							selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
 						}
+					}
 
 		}
 	}
@@ -1204,7 +1139,6 @@ int compie::strategicAdvance(MasterBoard* boardToUse, compieMinionRecord* select
 
 }
 
-//Modified:
 //If minion is damaged or air and needs fuel, looks for friendly property capable of supporting, and either moves onto it, or moving towards it.
 int compie::strategicWithdraw(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
@@ -1483,7 +1417,7 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 		{
 			//std::cout << x << " " << y <<std::endl;
 			//If the tile is property and is enemy controlled.
-			if (boardToUse->Board[x][y].checkForProperty(boardToUse->Board[x][y].symbol) == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag)
+			if (boardToUse->Board[x][y].checkForProperty() == true && boardToUse->Board[x][y].controller != boardToUse->playerFlag)
 			{
 				//If the current tile DOES not have minion on top (IE we will be able to move there)
 				if (boardToUse->Board[x][y].hasMinionOnTop == false)
@@ -1509,7 +1443,6 @@ int compie::findPropertyWithinLocalArea(MasterBoard* boardToUse, int* returnX, i
 	return distanceToClosestEnemyProperty;
 }
 
-//Modified:
 //Determine whether the minion will attack local enemies, capture property, or move strategically.
 //This function assumes the minion is already selected.
 int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
@@ -1714,7 +1647,7 @@ int compie::determinePotentialMinionTasking(MasterBoard* boardToUse, compieMinio
 	return 0;
 }
 
-//Modified:
+
 int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
 {
 	int gameEndCode = 0;
@@ -2055,7 +1988,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 	return 1;
 }
 
-//Modified: Added new production options
+//Modified: Added lambdas to clean up purchase method
 //Right now this is actually buying units too.
 int compie::determineProduction(MasterBoard* boardToUse)
 {
@@ -2075,7 +2008,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 	int numberOfLanders = 0;
 
 	//Go through map and find all of our factories for totalFactories
-	//Also count ports for naval contstruction
+	//Also count ports for naval construction
 	for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
 	{
 		for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
@@ -2085,7 +2018,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 			{
 				totalFactoriesLeft++;
 			}
-			//If the current tile is our factory
+			//If the current tile is our port
 			if (boardToUse->Board[x][y].symbol == 'P' && boardToUse->Board[x][y].controller == boardToUse->playerFlag)
 			{
 				numberOfPorts++;
@@ -2185,203 +2118,87 @@ int compie::determineProduction(MasterBoard* boardToUse)
 
 			bool minionPurchased = false;
 
-			//If the current tile is our factory and there is no one already on top
-			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop == false)
+			//Comparison function to save space
+			auto potentiallyBuyLandMinion = [&](std::string inputMinion, char purchaseSite, int & runningTotalOfMinions, int & runningTotalOfFactories)
 			{
-
-				//If enemy has at least 1 air unit, and we either have no AA, or they twice or more than our AA
-				//And we can afford, and is not banned
-				if (numberOfEnemyAirUnits > 0 && (numberOfAA == 0 || numberOfEnemyAirUnits / numberOfAA >= 2)
-					&& boardToUse->consultMinionCostChart("Anti-Aircraft", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Anti-Aircraft", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Anti-Aircraft") == boardToUse->banList.end()
+				if (boardToUse->consultMinionCostChart(inputMinion, purchaseSite) <= availableTreasury
+					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart(inputMinion, purchaseSite)
+					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), inputMinion) == boardToUse->banList.end()
 					&& minionPurchased == false)
 				{
 					//Must be able to actually afford the unit.				
-					int success = boardToUse->attemptPurchaseMinion("Anti-Aircraft", x, y, boardToUse->playerFlag);
+					int success = boardToUse->attemptPurchaseMinion(inputMinion, x, y, boardToUse->playerFlag);
 					if (success == 0)
 					{
-						numberOfAA++;
-						totalFactoriesLeft--;
+						runningTotalOfMinions++;
+						runningTotalOfFactories--;
 						minionPurchased = true;
 					}
+				}
+			};
+
+			//If the current tile is our factory and there is no one already on top
+			if (boardToUse->Board[x][y].symbol == 'h' && boardToUse->Board[x][y].controller == boardToUse->playerFlag && boardToUse->Board[x][y].hasMinionOnTop == false)
+			{
+				//MODIFIED	
+				//If enemy has at least 1 air unit, and we either have no AA, or they twice or more than our AA
+				//And we can afford, and is not banned
+				if (numberOfEnemyAirUnits > 0 && (numberOfAA == 0 || numberOfEnemyAirUnits / numberOfAA >= 2) )
+				{
+					potentiallyBuyLandMinion("Anti-Aircraft", 'h', numberOfAA, totalFactoriesLeft);
 				}
 
 				//If we have a proper proportion of tanks, buy cavalry.
 				//Must not be banned.
-				if (int(numberOfTanks / 3) > numberOfCavalry
-					&& boardToUse->consultMinionCostChart("Recon", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Recon", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Recon") == boardToUse->banList.end()
-					&& minionPurchased == false)
+				if (int(numberOfTanks / 3) > numberOfCavalry)
 				{
-					//Must be able to actually afford the unit.				
-					int success = boardToUse->attemptPurchaseMinion("Recon", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfCavalry++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
-
+					potentiallyBuyLandMinion("Recon", 'h', numberOfCavalry, totalFactoriesLeft);
 				}
 
 				//If we have enough cav, buy rocket if not banned
-				if (int(numberOfTanks / 2) > numberOfRanged
-					&& boardToUse->consultMinionCostChart("Rocket_Artillery", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Rocket_Artillery", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Rocket_Artillery") == boardToUse->banList.end()
-					&& minionPurchased == false)
+				if (int(numberOfTanks / 2) > numberOfRanged)
 				{
-					//Must be able to actually afford the unit.				
-					int success = boardToUse->attemptPurchaseMinion("Rocket_Artillery", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfRanged++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
-
+					potentiallyBuyLandMinion("Rocket_Artillery", 'h', numberOfRanged, totalFactoriesLeft);
 				}
 
 				//If we can't afford rocket, maybe we can afford arty (If not banned)
-				if (int(numberOfTanks / 2) > numberOfRanged
-					&& boardToUse->consultMinionCostChart("Artillery", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Artillery", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Artillery") == boardToUse->banList.end()
-					&& minionPurchased == false)
+				if (int(numberOfTanks / 2) > numberOfRanged)
 				{
-					//Must be able to actually afford the unit.				
-					int success = boardToUse->attemptPurchaseMinion("Artillery", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfRanged++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
-
+					potentiallyBuyLandMinion("Artillery", 'h', numberOfRanged, totalFactoriesLeft);
 				}
 
 				//Attempt to buy APC for infantry support
-				if (int(numberOfInfantry / 4) > numberOfInfantryTransports
-					&& boardToUse->consultMinionCostChart("APC", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("APC", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "APC") == boardToUse->banList.end()
-					&& minionPurchased == false)
+				if (int(numberOfInfantry / 4) > numberOfInfantryTransports)
 				{
-					//Must be able to actually afford the unit.				
-					int success = boardToUse->attemptPurchaseMinion("APC", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfInfantryTransports++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
+					potentiallyBuyLandMinion("APC", 'h', numberOfInfantryTransports, totalFactoriesLeft);
 				}
 
 				//Attempt to buy IFV for infantry support
-				if (int(numberOfInfantry / 4) > numberOfInfantryTransports
-					&& boardToUse->consultMinionCostChart("IFV", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("IFV", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "IFV") == boardToUse->banList.end()
-					&& minionPurchased == false)
+				if (int(numberOfInfantry / 4) > numberOfInfantryTransports)
 				{
-					//Must be able to actually afford the unit.				
-					int success = boardToUse->attemptPurchaseMinion("IFV", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfInfantryTransports++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
-
+					potentiallyBuyLandMinion("IFV", 'h', numberOfInfantryTransports, totalFactoriesLeft);
 				}
 
 				//Infantry and specialists have a similar proportion.
+				//Special check to prevent from buying too many infantry.
 				if (int(numberOfInfantry / 3) > numberOfSpecialists
-					&& boardToUse->consultMinionCostChart("Specialist", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Specialist", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Specialist") == boardToUse->banList.end()
-					&&
-					(compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
-						compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
-					&& minionPurchased == false
-					)
-				{
-					//Must be able to actually afford the unit.
-
-					int success = boardToUse->attemptPurchaseMinion("Specialist", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfSpecialists++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
-				}
-
-				//Otherwise just buy other frontline units
-				if (boardToUse->consultMinionCostChart("Heavy_Armor", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Heavy_Armor", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Heavy_Armor") == boardToUse->banList.end()
-					&& minionPurchased == false)
-				{
-					//Must be able to actually afford the unit, and must not be banned.
-					int success = boardToUse->attemptPurchaseMinion("Heavy_Armor", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfTanks++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
-				}
-
-				//Otherwise just buy other frontline units
-				if (boardToUse->consultMinionCostChart("Modern_Armor", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Modern_Armor", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Modern_Armor") == boardToUse->banList.end()
-					&& minionPurchased == false)
-				{
-					//Must be able to actually afford the unit, and must not be banned.
-					int success = boardToUse->attemptPurchaseMinion("Modern_Armor", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfTanks++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
-				}
-
-				if (boardToUse->consultMinionCostChart("Armor", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Armor", 'h')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Armor") == boardToUse->banList.end()
-					&& minionPurchased == false)
-				{
-					//Must be able to actually afford the unit, and must not be banned.
-					int success = boardToUse->attemptPurchaseMinion("Armor", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfTanks++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
-				}
-
-				if (boardToUse->consultMinionCostChart("Infantry", 'h') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Infantry", 'h')
 					&& (compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
-						compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Infantry") == boardToUse->banList.end()
-					&& minionPurchased == false
-					)
+						compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere))
 				{
-					//Must be able to actually afford the unit, and must not be banned.
-					int success = boardToUse->attemptPurchaseMinion("Infantry", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfInfantry++;
-						totalFactoriesLeft--;
-						minionPurchased = true;
-					}
+					potentiallyBuyLandMinion("Specialist", 'h', numberOfSpecialists, totalFactoriesLeft);
+				}
+
+				//Otherwise just buy other frontline units				
+				potentiallyBuyLandMinion("Heavy_Armor", 'h', numberOfTanks, totalFactoriesLeft);
+
+				potentiallyBuyLandMinion("Modern_Armor", 'h', numberOfTanks, totalFactoriesLeft);
+
+				potentiallyBuyLandMinion("Armor", 'h', numberOfTanks, totalFactoriesLeft);
+
+				if (compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].onlyInfantryArmySizeHere <
+					compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].infantryMaxHere)
+				{
+					potentiallyBuyLandMinion("Infantry", 'h', numberOfInfantry, totalFactoriesLeft);
 				}
 
 			}
@@ -2392,50 +2209,40 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				boardToUse->Board[x][y].controller == boardToUse->playerFlag &&
 				boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
-				if (int(numberOfTanks / 3) > numberOfBombers
-					&& boardToUse->consultMinionCostChart("Bomber", 'A') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Bomber", 'A')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Bomber") == boardToUse->banList.end()
-					&& minionPurchased == false)
+
+				//Slightly different lambda function for air minions, since they don't care about total number of available factories
+				auto potentiallyBuyAirMinion = [&](std::string inputMinion, char purchaseSite, int & runningTotalOfMinions)
 				{
-					//Must be able to actually afford the unit.
-					int success = boardToUse->attemptPurchaseMinion("Bomber", x, y, boardToUse->playerFlag);
-					if (success == 0)
+					if (boardToUse->consultMinionCostChart(inputMinion, purchaseSite) <= availableTreasury
+						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart(inputMinion, purchaseSite)
+						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), inputMinion) == boardToUse->banList.end()
+						&& minionPurchased == false)
 					{
-						numberOfBombers++;
-						minionPurchased = true;
+						//Must be able to actually afford the unit.				
+						int success = boardToUse->attemptPurchaseMinion(inputMinion, x, y, boardToUse->playerFlag);
+						if (success == 0)
+						{
+							runningTotalOfMinions++;
+							minionPurchased = true;
+						}
 					}
+				};
+
+				if (int(numberOfTanks / 3) > numberOfBombers)
+				{
+					potentiallyBuyAirMinion("Bomber", 'A', numberOfBombers);
 				}
 
-				if (int(numberOfTanks / 3) > numberOfBombers
-					&& boardToUse->consultMinionCostChart("Attack_Copter", 'A') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Attack_Copter", 'A')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Attack_Copter") == boardToUse->banList.end()
-					&& minionPurchased == false)
+				if (int(numberOfTanks / 3) > numberOfBombers)
 				{
-					//Must be able to actually afford the unit.
-					int success = boardToUse->attemptPurchaseMinion("Attack_Copter", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfBombers++;
-						minionPurchased = true;
-					}
+					potentiallyBuyAirMinion("Attack_Copter", 'A', numberOfBombers);
 				}
 
-				if (int(numberOfInfantry / 4) > numberOfInfantryTransports
-					&& boardToUse->consultMinionCostChart("Transport_Copter", 'A') <= availableTreasury
-					&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Transport_Copter", 'A')
-					&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Transport_Copter") == boardToUse->banList.end()
-					&& minionPurchased == false)
+				if (int(numberOfInfantry / 4) > numberOfInfantryTransports)
 				{
-					//Must be able to actually afford the unit.
-					int success = boardToUse->attemptPurchaseMinion("Transport_Copter", x, y, boardToUse->playerFlag);
-					if (success == 0)
-					{
-						numberOfInfantryTransports++;
-						minionPurchased = true;
-					}
+					potentiallyBuyAirMinion("Transport_Copter", 'A', numberOfInfantryTransports);
 				}
+
 			}
 
 			//Port production
@@ -2445,82 +2252,48 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				boardToUse->Board[x][y].hasMinionOnTop == false)
 			{
 
-				//If we already have a navy to protect b-ship
-				if (numberOfPorts < numberOfSeaCombatants - 2 && numberOfSeaCombatants > 0)
+				//Slightly different lambda function for air minions, since they don't care about total number of available factories
+				auto potentiallyBuySeaMinion = [&](std::string inputMinion, char purchaseSite, int & runningTotalOfMinions)
 				{
-					//Try building a gunboat
-					if (boardToUse->consultMinionCostChart("Battleship", 'P') <= availableTreasury
-						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Battleship", 'P')
-						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Battleship") == boardToUse->banList.end()
+					if (boardToUse->consultMinionCostChart(inputMinion, purchaseSite) <= availableTreasury
+						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart(inputMinion, purchaseSite)
+						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), inputMinion) == boardToUse->banList.end()
 						&& minionPurchased == false)
 					{
-						//Must be able to actually afford the unit.
-						int success = boardToUse->attemptPurchaseMinion("Battleship", x, y, boardToUse->playerFlag);
+						//Must be able to actually afford the unit.				
+						int success = boardToUse->attemptPurchaseMinion(inputMinion, x, y, boardToUse->playerFlag);
 						if (success == 0)
 						{
-							numberOfSeaCombatants++;
+							runningTotalOfMinions++;
 							minionPurchased = true;
 						}
 					}
+				};
+
+				//If we already have a navy to protect b-ship
+				if (numberOfPorts < numberOfSeaCombatants - 2 && numberOfSeaCombatants > 0)
+				{
+					potentiallyBuySeaMinion("Battleship", 'P', numberOfSeaCombatants);
 				}
 
 				//Haven't yet reached large enough navy
 				if (numberOfPorts > numberOfSeaCombatants - 1)
 				{
-					//Try building a cruiser
-					if (boardToUse->consultMinionCostChart("Cruiser", 'P') <= availableTreasury
-						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Cruiser", 'P')
-						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Cruiser") == boardToUse->banList.end()
-						&& minionPurchased == false)
-					{
-						//Must be able to actually afford the unit.
-						int success = boardToUse->attemptPurchaseMinion("Cruiser", x, y, boardToUse->playerFlag);
-						if (success == 0)
-						{
-							numberOfSeaCombatants++;
-							minionPurchased = true;
-						}
-					}
+					potentiallyBuySeaMinion("Cruiser", 'P', numberOfSeaCombatants);
 				}
 
 				//If we have less naval units than ports
 				if (numberOfPorts > numberOfSeaCombatants)
 				{
-					//Try building a gunboat
-					if (boardToUse->consultMinionCostChart("Gunboat", 'P') <= availableTreasury
-						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Gunboat", 'P')
-						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Gunboat") == boardToUse->banList.end()
-						&& minionPurchased == false)
-					{
-						//Must be able to actually afford the unit.
-						int success = boardToUse->attemptPurchaseMinion("Gunboat", x, y, boardToUse->playerFlag);
-						if (success == 0)
-						{
-							numberOfSeaCombatants++;
-							minionPurchased = true;
-						}
-					}
+					potentiallyBuySeaMinion("Gunboat", 'P', numberOfSeaCombatants);
 				}
+
 				//If we have less naval units than ports
 				if (numberOfPorts > numberOfLanders)
 				{
-					//Try building a lander
-					if (boardToUse->consultMinionCostChart("Lander", 'P') <= availableTreasury
-						&& boardToUse->playerRoster[boardToUse->playerFlag].treasury >= boardToUse->consultMinionCostChart("Lander", 'P')
-						&& std::find(boardToUse->banList.begin(), boardToUse->banList.end(), "Lander") == boardToUse->banList.end()
-						&& minionPurchased == false)
-					{
-						//Must be able to actually afford the unit.
-						int success = boardToUse->attemptPurchaseMinion("Lander", x, y, boardToUse->playerFlag);
-						if (success == 0)
-						{
-							numberOfSeaCombatants++;
-							minionPurchased = true;
-						}
-					}
+					potentiallyBuySeaMinion("Lander", 'P', numberOfSeaCombatants);
 				}
 			}
-
 
 
 		}

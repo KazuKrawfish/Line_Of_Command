@@ -323,7 +323,8 @@ int tile::determineSeaBeachType(bool thisTileChanged, MasterBoard* boardToSet)
 }
 
 
-int tile::consultMovementChart(std::string minionType, char terrainType)
+//Modified to remove unecessary terrain input, tile already has this
+int tile::consultMovementChart(std::string minionType)
 {
 
 	int x = -1;
@@ -332,72 +333,72 @@ int tile::consultMovementChart(std::string minionType, char terrainType)
 	if (minionType == "Infantry" || minionType == "Insurgent" || minionType == "Cavalry")
 		x = 0;
 	else
-	if (minionType == "Specialist" || minionType == "Operative")
-		x = 1;
-	else
-	if (minionType == "Armor" || minionType == "Upgunned_Armor" || minionType == "Modern_Armor")
-		x = 2;
-	else
-	if (minionType == "Artillery" || minionType == "Assault_Gun")
-		x = 3;
-	else
-	if (minionType == "Recon" || minionType == "Technical")
-		x = 4;
-	else
-	if (minionType == "Rocket_Artillery" || minionType == "Victory_Launcher")
-		x = 5;
-	else
-	if (minionType == "Heavy_Armor" || minionType == "Super_Heavy_Armor")
-		x = 6;
-	else
-	if (minionType == "Anti-Aircraft")
-		x = 7;
-	else
-	if (minionType == "Attack_Copter")
-		x = 8;
-	else
-	if (minionType == "Transport_Copter")
-		x = 9;
-	else
-	if (minionType == "APC")
-		x = 10;
-	else
-	if (minionType == "Interceptor" || minionType == "Multirole" || minionType == "Advanced_Fighter")
-		x = 11;
-	else
-	if (minionType == "Bomber")
-		x = 12;
-	else
-	if (minionType == "Lander")
-		x = 13;
-	else
-	if (minionType == "Battleship")
-		x = 14;
-	else
-	if (minionType == "Cruiser")
-		x = 15;
-	else
-	if (minionType == "Gunboat")
-		x = 16;
-	else
-	if (minionType == "Submarine")
-		x = 17;
-	else
-	if (minionType == "Aircraft_Carrier")
-		x = 18;
-	else
-	if (minionType == "Artillery_Emplacement" || minionType == "Landmine")
-		x = 19;
-	else
-	if (minionType == "SAM_Site")
-		x = 20;
-	else
-	if (minionType == "IFV")
-		x = 21;
+		if (minionType == "Specialist" || minionType == "Operative")
+			x = 1;
+		else
+			if (minionType == "Armor" || minionType == "Upgunned_Armor" || minionType == "Modern_Armor")
+				x = 2;
+			else
+				if (minionType == "Artillery" || minionType == "Assault_Gun")
+					x = 3;
+				else
+					if (minionType == "Recon" || minionType == "Technical")
+						x = 4;
+					else
+						if (minionType == "Rocket_Artillery" || minionType == "Victory_Launcher")
+							x = 5;
+						else
+							if (minionType == "Heavy_Armor" || minionType == "Super_Heavy_Armor")
+								x = 6;
+							else
+								if (minionType == "Anti-Aircraft")
+									x = 7;
+								else
+									if (minionType == "Attack_Copter")
+										x = 8;
+									else
+										if (minionType == "Transport_Copter")
+											x = 9;
+										else
+											if (minionType == "APC")
+												x = 10;
+											else
+												if (minionType == "Interceptor" || minionType == "Multirole" || minionType == "Advanced_Fighter")
+													x = 11;
+												else
+													if (minionType == "Bomber")
+														x = 12;
+													else
+														if (minionType == "Lander")
+															x = 13;
+														else
+															if (minionType == "Battleship")
+																x = 14;
+															else
+																if (minionType == "Cruiser")
+																	x = 15;
+																else
+																	if (minionType == "Gunboat")
+																		x = 16;
+																	else
+																		if (minionType == "Submarine")
+																			x = 17;
+																		else
+																			if (minionType == "Aircraft_Carrier")
+																				x = 18;
+																			else
+																				if (minionType == "Artillery_Emplacement" || minionType == "Landmine")
+																					x = 19;
+																				else
+																					if (minionType == "SAM_Site")
+																						x = 20;
+																					else
+																						if (minionType == "IFV")
+																							x = 21;
 
 
 	//   . + ^ M  H m n h Q = ~ - A P
-	switch (terrainType)
+	switch (symbol)
 	{
 	case('.'):
 		y = 0;
@@ -458,13 +459,13 @@ int tile::consultMovementChart(std::string minionType, char terrainType)
 }
 
 
-
-bool tile::checkForProperty(char terrainType)
+//Modified to remove unecessary char input
+bool tile::checkForProperty()
 {
 	bool isProperty = false;
 
 	//Non property included for clarity.
-	switch (terrainType)
+	switch (symbol)
 	{
 	case('.'):
 	case('+'):
