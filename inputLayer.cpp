@@ -587,7 +587,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(3):
 	{
 		//Print health explain:
-		sf::String healthExplainString = "Minion hit points. All minions start with 100 and\die at 0. Minions repair 20 hit points per turn on\na friendly property. Attack and capture is\nproportional to hit points.";
+		sf::String healthExplainString = "Minion hit points. All minions start with 100 and\ndie at 0. Minions repair 20 hit points per turn on\na friendly property. Attack and capture is\nproportional to hit points.";
 		sf::Text healthExplainText(healthExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		healthExplainText.setPosition(265, 220);
 		healthExplainText.setFillColor(sf::Color::Black);
@@ -597,7 +597,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(4):
 	{
 		//Print movement/fuel explain:
-		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use fuel based\non their type and the terrain they cross. Also, aircraft use\n5 fuel and ships use 2 fuel during upkeep.\nIf they run out, they die.";
+		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use fuel based\non their type and the terrain they cross. Also, aircraft\nuse 5 fuel and ships use 2 fuel during upkeep.\nIf they run out, they die.";
 		sf::Text fuelExplainText(fuelExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		fuelExplainText.setPosition(265, 220);
 		fuelExplainText.setFillColor(sf::Color::Black);
@@ -607,7 +607,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(5):
 	{
 		//Print ammo explain:
-		sf::String ammoExplainString = "Minions require ammo to attack with each weapon.\nIndicates current and maximum ammo.\nPrimary ammo on top, secondary ammo on bottom.\nINF indicates infinite ammo for that weapon.";
+		sf::String ammoExplainString = "Minions require ammo to attack with each weapon.\nIndicates current and maximum ammo.\nPrimary ammo is on top, secondary ammo on bottom.\nINF indicates infinite ammo for that weapon.";
 		sf::Text ammoExplainText(ammoExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		ammoExplainText.setPosition(265, 220);
 		ammoExplainText.setFillColor(sf::Color::Black);

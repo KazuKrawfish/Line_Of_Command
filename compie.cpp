@@ -603,6 +603,8 @@ int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer
 	return 0;
 }
 
+//Modified - Edited air/land transport tile search to hopefully fix it.
+//MODIFIED: Also, was checking if infantry COULDN'T reach that tile, so changed from == to != - hopefully that's the major fix needed
 //Land/air transport - Look for closest factory. Move within 2 squares of that factory.
 //Sea transport - Look for closest beach/port which is on same landmass as a friendly factory.
 int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord* selectedMinionRecord)
@@ -658,14 +660,14 @@ int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord
 				//Also, an infantry must be able to access that tile.
 				int distance = boardToUse->computeDistance(objectiveFactoryTile->locationX, x, objectiveFactoryTile->locationY, y);
 				if (distance <= 2 && distance > 0 && (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop == myMinion)
-					&& boardToUse->Board[x][y].consultMovementChart("Infantry") == 99)
+					&& boardToUse->Board[x][y].consultMovementChart("Infantry") != 99)
 				{
 					//Can we get there? Is it closer than previous distance?
 					int rangeToTile = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
 					if (rangeToTile != -1 && rangeToTile < distanceFromMinionToObjective)
 					{
 						//Set this is as our actual objective tile
-						distanceFromMinionToObjective = distance;
+						distanceFromMinionToObjective = rangeToTile;   //This may be supposed to be rangeToTile, not distance
 						selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
 					}
 				}
@@ -682,7 +684,7 @@ int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord
 				//Is it a beach or port tile?
 				//Must also be unoccupied.
 				if ((boardToUse->Board[x][y].symbol == '*' || boardToUse->Board[x][y].symbol == 'P')
-					&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop == myMinion ))
+					&& (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop == myMinion))
 				{
 					int rangeToBeach = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
 					if (rangeToBeach != -1 && rangeToBeach < distanceFromMinionToObjective)
@@ -696,12 +698,6 @@ int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord
 
 							for (int j = 0; j < boardToUse->BOARD_HEIGHT; j++)
 							{
-								/*if (boardToUse->Board[i][j].symbol == 'h' && boardToUse->Board[i][j].controller == boardToUse->playerFlag
-									&& compieLandMassMap.grid[i][j].landMassNumber == compieLandMassMap.grid[x][y].landMassNumber )
-								{
-									factoryHere = true;
-									break;
-								}*/
 								//Friendly factory on same landmass
 								if (boardToUse->Board[i][j].symbol == 'h' && boardToUse->Board[i][j].controller == boardToUse->playerFlag
 									&& compieLandMassMap.grid[i][j].landMassNumber == compieLandMassMap.grid[x][y].landMassNumber)
@@ -2277,7 +2273,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				}
 
 				//Haven't yet reached large enough navy
-				if (numberOfPorts > numberOfSeaCombatants - 1)
+				if (numberOfPorts > numberOfSeaCombatants - 2)
 				{
 					potentiallyBuySeaMinion("Cruiser", 'P', numberOfSeaCombatants);
 				}
