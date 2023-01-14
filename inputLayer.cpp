@@ -974,7 +974,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 				//Check if player can afford each particular minion, and if not, then draw over a gray box effect.
 				int minionPrice = boardToPrint->consultMinionCostChart(portButtons.at(i).myName, '~');
 				//If it is a real and non-banned minion, BUT is not affordable, print gray box effect.
-				if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+				if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury)
 				{
 					grayBoxSprite.setPosition(portButtons.at(i).mySprite.getPosition());
 					inputLayerWindow->draw(grayBoxSprite);
@@ -1014,7 +1014,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 				//Check if player can afford each particular minion, and if not, then draw over a gray box effect.
 				int minionPrice = boardToPrint->consultMinionCostChart(airbaseButtons.at(i).myName, '~');
 				//If it is a real and non-banned minion, BUT is not affordable, print gray box effect.
-				if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+				if (minionPrice > 0 && minionPrice > boardToPrint->playerRoster[boardToPrint->playerFlag].treasury)
 				{
 					grayBoxSprite.setPosition(airbaseButtons.at(i).mySprite.getPosition());
 					inputLayerWindow->draw(grayBoxSprite);
@@ -1869,6 +1869,14 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 		if (gameMusic[factionMusicOffset].getStatus() != sf::SoundSource::Status::Playing)
 			gameMusic[factionMusicOffset].play();
 
+	}
+	//If sound is off, stop whatever music was playing.
+	else if (soundsOn == false)
+	{
+		for (unsigned int i = 0; i < 7; i++)
+		{
+			gameMusic[i].stop();
+		}
 	}
 
 	//Reset line tracker after each print.

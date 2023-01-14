@@ -64,7 +64,7 @@ int compie::statusUpdate(MasterBoard* boardToUse)
 	double totalFactoriesCompieOwns = 0;
 
 	//Clear all land masses of infantry/army size amounts
-	for (int i = 1; i < compieLandMassMap.roster.size(); i++)
+	for (unsigned int i = 1; i < compieLandMassMap.roster.size(); i++)
 	{
 		compieLandMassMap.roster[i].armySizeHere = 0;
 		compieLandMassMap.roster[i].onlyInfantryArmySizeHere = 0;
@@ -92,7 +92,7 @@ int compie::statusUpdate(MasterBoard* boardToUse)
 	}
 
 	double armamentFactor = totalFactoriesCompieOwns / totalPropertiesCompieOwns;
-	for (int i = 1; i < compieLandMassMap.roster.size(); i++)
+	for (unsigned int i = 1; i < compieLandMassMap.roster.size(); i++)
 	{
 		compieLandMassMap.roster[i].infantryMaxHere = armamentFactor * compieLandMassMap.roster[i].maxArmySize + totalFactoriesCompieOwns + 1;
 	}
@@ -393,7 +393,7 @@ int compie::analyzeMap(MasterBoard* boardToUse)
 
 	}
 
-	for (int y = 1; y < compieLandMassMap.roster.size(); y++)
+	for (unsigned int y = 1; y < compieLandMassMap.roster.size(); y++)
 	{
 		///(6 == 2*2) <-- 2: Half of landMass belongs to compie, 2: To provide room for maneuver and repair
 		double normalizedArea = compieLandMassMap.roster[y].totalLandSquareCount * compieLandMassMap.roster[y].landinessFactor;
