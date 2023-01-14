@@ -541,8 +541,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 //New function:
 int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 {
-	char pointerToPrint[100];
-
+	
 	//Always print dialog box below text
 	int xCoord = 240;
 	int yCoord = 200;
@@ -1277,8 +1276,7 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
 	{
 		inputLayerWindow->clear();
-		char buffer[100];
-
+		
 		sf::Sprite backgroundSprite;
 		backgroundSprite.setTexture(MainMenu->otherGameTextures->at(8));
 		inputLayerWindow->draw(backgroundSprite);
@@ -2884,8 +2882,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 				sf::String loadPrompt = "Choose which save game to load (Case sensitive): \n";
 				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset, "load");
-				sf::Event event;
-
+				
 				std::string stdloadGameName = loadGameName;
 				loadGameSave.open(".\\savegames\\" + stdloadGameName + "_save.txt");
 				if (loadGameSave.is_open())

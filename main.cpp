@@ -62,7 +62,11 @@ int initializeTextureArray(std::string directory, const std::vector <std::string
 int main()
 {
 	sf::Color colorWhite;
-	sf::RenderWindow mainWindow(sf::VideoMode(1300, 700), "Line of Command");
+
+	//Determine size of desktop for window
+	sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
+
+	sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
 
 	//Load topMenuButton textures
 	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off", "top_Editor_Mode_On", "top_New_Campaign", "top_New_Skirmish", "top_Back", "top_Load_Campaign" };
