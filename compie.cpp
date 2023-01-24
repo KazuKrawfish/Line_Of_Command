@@ -15,10 +15,6 @@ bool isAdjacent(int inputX1, int inputX2, int inputY1, int inputY2);
 //SelectMinion now builds an apparentPathMap that overrides the initial one. Shouldn't matter for strategic considerations.
 
 
-//Below functions are "utilities" that need to find a home.
-
-//Above functions are "utilities" that need to find a home.
-
 //Find closest airbase to minion
 //If none exist, return NULL tile
 tile* compie::findClosestAirbase(MasterBoard* boardToUse, Minion* inputMinion)

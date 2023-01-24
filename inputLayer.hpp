@@ -34,7 +34,7 @@ public:
 
 	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
 		sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures,
-		sf::Music * inputGameMusic);
+		sf::Music * inputGameMusic, sf::Vector2u inputWindowSize);
 
 	//Print Functions:///////////////////////////////////////////////////////
 	//Non-game play
@@ -124,6 +124,10 @@ public:
 	sf::Font* inputLayerFont;
 	sf::RenderWindow* inputLayerWindow;
 	int menuLineTracker = 1;	//Starts at offset of one.
+
+	//Offsets in pixel values for fullscreen
+	int WIDTH_OFFSET = 500;
+	int HEIGHT_OFFSET = 500;
 	//SFML Objects end	/////////////////////////
 
 

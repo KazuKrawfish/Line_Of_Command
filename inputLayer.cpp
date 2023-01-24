@@ -26,7 +26,7 @@ char getValidPlayerInput(sf::RenderWindow* myWindow);
 
 inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
 	sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons,
-	std::vector <sf::Texture>* statusTextures,  sf::Music * inputGameMusic)
+	std::vector <sf::Texture>* statusTextures,  sf::Music * inputGameMusic, sf::Vector2u inputWindowSize)
 {
 	inputLayerTexture = gameTexture;
 	inputLayerFont = cour;
@@ -37,9 +37,15 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	showRangeStatus = hideRange;
 	gameMusic = inputGameMusic;
 
+	WIDTH_OFFSET = ( inputWindowSize.x - MAX_WINDOW_WIDTH * 50) / 2;
+	HEIGHT_OFFSET = ( inputWindowSize.y - MAX_WINDOW_HEIGHT * 50) / 2;
+
+	std::cout << "Width offset is: " << WIDTH_OFFSET << std::endl;
+	std::cout << "Height offset is: " << HEIGHT_OFFSET << std::endl;
+
 	//Create buttons for property menus using the gameTexture
 	//Overall property menu area is:
-	int menuTop = 150;
+	int menuTop = 150 ;
 	int menuLeft = MAX_WINDOW_WIDTH * 50 + 20;
 
 	//Button dimensions
@@ -53,7 +59,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	//For each minion that can be purchased, create new button and push_back.
 	for (int i = 0; i < factoryOptions.size(); i++)
 	{
-		factoryButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, factoryButton, gameTexture, factoryOptions.at(i));
+		factoryButtons.emplace_back(menuLeft + x * 50 + WIDTH_OFFSET, menuTop + y * 50 + HEIGHT_OFFSET, factoryButton, gameTexture, factoryOptions.at(i));
 		factoryButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
 		factoryButtons.at(i).width = 50;
 		factoryButtons.at(i).height = 50;
@@ -90,7 +96,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	x = 0;
 	for (int i = 0; i < airbaseOptions.size(); i++)
 	{
-		airbaseButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, airbaseButton, gameTexture, airbaseOptions.at(i));
+		airbaseButtons.emplace_back(menuLeft + x * 50 + WIDTH_OFFSET, menuTop + y * 50 + HEIGHT_OFFSET, airbaseButton, gameTexture, airbaseOptions.at(i));
 		airbaseButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
 		airbaseButtons.at(i).width = 50;
 		airbaseButtons.at(i).height = 50;
@@ -113,7 +119,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	x = 0;
 	for (int i = 0; i < portOptions.size(); i++)
 	{
-		portButtons.emplace_back(menuLeft + x * 50, menuTop + y * 50, portButton, gameTexture, portOptions.at(i));
+		portButtons.emplace_back(menuLeft + x * 50 + WIDTH_OFFSET, menuTop + y * 50 + HEIGHT_OFFSET, portButton, gameTexture, portOptions.at(i));
 		portButtons.at(i).mySprite.setTextureRect(rectArray[0][4]);	//Placeholder image
 		portButtons.at(i).width = 50;
 		portButtons.at(i).height = 50;
@@ -145,7 +151,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	//For each status element, create new button and push back.
 	for (int i = 0; i < statusTextures->size(); i++)
 	{
-		statusButtons.emplace_back(menuLeft + x * (statusButtonWidth + 10), menuTop + y * (statusButtonHeight + 10), int(statusButton), &(statusTextures->at(i)), "StatusButton");
+		statusButtons.emplace_back(menuLeft + (x * (statusButtonWidth + 10) ) + WIDTH_OFFSET , menuTop + ( y * (statusButtonHeight + 10) ) + HEIGHT_OFFSET , int(statusButton), &(statusTextures->at(i)), "StatusButton");
 
 		//Put certain number of buttons on each row, then go to next row.
 		x++;
@@ -166,11 +172,11 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 	//Initialize effects sprite, even though it may not always be used.
 	sf::Sprite effectsSprite;
 	effectsSprite.setTexture(*inputLayerTexture);
-	effectsSprite.setPosition(screenX * 50, screenY * 50);
+	effectsSprite.setPosition(screenX * 50 + WIDTH_OFFSET, screenY * 50 + HEIGHT_OFFSET);
 
 	//First print tile, change sprite depending on if withinVision or not
-	tileToPrint->mySprite.setPosition(screenX * 50, screenY * 50);
-	tileToPrint->myFogSprite.setPosition(screenX * 50, screenY * 50);
+	tileToPrint->mySprite.setPosition(screenX * 50 + WIDTH_OFFSET, screenY * 50 + HEIGHT_OFFSET);
+	tileToPrint->myFogSprite.setPosition(screenX * 50 + WIDTH_OFFSET, screenY * 50 + HEIGHT_OFFSET);
 	if (tileToPrint->withinVision[playerNumber] == true)
 	{
 		inputLayerWindow->draw(tileToPrint->mySprite);
@@ -185,7 +191,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 	{
 		sf::Sprite riverSprite;
 		riverSprite.setTexture(*inputLayerTexture);
-		riverSprite.setPosition(screenX * 50, screenY * 50);
+		riverSprite.setPosition(screenX * 50 + WIDTH_OFFSET, screenY * 50 + HEIGHT_OFFSET);
 
 		int riverYCoord = 9;
 		if (tileToPrint->withinVision[playerNumber] == false)
@@ -221,7 +227,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 	{
 		sf::Sprite beachSprite;
 		beachSprite.setTexture(*inputLayerTexture);
-		beachSprite.setPosition(screenX * 50, screenY * 50);
+		beachSprite.setPosition(screenX * 50 + WIDTH_OFFSET, screenY * 50 + HEIGHT_OFFSET);
 
 		int beachYCoord = 11;
 		if (tileToPrint->withinVision[playerNumber] == false)
@@ -264,15 +270,15 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			//Last check - must not be stealth minion and unseen
 			if (tileToPrint->minionOnTop->stealthMode == false || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber)
 			{
-				tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50, screenY * 50);
+				tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50 + WIDTH_OFFSET, screenY * 50 + HEIGHT_OFFSET);
 				inputLayerWindow->draw(tileToPrint->minionOnTop->mySprite);
 			}
 		}
 
 		//Get mouse position to see if it's hovering over a potential action tile
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
-		int windowX = mousePosition.x / 50;
-		int windowY = mousePosition.y / 50;
+		int windowX = ( mousePosition.x - WIDTH_OFFSET ) / 50 ;
+		int windowY = ( mousePosition.y - HEIGHT_OFFSET) / 50 ;
 		int mouseTileX = windowX + boardToPrint->windowLocationX;       //May take out windowLocationX if this isn't working
 		int mouseTileY = windowY + boardToPrint->windowLocationY;       //May take out windowLocationY if this isn't working
 		bool mouseHovering = false;
@@ -416,7 +422,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			&& (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType != computerPlayer
 				|| MainMenu->editorMode == true))
 		{
-			boardToPrint->cursor.mySprite.setPosition(screenX * 50, screenY * 50);
+			boardToPrint->cursor.mySprite.setPosition(screenX * 50 + WIDTH_OFFSET, screenY * 50 + HEIGHT_OFFSET);
 			inputLayerWindow->draw(boardToPrint->cursor.mySprite);
 
 		}
@@ -527,7 +533,7 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 		{
 			//If there is some additional animation, print that too, on top of everything else
 			//It must be set by previous function
-			tileToPrint->animationSprite->setPosition(screenX * 50, screenY * 50);
+			tileToPrint->animationSprite->setPosition(screenX * 50 + WIDTH_OFFSET, screenY * 50 + HEIGHT_OFFSET);
 			inputLayerWindow->draw(*(tileToPrint->animationSprite));
 
 
@@ -547,8 +553,11 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	int yCoord = 200;
 	sf::Sprite dialogBoxSprite;
 	dialogBoxSprite.setTexture(MainMenu->otherGameTextures->at(11));
-	dialogBoxSprite.setPosition(xCoord, yCoord);
+	dialogBoxSprite.setPosition(xCoord + WIDTH_OFFSET, yCoord + HEIGHT_OFFSET);
 	inputLayerWindow->draw(dialogBoxSprite);
+
+	int explainTextPositionX = 265 + WIDTH_OFFSET;
+	int explainTextPositionY = 220 + HEIGHT_OFFSET;
 
 	//Then print text based on which dialog box it is
 	switch (dialogBoxOpen)
@@ -558,7 +567,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 		//Print defense explain:
 		sf::String defenseExplainString = "Each tile provides a defense bonus from 0 to 5.\nEach point reduces damage by 5 % in combat.";
 		sf::Text defenseExplainText(defenseExplainString, *inputLayerFont, MainMenu->menuTextSize);
-		defenseExplainText.setPosition(265, 220);
+		defenseExplainText.setPosition(explainTextPositionX , explainTextPositionY);
 		defenseExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(defenseExplainText);
 		break;
@@ -568,7 +577,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 		//Print production explain:
 		sf::String productionExplainString = "Friendly properties produce gold to support the\nwar effort. Most produce 1000 per turn, but some\nproduce more.";
 		sf::Text productionExplainText(productionExplainString, *inputLayerFont, MainMenu->menuTextSize);
-		productionExplainText.setPosition(265, 220);
+		productionExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		productionExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(productionExplainText);
 		break;
@@ -578,7 +587,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 		//Print capture explain:
 		sf::String capExplainString = "Capture points. Infantry and technicals can capture\nenemy properties at 1 point per health per turn.\n20 points are needed to capture a property.";
 		sf::Text capExplainText(capExplainString, *inputLayerFont, MainMenu->menuTextSize);
-		capExplainText.setPosition(265, 220);
+		capExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		capExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(capExplainText);
 		break;
@@ -588,7 +597,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 		//Print health explain:
 		sf::String healthExplainString = "Minion hit points. All minions start with 100 and\ndie at 0. Minions repair 20 hit points per turn on\na friendly property. Attack and capture is\nproportional to hit points.";
 		sf::Text healthExplainText(healthExplainString, *inputLayerFont, MainMenu->menuTextSize);
-		healthExplainText.setPosition(265, 220);
+		healthExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		healthExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(healthExplainText);
 		break;
@@ -598,7 +607,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 		//Print movement/fuel explain:
 		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use fuel based\non their type and the terrain they cross. Also, aircraft\nuse 5 fuel and ships use 2 fuel during upkeep.\nIf they run out, they die.";
 		sf::Text fuelExplainText(fuelExplainString, *inputLayerFont, MainMenu->menuTextSize);
-		fuelExplainText.setPosition(265, 220);
+		fuelExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		fuelExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(fuelExplainText);
 		break;
@@ -608,7 +617,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 		//Print ammo explain:
 		sf::String ammoExplainString = "Minions require ammo to attack with each weapon.\nIndicates current and maximum ammo.\nPrimary ammo is on top, secondary ammo on bottom.\nINF indicates infinite ammo for that weapon.";
 		sf::Text ammoExplainText(ammoExplainString, *inputLayerFont, MainMenu->menuTextSize);
-		ammoExplainText.setPosition(265, 220);
+		ammoExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		ammoExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(ammoExplainText);
 		break;
@@ -618,7 +627,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 		//Print move-state explain:
 		sf::String moveExplainString = "Green arrow - Can move and then attack/other action.\nYellow pause - Can now attack, unload, supply, etc.\nRed stop - Has performed all possible moves this turn.";
 		sf::Text moveExplainText(moveExplainString, *inputLayerFont, MainMenu->menuTextSize);
-		moveExplainText.setPosition(265, 220);
+		moveExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		moveExplainText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(moveExplainText);
 		break;
@@ -656,7 +665,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 	//Convert and print.
 	sf::Text playerStatusText(playerStatus, *inputLayerFont, MainMenu->menuTextSize);
-	playerStatusText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + spacingConstant);
+	playerStatusText.setPosition(MAX_WINDOW_WIDTH * 52 + WIDTH_OFFSET, menuLineTracker * MainMenu->menuTextSize + spacingConstant + HEIGHT_OFFSET);
 	playerStatusText.setFillColor(sf::Color::Black);
 	inputLayerWindow->draw(playerStatusText);
 
@@ -708,7 +717,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 				//First draw box for capture status
 				snprintf(pointerToPrint, 100, "%d", currentTile->capturePoints);
 				sf::Text newText(pointerToPrint, *inputLayerFont, MainMenu->menuTextSize + 6);
-				newText.setPosition(statusButtons.at(2).xCoord + 78, statusButtons.at(2).yCoord + 18);
+				newText.setPosition(statusButtons.at(2).xCoord + 78 + WIDTH_OFFSET, statusButtons.at(2).yCoord + 18 + HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 				inputLayerWindow->draw(newText);
 			}
@@ -756,14 +765,14 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			//Then print out actual values of ammo
 			sf::String ammoNumberString = pointerToPrint;
 			sf::Text ammoNumberText(ammoNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80, statusButtons.at(5).yCoord + 15);
+			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80 + WIDTH_OFFSET, statusButtons.at(5).yCoord + 15 + HEIGHT_OFFSET);
 			ammoNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(ammoNumberText);
 
 			//Print move state of minion
 			sf::Sprite effectsSprite;
 			effectsSprite.setTexture(*inputLayerTexture);
-			effectsSprite.setPosition(statusButtons.at(6).xCoord + 35, statusButtons.at(6).yCoord + 10);
+			effectsSprite.setPosition(statusButtons.at(6).xCoord + 35 + WIDTH_OFFSET, statusButtons.at(6).yCoord + 10 + HEIGHT_OFFSET);
 			if (currentMinion->status == gaveupmovehasntfired)
 			{
 				//Print yellow pause image
@@ -816,7 +825,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		snprintf(pointerToPrint, 100, "%d", int(round((currentTile->defenseFactor - 1.0) * 10)));
 		sf::String defenseBonusNumber = pointerToPrint;
 		sf::Text defenseBonusText(defenseBonusNumber, *inputLayerFont, MainMenu->menuTextSize + 6);
-		defenseBonusText.setPosition(statusButtons.at(0).xCoord + 80, statusButtons.at(0).yCoord + 18);
+		defenseBonusText.setPosition(statusButtons.at(0).xCoord + 80 + WIDTH_OFFSET,  statusButtons.at(0).yCoord + 18 + HEIGHT_OFFSET);
 		defenseBonusText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(defenseBonusText);
 
@@ -828,7 +837,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			snprintf(pointerToPrint, 100, "%d", currentTile->production);
 			sf::String productionNumberString = pointerToPrint;
 			sf::Text productionNumberText(productionNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			productionNumberText.setPosition(statusButtons.at(1).xCoord + 70, statusButtons.at(1).yCoord + 23);
+			productionNumberText.setPosition(statusButtons.at(1).xCoord + 70 + WIDTH_OFFSET, statusButtons.at(1).yCoord + 23 + HEIGHT_OFFSET) ; 
 			productionNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(productionNumberText);
 		}
@@ -866,7 +875,7 @@ int inputLayer::printMinionMenu(MasterBoard* boardToPrint) {
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize + 2);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52 + WIDTH_OFFSET, menuLineTracker * MainMenu->menuTextSize + 2 + HEIGHT_OFFSET);
 
 	newText.setFillColor(sf::Color::Black);
 
@@ -884,7 +893,7 @@ int inputLayer::printBoardMenu(MasterBoard* boardToPrint) {
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52 + WIDTH_OFFSET, menuLineTracker * MainMenu->menuTextSize + HEIGHT_OFFSET);
 
 	newText.setFillColor(sf::Color::Black);
 
@@ -1040,7 +1049,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 	boardMessage += "\n";
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52 + WIDTH_OFFSET, menuLineTracker * MainMenu->menuTextSize + HEIGHT_OFFSET);
 	newText.setFillColor(sf::Color::Black);
 	inputLayerWindow->draw(newText);
 
@@ -1101,7 +1110,7 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) 
 	//First draw the background for status area
 	sf::Sprite statusBox;
 	statusBox.setTexture(MainMenu->otherGameTextures->at(4));
-	statusBox.setPosition(MAX_WINDOW_WIDTH * 50, 0);
+	statusBox.setPosition(MAX_WINDOW_WIDTH * 50 + WIDTH_OFFSET, 0 + HEIGHT_OFFSET);
 	inputLayerWindow->draw(statusBox);
 
 
@@ -1164,7 +1173,7 @@ int inputLayer::printInsertMinion(MasterBoard* boardToPrint)
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52 + WIDTH_OFFSET, menuLineTracker * MainMenu->menuTextSize + HEIGHT_OFFSET);
 
 	newText.setFillColor(sf::Color::Black);
 
@@ -2299,8 +2308,8 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 		sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
 
 		//If mouse click is within map, 
-		int windowX = mousePosition.x / 50;
-		int windowY = mousePosition.y / 50;
+		int windowX = (mousePosition.x - WIDTH_OFFSET) / 50;
+		int windowY = (mousePosition.y - HEIGHT_OFFSET) / 50;
 		int tileX = windowX + boardToInput->windowLocationX;
 		int tileY = windowY + boardToInput->windowLocationY;
 
@@ -2438,8 +2447,8 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
 
 	//Get mouse click information
-	int windowX = mousePosition.x / 50;
-	int windowY = mousePosition.y / 50;
+	int windowX = (mousePosition.x -WIDTH_OFFSET) / 50 ;
+	int windowY = (mousePosition.y - HEIGHT_OFFSET) / 50 ;
 	int tileX = windowX + boardToInput->windowLocationX;
 	int tileY = windowY + boardToInput->windowLocationY;
 
