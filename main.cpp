@@ -61,6 +61,15 @@ int initializeTextureArray(std::string directory, const std::vector <std::string
 
 int main()
 {
+	//Insert a new job each for a series of maps, if we're running battle lab.
+	//Config file has all configurations INCLUDING whether or not battle lab is being run.
+	//Map list simply contains list of maps to run battle lab on.
+	file mapList;
+	file battleLabConfig;
+	battleLabConfig.open("ConfigFile.txt");
+	mapList.open("mapList");
+		
+		
 	sf::Color colorWhite;
 
 	//Determine size of desktop for window
@@ -169,7 +178,7 @@ int main()
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
 
-	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray);
+	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapName);
 
 	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, &MainMenu.gameMenuButtons, &statusTexturesArray , &(gameMusicArray[0]) );
 	MasterBoard GameBoard(&mainTexture);
