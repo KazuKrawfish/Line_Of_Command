@@ -67,9 +67,6 @@ int main()
 	sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
 	
 	sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
-	sf::Vector2u windowSize = mainWindow.getSize();
-	std::cout << "Window width is: "<< windowSize.x << std::endl;
-	std::cout << "Window height is: " << windowSize.y << std::endl;
 
 	//Load topMenuButton textures
 	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off", "top_Editor_Mode_On", "top_New_Campaign", "top_New_Skirmish", "top_Back", "top_Load_Campaign" };
@@ -85,7 +82,7 @@ int main()
 
 	//Load other textures
 	std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox", "Sidebar", "loadGameBackground",
-		"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", "dialogBox" };
+		"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", "dialogBox" , "gameplayBackground" };
 	std::vector <sf::Texture> otherTextureArray;
 	otherTextureArray.resize(otherImagesList.size());
 	initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
@@ -174,7 +171,7 @@ int main()
 
 	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray);
 
-	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, &MainMenu.gameMenuButtons, &statusTexturesArray , &(gameMusicArray[0]) , windowSize);
+	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, &MainMenu.gameMenuButtons, &statusTexturesArray , &(gameMusicArray[0]) );
 	MasterBoard GameBoard(&mainTexture);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);

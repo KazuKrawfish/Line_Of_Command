@@ -60,6 +60,10 @@ public:
 	std::string nextMissionName, missionBriefing;
 	int briefingLineNumber = 0;
 
+	//Offsets for fullscreen
+	int MM_WIDTH_OFFSET = 0;
+	int MM_HEIGHT_OFFSET = 0;
+
 	//gameTurn represents the overall turn, which increments once everyone has cycled through one player turn.
 	int gameTurn = 1;
 

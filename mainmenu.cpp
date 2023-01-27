@@ -48,6 +48,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 	//Load or new game box
 	sf::Sprite backgroundSprite;
 	backgroundSprite.setTexture(otherGameTextures->at(boxType));
+	backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 	mywindow->draw(backgroundSprite);
 
 	sf::Text announceText(AnnouncementString, *inputFont, menuTextSize);
@@ -124,13 +125,21 @@ char getValidPlayerInput(sf::RenderWindow* myWindow)
 
 mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
 					std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
-					std::vector <sf::Texture>* factionButtonTextureArray)
+					std::vector <sf::Texture>* factionButtonTextureArray )
 {
 	myTexture = gameTexture;
 	musicArray = inputMusicArray;
 	myFont = cour;
 	mywindow = myWindow;
 	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
+
+	//Determine offsets for mainmenu AND for inputLayer
+	sf::Vector2u windowSize = myWindow->getSize();
+	std::cout << "Window width is: " << windowSize.x << std::endl;
+	std::cout << "Window height is: " << windowSize.y << std::endl;
+	
+	MM_WIDTH_OFFSET = (windowSize.x - MAX_WINDOW_WIDTH * 50) / 2;
+	MM_HEIGHT_OFFSET = (windowSize.y - MAX_WINDOW_HEIGHT * 50) / 2;
 
 
 	//Game menu buttons ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,15 +168,15 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 		//For soundOff and speedFast, they have the same y-coord as the previous button, soundOn and speedNormal.
 		if (buttonType == soundOff || buttonType == speedFast)
 		{
-			y = menuTop + topMargin + (buttonHeight + betweenMargin) * (buttonPlacement - 1);
+			y = MM_HEIGHT_OFFSET + menuTop + topMargin + (buttonHeight + betweenMargin) * (buttonPlacement - 1);
 		}
 		else
 		{
-			y = menuTop + topMargin + (buttonHeight + betweenMargin) * buttonPlacement;
+			y = MM_HEIGHT_OFFSET + menuTop + topMargin + (buttonHeight + betweenMargin) * buttonPlacement;
 			//Only advance button position if it's a "unique" button. Not a sound/speed alternate button.
 			buttonPlacement++;
 		}
-		gameMenuButtons.emplace_back(menuLeft + leftMargin, y, buttonType, &(inputGameMenuButtonTextureArray->at(i)), "GameMenuButton");
+		gameMenuButtons.emplace_back(menuLeft + leftMargin + MM_WIDTH_OFFSET, y, buttonType, &(inputGameMenuButtonTextureArray->at(i)), "GameMenuButton");
 	}
 	//Game menu buttons ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -200,16 +209,16 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 		//For editModeOn, it has the same y-coord as the previous button, editModeOff.
 		if (i == editorModeOn)
 		{
-			y = TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * (i - 1);
+			y = MM_HEIGHT_OFFSET + TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * (i - 1);
 		}
 		else
 		{
-			y = TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * i;
+			y = MM_HEIGHT_OFFSET + TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * i;
 			//Only advance button position if it's a "unique" button. Not a editMode alternate button.
 			buttonPlacement++;
 		}
 
-		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y, i, &(topMenuButtonTextureArray->at(i)), "TopMenuButton");
+		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, i, &(topMenuButtonTextureArray->at(i)), "TopMenuButton");
 	}
 
 	//Top menu buttons - new skirmish, new campaign, go back
@@ -219,7 +228,7 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	for (int i = 4; i < 7; i++)
 	{
 		y = TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * buttonPlacement;
-		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin, y, i, &(topMenuButtonTextureArray->at(i)), "TopMenuButton");
+		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y + MM_HEIGHT_OFFSET, i, &(topMenuButtonTextureArray->at(i)), "TopMenuButton");
 		buttonPlacement++;
 	}
 	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -248,8 +257,8 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	{
 		for (int j = 0; j < 2; j++) 
 		{
-			int y = i * (factionButtonHeight + factionBetweenMargin) + factionButtonsTop;
-			int x = j * (factionButtonWidth + factionBetweenMargin) + factionButtonsLeft;
+			int y = i * (factionButtonHeight + factionBetweenMargin) + factionButtonsTop + MM_HEIGHT_OFFSET;
+			int x = j * (factionButtonWidth + factionBetweenMargin) + factionButtonsLeft + MM_WIDTH_OFFSET;
 			factionChoiceButtons.emplace_back(x, y, factionButton, &(factionButtonTextureArray->at(factionNumber)), "FactionButton");
 			factionNumber++;
 		}
@@ -759,7 +768,7 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 	sf::Sprite startScreenStatementSprite;
 	startScreenStatementSprite.setTexture(otherGameTextures->at(2));
-	startScreenStatementSprite.setPosition(330, 130);
+	startScreenStatementSprite.setPosition(330 + MM_WIDTH_OFFSET, 130 + MM_HEIGHT_OFFSET);
 
 	mywindow->clear();
 
@@ -1105,15 +1114,17 @@ int mainMenu::printTopMenu()
 
 	sf::Sprite topMenuWallpaperSprite;
 	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
+	topMenuWallpaperSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(otherGameTextures->at(3));
+	topMenuSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 
 	mywindow->clear();
 
 	mywindow->draw(topMenuWallpaperSprite);
 
-	topMenuSprite.setPosition(450, 150);
+	topMenuSprite.setPosition(450 + MM_WIDTH_OFFSET, 150 + MM_HEIGHT_OFFSET);
 	mywindow->draw(topMenuSprite);
 
 	//Draw three buttons for top menu
@@ -1158,6 +1169,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	//First draw out buttons, then take in input from mouse.
 	sf::Sprite topMenuWallpaperSprite;
 	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
+	topMenuWallpaperSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(otherGameTextures->at(3));
@@ -1166,7 +1178,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	mywindow->draw(topMenuWallpaperSprite);
 
-	topMenuSprite.setPosition(450, 150);
+	topMenuSprite.setPosition(450 + MM_WIDTH_OFFSET, 150 + MM_HEIGHT_OFFSET);
 	mywindow->draw(topMenuSprite);
 
 	//Draw two buttons for top menu new
@@ -1204,7 +1216,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
 				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-				newText.setPosition(300, 200);
+				newText.setPosition(300 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 
 				mywindow->draw(newText);
@@ -1223,7 +1235,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
 				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-				newText.setPosition(430, 200);
+				newText.setPosition(430 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 
 				mywindow->draw(newText);
@@ -1275,7 +1287,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				anotherTopMenuNewString = "Successfully loaded. Press any key to continue.\n";
 				sf::Text newText(anotherTopMenuNewString, *myFont, menuTextSize);
-				newText.setPosition(300, 200);
+				newText.setPosition(300 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 
 				mywindow->draw(newText);
@@ -1339,7 +1351,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->draw(backgroundSprite);
 
 				sf::Text newText(CampaignBriefing, *myFont, menuTextSize);
-				newText.setPosition(200, 200);
+				newText.setPosition(200 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 				mywindow->draw(newText);
 				mywindow->display();
@@ -1440,7 +1452,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			{
 				topMenuNewString = "Choose this player's faction. \n";
 				sf::Text factionChooseText(topMenuNewString, *myFont, menuTextSize);
-				factionChooseText.setPosition(500, 140);
+				factionChooseText.setPosition(500 + MM_WIDTH_OFFSET, 140 + MM_HEIGHT_OFFSET);
 				factionChooseText.setFillColor(sf::Color::Black);
 
 				mywindow->clear();
@@ -1555,7 +1567,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
 			newText.setFillColor(sf::Color::Black);
-			newText.setPosition(300, 200);
+			newText.setPosition(300 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 
 			sf::Sprite backgroundSprite;
 			backgroundSprite.setTexture(otherGameTextures->at(5));
