@@ -1856,45 +1856,49 @@ int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 
 int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation)
 {
-	if (status != waitingForNextLocalPlayer)
+	//Check for battle lab before actually printing
+	if (MainMenu->battleLabOn == false)
 	{
-		inputLayerWindow->clear();
-		printUpperScreen(boardToPrint, observerNumber, withinAnimation);
-		printLowerScreen(boardToPrint, observerNumber);
-		inputLayerWindow->display();
-
-	}
-	else printWaitingScreen(boardToPrint);
-
-
-	//If not playing music already, play music for that player's faction
-	if (soundsOn == true)
-	{
-		int factionMusicOffset = int(boardToPrint->playerRoster[boardToPrint->playerFlag].playerFaction) + 2; //Number of songs before faction themes
-
-		//Crude method to ensure we stopped playing previous faction music if it was different
-		for (int i = 3; i < 7; i++)
+		if (status != waitingForNextLocalPlayer)
 		{
-			if (factionMusicOffset != i)
+			inputLayerWindow->clear();
+			printUpperScreen(boardToPrint, observerNumber, withinAnimation);
+			printLowerScreen(boardToPrint, observerNumber);
+			inputLayerWindow->display();
+
+		}
+		else printWaitingScreen(boardToPrint);
+
+
+		//If not playing music already, play music for that player's faction
+		if (soundsOn == true)
+		{
+			int factionMusicOffset = int(boardToPrint->playerRoster[boardToPrint->playerFlag].playerFaction) + 2; //Number of songs before faction themes
+
+			//Crude method to ensure we stopped playing previous faction music if it was different
+			for (int i = 3; i < 7; i++)
+			{
+				if (factionMusicOffset != i)
+					gameMusic[i].stop();
+			}
+
+			//Then play the actual appropriate music for this faction
+			if (gameMusic[factionMusicOffset].getStatus() != sf::SoundSource::Status::Playing)
+				gameMusic[factionMusicOffset].play();
+
+		}
+		//If sound is off, stop whatever music was playing.
+		else if (soundsOn == false)
+		{
+			for (unsigned int i = 0; i < 7; i++)
+			{
 				gameMusic[i].stop();
+			}
 		}
 
-		//Then play the actual appropriate music for this faction
-		if (gameMusic[factionMusicOffset].getStatus() != sf::SoundSource::Status::Playing)
-			gameMusic[factionMusicOffset].play();
-
+		//Reset line tracker after each print.
+		menuLineTracker = 1;
 	}
-	//If sound is off, stop whatever music was playing.
-	else if (soundsOn == false)
-	{
-		for (unsigned int i = 0; i < 7; i++)
-		{
-			gameMusic[i].stop();
-		}
-	}
-
-	//Reset line tracker after each print.
-	menuLineTracker = 1;
 
 	return 0;
 }

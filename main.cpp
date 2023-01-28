@@ -15,7 +15,7 @@
 #include "inputLayer.hpp"
 #include "compie.hpp"
 #include "mainmenu.h"
-
+#include <thread>
 
 /*
 #ifdef _WIN32
@@ -59,22 +59,67 @@ int initializeTextureArray(std::string directory, const std::vector <std::string
 	return 0;
 }
 
+int buildThread (sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
+	std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputMusicArray,
+	std::vector <sf::Texture>* factionButtonTextureArray, std::string inputConfigFileName, std::string inputMapListName, std::vector <sf::Sound>* inputSoundEffects,
+	std::vector <sf::Texture>* statusTextures)
+{
+	mainMenu MainMenu(myWindow, gameTexture, cour, topMenuButtonTextureArray, inputGameMenuButtonTextureArray, inputOtherTextureArray, &(inputMusicArray[0]), factionButtonTextureArray, inputConfigFileName, inputMapListName);
+
+	inputLayer InputLayer(&MainMenu, myWindow, gameTexture, cour, inputSoundEffects, &MainMenu.gameMenuButtons, statusTextures, &(inputMusicArray[0]));
+	MasterBoard GameBoard(gameTexture);
+
+	MainMenu.introScreen(&GameBoard, &InputLayer);
+
+	return 1;
+}
+
 int main()
 {
+	//BATLELAB
+	//First open battle lab config and determine if we are in battle lab mode.
+	//Normal play is 0, 1 is battle lab   
+	std::ifstream battleLabConfigFile;
+	std::string battleLabConfigFileName = ".\\battleLab\\battleLabConfig.txt";
+	battleLabConfigFile.open(battleLabConfigFileName);
+	bool mainBattleLabOn = false;
+	std::string ThrowawayString;
+
+	if (battleLabConfigFile.is_open() == true)
+	{
+		battleLabConfigFile >> ThrowawayString;
+		battleLabConfigFile >> mainBattleLabOn;
+	}
+	else
+	{
+		std::cout << "Could not open battle lab config file." << std::endl;
+	}
+	battleLabConfigFile.close();
+
 	//Insert a new job each for a series of maps, if we're running battle lab.
 	//Config file has all configurations INCLUDING whether or not battle lab is being run.
 	//Map list simply contains list of maps to run battle lab on.
-	file mapList;
-	file battleLabConfig;
-	battleLabConfig.open("ConfigFile.txt");
-	mapList.open("mapList");
-		
+	std::ifstream mapListFile;
+	std::string mapListName = ".\\battleLab\\mapList.txt";
+	mapListFile.open(mapListName);
+	std::vector <std::string> mapList;
+	std::string mapName;
+	if (mapListFile.is_open() == true)
+	{
+		while (mapListFile >> mapName)
+		{
+			mapList.push_back(mapName);
+		}
+	
+	}
+	else 
+	{
+		std::cout << "Could not open map list for battle lab" << std::endl;
+	}
 		
 	sf::Color colorWhite;
-
 	//Determine size of desktop for window
 	sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
-	
 	sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
 
 	//Load topMenuButton textures
@@ -131,7 +176,6 @@ int main()
 	std::vector <sf::Sound> soundEffects;
 	soundEffects.resize(numberOfSoundEffects + 1);
 
-
 	//Initialize intRect grid
 	rectArray.resize(rectArrayWidth + 1);
 	for (int i = 0; i < rectArrayWidth; i++)
@@ -178,12 +222,30 @@ int main()
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
 
-	mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapName);
+	//If battle lab is on, create threads to handle various maps.
+	if (mainBattleLabOn == true)
+	{
+		std::vector <std::thread> threadList; 
 
-	inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, &MainMenu.gameMenuButtons, &statusTexturesArray , &(gameMusicArray[0]) );
-	MasterBoard GameBoard(&mainTexture);
 
-	MainMenu.introScreen(&GameBoard, &InputLayer);
+		for (int i = 0; i < mapList.size(); i++)
+		{
+			threadList.push_back(std::thread(buildThread, &mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray,
+				&gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapList.at(i),
+				&soundEffects, &statusTexturesArray));
+			std::cout << "Thread created" << std::endl;
+		}
+
+	}
+	else //Otherwise proceed with just one set of instances 
+	{
+		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);
+
+		inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, &MainMenu.gameMenuButtons, &statusTexturesArray, &(gameMusicArray[0]));
+		MasterBoard GameBoard(&mainTexture);
+
+		MainMenu.introScreen(&GameBoard, &InputLayer);
+	}
 
 }
 

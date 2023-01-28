@@ -33,7 +33,7 @@ public:
 	//CONSTRUCTOR///////////////////////////////
 	mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
 				std::vector <sf::Texture>* gameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
-				std::vector <sf::Texture>* factionButtonTextureArray);
+				std::vector <sf::Texture>* factionButtonTextureArray , std::string inputConfigFileName, std::string inputMapListName);
 	//CONSTRUCTOR///////////////////////////////
 
 	//Main Menu Interface //////////////////////
@@ -102,6 +102,8 @@ public:
 	//SFML Objects///////////////////////////////
 
 	//Battle Lab/////////////////////////////////
+	std::string battleLabConfigFileName = "";
+	std::string battleLabScenarioName = "";
 	bool battleLabOn = false; 
 	bool battleLabReset = false;
 	int battleLabTurnLimit = 0;

@@ -125,8 +125,11 @@ char getValidPlayerInput(sf::RenderWindow* myWindow)
 
 mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
 					std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
-					std::vector <sf::Texture>* factionButtonTextureArray )
+					std::vector <sf::Texture>* factionButtonTextureArray , std::string inputConfigFileName, std::string inputMapName )
 {
+	battleLabScenarioName = inputMapName;
+	battleLabConfigFileName = inputConfigFileName;
+
 	myTexture = gameTexture;
 	musicArray = inputMusicArray;
 	myFont = cour;
@@ -736,14 +739,9 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
-	//BATLELAB
-	//First open battle lab config and determine if we are in battle lab mode.
-	//Normal play is 0, 1 is battle lab   
 	std::ifstream battleLabConfigFile;
-	battleLabConfigFile.open(".\\battleLab\\battleLabConfig.txt");
-	battleLabOn = false;		//Global
-	std::string ThrowawayString;
-
+	battleLabConfigFile.open(battleLabConfigFileName);
+	std::string ThrowawayString = "";
 	if (battleLabConfigFile.is_open() == true)
 	{
 		battleLabConfigFile >> ThrowawayString;
@@ -753,6 +751,7 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	{
 		std::cout << "Could not open battle lab config file." << std::endl;
 	}
+
 
 	//If ordered, run battle lab.
 	if (battleLabOn == true)
@@ -803,6 +802,8 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 //Make sure all compie paths return to main menu.
 int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile)
 {
+	std::cout << "Entering battle lab." << std::endl;
+
 	//Battle lab expects the following in config file:
 	//runBattleLab_0_Off_1_On
 	//0
@@ -827,16 +828,12 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	*configFile >> ThrowawayString;
 	*configFile >> battleLabTurnLimit; //Global within mainMenu.cpp
 
-	std::string scenarioName = "";
-	*configFile >> ThrowawayString;
-	*configFile >> scenarioName;
-
 	std::string outputName = "";
 	*configFile >> ThrowawayString;
 	*configFile >> outputName;
 
 	std::ofstream outputFile;
-	outputFile.open(".\\battlelab\\" + outputName );
+	outputFile.open(".\\battlelab\\" + outputName + "_" + battleLabScenarioName + ".txt");
 
 	//Increase speed and turn off sound
 	InputLayer->speedFactor = 1000;
@@ -863,11 +860,15 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		//Need to print out mission/scenario printout here
 		if (gameType == localSkirmish)
 		{
-			newGameMap.open(".\\scenarios\\" + scenarioName + ".txt");
+			newGameMap.open(".\\scenarios\\" + battleLabScenarioName + ".txt");
 			if (newGameMap.is_open() == false)
 			{
 				std::cout << "Could not open scenario. Aborting battle lab." << std::endl;
 				return 1;
+			}
+			else 
+			{
+				std::cout << "Successfully opened scenario " << battleLabScenarioName << std::endl;
 			}
 		}
 

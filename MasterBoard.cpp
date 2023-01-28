@@ -2647,6 +2647,8 @@ std::string MasterBoard::captureProperty(tile* inputTile, Minion* inputMinion, i
 //Only print victory if human player present.
 int MasterBoard::playerVictory(int winningPlayer, inputLayer* InputLayer)
 {
+	std::cout << "Player " << winningPlayer << " wins" << std::endl;
+
 	bool humanPlayerPresent = false;
 	for (int i = 1; i < playerRoster.size(); i++)
 	{
@@ -2684,7 +2686,7 @@ int MasterBoard::playerVictory(int winningPlayer, inputLayer* InputLayer)
 //Doesn't print defeat if both computer players are playing
 int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* InputLayer)
 {
-
+	std::cout << "Player defeated" << std::endl;
 	playerRoster[losingPlayer].stillAlive = false;
 
 	bool throwAway = false;
@@ -3062,6 +3064,7 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 	}
 
 	//If minion is being transported, then do not attmept to deselect or talk to its location.
+	//Otherwise, deselct it and reset it.
 	if (inputMinion->transporter == NULL)
 	{
 		deselectMinion();
