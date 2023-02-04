@@ -647,27 +647,36 @@ int compie::transportSearchForPickup(MasterBoard* boardToUse, compieMinionRecord
 		//After determining closest factory tile, find tile closest to minion which is also within 2 tiles of that factory.
 		//Reset objective distance number
 		distanceFromMinionToObjective = 999;
-		for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
+		if (objectiveFactoryTile != NULL)
 		{
-			for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
+			for (int x = 0; x < boardToUse->BOARD_WIDTH; x++)
 			{
-				//Is it within 2 of objectiveFactoryTile, but not directly on top?
-				//Must also be unoccupied
-				//Also, an infantry must be able to access that tile.
-				int distance = boardToUse->computeDistance(objectiveFactoryTile->locationX, x, objectiveFactoryTile->locationY, y);
-				if (distance <= 2 && distance > 0 && (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop == myMinion)
-					&& boardToUse->Board[x][y].consultMovementChart("Infantry") != 99)
+				for (int y = 0; y < boardToUse->BOARD_HEIGHT; y++)
 				{
-					//Can we get there? Is it closer than previous distance?
-					int rangeToTile = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
-					if (rangeToTile != -1 && rangeToTile < distanceFromMinionToObjective)
+					//Is it within 2 of objectiveFactoryTile, but not directly on top?
+					//Must also be unoccupied
+					//Also, an infantry must be able to access that tile.
+					int distance = boardToUse->computeDistance(objectiveFactoryTile->locationX, x, objectiveFactoryTile->locationY, y);
+					if (distance <= 2 && distance > 0 && (boardToUse->Board[x][y].hasMinionOnTop == false || boardToUse->Board[x][y].minionOnTop == myMinion)
+						&& boardToUse->Board[x][y].consultMovementChart("Infantry") != 99)
 					{
-						//Set this is as our actual objective tile
-						distanceFromMinionToObjective = rangeToTile;   //This may be supposed to be rangeToTile, not distance
-						selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
+						//Can we get there? Is it closer than previous distance?
+						int rangeToTile = myMinion->terrainOnlyPathMap[x][y].distanceFromMinion;
+						if (rangeToTile != -1 && rangeToTile < distanceFromMinionToObjective)
+						{
+							//Set this is as our actual objective tile
+							distanceFromMinionToObjective = rangeToTile;   //This may be supposed to be rangeToTile, not distance
+							selectedMinionRecord->objectiveTile = &(boardToUse->Board[x][y]);
+						}
 					}
 				}
 			}
+		}
+		else 
+		{
+			//If there is no valid objective, just sit still
+			selectedMinionRecord->objectiveTile = &(boardToUse->Board[myMinion->locationX][myMinion->locationY]);
+			distanceFromMinionToObjective = 0;
 		}
 
 	}
@@ -1807,8 +1816,11 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 	//Attempt to stop game freezing by polling for one event.
 	//Flush event queue to clear out "Enter" and other rifraf
-	sf::Event throwAwayEvent;
-	while (InputLayer->inputLayerWindow->pollEvent(throwAwayEvent));
+	if (InputLayer->inputLayerWindow != NULL)
+	{
+		sf::Event throwAwayEvent;
+		while (InputLayer->inputLayerWindow->pollEvent(throwAwayEvent));
+	}
 
 	//Regardless of the tasking, it has now been executed.
 	selectedMinionRecord->taskingStatus = taskingExecuted;
@@ -1827,6 +1839,7 @@ int compie::executeMinionTasks(MasterBoard* boardToUse, compieMinionRecord* sele
 
 int compie::takeMyTurn(MasterBoard* boardToUse)
 {
+	std::cout << "Compie player " << boardToUse->playerFlag << "'s " << InputLayer->MainMenu->gameTurn << " turn" << std::endl;
 	int whoIsWatching = -1;		//-1 Is "default" meaning in a standard multiplayer game, nothing is printed during compie turn. It's hidden from view.
 
 	//If we're in debug mode, give player vision over everything.

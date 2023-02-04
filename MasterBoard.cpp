@@ -1282,7 +1282,7 @@ int MasterBoard::clearBoard(inputLayer* InputLayer)
 	{
 		if (minionRoster[i] != NULL)
 		{
-			destroyMinion(minionRoster[i], false, InputLayer, true);
+			delete minionRoster[i];	//Avoid unecessary complication from destroyMinion()
 			minionRoster[i] = NULL;
 		}
 	}
@@ -2816,7 +2816,8 @@ int MasterBoard::landmineAttack(int attackingX, int attackingY, inputLayer* Inpu
 	bool splashGraphicsOn = true;			
 
 	//Combat graphics for landmine, with both tiles equivalent, to cause graphics to be landmine-style.
-	InputLayer->combatGraphics(this, observerNumber, &Board[attackingX][attackingY], &Board[attackingX][attackingY] , splashGraphicsOn);
+	if(InputLayer->inputLayerTexture != NULL)
+		InputLayer->combatGraphics(this, observerNumber, &Board[attackingX][attackingY], &Board[attackingX][attackingY] , splashGraphicsOn);
 
 	//Landmine is autodestroyed.
 	destroyMinion(attackingMinion, false, InputLayer, false);
@@ -3052,15 +3053,15 @@ int MasterBoard::destroyMinion(Minion* inputMinion, bool printMessage, inputLaye
 
 	int minionController = inputMinion->team;
 
-	//If carrying a guy, kill that guy too.
-	if (inputMinion->firstMinionBeingTransported != NULL)
-	{
-		destroyMinion(inputMinion->firstMinionBeingTransported, printMessage, InputLayer, AdminKill);
-	}
-
+	//If carrying a guy, kill that guy first
 	if (inputMinion->secondMinionBeingTransported != NULL)
 	{
 		destroyMinion(inputMinion->secondMinionBeingTransported, printMessage, InputLayer, AdminKill);
+	}
+
+	if (inputMinion->firstMinionBeingTransported != NULL)
+	{
+		destroyMinion(inputMinion->firstMinionBeingTransported, printMessage, InputLayer, AdminKill);
 	}
 
 	//If minion is being transported, then do not attmept to deselect or talk to its location.

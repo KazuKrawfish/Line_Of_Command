@@ -56,6 +56,7 @@ public:
 
 	MasterBoard(sf::Texture* inputTexture);
 
+
 	//Board Management Functions//////////////
 	int checkWindow();
 	int clearBoard(inputLayer* InputLayer);

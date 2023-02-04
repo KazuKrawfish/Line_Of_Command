@@ -35,6 +35,8 @@ public:
 				std::vector <sf::Texture>* gameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
 				std::vector <sf::Texture>* factionButtonTextureArray , std::string inputConfigFileName, std::string inputMapListName);
 	//CONSTRUCTOR///////////////////////////////
+	//Battle lab constructor////////////////////
+	mainMenu(std::string inputConfigFileName, std::string inputMapListName);
 
 	//Main Menu Interface //////////////////////
 	int printTopMenu();

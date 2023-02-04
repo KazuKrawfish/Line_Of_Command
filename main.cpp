@@ -59,15 +59,12 @@ int initializeTextureArray(std::string directory, const std::vector <std::string
 	return 0;
 }
 
-int buildThread (sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
-	std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputMusicArray,
-	std::vector <sf::Texture>* factionButtonTextureArray, std::string inputConfigFileName, std::string inputMapListName, std::vector <sf::Sound>* inputSoundEffects,
-	std::vector <sf::Texture>* statusTextures)
+//Need to make custom constructors for NULL window for each of these items.
+int buildThread (std::string inputConfigFileName, std::string inputMapListName)
 {
-	mainMenu MainMenu(myWindow, gameTexture, cour, topMenuButtonTextureArray, inputGameMenuButtonTextureArray, inputOtherTextureArray, &(inputMusicArray[0]), factionButtonTextureArray, inputConfigFileName, inputMapListName);
-
-	inputLayer InputLayer(&MainMenu, myWindow, gameTexture, cour, inputSoundEffects, &MainMenu.gameMenuButtons, statusTextures, &(inputMusicArray[0]));
-	MasterBoard GameBoard(gameTexture);
+	mainMenu MainMenu(inputConfigFileName, inputMapListName);
+	inputLayer InputLayer(&MainMenu);
+	MasterBoard GameBoard(NULL);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);
 
@@ -120,7 +117,7 @@ int main()
 	sf::Color colorWhite;
 	//Determine size of desktop for window
 	sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
-	sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
+
 
 	//Load topMenuButton textures
 	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off", "top_Editor_Mode_On", "top_New_Campaign", "top_New_Skirmish", "top_Back", "top_Load_Campaign" };
@@ -225,20 +222,26 @@ int main()
 	//If battle lab is on, create threads to handle various maps.
 	if (mainBattleLabOn == true)
 	{
+		//Close window to prevent freezing
 		std::vector <std::thread> threadList; 
-
 
 		for (int i = 0; i < mapList.size(); i++)
 		{
-			threadList.push_back(std::thread(buildThread, &mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray,
-				&gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapList.at(i),
-				&soundEffects, &statusTexturesArray));
+			threadList.push_back(std::thread(buildThread, battleLabConfigFileName, mapList.at(i) ));
 			std::cout << "Thread created" << std::endl;
+		}
+
+		//Rejoin all threads before proceeding.
+		for (int i = 0; i < mapList.size(); i++)
+		{
+			threadList.at(i).join();
 		}
 
 	}
 	else //Otherwise proceed with just one set of instances 
 	{
+		sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
+
 		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);
 
 		inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, &MainMenu.gameMenuButtons, &statusTexturesArray, &(gameMusicArray[0]));
@@ -247,6 +250,9 @@ int main()
 		MainMenu.introScreen(&GameBoard, &InputLayer);
 	}
 
+
+	std::cout << "Complete" << std::endl;
+	return 0;
 }
 
 

@@ -16,8 +16,11 @@ int Cursor::initialize(sf::Texture* inputTexture, MasterBoard* inputBoardToPlay)
 	
 	//Basic image init below
 	//This is the cursor image, it should never change.
-	mySprite.setTexture(*inputTexture);
-	mySprite.setTextureRect(rectArray[0][2]);
+	if (inputTexture != NULL)
+	{
+		mySprite.setTexture(*inputTexture);
+		mySprite.setTextureRect(rectArray[0][2]);
+	}
 
 	return 0;
 }

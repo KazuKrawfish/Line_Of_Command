@@ -45,8 +45,11 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
     stealthMode = false;
 	
     myTexture = inputTexture;
-	mySprite.setTexture(*myTexture);
-	mySprite.setTextureRect(rectArray[0][4]);
+	if (myTexture != NULL)
+	{
+		mySprite.setTexture(*myTexture);
+		mySprite.setTextureRect(rectArray[0][4]);
+	}
 	//Basic image init end
 
 	truePathMap.resize(Environment->BOARD_WIDTH + 1);

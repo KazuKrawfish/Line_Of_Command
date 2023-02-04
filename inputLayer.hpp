@@ -35,6 +35,7 @@ public:
 	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
 		sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures,
 		sf::Music * inputGameMusic);
+	inputLayer(mainMenu* inputMainMenu);	//Battlelab constructor
 
 	//Print Functions:///////////////////////////////////////////////////////
 	//Non-game play
@@ -94,7 +95,7 @@ public:
 	specialKey minionVisibleStatus = showMinions;
 	rangeVisibleStatus showRangeStatus = hideRange;
 	bool capsLockOn = false;
-	mainMenu* MainMenu;
+	mainMenu* MainMenu = NULL;
 
 
 	//MenuCrawlerObjects /////////////////////////
@@ -117,12 +118,12 @@ public:
 
 	//SFML Objects		/////////////////////////
 	std::vector <sf::Sound>* soundEffects;
-	 sf::Music* gameMusic;
+	 sf::Music* gameMusic = NULL;
 	bool soundsOn = false;
 	int speedFactor = 1;		//1 is normal. 3 is "high". 10 is ultra fast.
-	sf::Texture* inputLayerTexture;
-	sf::Font* inputLayerFont;
-	sf::RenderWindow* inputLayerWindow;
+	sf::Texture* inputLayerTexture = NULL;
+	sf::Font* inputLayerFont = NULL;
+	sf::RenderWindow* inputLayerWindow = NULL;
 	int menuLineTracker = 1;	//Starts at offset of one.
 
 	//Offsets in pixel values for fullscreen

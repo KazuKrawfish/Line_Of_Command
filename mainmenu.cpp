@@ -276,6 +276,25 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	otherGameTextures = inputOtherTextureArray;
 }
 
+mainMenu::mainMenu(std::string inputConfigFileName, std::string inputMapName)
+{
+	battleLabScenarioName = inputMapName;
+	battleLabConfigFileName = inputConfigFileName;
+
+	myTexture = NULL;
+	musicArray = NULL;
+	myFont = NULL;
+	mywindow = NULL;
+
+	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
+
+	//Determine offsets for mainmenu AND for inputLayer
+
+	std::cout << "Window width is unknown" << std::endl;
+	std::cout << "Window height is unknown" << std::endl;
+
+
+}
 
 
 //Gameplay note:
@@ -758,6 +777,7 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	{
 		std::cout << "Running Battle Lab" << std::endl;
 		runBattleLab(boardToPlay, InputLayer, &battleLabConfigFile);
+		return 0;
 	}
 	//END_BATTLELAB
 
@@ -907,6 +927,12 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		//After loading scenario for this iteration, play game.
 		playGame(boardToPlay, InputLayer);
 
+		if (battleLabWinningPlayer == 1)
+			battleLabnumberPlayerOneWins++;
+		else if (battleLabWinningPlayer == 2)
+			battleLabnumberPlayerTwoWins++;
+		else battleLabNumberDraws++;
+
 		//Put out status
 		outputFile << "********** Completed game number: " << i << " ****************" << std::endl;
 		outputFile << "Winner: Player " << battleLabWinningPlayer << std::endl;
@@ -990,8 +1016,11 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		else
 			if (menuStatus == playingMap)
 			{
-				if(musicArray[0].getStatus() == sf::SoundSource::Playing)
-					musicArray[0].stop();
+				if (musicArray != NULL)
+				{
+					if (musicArray[0].getStatus() == sf::SoundSource::Playing)
+						musicArray[0].stop();
+				}
 
 				//Only call upkeep before play commences if it is a new game AND very first turn
 				//And not compie. Compie performs upkeep in its own function.

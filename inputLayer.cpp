@@ -166,6 +166,11 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	return;
 }
 
+inputLayer::inputLayer(mainMenu* inputMainMenu) 
+{
+	MainMenu = inputMainMenu;
+}	
+
 int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actualY, MasterBoard* boardToPrint, int playerNumber, bool withinAnimation)
 {
 	tile* tileToPrint = &boardToPrint->Board[actualX][actualY];
@@ -1314,7 +1319,7 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToMove, int locationX, int locationY)
 {
 	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-	if (observerNumber == -1)
+	if (observerNumber == -1 || inputLayerTexture == NULL)
 		return -1;
 
 	//Sound effects
@@ -1376,7 +1381,8 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 int inputLayer::combatGraphics(MasterBoard* boardToPrint, int observerNumber, tile* tileAttacking, tile* tileBeingAttacked, bool splashGraphicsOn)
 {
 	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-	if (observerNumber == -1)
+	//If input layer texture is NULL, skip graphics.
+	if (observerNumber == -1 || inputLayerTexture == NULL)
 		return -1;
 
 	if (tileAttacking == NULL || tileBeingAttacked == NULL)
@@ -1556,7 +1562,7 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 	tile* myTile = &boardToPrint->Board[locationX][locationY];
 
 	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-	if (observerNumber == -1)
+	if (observerNumber == -1 || inputLayerTexture == NULL)
 		return -1;
 
 	if (minionToCapture == NULL)
@@ -1630,6 +1636,10 @@ int inputLayer::captureGraphics(MasterBoard* boardToPrint, int observerNumber, M
 
 int inputLayer::supplyGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToSupply, int locationX, int locationY)
 {
+	if (inputLayerTexture == NULL)
+		return 1;
+
+
 	//Should be checking for bad locX but will add later
 	tile* myTile = &boardToPrint->Board[locationX][locationY];
 
@@ -1712,7 +1722,7 @@ int inputLayer::trapGraphics(MasterBoard* boardToPrint, int observerNumber, Mini
 	tile* myTile = &boardToPrint->Board[locationX][locationY];
 
 	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-	if (observerNumber == -1)
+	if (observerNumber == -1 || inputLayerTexture == NULL)
 		return -1;
 
 	if (minionTrapped == NULL)
@@ -1781,7 +1791,7 @@ int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 	tile* myTile = &boardToPrint->Board[locationX][locationY];
 
 	//-1 Observer indicates this is compie playing, during non-single player, so we do not print any graphics.
-	if (observerNumber == -1)
+	if (observerNumber == -1 || inputLayerTexture == NULL)
 		return -1;
 
 	if (minionToSupply == NULL)
