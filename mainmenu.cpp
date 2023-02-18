@@ -748,7 +748,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 		for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 		{
 			if (boardToPrint->playerRoster[i].playerType == computerPlayer)
-				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPrint, variableRepairThreshold);
+				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPrint, -1, -1, -1, -1, -1);	//Use default behaviors
 		}
 	}
 
@@ -892,26 +892,39 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 			}
 		}
 
-		//Change repair threshold for each run.
-		if(variableRepairThreshold <= 80)
-			variableRepairThreshold += 10;
-
 		//Actually load scenario. Initialize board, etc.
 		gameLoad(boardToPlay, InputLayer, &newGameMap);
 		newGameMap.close();
 
 		//Initialize compies if not done by gameLoad (They were initialized if it is a mission or a savegame)
+		int variableRepairThreshold = 40;				//10-90 represents when a minion will attempt to repair, on a 100 hp scale. 40 gives best behavior so far.
+		int variableMinionAggressionBonus = 0;			//Intended range is -20 - 20 for reasonable behavior. Allows compie minions to attack even when the odds are against them.
+		int variableInfantryAttackBonus = 2;			//Intended range is 1-3 for reasonable behavior. Makes attacking infantry more attractive - would be difficult to attack them with expensive minions otherwise
+		int variableInfantryBaseline = 5;				//No idea what a reasonable range is, probably between 0 - 10. Describes min. number of infantry required in army.
+		int variableArmySizeFactor = 4;					//Reasonable range is 1 - 8. 1 makes larger armies, 8 smaller.
 		
+		outputFile << "********** Starting game number: " << i << " ****************" << std::endl;
+
 		if (boardToPlay->missionFlag == false)
 		{
 			computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
 			for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 			{
-				int controlledRepairThreshold = 50;
+				//Randomize input values
+				//variableRepairThreshold = 10 + rand() % 81;
+				//variableMinionAggressionBonus = -20 + rand() % 41;
+				//variableInfantryAttackBonus = 1 + rand() % 3;
+				//variableInfantryBaseline = rand() % 11;
+				variableArmySizeFactor = 1 + rand() % 8;
+							   			
+				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, variableRepairThreshold, variableMinionAggressionBonus,
+					variableInfantryAttackBonus, variableInfantryBaseline, variableArmySizeFactor);
 
-				if(i == 2)
-					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay , controlledRepairThreshold );
-				else computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, variableRepairThreshold);
+				outputFile << "Repair threshold for player " << i << ": "<< variableRepairThreshold << std::endl;
+				outputFile << "Aggression bonus for player " << i << ": " << variableMinionAggressionBonus << std::endl;
+				outputFile << "Willingness to attack infantry for player " << i << ": " << variableInfantryAttackBonus << std::endl;
+				outputFile << "Infantry component size for player " << i << ": " << variableInfantryBaseline << std::endl;
+				outputFile << "Army size factor for player " << i << ": " << variableArmySizeFactor << std::endl;
 			}
 		}
 
@@ -937,7 +950,6 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		outputFile << "********** Completed game number: " << i << " ****************" << std::endl;
 		outputFile << "Winner: Player " << battleLabWinningPlayer << std::endl;
 		outputFile << "Number of turns in this game: " << gameTurn << std::endl;
-		outputFile << "Repair threshold for player 1: " << variableRepairThreshold << std::endl;
 		outputFile << "\tPlayer 1 wins: " << battleLabnumberPlayerOneWins << std::endl;
 		outputFile << "\tPlayer 2 wins: " << battleLabnumberPlayerTwoWins << std::endl;
 		outputFile << "\tNumber of draws: " << battleLabNumberDraws << std::endl << std::endl << std::endl;
@@ -1427,7 +1439,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	//Resize computer Roster for easy access.
 	computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
 
-	if (gameType == localSkirmish) //Campaign map sticks to names supplied
+	if (gameType == localSkirmish) //Campaign map sticks to names and values supplied
 	{
 		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 		{
@@ -1469,7 +1481,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 					else if (playerTypeInput == 'c')
 					{
 						boardToPlay->playerRoster[i].playerType = computerPlayer;
-						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, variableRepairThreshold);
+						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, -1, -1, -1, -1, -1);	//Use default behaviors
 					}
 					playerTypeDecided = true;
 				}

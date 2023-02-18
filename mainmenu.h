@@ -111,8 +111,6 @@ public:
 	int battleLabTurnLimit = 0;
 	int battleLabWinningPlayer = 0;
 	int runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile);
-
-	int variableRepairThreshold = 0;
 	//Battle Lab/////////////////////////////////
 
 };

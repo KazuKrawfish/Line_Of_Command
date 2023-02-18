@@ -87,10 +87,11 @@ int compie::statusUpdate(MasterBoard* boardToUse)
 		}
 	}
 
+	//More factories means larger more infantry heavy army
 	double armamentFactor = totalFactoriesCompieOwns / totalPropertiesCompieOwns;
 	for (unsigned int i = 1; i < compieLandMassMap.roster.size(); i++)
 	{
-		compieLandMassMap.roster[i].infantryMaxHere = armamentFactor * compieLandMassMap.roster[i].maxArmySize + totalFactoriesCompieOwns + 1;
+		compieLandMassMap.roster[i].infantryMaxHere = armamentFactor * compieLandMassMap.roster[i].maxArmySize + compieInfantryBaseline;
 	}
 
 	return 0;
@@ -391,10 +392,11 @@ int compie::analyzeMap(MasterBoard* boardToUse)
 
 	for (unsigned int y = 1; y < compieLandMassMap.roster.size(); y++)
 	{
-		///(6 == 2*2) <-- 2: Half of landMass belongs to compie, 2: To provide room for maneuver and repair
+		///Baseline for compieArmySizeFactor: (4 == 2*2) <-- 2: Half of landMass belongs to compie, 2: To provide room for maneuver and repair
 		double normalizedArea = compieLandMassMap.roster[y].totalLandSquareCount * compieLandMassMap.roster[y].landinessFactor;
-		compieLandMassMap.roster[y].maxArmySize = normalizedArea * compieLandMassMap.roster[y].edginessFactor / (4) + 2;
+		compieLandMassMap.roster[y].maxArmySize = normalizedArea * compieLandMassMap.roster[y].edginessFactor / (compieArmySizeFactor) + 2;
 
+		//Minimum army size per landmass
 		if (compieLandMassMap.roster[y].maxArmySize < 4)
 		{
 			compieLandMassMap.roster[y].maxArmySize = 4;
@@ -571,16 +573,26 @@ compie::compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInp
 	return;
 }
 
-int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse, int inputRepairThreshold)
+int compie::initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse, int inputRepairThreshold,
+	int inputMinionAggressionBonus , int inputInfantryAttackBonus, int inputInfantryBaseline, int inputArmySizeFactor)
 {
 	InputLayer = providedInputLayer;
 	menuPointer = inputMenu;
 	compiePlayerFlag = inputPlayerFlag;
 	compieMinionRoster.resize(GLOBALSUPPLYCAP);
 
-	//Battlelab input
-	repairThreshold = inputRepairThreshold;
-
+	//Battlelab inputs
+	//Only gets used if not -1. -1 indicates to use defaults.
+	if(inputRepairThreshold != -1)
+		repairThreshold = inputRepairThreshold;
+	if (inputMinionAggressionBonus != -1)
+		compieMinionAggressionBonus = inputMinionAggressionBonus;
+	if (inputInfantryAttackBonus != -1)
+		compieInfantryAttackBonus = inputInfantryAttackBonus;
+	if (inputInfantryBaseline != -1)
+		compieInfantryBaseline = inputInfantryBaseline;
+	if (inputArmySizeFactor != -1)
+		compieArmySizeFactor = inputArmySizeFactor;
 
 
 	compieLandMassMap.grid.clear();
@@ -1248,7 +1260,7 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 	//For infantry, double the defenderCost to double overall score for damage dealt to it.
 	if (boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Infantry" || boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Specialist"
 		|| boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Cavalry" || boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Insurgent")
-		defenderCost *= 2;
+		defenderCost *= compieInfantryAttackBonus;
 
 
 
@@ -1268,7 +1280,7 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 		defenderCounterAttackDamageDealt = 0;
 
 	//This is the potential "value added" from combat, based on what we might lose vs gain.
-	double newRelativeSuitabilityScore = ((attackerDamageDealt * defenderCost) - (defenderCounterAttackDamageDealt * attackerCost)) / 100;
+	double newRelativeSuitabilityScore = ((attackerDamageDealt * defenderCost ) + compieMinionAggressionBonus - (defenderCounterAttackDamageDealt * attackerCost)) / 100;
 
 	//If it's a better score, switch targets.
 	if (newRelativeSuitabilityScore > * relativeSuitabilityScore)
@@ -2114,12 +2126,6 @@ int compie::determineProduction(MasterBoard* boardToUse)
 		{
 			//First determine "surplus" treasury, which accounts for at least purchasing an infantry at every possible factory.
 			int availableTreasury = boardToUse->playerRoster[boardToUse->playerFlag].treasury + 1000 - totalFactoriesLeft * 1000;
-
-			//This can be tweaked. 
-			//If game turn is after turn 2, we do not need as many infantry, so we we set availableTreasury to arbitrarily large
-			//Every  factory amount will be "enough"
-			if (menuPointer->gameTurn > 2)
-				availableTreasury += 100000;
 
 			bool minionPurchased = false;
 
