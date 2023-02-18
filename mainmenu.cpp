@@ -53,7 +53,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 
 	sf::Text announceText(AnnouncementString, *inputFont, menuTextSize);
 	announceText.setFillColor(sf::Color::Black);
-	announceText.setPosition(300, 200);
+	announceText.setPosition(MM_WIDTH_OFFSET + 300, MM_HEIGHT_OFFSET + 200);
 	myWindow->draw(announceText);
 
 	myWindow->display();
@@ -66,7 +66,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 
 			inputString += event.text.unicode;
 			sf::Text inputText(inputString, *inputFont, menuTextSize);
-			inputText.setPosition(300, (menuTextSize + 10) * (LineNumber)+200);	//Position for strings for announcements and such
+			inputText.setPosition( MM_WIDTH_OFFSET + 300, MM_HEIGHT_OFFSET + (menuTextSize + 10) * (LineNumber)+200);	//Position for strings for announcements and such
 			inputText.setFillColor(sf::Color::Black);
 
 			myWindow->clear();
@@ -141,8 +141,10 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	std::cout << "Window width is: " << windowSize.x << std::endl;
 	std::cout << "Window height is: " << windowSize.y << std::endl;
 	
-	MM_WIDTH_OFFSET = (windowSize.x - MAX_WINDOW_WIDTH * 50) / 2;
-	MM_HEIGHT_OFFSET = (windowSize.y - MAX_WINDOW_HEIGHT * 50) / 2;
+	//Actually needs to be based off the various briefing backgrounds and such, not the game board itself.
+	MM_WIDTH_OFFSET = (windowSize.x - inputOtherTextureArray->at(5).getSize().x ) / 2;
+	MM_HEIGHT_OFFSET = (windowSize.y - inputOtherTextureArray->at(5).getSize().y) / 2;
+	//MM_HEIGHT_OFFSET = (windowSize.y - MAX_WINDOW_HEIGHT * 50) / 2;
 
 
 	//Game menu buttons ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1156,7 +1158,7 @@ int mainMenu::printTopMenu()
 
 	sf::Sprite topMenuWallpaperSprite;
 	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
-	topMenuWallpaperSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+	
 
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(otherGameTextures->at(3));
@@ -1211,7 +1213,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	//First draw out buttons, then take in input from mouse.
 	sf::Sprite topMenuWallpaperSprite;
 	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
-	topMenuWallpaperSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+	
 
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(otherGameTextures->at(3));
@@ -1254,6 +1256,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				sf::Sprite backgroundSprite;
 				backgroundSprite.setTexture(otherGameTextures->at(6));
+				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 				mywindow->draw(backgroundSprite);
 
 				nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
@@ -1273,11 +1276,12 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				sf::Sprite backgroundSprite;
 				backgroundSprite.setTexture(otherGameTextures->at(6));
+				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 				mywindow->draw(backgroundSprite);
 
 				nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
 				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-				newText.setPosition(430 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
+				newText.setPosition(300 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 
 				mywindow->draw(newText);
@@ -1325,6 +1329,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				sf::Sprite backgroundSprite;
 				backgroundSprite.setTexture(otherGameTextures->at(6));
+				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 				mywindow->draw(backgroundSprite);
 
 				anotherTopMenuNewString = "Successfully loaded. Press any key to continue.\n";
@@ -1390,6 +1395,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				sf::Sprite backgroundSprite;
 				backgroundSprite.setTexture(otherGameTextures->at(6));
+				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 				mywindow->draw(backgroundSprite);
 
 				sf::Text newText(CampaignBriefing, *myFont, menuTextSize);
@@ -1445,7 +1451,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		{
 			mywindow->clear();
 			char buffer[100];
-			snprintf(buffer, 100, "Input Player %d's name: \n", i);
+			snprintf(buffer, 300, "Input Player %d's name: \n", i);
 			sf::String announceString = buffer;
 			inputName = playerInputString(mywindow, myFont, announceString, 1, "new");
 
@@ -1457,13 +1463,14 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				char playerTypeInput = ' ';
 				topMenuNewString = "Is this player human (h) or computer (c)? \n";
 				sf::Text anotherText(topMenuNewString, *myFont, menuTextSize);
-				anotherText.setPosition(300, 200);
+				anotherText.setPosition(MM_WIDTH_OFFSET + 300, MM_HEIGHT_OFFSET + 200);
 				anotherText.setFillColor(sf::Color::Black);
 
 				mywindow->clear();
 
 				sf::Sprite backgroundSprite;
 				backgroundSprite.setTexture(otherGameTextures->at(6));
+				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 
 				mywindow->draw(backgroundSprite);
 				mywindow->draw(anotherText);
@@ -1501,6 +1508,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				sf::Sprite backgroundSprite;
 				backgroundSprite.setTexture(otherGameTextures->at(6));
+				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 
 				mywindow->draw(backgroundSprite);
 				mywindow->draw(factionChooseText);
@@ -1613,6 +1621,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 			sf::Sprite backgroundSprite;
 			backgroundSprite.setTexture(otherGameTextures->at(5));
+			backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 
 			mywindow->draw(backgroundSprite);
 			mywindow->draw(newText);

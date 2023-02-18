@@ -770,14 +770,14 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			//Then print out actual values of ammo
 			sf::String ammoNumberString = pointerToPrint;
 			sf::Text ammoNumberText(ammoNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80 + IL_WIDTH_OFFSET, statusButtons.at(5).yCoord + 15 + IL_HEIGHT_OFFSET);
+			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80 , statusButtons.at(5).yCoord + 15 );
 			ammoNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(ammoNumberText);
 
 			//Print move state of minion
 			sf::Sprite effectsSprite;
 			effectsSprite.setTexture(*inputLayerTexture);
-			effectsSprite.setPosition(statusButtons.at(6).xCoord + 35 + IL_WIDTH_OFFSET, statusButtons.at(6).yCoord + 10 + IL_HEIGHT_OFFSET);
+			effectsSprite.setPosition(statusButtons.at(6).xCoord + 35 , statusButtons.at(6).yCoord + 10 );
 			if (currentMinion->status == gaveupmovehasntfired)
 			{
 				//Print yellow pause image
@@ -830,7 +830,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 		snprintf(pointerToPrint, 100, "%d", int(round((currentTile->defenseFactor - 1.0) * 10)));
 		sf::String defenseBonusNumber = pointerToPrint;
 		sf::Text defenseBonusText(defenseBonusNumber, *inputLayerFont, MainMenu->menuTextSize + 6);
-		defenseBonusText.setPosition(statusButtons.at(0).xCoord + 80 + IL_WIDTH_OFFSET,  statusButtons.at(0).yCoord + 18 + IL_HEIGHT_OFFSET);
+		defenseBonusText.setPosition(statusButtons.at(0).xCoord + 80 ,  statusButtons.at(0).yCoord + 18 );
 		defenseBonusText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(defenseBonusText);
 
@@ -842,7 +842,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			snprintf(pointerToPrint, 100, "%d", currentTile->production);
 			sf::String productionNumberString = pointerToPrint;
 			sf::Text productionNumberText(productionNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			productionNumberText.setPosition(statusButtons.at(1).xCoord + 70 + IL_WIDTH_OFFSET, statusButtons.at(1).yCoord + 23 + IL_HEIGHT_OFFSET) ; 
+			productionNumberText.setPosition(statusButtons.at(1).xCoord + 70 , statusButtons.at(1).yCoord + 23 ) ; 
 			productionNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(productionNumberText);
 		}
@@ -1196,7 +1196,7 @@ int inputLayer::printInsertTile(MasterBoard* boardToPrint)
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
-	newText.setPosition(MAX_WINDOW_WIDTH * 52, menuLineTracker * MainMenu->menuTextSize);
+	newText.setPosition(MAX_WINDOW_WIDTH * 52 + IL_WIDTH_OFFSET , menuLineTracker * MainMenu->menuTextSize + IL_HEIGHT_OFFSET);
 
 	newText.setFillColor(sf::Color::Black);
 
@@ -1238,7 +1238,7 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	boardMessage += "\n\nPress any key to continue.";
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-	newText.setPosition(250, 200);
+	newText.setPosition(IL_WIDTH_OFFSET + 250, IL_HEIGHT_OFFSET + 200);
 	newText.setFillColor(sf::Color::Black);
 
 	inputLayerWindow->draw(newText);
@@ -1305,7 +1305,7 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 		sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
 		announceString += "'s turn. Press any key to begin.  \n";
 		sf::Text newText(announceString, *inputLayerFont, 20);
-		newText.setPosition(300, 200);
+		newText.setPosition(IL_WIDTH_OFFSET + 100, IL_HEIGHT_OFFSET + 200);
 		newText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(newText);
 		inputLayerWindow->display();
@@ -2823,7 +2823,7 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 	victoryMessage += " was victorious! Press any key to continue.  \n";
 
 	sf::Text victoryText(victoryMessage, *inputLayerFont, MainMenu->menuTextSize + 5);
-	victoryText.setPosition(380, 100);
+	victoryText.setPosition(IL_WIDTH_OFFSET + 380, IL_HEIGHT_OFFSET + 100);
 	victoryText.setFillColor(sf::Color::Black);
 	MainMenu->mywindow->draw(victoryText);
 	inputLayerWindow->display();
@@ -2885,7 +2885,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			sf::String successSave = "Game saved. Press any key to continue.\n";
 			sf::Text newText(successSave, *inputLayerFont, MainMenu->menuTextSize);
 			newText.setFillColor(sf::Color::Black);
-			newText.setPosition(300, 200);
+			newText.setPosition(IL_WIDTH_OFFSET + 100, IL_HEIGHT_OFFSET + 200);
 			inputLayerWindow->draw(newText);
 			inputLayerWindow->display();
 
@@ -2929,7 +2929,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 					inputLayerWindow->draw(backgroundSprite);
 
 					sf::Text newText(successful, *inputLayerFont, MainMenu->menuTextSize);
-					newText.setPosition(300, 200);
+					newText.setPosition(IL_WIDTH_OFFSET + 100, IL_HEIGHT_OFFSET + 200);
 					newText.setFillColor(sf::Color::Black);
 					inputLayerWindow->draw(newText);
 					inputLayerWindow->display();
