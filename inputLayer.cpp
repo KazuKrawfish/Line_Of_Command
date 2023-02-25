@@ -25,11 +25,12 @@ when necessary, ie. when game ends or player wants to leave the current game.
 char getValidPlayerInput(sf::RenderWindow* myWindow);
 
 inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
-	sf::Font* cour, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons,
+	sf::Font* inputFont, sf::Font* inputBoldFont, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons,
 	std::vector <sf::Texture>* statusTextures,  sf::Music * inputGameMusic)
 {
 	inputLayerTexture = gameTexture;
-	inputLayerFont = cour;
+	inputLayerFont = inputFont;
+	inputLayerBoldFont = inputBoldFont;
 	inputLayerWindow = myWindow;
 	MainMenu = inputMainMenu;
 	soundEffects = inputSoundEffects;
@@ -570,7 +571,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(0):
 	{
 		//Print defense explain:
-		sf::String defenseExplainString = "Each tile provides a defense bonus from 0 to 5.\nEach point reduces damage by 5 % in combat.";
+		sf::String defenseExplainString = "Each tile provides a defense bonus from\n0 to 5. Each point reduces damage by\n5 % in combat.";
 		sf::Text defenseExplainText(defenseExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		defenseExplainText.setPosition(explainTextPositionX , explainTextPositionY);
 		defenseExplainText.setFillColor(sf::Color::Black);
@@ -580,7 +581,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(1):
 	{
 		//Print production explain:
-		sf::String productionExplainString = "Friendly properties produce gold to support the\nwar effort. Most produce 1000 per turn, but some\nproduce more.";
+		sf::String productionExplainString = "Friendly properties produce gold to\nsupport the war effort. Most produce\n1000 per turn, but some produce more.";
 		sf::Text productionExplainText(productionExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		productionExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		productionExplainText.setFillColor(sf::Color::Black);
@@ -590,7 +591,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(2):
 	{
 		//Print capture explain:
-		sf::String capExplainString = "Capture points. Infantry and technicals can capture\nenemy properties at 1 point per health per turn.\n20 points are needed to capture a property.";
+		sf::String capExplainString = "Capture points. Infantry and technicals\ncan capture enemy properties at 1 point\nper health per turn. 20 points\nare needed to capture a property.";
 		sf::Text capExplainText(capExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		capExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		capExplainText.setFillColor(sf::Color::Black);
@@ -600,7 +601,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(3):
 	{
 		//Print health explain:
-		sf::String healthExplainString = "Minion hit points. All minions start with 100 and\ndie at 0. Minions repair 20 hit points per turn on\na friendly property. Attack and capture is\nproportional to hit points.";
+		sf::String healthExplainString = "Minion hit points. All minions start with\n100 and die at 0. Minions repair 20\nhit points per turn on a friendly property.\nAttack and capture is proportional to hit\npoints.";
 		sf::Text healthExplainText(healthExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		healthExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		healthExplainText.setFillColor(sf::Color::Black);
@@ -610,7 +611,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(4):
 	{
 		//Print movement/fuel explain:
-		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use fuel based\non their type and the terrain they cross. Also, aircraft\nuse 5 fuel and ships use 2 fuel during upkeep.\nIf they run out, they die.";
+		sf::String fuelExplainString = "Fuel left and maximum fuel. Minions use\nfuel based on their type and the terrain\nthey cross. Also, aircraft use 5\nfuel and ships use 2 fuel during upkeep.\nIf they run out, they die.";
 		sf::Text fuelExplainText(fuelExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		fuelExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		fuelExplainText.setFillColor(sf::Color::Black);
@@ -620,7 +621,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(5):
 	{
 		//Print ammo explain:
-		sf::String ammoExplainString = "Minions require ammo to attack with each weapon.\nIndicates current and maximum ammo.\nPrimary ammo is on top, secondary ammo on bottom.\nINF indicates infinite ammo for that weapon.";
+		sf::String ammoExplainString = "Minions require ammo to attack with\neach weapon. Indicates current and\nmaximum ammo. Primary ammo is\non top, secondary ammo on bottom.\nINF indicates infinite ammo for\nthat weapon.";
 		sf::Text ammoExplainText(ammoExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		ammoExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		ammoExplainText.setFillColor(sf::Color::Black);
@@ -630,7 +631,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(6):
 	{
 		//Print move-state explain:
-		sf::String moveExplainString = "Green arrow - Can move and then attack/other action.\nYellow pause - Can now attack, unload, supply, etc.\nRed stop - Has performed all possible moves this turn.";
+		sf::String moveExplainString = "Green (Play) - Can move and then\nattack/other action.\nYellow (Pause) - Can now attack,\nunload, supply, etc.\nRed (Stop) - Has performed all\npossible moves this turn.";
 		sf::Text moveExplainText(moveExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		moveExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		moveExplainText.setFillColor(sf::Color::Black);
@@ -663,7 +664,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 	//Print current player, with treasury and potential event text.
 	sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
-	snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
+	snprintf(pointerToPrint, 100, "'s turn.\nTreasury: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	//snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	playerStatus += pointerToPrint;
 	playerStatus += &eventText[0];
@@ -722,7 +723,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 				//First draw box for capture status
 				snprintf(pointerToPrint, 100, "%d", currentTile->capturePoints);
 				sf::Text newText(pointerToPrint, *inputLayerFont, MainMenu->menuTextSize + 6);
-				newText.setPosition(statusButtons.at(2).xCoord + 78 + IL_WIDTH_OFFSET, statusButtons.at(2).yCoord + 18 + IL_HEIGHT_OFFSET);
+				newText.setPosition(statusButtons.at(2).xCoord + 78 , statusButtons.at(2).yCoord + 18 );
 				newText.setFillColor(sf::Color::Black);
 				inputLayerWindow->draw(newText);
 			}
@@ -741,7 +742,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			snprintf(pointerToPrint, 100, "%d", int(currentMinion->health));
 			sf::String healthNumberString = pointerToPrint;
 			sf::Text healthNumberText(healthNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			healthNumberText.setPosition(statusButtons.at(3).xCoord + 78, statusButtons.at(3).yCoord + 23);
+			healthNumberText.setPosition(statusButtons.at(3).xCoord + 75, statusButtons.at(3).yCoord + 23);
 			healthNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(healthNumberText);
 
@@ -749,8 +750,8 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			//Then print actual number
 			snprintf(pointerToPrint, 100, "%d/%d", currentMinion->currentFuel, currentMinion->maxFuel);
 			sf::String fuelNumberString = pointerToPrint;
-			sf::Text fuelNumberText(fuelNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			fuelNumberText.setPosition(statusButtons.at(4).xCoord + 70, statusButtons.at(4).yCoord + 23);
+			sf::Text fuelNumberText(fuelNumberString, *inputLayerFont, MainMenu->menuTextSize-2);
+			fuelNumberText.setPosition(statusButtons.at(4).xCoord + 50, statusButtons.at(4).yCoord + 23);
 			fuelNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(fuelNumberText);
 
@@ -770,14 +771,14 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			//Then print out actual values of ammo
 			sf::String ammoNumberString = pointerToPrint;
 			sf::Text ammoNumberText(ammoNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 80 , statusButtons.at(5).yCoord + 15 );
+			ammoNumberText.setPosition(statusButtons.at(5).xCoord + 70 , statusButtons.at(5).yCoord + 15 );
 			ammoNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(ammoNumberText);
 
 			//Print move state of minion
 			sf::Sprite effectsSprite;
 			effectsSprite.setTexture(*inputLayerTexture);
-			effectsSprite.setPosition(statusButtons.at(6).xCoord + 35 , statusButtons.at(6).yCoord + 10 );
+			effectsSprite.setPosition(statusButtons.at(6).xCoord + 37 , statusButtons.at(6).yCoord + 10 );
 			if (currentMinion->status == gaveupmovehasntfired)
 			{
 				//Print yellow pause image
@@ -842,7 +843,7 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			snprintf(pointerToPrint, 100, "%d", currentTile->production);
 			sf::String productionNumberString = pointerToPrint;
 			sf::Text productionNumberText(productionNumberString, *inputLayerFont, MainMenu->menuTextSize);
-			productionNumberText.setPosition(statusButtons.at(1).xCoord + 70 , statusButtons.at(1).yCoord + 23 ) ; 
+			productionNumberText.setPosition(statusButtons.at(1).xCoord + 60 , statusButtons.at(1).yCoord + 23 ) ; 
 			productionNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(productionNumberText);
 		}
@@ -915,7 +916,7 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 	sf::Vector2i mousePosition = sf::Mouse::getPosition(*(inputLayerWindow));
 
 	//Create string, but do not yet print. Still need to add hovered minion name.
-	sf::String boardMessage = "Purchase minion (L-Click). Deselect (R-Click/T-Key)\n";
+	sf::String boardMessage = "Purchase minion (L). Deselect (R/T)\n";
 	char hoveredMinionName[100];
 	snprintf(hoveredMinionName, 100, " ");
 
@@ -1065,6 +1066,12 @@ int	inputLayer::printPropertyMenu(MasterBoard* boardToPrint)
 
 int inputLayer::printMenu(MasterBoard* boardToPrint)
 {
+	//Draw menu background
+	sf::Sprite gameMenuBox;
+	gameMenuBox.setTexture(MainMenu->otherGameTextures->at(13));
+	gameMenuBox.setPosition(menuButtons->at(0).xCoord - 50 , menuButtons->at(0).yCoord - 50);
+	inputLayerWindow->draw(gameMenuBox);
+
 
 	//Draw each button at its offset.
 	//Button must be active, so no sound means soundOn is not drawn
@@ -1220,10 +1227,16 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 
 	sf::String boardMessage;
 
+
 	sf::Sprite backgroundSprite;
-	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(9));
-	backgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
 	inputLayerWindow->draw(backgroundSprite);
+
+	sf::Sprite menuBackgroundSprite;
+	menuBackgroundSprite.setTexture(MainMenu->otherGameTextures->at(6));
+	menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+	inputLayerWindow->draw(menuBackgroundSprite);
+
 
 	if (boardToInput->missionFlag == true)
 	{
@@ -1238,7 +1251,7 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	boardMessage += "\n\nPress any key to continue.";
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-	newText.setPosition(IL_WIDTH_OFFSET + 250, IL_HEIGHT_OFFSET + 200);
+	newText.setPosition(IL_WIDTH_OFFSET + 70, IL_HEIGHT_OFFSET + 100);
 	newText.setFillColor(sf::Color::Black);
 
 	inputLayerWindow->draw(newText);
@@ -1298,14 +1311,25 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 		inputLayerWindow->clear();
 		
 		sf::Sprite backgroundSprite;
-		backgroundSprite.setTexture(MainMenu->otherGameTextures->at(8));
-		backgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+		backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
 		inputLayerWindow->draw(backgroundSprite);
+		
+		sf::Sprite menuBackgroundSprite;
+		menuBackgroundSprite.setTexture(MainMenu->otherGameTextures->at(8));
+		menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+		inputLayerWindow->draw(menuBackgroundSprite);
+			   
+		//Title text
+		sf::String titleString = "NEXT PLAYER";
+		sf::Text titleText(titleString, *inputLayerFont, 50);
+		titleText.setPosition(IL_WIDTH_OFFSET + 450, IL_HEIGHT_OFFSET + 70);
+		titleText.setFillColor(sf::Color::Black);
+		inputLayerWindow->draw(titleText);
 
 		sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
 		announceString += "'s turn. Press any key to begin.  \n";
 		sf::Text newText(announceString, *inputLayerFont, 20);
-		newText.setPosition(IL_WIDTH_OFFSET + 100, IL_HEIGHT_OFFSET + 200);
+		newText.setPosition(IL_WIDTH_OFFSET + 450, IL_HEIGHT_OFFSET + 200);
 		newText.setFillColor(sf::Color::Black);
 		inputLayerWindow->draw(newText);
 		inputLayerWindow->display();
@@ -2780,9 +2804,13 @@ int inputLayer::printPlayerDefeat(int playerDefeated, MasterBoard* boardToPrint)
 	sf::String boardMessage;
 
 	sf::Sprite backgroundSprite;
-	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
-	backgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
 	inputLayerWindow->draw(backgroundSprite);
+
+	sf::Sprite menuBackgroundSprite;
+	menuBackgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
+	menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+	inputLayerWindow->draw(menuBackgroundSprite);
 
 
 	sf::String defeatMessage = boardToPrint->playerRoster[playerDefeated].name;
@@ -2815,9 +2843,13 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 	}
 
 	sf::Sprite backgroundSprite;
-	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
-	backgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
 	inputLayerWindow->draw(backgroundSprite);
+
+	sf::Sprite menuBackgroundSprite;
+	menuBackgroundSprite.setTexture(MainMenu->otherGameTextures->at(10));
+	menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+	inputLayerWindow->draw(menuBackgroundSprite);
 
 	sf::String victoryMessage = boardToPrint->playerRoster[playerVictorious].name;
 	victoryMessage += " was victorious! Press any key to continue.  \n";
@@ -2867,7 +2899,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			int lineOffset = 1;
 			inputLayerWindow->clear();
 			sf::String savePrompt = "Choose a name to save your game.\n";
-			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset, "save");
+			sf::String saveGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, savePrompt, lineOffset, "save", 330);
 
 			std::string stdSaveGameName = ".\\savegames\\";
 			stdSaveGameName += saveGameName;
@@ -2878,9 +2910,13 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			inputLayerWindow->clear();
 
 			sf::Sprite backgroundSprite;
-			backgroundSprite.setTexture(MainMenu->otherGameTextures->at(7));
-			backgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+			backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
 			inputLayerWindow->draw(backgroundSprite);
+
+			sf::Sprite menuBackgroundSprite;
+			menuBackgroundSprite.setTexture(MainMenu->otherGameTextures->at(7));
+			menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+			inputLayerWindow->draw(menuBackgroundSprite);
 
 			sf::String successSave = "Game saved. Press any key to continue.\n";
 			sf::Text newText(successSave, *inputLayerFont, MainMenu->menuTextSize);
@@ -2914,7 +2950,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			{
 
 				sf::String loadPrompt = "Choose which save game to load (Case sensitive): \n";
-				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset, "load");
+				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset, "load", 150);
 				
 				std::string stdloadGameName = loadGameName;
 				loadGameSave.open(".\\savegames\\" + stdloadGameName + "_save.txt");
@@ -2924,9 +2960,13 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 					sf::String successful = "Successfully loaded! Press any key to continue.\n";
 
 					sf::Sprite backgroundSprite;
-					backgroundSprite.setTexture(MainMenu->otherGameTextures->at(5));
-					backgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+					backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
 					inputLayerWindow->draw(backgroundSprite);
+
+					sf::Sprite menuBackgroundSprite;
+					menuBackgroundSprite.setTexture(MainMenu->otherGameTextures->at(5));
+					menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+					inputLayerWindow->draw(menuBackgroundSprite);
 
 					sf::Text newText(successful, *inputLayerFont, MainMenu->menuTextSize);
 					newText.setPosition(IL_WIDTH_OFFSET + 100, IL_HEIGHT_OFFSET + 200);

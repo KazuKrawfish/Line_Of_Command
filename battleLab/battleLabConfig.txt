@@ -1,0 +1,8 @@
+runBattleLab_0_Off_1_On
+0
+Number_Of_Runs
+5
+TurnLimit
+40
+Output_Name
+multivariableTest2

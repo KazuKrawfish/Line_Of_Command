@@ -31,7 +31,7 @@ class mainMenu
 public:
 
 	//CONSTRUCTOR///////////////////////////////
-	mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
+	mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* inputFont, sf::Font* boldInputFont, std::vector <sf::Texture>* topMenuButtonTextureArray,
 				std::vector <sf::Texture>* gameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
 				std::vector <sf::Texture>* factionButtonTextureArray , std::string inputConfigFileName, std::string inputMapListName);
 	//CONSTRUCTOR///////////////////////////////
@@ -55,7 +55,7 @@ public:
 
 	//Other functions///////////////////////////
 	int printWaitingScreen();
-	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber, std::string backgroundType);
+	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber, std::string backgroundType, int offsetWidth);
 	//Other functions///////////////////////////
 
 	const int menuTextSize = 20;
@@ -99,6 +99,7 @@ public:
 	sf::RenderWindow* mywindow;
 	sf::Texture* myTexture;
 	sf::Font* myFont;
+	sf::Font* myBoldFont;
 	std::vector <sf::Texture>* otherGameTextures;
 	sf::Music* musicArray;
 	//SFML Objects///////////////////////////////

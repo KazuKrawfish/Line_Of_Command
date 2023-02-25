@@ -23,7 +23,7 @@ class MasterBoard;
 //Because we're having difficulty getting strings to work, we're leaving this for now.
 //Linenumber indicates offset for input field.
 //If you provide an announcement string with 2 lines, LineNumber should be 3.
-sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber, std::string backgroundType)
+sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber, std::string backgroundType, int offsetWidth)
 {
 	sf::String inputString = "";
 	sf::Event event;
@@ -32,28 +32,44 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 	myWindow->clear();
 
 	int boxType = 0;
+	sf::String titleString;
 	if (backgroundType == "load")
 	{
 		boxType = 5;
+		titleString = "LOAD GAME";
 	}
 	else if (backgroundType == "new")
 	{
 		boxType = 6;
+		titleString = "NEW GAME";
 	}
 	else if (backgroundType == "save")
 	{
 		boxType = 7;
+		titleString = "SAVE GAME";
 	}
 
-	//Load or new game box
+	//Keep top menu background
 	sf::Sprite backgroundSprite;
-	backgroundSprite.setTexture(otherGameTextures->at(boxType));
-	backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+	backgroundSprite.setTexture(otherGameTextures->at(1));
 	mywindow->draw(backgroundSprite);
 
+	//Load or new game box
+	sf::Sprite backgroundBoxSprite;
+	backgroundBoxSprite.setTexture(otherGameTextures->at(boxType));
+	backgroundBoxSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+	mywindow->draw(backgroundBoxSprite);
+
+	//Title text
+	sf::Text titleText(titleString, *inputFont, 50);
+	titleText.setPosition(MM_WIDTH_OFFSET + 470, MM_HEIGHT_OFFSET + 70);
+	titleText.setFillColor(sf::Color::Black);
+	myWindow->draw(titleText);
+
+	//Text filled by player
 	sf::Text announceText(AnnouncementString, *inputFont, menuTextSize);
 	announceText.setFillColor(sf::Color::Black);
-	announceText.setPosition(MM_WIDTH_OFFSET + 300, MM_HEIGHT_OFFSET + 200);
+	announceText.setPosition(MM_WIDTH_OFFSET + offsetWidth, MM_HEIGHT_OFFSET + 200);
 	myWindow->draw(announceText);
 
 	myWindow->display();
@@ -66,12 +82,14 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 
 			inputString += event.text.unicode;
 			sf::Text inputText(inputString, *inputFont, menuTextSize);
-			inputText.setPosition( MM_WIDTH_OFFSET + 300, MM_HEIGHT_OFFSET + (menuTextSize + 10) * (LineNumber)+200);	//Position for strings for announcements and such
+			inputText.setPosition( MM_WIDTH_OFFSET + offsetWidth, MM_HEIGHT_OFFSET + (menuTextSize + 10) * (LineNumber)+200);	//Position for strings for announcements and such
 			inputText.setFillColor(sf::Color::Black);
 
 			myWindow->clear();
 			mywindow->draw(backgroundSprite);
+			mywindow->draw(backgroundBoxSprite);
 			myWindow->draw(announceText);
+			myWindow->draw(titleText);
 			myWindow->draw(inputText);
 			myWindow->display();
 		}
@@ -123,7 +141,7 @@ char getValidPlayerInput(sf::RenderWindow* myWindow)
 	return inputChar;
 }
 
-mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* cour, std::vector <sf::Texture>* topMenuButtonTextureArray,
+mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* inputFont, sf::Font* boldInputFont, std::vector <sf::Texture>* topMenuButtonTextureArray,
 					std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
 					std::vector <sf::Texture>* factionButtonTextureArray , std::string inputConfigFileName, std::string inputMapName )
 {
@@ -132,7 +150,8 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 
 	myTexture = gameTexture;
 	musicArray = inputMusicArray;
-	myFont = cour;
+	myFont = inputFont;
+	myBoldFont = boldInputFont;
 	mywindow = myWindow;
 	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
 
@@ -793,7 +812,8 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 	mywindow->clear();
 
-	musicArray[0].play();
+	if(InputLayer->soundsOn == true)
+		musicArray[0].play();
 
 	mywindow->draw(startWallpaperSprite);
 	mywindow->draw(startScreenStatementSprite);
@@ -1165,11 +1185,17 @@ int mainMenu::printTopMenu()
 	topMenuSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 
 	mywindow->clear();
-
+	
 	mywindow->draw(topMenuWallpaperSprite);
 
 	topMenuSprite.setPosition(450 + MM_WIDTH_OFFSET, 150 + MM_HEIGHT_OFFSET);
 	mywindow->draw(topMenuSprite);
+
+	sf::String topmenuString = "MAIN MENU";
+	sf::Text topmenuText(topmenuString, *myBoldFont, menuTextSize + 5);
+	topmenuText.setPosition(520 + MM_WIDTH_OFFSET, 180 + MM_HEIGHT_OFFSET);
+	topmenuText.setFillColor(sf::Color::Black);
+	mywindow->draw(topmenuText);
 
 	//Draw three buttons for top menu
 	for (int i = 0; i < 2; i++)
@@ -1225,6 +1251,12 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	topMenuSprite.setPosition(450 + MM_WIDTH_OFFSET, 150 + MM_HEIGHT_OFFSET);
 	mywindow->draw(topMenuSprite);
 
+	sf::String topmenuString = "MAIN MENU";
+	sf::Text topmenuText(topmenuString, *myBoldFont, menuTextSize+5);
+	topmenuText.setPosition(520 + MM_WIDTH_OFFSET, 180 + MM_HEIGHT_OFFSET);
+	topmenuText.setFillColor(sf::Color::Black);
+	mywindow->draw(topmenuText);
+
 	//Draw two buttons for top menu new
 	for (int i = 4; i < 7; i++)
 	{
@@ -1255,13 +1287,17 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->clear();
 
 				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(otherGameTextures->at(6));
-				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				backgroundSprite.setTexture(otherGameTextures->at(1));
 				mywindow->draw(backgroundSprite);
+
+				sf::Sprite menuBackgroundSprite;
+				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				mywindow->draw(menuBackgroundSprite);
 
 				nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
 				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-				newText.setPosition(300 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
+				newText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 
 				mywindow->draw(newText);
@@ -1275,13 +1311,17 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->clear();
 
 				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(otherGameTextures->at(6));
-				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				backgroundSprite.setTexture(otherGameTextures->at(1));
 				mywindow->draw(backgroundSprite);
 
+				sf::Sprite menuBackgroundSprite;
+				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				mywindow->draw(menuBackgroundSprite);
+
 				nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
-				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-				newText.setPosition(300 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
+				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize+4);
+				newText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 
 				mywindow->draw(newText);
@@ -1318,7 +1358,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		{
 			mywindow->clear();
 			anotherTopMenuNewString += "Choose which scenario to load (Case sensitive): \n";
-			sf::String scenarioName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset, "new");
+			sf::String scenarioName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset, "new", 330);
 			sf::Event event;
 
 			std::string newScenario = scenarioName;
@@ -1328,13 +1368,17 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->clear();
 
 				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(otherGameTextures->at(6));
-				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				backgroundSprite.setTexture(otherGameTextures->at(1));
 				mywindow->draw(backgroundSprite);
+
+				sf::Sprite menuBackgroundSprite;
+				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				mywindow->draw(menuBackgroundSprite);
 
 				anotherTopMenuNewString = "Successfully loaded. Press any key to continue.\n";
 				sf::Text newText(anotherTopMenuNewString, *myFont, menuTextSize);
-				newText.setPosition(300 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
+				newText.setPosition(330 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 
 				mywindow->draw(newText);
@@ -1394,12 +1438,16 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->clear();
 
 				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(otherGameTextures->at(6));
-				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				backgroundSprite.setTexture(otherGameTextures->at(1));
 				mywindow->draw(backgroundSprite);
 
+				sf::Sprite menuBackgroundSprite;
+				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				mywindow->draw(menuBackgroundSprite);
+
 				sf::Text newText(CampaignBriefing, *myFont, menuTextSize);
-				newText.setPosition(200 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
+				newText.setPosition(60 + MM_WIDTH_OFFSET, 100 + MM_HEIGHT_OFFSET);
 				newText.setFillColor(sf::Color::Black);
 				mywindow->draw(newText);
 				mywindow->display();
@@ -1451,9 +1499,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		{
 			mywindow->clear();
 			char buffer[100];
-			snprintf(buffer, 300, "Input Player %d's name: \n", i);
+			snprintf(buffer, 330, "Input Player %d's name: \n", i);
 			sf::String announceString = buffer;
-			inputName = playerInputString(mywindow, myFont, announceString, 1, "new");
+			inputName = playerInputString(mywindow, myFont, announceString, 1, "new", 330);
 
 			boardToPlay->playerRoster[i].name = inputName;
 
@@ -1463,16 +1511,20 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				char playerTypeInput = ' ';
 				topMenuNewString = "Is this player human (h) or computer (c)? \n";
 				sf::Text anotherText(topMenuNewString, *myFont, menuTextSize);
-				anotherText.setPosition(MM_WIDTH_OFFSET + 300, MM_HEIGHT_OFFSET + 200);
+				anotherText.setPosition(MM_WIDTH_OFFSET + 330, MM_HEIGHT_OFFSET + 200);
 				anotherText.setFillColor(sf::Color::Black);
 
 				mywindow->clear();
 
 				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(otherGameTextures->at(6));
-				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
-
+				backgroundSprite.setTexture(otherGameTextures->at(1));
 				mywindow->draw(backgroundSprite);
+
+				sf::Sprite menuBackgroundSprite;
+				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				mywindow->draw(menuBackgroundSprite);
+
 				mywindow->draw(anotherText);
 
 				mywindow->display();
@@ -1507,10 +1559,14 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->clear();
 
 				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(otherGameTextures->at(6));
-				backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
-
+				backgroundSprite.setTexture(otherGameTextures->at(1));
 				mywindow->draw(backgroundSprite);
+
+				sf::Sprite menuBackgroundSprite;
+				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				mywindow->draw(menuBackgroundSprite);
+
 				mywindow->draw(factionChooseText);
 
 				for (int i = 0; i < factionChoiceButtons.size(); i++)
@@ -1551,7 +1607,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		mywindow->clear();
 		topMenuNewString = "Input Player 1's name: \n";
 
-		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1, "new");
+		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1, "new",400);
 		boardToPlay->playerRoster[1].name = inputName;
 
 	}
@@ -1605,7 +1661,7 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	{
 
 
-		sf::String scenarioName = playerInputString(mywindow, myFont, topMenuNewString, announcementLength, "load");
+		sf::String scenarioName = playerInputString(mywindow, myFont, topMenuNewString, announcementLength, "load", 150);
 		std::string saveToLoad = scenarioName;
 
 		saveToLoad += "_save.txt";
@@ -1617,13 +1673,18 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 
 			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
 			newText.setFillColor(sf::Color::Black);
-			newText.setPosition(300 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
+			newText.setPosition(330 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 
 			sf::Sprite backgroundSprite;
-			backgroundSprite.setTexture(otherGameTextures->at(5));
-			backgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
-
+			backgroundSprite.setTexture(otherGameTextures->at(1));
 			mywindow->draw(backgroundSprite);
+
+			sf::Sprite menuBackgroundSprite;
+			menuBackgroundSprite.setTexture(otherGameTextures->at(5));
+			menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+			mywindow->draw(menuBackgroundSprite);
+
+
 			mywindow->draw(newText);
 			mywindow->display();
 

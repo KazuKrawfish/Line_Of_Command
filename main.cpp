@@ -133,7 +133,8 @@ int main()
 
 	//Load other textures
 	std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox", "Sidebar", "loadGameBackground",
-		"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", "dialogBox" , "gameplayBackground" };
+		"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", "dialogBox" , "gameplayBackground",
+		"inGameMenu"};
 	std::vector <sf::Texture> otherTextureArray;
 	otherTextureArray.resize(otherImagesList.size());
 	initializeTextureArray("otherImages", otherImagesList, otherTextureArray);
@@ -188,6 +189,7 @@ int main()
 	}
 
 	sf::Font gameFont;
+	sf::Font boldGameFont;
 	//Load up image and use to initiate texture
 	//Also set white to transparent
 	if (!mainImage.loadFromFile("tilesAndUnits.png"))
@@ -214,7 +216,12 @@ int main()
 	mainImage.createMaskFromColor(colorWhite.White);
 	mainTexture.loadFromImage(mainImage);
 
-	if (!gameFont.loadFromFile("times.ttf"))
+	if (!gameFont.loadFromFile("Orbitron-Medium.ttf"))
+	{
+		std::cout << "Couldn't load fonts!" << std::endl;
+	}
+	
+	if (!boldGameFont.loadFromFile("Orbitron-Black.ttf"))
 	{
 		std::cout << "Couldn't load fonts!" << std::endl;
 	}
@@ -242,9 +249,9 @@ int main()
 	{
 		sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
 
-		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);
+		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &boldGameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);
 
-		inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &soundEffects, &MainMenu.gameMenuButtons, &statusTexturesArray, &(gameMusicArray[0]));
+		inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &boldGameFont, &soundEffects, & MainMenu.gameMenuButtons, & statusTexturesArray, & (gameMusicArray[0]));
 		MasterBoard GameBoard(&mainTexture);
 
 		MainMenu.introScreen(&GameBoard, &InputLayer);
