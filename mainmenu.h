@@ -102,6 +102,8 @@ public:
 	sf::Font* myBoldFont;
 	std::vector <sf::Texture>* otherGameTextures;
 	sf::Music* musicArray;
+	sf::Clock printTimer;
+	bool printSecond = false;
 	//SFML Objects///////////////////////////////
 
 	//Battle Lab/////////////////////////////////

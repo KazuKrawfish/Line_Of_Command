@@ -32,7 +32,7 @@ class inputLayer
 {
 public:
 
-	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
+	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Texture* secondGameTexture,
 		sf::Font* inputFont, sf::Font* inputBoldFont, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures,
 		sf::Music * inputGameMusic);
 	inputLayer(mainMenu* inputMainMenu);	//Battlelab constructor
@@ -122,6 +122,7 @@ public:
 	bool soundsOn = false;
 	int speedFactor = 1;		//1 is normal. 3 is "high". 10 is ultra fast.
 	sf::Texture* inputLayerTexture = NULL;
+	sf::Texture* secondInputLayerTexture = NULL;
 	sf::Font* inputLayerFont = NULL;
 	sf::Font* inputLayerBoldFont = NULL;
 	sf::RenderWindow* inputLayerWindow = NULL;

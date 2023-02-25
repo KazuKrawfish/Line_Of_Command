@@ -145,6 +145,8 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 					std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
 					std::vector <sf::Texture>* factionButtonTextureArray , std::string inputConfigFileName, std::string inputMapName )
 {
+	printTimer.restart();
+
 	battleLabScenarioName = inputMapName;
 	battleLabConfigFileName = inputConfigFileName;
 
@@ -1016,8 +1018,40 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		}
 		else
 		{
-			//Keep polling until a legit player input, not just mouse movement.
-			mywindow->waitEvent(playerInput);
+			//Keep polling until any player input, even if mouse movement
+			bool playerInputReceived = false;
+			while (playerInputReceived == false)
+			{
+				//See if player did an input
+				playerInputReceived = mywindow->pollEvent(playerInput);
+
+				//Only print repeatedly if actually playing the board
+				if(menuStatus == playingMap)
+				{
+					//Advance the printTimer and reset after 1 second of real life time
+					if (printTimer.getElapsedTime().asSeconds() > float(1))
+					{
+						printTimer.restart();
+
+						if (printSecond == true)
+							printSecond = false;
+						else printSecond = true;
+					}
+
+					//Wait 20 ms regardless of input received
+					if (playerInputReceived == false)
+					{
+						sf::Time smallWaitTime;
+						while (smallWaitTime.asMilliseconds() < 11)
+						{
+							smallWaitTime = printTimer.getElapsedTime();
+						}
+					}
+
+					InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
+				}	
+
+			}
 
 			if (playerInput.type == sf::Event::Closed)
 			{

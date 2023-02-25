@@ -64,7 +64,7 @@ int buildThread (std::string inputConfigFileName, std::string inputMapListName)
 {
 	mainMenu MainMenu(inputConfigFileName, inputMapListName);
 	inputLayer InputLayer(&MainMenu);
-	MasterBoard GameBoard(NULL);
+	MasterBoard GameBoard(NULL, NULL);
 
 	MainMenu.introScreen(&GameBoard, &InputLayer);
 
@@ -165,7 +165,9 @@ int main()
 	}
 
 	sf::Texture mainTexture;
+	sf::Texture secondMainTexture;
 	sf::Image mainImage;
+	sf::Image secondMainImage;
 
 	//Initialize Sounds Array
 	const int numberOfSoundEffects = 20;
@@ -197,6 +199,11 @@ int main()
 		std::cout << "Couldn't load image!" << std::endl;
 	}
 
+	if (!secondMainImage.loadFromFile("secondTilesAndUnits.png"))
+	{
+		std::cout << "Couldn't load image!" << std::endl;
+	}
+
 	//Init sound effect buffer and sound arrays
 	soundEffectBuffers.resize(soundEffectNames.size() + 1);
 	for (int i = 0; i < soundEffectNames.size(); i++)
@@ -215,6 +222,9 @@ int main()
 	//Transfer Images to Textures
 	mainImage.createMaskFromColor(colorWhite.White);
 	mainTexture.loadFromImage(mainImage);
+
+	secondMainImage.createMaskFromColor(colorWhite.White);
+	secondMainTexture.loadFromImage(secondMainImage);
 
 	if (!gameFont.loadFromFile("Orbitron-Medium.ttf"))
 	{
@@ -251,8 +261,8 @@ int main()
 
 		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &boldGameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);
 
-		inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &gameFont, &boldGameFont, &soundEffects, & MainMenu.gameMenuButtons, & statusTexturesArray, & (gameMusicArray[0]));
-		MasterBoard GameBoard(&mainTexture);
+		inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &secondMainTexture, &gameFont, &boldGameFont, &soundEffects, & MainMenu.gameMenuButtons, & statusTexturesArray, & (gameMusicArray[0]));
+		MasterBoard GameBoard(&mainTexture , &secondMainTexture);
 
 		MainMenu.introScreen(&GameBoard, &InputLayer);
 	}

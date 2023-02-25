@@ -25,6 +25,7 @@ Minion::Minion()
 
 	//Basic image init below
 	mySprite.setTextureRect(rectArray[0][4]);
+	mySecondSprite.setTextureRect(rectArray[0][4]);
 
 
 }
@@ -35,7 +36,7 @@ Minion::Minion()
 //This assumes that the transport already exists if the minion is being carried. Can cause NULL dereference!
 Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType, int inputTeam,
 	MasterBoard* Environment, int inputHealth, int inputVeterancy, int beingTransported, int inputFuel,
-	int inputPriAmmo, int inputSecAmmo, sf::Texture* inputTexture)
+	int inputPriAmmo, int inputSecAmmo, sf::Texture* inputTexture , sf::Texture* secondInputTexture)
 {
 	veterancy = inputVeterancy;
 	seniority = inputSeniority;
@@ -49,6 +50,13 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 	{
 		mySprite.setTexture(*myTexture);
 		mySprite.setTextureRect(rectArray[0][4]);
+	}
+
+	mySecondTexture = secondInputTexture;
+	if (secondInputTexture != NULL)
+	{
+		mySecondSprite.setTexture(*secondInputTexture);
+		mySecondSprite.setTextureRect(rectArray[0][4]);
 	}
 	//Basic image init end
 
@@ -96,6 +104,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = infantry;
         captureCapable = true;
 		mySprite.setTextureRect(rectArray[0][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[0][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -111,6 +120,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = infantry;
 		captureCapable = true;
 		mySprite.setTextureRect(rectArray[30][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[30][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 1;
 		maxSecAmmo = 0;
@@ -128,6 +138,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
         stealthMode = true;
 		
 		mySprite.setTextureRect(rectArray[29][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[29][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -143,6 +154,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = infantry;
         captureCapable = true;
 		mySprite.setTextureRect(rectArray[1][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[1][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
 		maxSecAmmo = 0;
@@ -160,6 +172,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		captureCapable = true;
 		mySprite.setTextureRect(rectArray[35][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[35][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -175,6 +188,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = normal;
 		mySprite.setTextureRect(rectArray[3][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[3][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -193,6 +207,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		
 		mySprite.setTextureRect(rectArray[27][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[27][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -211,6 +226,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		
 		mySprite.setTextureRect(rectArray[28][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[28][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
@@ -228,6 +244,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		minAttackRange = 1;
 		mySprite.setTextureRect(rectArray[7][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[7][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
@@ -246,6 +263,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		
 		mySprite.setTextureRect(rectArray[6][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[6][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 6;
 		maxSecAmmo = 0;
@@ -264,6 +282,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		
 		mySprite.setTextureRect(rectArray[26][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[26][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -281,6 +300,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = normal;
 		mySprite.setTextureRect(rectArray[34][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[34][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 9;
 		maxSecAmmo = 0;
@@ -300,6 +320,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		minAttackRange = 1;
 		
 		mySprite.setTextureRect(rectArray[5][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[5][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -318,6 +339,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		
 		mySprite.setTextureRect(rectArray[2][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[2][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -336,6 +358,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		captureCapable = true;
 		mySprite.setTextureRect(rectArray[31][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[31][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = -1;
 		maxSecAmmo = 0;
@@ -354,6 +377,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		minAttackRange = 2;
 		specialtyGroup = normal;
 		mySprite.setTextureRect(rectArray[8][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[8][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -373,6 +397,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		minAttackRange = 2;
 		specialtyGroup = splashAttack;
 		mySprite.setTextureRect(rectArray[33][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[33][inputTeam + 4]);
 		maxFuel = 50;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -392,6 +417,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		minAttackRange = 1;
 		specialtyGroup = defense;
 		mySprite.setTextureRect(rectArray[22][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[22][inputTeam + 4]);
 		maxFuel = 10;
 		maxPriAmmo = 0;
 		maxSecAmmo = -1;
@@ -410,6 +436,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		minAttackRange = 2;
 		specialtyGroup = defense;
 		mySprite.setTextureRect(rectArray[23][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[23][inputTeam + 4]);
 		maxFuel = 10;
 		maxPriAmmo = 0;
 		maxSecAmmo = -1;
@@ -429,6 +456,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 
 		mySprite.setTextureRect(rectArray[9][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[9][inputTeam + 4]);
 		maxFuel = 80;
 		domain = air;
 		maxPriAmmo = 9;
@@ -448,6 +476,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		rangeType = directFire;
 		specialtyGroup = smallTransport;
 		mySprite.setTextureRect(rectArray[10][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[10][inputTeam + 4]);
 		maxFuel = 80;
 		domain = air;
 
@@ -466,6 +495,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = smallTransport;
 		
 		mySprite.setTextureRect(rectArray[4][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[4][inputTeam + 4]);
 		maxFuel = 70;
 
 
@@ -483,6 +513,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = smallTransport;
 		
 		mySprite.setTextureRect(rectArray[25][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[25][inputTeam + 4]);
 		maxFuel = 70;
 
 		maxPriAmmo = 9;
@@ -503,6 +534,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 		domain = air;
 		mySprite.setTextureRect(rectArray[11][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[11][inputTeam + 4]);
 		maxFuel = 60;
 		maxPriAmmo = 3;
 		maxSecAmmo = 0;
@@ -523,6 +555,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		domain = air;
 		
 		mySprite.setTextureRect(rectArray[24][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[24][inputTeam + 4]);
 		maxFuel = 75;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -543,6 +576,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		domain = air;
 		
 		mySprite.setTextureRect(rectArray[20][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[20][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 6;
 		maxSecAmmo = 0;
@@ -563,6 +597,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		domain = air;
 
 		mySprite.setTextureRect(rectArray[12][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[12][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 3;
         maxSecAmmo = -1;
@@ -584,6 +619,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = normal;
 
 		mySprite.setTextureRect(rectArray[13][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[13][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
         maxSecAmmo = -1;
@@ -605,6 +641,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		domain = sea;
 
 		mySprite.setTextureRect(rectArray[14][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[14][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		maxSecAmmo = 6;
@@ -621,6 +658,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = smallTransport;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[16][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[16][inputTeam + 4]);
 		maxFuel = 70;
 		maxPriAmmo = 1;
 		maxSecAmmo = -1;
@@ -637,6 +675,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = largeTransport;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[15][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[15][inputTeam + 4]);
 		maxFuel = 80;
 		
 	}
@@ -652,6 +691,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
         stealthMode = false;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[18][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[18][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
         maxSecAmmo = -1;
@@ -668,6 +708,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		specialtyGroup = aircraftCarrier;
 		domain = sea;
 		mySprite.setTextureRect(rectArray[17][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[17][inputTeam + 4]);
 		maxFuel = 80;
 		maxPriAmmo = 6;
 		maxSecAmmo = -1;
@@ -684,6 +725,7 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
         stealthMode = true;
 		domain = land;
 		mySprite.setTextureRect(rectArray[32][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[32][inputTeam + 4]);
 		maxFuel = 0;
 		maxPriAmmo = 1;
 	}

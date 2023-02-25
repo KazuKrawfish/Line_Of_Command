@@ -41,7 +41,8 @@ public:
 
 	//Constructors
 	Minion(int inputSeniority, int inputX, int inputY, std::string inputType, int inputTeam, MasterBoard* Environment,
-		int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo, int inputSecAmmo, sf::Texture* inputTexture);
+		int inputHealth, int inputVeterancy, int beingTransported, int inputFuel, int inputAmmo, int inputSecAmmo, 
+		sf::Texture* inputTexture, sf::Texture* inputSecondTexture);
 	Minion();
 	~Minion();
 
@@ -89,6 +90,8 @@ public:
 
 	//GRAPHICS ///////////////////////////
 	sf::Sprite mySprite;
+	sf::Sprite mySecondSprite;
+	sf::Texture* mySecondTexture;
 	sf::Texture* myTexture;
 	bool invisible = false;	//Used for movement graphics, not for stealth.
 	//GRAPHICS ///////////////////////////

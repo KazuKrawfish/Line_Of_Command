@@ -54,7 +54,7 @@ class MasterBoard
 {
 public:
 
-	MasterBoard(sf::Texture* inputTexture);
+	MasterBoard(sf::Texture* inputTexture,  sf::Texture* inputSecondTexture);
 
 
 	//Board Management Functions//////////////
@@ -153,6 +153,7 @@ public:
 
 	//GRAPHICS	///////////////////////////////
 	sf::Texture* myTexture;
+	sf::Texture* mySecondTexture;
 	//GRAPHICS	///////////////////////////////
 
 

@@ -743,10 +743,11 @@ int MasterBoard::consultMinionCostChart(std::string minionType, char propertyTyp
 }
 
 //Currently this is not doing what it should be doing- only partial initialization.
-MasterBoard::MasterBoard(sf::Texture* inputTexture)
+MasterBoard::MasterBoard(sf::Texture* inputTexture , sf::Texture* inputSecondTexture)
 {
 	playerFlag = 0;
 	myTexture = inputTexture;
+	mySecondTexture = inputSecondTexture;
 
 	//Not sure why we have to do an extra row, whatever! (Tried with one less and it caused out of bounds..... i am insane?!?!)
 	//First resize board to meet savegame specifications.
@@ -1968,7 +1969,7 @@ int MasterBoard::createMinion(std::string inputType, int inputX, int inputY, int
 		if (minionRoster[i] == NULL)
 		{
 			//Successful creation of new minion.
-			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo, myTexture);
+			minionRoster[i] = new Minion(i, inputX, inputY, inputType, inputTeam, this, inputHealth, veterancy, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo, myTexture, mySecondTexture);
 			if (minionRoster[i] != NULL)
 			{
 				minionRoster[i]->status = (minionStatus)status;

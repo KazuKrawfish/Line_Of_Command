@@ -24,11 +24,12 @@ when necessary, ie. when game ends or player wants to leave the current game.
 
 char getValidPlayerInput(sf::RenderWindow* myWindow);
 
-inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture,
+inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Texture* secondGameTexture,
 	sf::Font* inputFont, sf::Font* inputBoldFont, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons,
 	std::vector <sf::Texture>* statusTextures,  sf::Music * inputGameMusic)
 {
 	inputLayerTexture = gameTexture;
+	secondInputLayerTexture = secondGameTexture;
 	inputLayerFont = inputFont;
 	inputLayerBoldFont = inputBoldFont;
 	inputLayerWindow = myWindow;
@@ -276,8 +277,17 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			//Last check - must not be stealth minion and unseen
 			if (tileToPrint->minionOnTop->stealthMode == false || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber)
 			{
-				tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50 + IL_WIDTH_OFFSET, screenY * 50 + IL_HEIGHT_OFFSET);
-				inputLayerWindow->draw(tileToPrint->minionOnTop->mySprite);
+				//Now determine which sprite to print based on main menu's printTimer
+				if (MainMenu->printSecond == false)
+				{
+					tileToPrint->minionOnTop->mySprite.setPosition(screenX * 50 + IL_WIDTH_OFFSET, screenY * 50 + IL_HEIGHT_OFFSET);
+					inputLayerWindow->draw(tileToPrint->minionOnTop->mySprite);
+				}
+				else
+				{
+					tileToPrint->minionOnTop->mySecondSprite.setPosition(screenX * 50 + IL_WIDTH_OFFSET, screenY * 50 + IL_HEIGHT_OFFSET);
+					inputLayerWindow->draw(tileToPrint->minionOnTop->mySecondSprite);
+				}
 			}
 		}
 
