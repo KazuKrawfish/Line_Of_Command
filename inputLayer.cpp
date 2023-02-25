@@ -1227,7 +1227,6 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 
 	sf::String boardMessage;
 
-
 	sf::Sprite backgroundSprite;
 	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
 	inputLayerWindow->draw(backgroundSprite);
@@ -1237,6 +1236,11 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
 	inputLayerWindow->draw(menuBackgroundSprite);
 
+	//Title text
+	sf::Text titleText("MISSON BRIEFING", *inputLayerBoldFont, 50);
+	titleText.setPosition(IL_WIDTH_OFFSET + 360, IL_HEIGHT_OFFSET + 70);
+	titleText.setFillColor(sf::Color::Black);
+	inputLayerWindow->draw(titleText);
 
 	if (boardToInput->missionFlag == true)
 	{
@@ -1251,7 +1255,7 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	boardMessage += "\n\nPress any key to continue.";
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
-	newText.setPosition(IL_WIDTH_OFFSET + 70, IL_HEIGHT_OFFSET + 100);
+	newText.setPosition(IL_WIDTH_OFFSET + 70, IL_HEIGHT_OFFSET + 150);
 	newText.setFillColor(sf::Color::Black);
 
 	inputLayerWindow->draw(newText);
