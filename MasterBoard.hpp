@@ -108,6 +108,7 @@ public:
 	int consultMinionCostChart(std::string minionType, char propertyType);
 	bool checkFactionAvailability(std::string minionType, int inputPlayer);
 	int deployLandmine(inputLayer* InputLayer, int inputX, int inputY);
+	int buildImprovement(inputLayer* InputLayer, int inputX, int inputY);
 	int createMinion(std::string, int inputX, int inputY, int inputTeam, int inputHealth, int status, int veterancy, int beingTransported, int inputFuel, int inputPriAmmo, int inputSecAmmo);
 	//Purchase Functions///////////////////////
 

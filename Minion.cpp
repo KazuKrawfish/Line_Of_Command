@@ -110,6 +110,22 @@ Minion::Minion(int inputSeniority, int inputX, int inputY, std::string inputType
 		maxSecAmmo = 0;
 	}
     else
+	if (inputType == "Engineer")
+	{
+		description = "Engineer";
+		movementRange = 3;
+		attackRange = 1;
+		visionRange = 3;
+		rangeType = directFire;
+		specialtyGroup = infantry;
+		captureCapable = true;
+		mySprite.setTextureRect(rectArray[36][inputTeam + 4]);
+		mySecondSprite.setTextureRect(rectArray[36][inputTeam + 4]);
+		maxFuel = 70;
+		maxPriAmmo = -1;
+		maxSecAmmo = 0;
+	}
+	else
 	if(inputType == "Insurgent")
 	{
 		description = "Insurgent";

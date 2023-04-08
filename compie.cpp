@@ -1259,7 +1259,8 @@ int compie::checkSingleTileForCombatValue(int attackerX, int attackerY, int defe
 
 	//For infantry, double the defenderCost to double overall score for damage dealt to it.
 	if (boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Infantry" || boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Specialist"
-		|| boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Cavalry" || boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Insurgent")
+		|| boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Cavalry" || boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Insurgent"
+		|| boardToUse->Board[defenderX][defenderY].minionOnTop->type == "Engineer")
 		defenderCost *= compieInfantryAttackBonus;
 
 
@@ -2065,7 +2066,7 @@ int compie::determineProduction(MasterBoard* boardToUse)
 				numberOfCavalry++;
 
 			}
-			if (boardToUse->minionRoster[i]->type == "Specialist")
+			if (boardToUse->minionRoster[i]->type == "Specialist" || boardToUse->minionRoster[i]->type == "Engineer")
 			{
 				numberOfSpecialists++;
 

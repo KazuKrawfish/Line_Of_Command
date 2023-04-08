@@ -1025,6 +1025,10 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 				//See if player did an input
 				playerInputReceived = mywindow->pollEvent(playerInput);
 
+				//We never count mouse movement as an event.
+				if (playerInput.type == sf::Event::MouseMoved)
+					playerInputReceived = false;
+
 				//Only print repeatedly if actually playing the board
 				if(menuStatus == playingMap)
 				{

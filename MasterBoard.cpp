@@ -20,13 +20,13 @@ development, and since this is almost entirely a solo effort.
 #include <algorithm>
 
 //Faction 0 is neutral faction, which gets no special units.
-bool minionsAllowedForFaction[5][31] =
+bool minionsAllowedForFaction[5][32] =
 //                                          Inf     Insrg   Oper    Spec    recon   tech    APC     IFV     Arty    Armr    Asgun   Upgarm  antia   rockt   hvyarm  mdnarm  tcop    acop    int     advf    multi   bomb,   gboat   cruis   land    sub     ship    cvn     vctlau  shvy    cavlry  
-/*Neutral*/								  { true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false,
-/*North Redonia*/                           true,   false,  false,  true,   true,   false,  true,   false,  false,  true,   true,   true,   true,   true,   true,   false,  true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   true,   false,  false,  false,
-/*South Redonia*/                           true,   false,  false,  true,   true,   false,  false,   true,  true,   true,   false,  false,  true,   true,   false,  true,   true,   true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false,
-/*Ormosa*/                                  true,   true,   true,   true,   false,   true,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false,
-/*Torran*/                                  true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   true,   true,   true  };
+/*Neutral*/								  { true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false, true,
+/*North Redonia*/                           true,   false,  false,  true,   true,   false,  true,   false,  false,  true,   true,   true,   true,   true,   true,   false,  true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   true,   false,  false,  false, true,
+/*South Redonia*/                           true,   false,  false,  true,   true,   false,  false,   true,  true,   true,   false,  false,  true,   true,   false,  true,   true,   true,   true,   true,   false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false, true,
+/*Ormosa*/                                  true,   true,   true,   true,   false,   true,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   false,  false,  false, true,
+/*Torran*/                                  true,   false,  false,  true,   true,   false,  true,   false,  true,   true,   false,  false,  true,   true,   true,   false,  true,   true,   true,   false,  false,  true,   true,   true,   true,   true,   true,   true,   true,   true,   true , true  };
 
 
 //If the two input coordinates are next to each other, return true. Otherwise, return false.
@@ -295,7 +295,7 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 	if (defendingMinion.type == "Infantry" || defendingMinion.type == "Operative" || defendingMinion.type == "Cavalry" || defendingMinion.type == "Landmine")
 		x = 0;
 	else
-	if (defendingMinion.type == "Specialist" || defendingMinion.type == "Insurgent")
+	if (defendingMinion.type == "Specialist" || defendingMinion.type == "Insurgent" || defendingMinion.type == "Engineer")
 		x = 1;
 	else
 	if (defendingMinion.type == "Armor" || defendingMinion.type == "Upgunned_Armor" )
@@ -359,7 +359,7 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 		x = 21;
 
 
-	if (attackingMinion.type == "Infantry" || attackingMinion.type == "Operative" || attackingMinion.type == "Cavalry")
+	if (attackingMinion.type == "Infantry" || attackingMinion.type == "Operative" || attackingMinion.type == "Cavalry" || attackingMinion.type == "Engineer")
 		y = 0;
 	else
 	if (attackingMinion.type == "Specialist" || attackingMinion.type == "Insurgent")
@@ -624,7 +624,7 @@ int MasterBoard::consultMinionCostChart(std::string minionType, char propertyTyp
 		canItBeBoughtHere = true;
 	}
 	if ((propertyType == 'n' || propertyType == 'H' || propertyType == 'Q' || propertyType == 'h') &&
-		(minionType == "Infantry" || minionType == "Specialist" || minionType == "Armor" || minionType == "Artillery" || minionType == "Rocket_Artillery"
+		(minionType == "Infantry" || minionType == "Engineer" || minionType == "Specialist" || minionType == "Armor" || minionType == "Artillery" || minionType == "Rocket_Artillery"
 			|| minionType == "Heavy_Armor" || minionType == "Anti-Aircraft" || minionType == "Recon" || minionType == "APC" || minionType == "Upgunned_Armor"
 			|| minionType == "Assault_Gun" || minionType == "Insurgent" || minionType == "Operative" || minionType == "Modern_Armor" || minionType == "IFV" 
             || minionType == "Technical" || minionType == "Cavalry" || minionType == "Super_Heavy_Armor" || minionType == "Victory_Launcher"))
@@ -655,6 +655,9 @@ int MasterBoard::consultMinionCostChart(std::string minionType, char propertyTyp
 		else
 	if( minionType == "Operative")
 		price = 5000;
+		else
+	if (minionType == "Engineer")
+		price = 4000;
 		else
 	if ( minionType == "Specialist")
 		price = 3000;
@@ -1882,6 +1885,9 @@ bool MasterBoard::checkFactionAvailability(std::string minionType, int inputPlay
         else
 	if ( minionType == "Cavalry")
 		minionNumber = 30;
+		else
+	if (minionType == "Engineer")
+		minionNumber = 31;
 
 
 
@@ -1921,6 +1927,57 @@ int MasterBoard::attemptPurchaseMinion(std::string inputType, int inputX, int in
 
 }
 
+//buildImprovement() will check for tile terrain constraints and cost constraints, as well as no one on that tile constraint..
+// buildImprovement () will invoke a similar graphic to repair, making the engineer blink several times.
+int MasterBoard::buildImprovement(inputLayer* InputLayer, int inputX, int inputY)
+{
+	//First check for terrain constraints:
+	tile* myTile = &Board[inputX][inputY];
+
+	//Make sure engineer is below and can only build on forest/plains/const zone
+	if (myTile->hasMinionOnTop == false || myTile->minionOnTop->type != "Engineer" || myTile->symbol != '.' || myTile->symbol != '+' || myTile->symbol != 'c')
+	{
+		return 1;
+	}
+
+	//Engineer must be 5 or more health
+	if(myTile->minionOnTop->health < 50)
+	{
+		return 1;
+	}
+
+	//If player cannot afford cost, return failure. Otherwise subtract 2k and build.
+	if (playerRoster[playerFlag].treasury < 1000)
+	{
+		return 1;
+	}
+	else
+	{
+		playerRoster[playerFlag].treasury -= 1000;
+
+		if (myTile->symbol == 'c')
+		{
+			//Change the underlying tile.
+			myTile->symbol = 'f';      //fort
+		}
+		else
+		{
+			myTile->symbol = 'c';      //construction zone
+		}
+
+		myTile->setCharacterstics(InputLayer->inputLayerTexture, this);
+
+		InputLayer->status = gameBoard;
+		InputLayer->repairGraphics(this, playerFlag, myTile->minionOnTop, inputX, inputY);
+	}
+
+	//If we made it this far we did a successful deploy, so deselect
+	cursor.selectMinionPointer->status = hasfired;
+	deselectMinion();
+
+	return 0;
+}
+
 //deployLandmine() will check for tile terrain constraints and cost constraints, as well as no one on that tile constraint..
 //deployLandmine() will invoke a similar graphic to repair, making the landmine blink several times.
 //within masterboard:
@@ -1928,6 +1985,10 @@ int MasterBoard::deployLandmine(inputLayer* InputLayer, int inputX, int inputY)
 {
 	//First check for terrain constraints:
 	tile* myTile = &Board[inputX][inputY];
+
+	//Landmine must not be banned
+	if (std::find(banList.begin(), banList.end(), "LandMine") != banList.end())
+		return 1;
 
 	//Prevent landmine insertion on top of another and prevent landmine deploy within sea/river
 	if (myTile->hasMinionOnTop == true || myTile->consultMovementChart("Landmine") == 99)

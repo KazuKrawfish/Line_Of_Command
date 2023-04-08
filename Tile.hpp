@@ -155,6 +155,22 @@ public:
 			myFogSprite.setTextureRect(rectArray[0][1]);
 			break;
 		}
+		case('f'):
+		{
+			description = "Fortification.";
+			defenseFactor = 1.3;
+			mySprite.setTextureRect(rectArray[37][2]);
+			myFogSprite.setTextureRect(rectArray[37][3]);
+			break;
+		}
+		case('c'):
+		{
+			description = "Construction.";
+			defenseFactor = 1.1;
+			mySprite.setTextureRect(rectArray[38][2]);
+			myFogSprite.setTextureRect(rectArray[38][3]);
+			break;
+		}
 		case('H'):
 		{
 			description = "City.";
@@ -173,7 +189,12 @@ public:
 			description = "Mine.";
 			defenseFactor = 1.2;
 			production = 3000;
+			
+			textureRectAnchorX = 36;
+			textureRectAnchorY = 0;
 
+			mySprite.setTextureRect(rectArray[textureRectAnchorX ][textureRectAnchorY]);
+			myFogSprite.setTextureRect(rectArray[textureRectAnchorX ][textureRectAnchorY + 1]);
 			break;
 		}
 		case('n'):

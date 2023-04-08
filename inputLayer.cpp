@@ -91,6 +91,7 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 	factoryButtons.at(16).mySprite.setTextureRect(rectArray[34][4]);      //Super Heavy Armor
 	factoryButtons.at(17).mySprite.setTextureRect(rectArray[33][4]);      //Victory Launcher
 	factoryButtons.at(18).mySprite.setTextureRect(rectArray[35][4]);      //Cavalry
+	factoryButtons.at(19).mySprite.setTextureRect(rectArray[36][4]);      //Engineer
 
 
 	//Airbase buttons
@@ -344,6 +345,11 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 						effectsSprite.setTextureRect(rectArray[10][15]); //Draw periscope
 						inputLayerWindow->draw(effectsSprite);
 					}
+					else if (mouseHovering == true && boardToPrint->cursor.selectMinionPointer->type == "Engineer")
+					{
+						effectsSprite.setTextureRect(rectArray[5][15]); //Draw wrench to build improvement
+						inputLayerWindow->draw(effectsSprite);
+					}
 			}
 			else
 				if (tileToPrint->withinCursorPath == true)
@@ -390,7 +396,8 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 						{
 							//Differentiate between operative and transport for potential action
 							if (boardToPrint->cursor.selectMinionPointer->type == "Operative")
-								effectsSprite.setTextureRect(rectArray[4][15]); //Draw landmine drop
+								if(std::find(boardToPrint->banList.begin(), boardToPrint->banList.end(), "Landmine") != boardToPrint->banList.end())
+									effectsSprite.setTextureRect(rectArray[4][15]); //Draw landmine drop
 							else effectsSprite.setTextureRect(rectArray[7][15]); //Draw bag drop
 
 							inputLayerWindow->draw(effectsSprite);
@@ -1229,9 +1236,14 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 {
 	inputLayerWindow->clear();
 
-	//If not playing music already, play music
+	//If not playing music already, play music, but first stop all the other music
+	//Crude method to ensure we stopped playing previous faction music if it was different
 	if (soundsOn == true && gameMusic[1].getStatus() != sf::SoundSource::Status::Playing)
 	{
+		for (int i = 3; i < 7; i++)
+		{
+			gameMusic[i].stop();
+		}
 		gameMusic[1].play();
 	}
 
@@ -2176,6 +2188,11 @@ int inputLayer::insertMinionInput(sf::Event* Input, MasterBoard* boardToInput)
 																																		{
 																																			convertedInput = "Cavalry";
 																																		}
+																																		else
+																																			if (savedInsertMinionInput == "eng" || savedInsertMinionInput == "Eng")
+																																			{
+																																				convertedInput = "Engineer";
+																																			}
 
 
 	Cursor* myCursor = &boardToInput->cursor;
@@ -2537,7 +2554,7 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 						boardToInput->cursor.YCoord == myMinion->locationY)
 					{
 						//If minion is capture-capable that has already moved, attempt to capture
-						if (myMinion->captureCapable == true &&
+						if ( (myMinion->captureCapable == true && boardToInput->Board[myMinion->locationX][myMinion->locationY].checkForProperty() == true) &&
 							(myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired))
 							* Input = sf::Keyboard::Key::C;
 						else
@@ -2550,6 +2567,11 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							else if (myMinion->type == "Submarine")
 							{
 								*Input = sf::Keyboard::Key::U;	//If submarine, either dive or surface.
+							}
+							else
+							if (myMinion->type == "Engineer")
+							{
+								*Input = sf::Keyboard::Key::B;	//If engineer, attempt to build if clicking on top.
 							}
 							else
 							{
@@ -2576,11 +2598,11 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							*Input = sf::Keyboard::Key::O;
 						}
 						else  //If this is empty space and is operative that already moved/gave up move
-							if (boardToInput->cursor.selectMinionPointer->type == "Operative" &&
+							if ( boardToInput->cursor.selectMinionPointer->type == "Operative"  &&
 								(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
 									boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
 							{
-								*Input = sf::Keyboard::Key::B;      //B for build. Either operative dropping a landmine, or engineer building something.
+								*Input = sf::Keyboard::Key::L;      //L for landmine. Operative dropping a landmine.
 							}
 							else  //Otherwise attempt to move there.
 							{
@@ -2744,11 +2766,22 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	}
 
 	//Must be operative, must have moved already.
-	if (*Input == sf::Keyboard::Key::B && boardToInput->cursor.selectMinionFlag == true
+	if (*Input == sf::Keyboard::Key::L && boardToInput->cursor.selectMinionFlag == true
 		&& boardToInput->cursor.selectMinionPointer->type == "Operative"
 		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
 	{
 		if (boardToInput->deployLandmine(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+		{
+			status = gameBoard;
+		}
+	}
+
+	//Must be engineer, must have moved already.
+	if (*Input == sf::Keyboard::Key::B && boardToInput->cursor.selectMinionFlag == true
+		&& boardToInput->cursor.selectMinionPointer->type == "Engineer"
+		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
+	{
+		if (boardToInput->buildImprovement(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
 		{
 			status = gameBoard;
 		}
@@ -2853,6 +2886,11 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 	//If not playing music already, play music
 	if (soundsOn == true && gameMusic[2].getStatus() != sf::SoundSource::Status::Playing)
 	{
+		for (int i = 3; i < 7; i++)
+		{
+			gameMusic[i].stop();
+		}
+
 		gameMusic[2].play();
 	}
 

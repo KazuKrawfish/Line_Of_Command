@@ -330,7 +330,7 @@ int tile::consultMovementChart(std::string minionType)
 	int x = -1;
 	int y = -1;
 
-	if (minionType == "Infantry" || minionType == "Insurgent" || minionType == "Cavalry")
+	if (minionType == "Infantry" || minionType == "Insurgent" || minionType == "Cavalry" || minionType == "Engineer")
 		x = 0;
 	else
 		if (minionType == "Specialist" || minionType == "Operative")
