@@ -404,6 +404,7 @@ int tile::consultMovementChart(std::string minionType)
 		y = 0;
 		break;
 	case('+'):
+	case('f'):
 		y = 1;
 		break;
 	case('^'):
@@ -475,6 +476,7 @@ bool tile::checkForProperty()
 	case('~'):
 	case('-'):
 	case('*'):
+	case('f'):
 		isProperty = false;
 		break;
 	case('A'):

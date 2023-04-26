@@ -460,11 +460,19 @@ int inputLayer::printSingleTile(int screenX, int screenY, int actualX, int actua
 			&& (tileToPrint->minionOnTop->stealthMode == false || adjacentObservers == true || tileToPrint->minionOnTop->team == playerNumber))
 		{
 
-			//Print if transporting or capturing // Specialty moves
+			//Print if transporting, building, or capturing // Specialty moves
 			if (minionToPrint->isCapturing == true)
 			{
-				effectsSprite.setTextureRect(rectArray[5][3]);
-				inputLayerWindow->draw(effectsSprite);
+				if (minionToPrint->type == "Engineer" && tileToPrint->checkForProperty() == false)
+				{
+					effectsSprite.setTextureRect(rectArray[10][14]);
+					inputLayerWindow->draw(effectsSprite);
+				}
+				else
+				{
+					effectsSprite.setTextureRect(rectArray[5][3]);
+					inputLayerWindow->draw(effectsSprite);
+				}
 			}
 			else if (minionToPrint->firstMinionBeingTransported != NULL || minionToPrint->secondMinionBeingTransported != NULL)
 			{
@@ -2569,7 +2577,8 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 								*Input = sf::Keyboard::Key::U;	//If submarine, either dive or surface.
 							}
 							else
-							if (myMinion->type == "Engineer")
+							if ((myMinion->status == hasmovedhasntfired || myMinion->status == gaveupmovehasntfired )
+								&& myMinion->type == "Engineer")
 							{
 								*Input = sf::Keyboard::Key::B;	//If engineer, attempt to build if clicking on top.
 							}
@@ -2777,15 +2786,15 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	}
 
 	//Must be engineer, must have moved already.
-	if (*Input == sf::Keyboard::Key::B && boardToInput->cursor.selectMinionFlag == true
-		&& boardToInput->cursor.selectMinionPointer->type == "Engineer"
-		&& (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired))
-	{
-		if (boardToInput->buildImprovement(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+	if (*Input == sf::Keyboard::Key::B && boardToInput->cursor.selectMinionFlag == true)
+		if( boardToInput->cursor.selectMinionPointer->type == "Engineer")		
+			if(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
 		{
-			status = gameBoard;
+			if (boardToInput->buildImprovement(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+			{
+				status = gameBoard;
+			}
 		}
-	}
 
 	//'U' - If submarine, attempt to surface or dive
 	//Cursor must be on top of selected minion.

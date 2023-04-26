@@ -1927,60 +1927,62 @@ int MasterBoard::attemptPurchaseMinion(std::string inputType, int inputX, int in
 
 }
 
-//buildImprovement() will check for tile terrain constraints and cost constraints, as well as no one on that tile constraint..
-// buildImprovement () will invoke a similar graphic to repair, making the engineer blink several times.
 int MasterBoard::buildImprovement(inputLayer* InputLayer, int inputX, int inputY)
 {
+	
 	//First check for terrain constraints:
 	tile* myTile = &Board[inputX][inputY];
 
 	//Make sure engineer is below and can only build on forest/plains/const zone
-	if (myTile->hasMinionOnTop == false || myTile->minionOnTop->type != "Engineer" || myTile->symbol != '.' || myTile->symbol != '+' || myTile->symbol != 'c')
+	if (myTile->hasMinionOnTop == false || myTile->minionOnTop->type != "Engineer" || (myTile->symbol != '.' && myTile->symbol != '+'))
 	{
 		return 1;
 	}
 
-	//Engineer must be 5 or more health
-	if(myTile->minionOnTop->health < 50)
+
+	//Determine build points based on engineer's health
+	int pointsToBuild = int(std::round(myTile->minionOnTop->health / 10));
+	int buildCost = 0;
+
+	//Late will want to change cost for building a mine, airbase, etc.
+	if (myTile->symbol == '.' || myTile->symbol == '+')
 	{
-		return 1;
+		buildCost = pointsToBuild * 100;
 	}
 
-	//If player cannot afford cost, return failure. Otherwise subtract 2k and build.
-	if (playerRoster[playerFlag].treasury < 1000)
+	//If player cannot afford cost, return failure. Otherwise subtract and build.
+	if (playerRoster[playerFlag].treasury < buildCost)
 	{
 		return 1;
 	}
 	else
 	{
-		playerRoster[playerFlag].treasury -= 1000;
+		playerRoster[playerFlag].treasury -= buildCost;
+		myTile->capturePoints -= pointsToBuild;
+		myTile->minionOnTop->isCapturing = true;
 
-		if (myTile->symbol == 'c')
+		if (myTile->capturePoints <= 0)
 		{
-			//Change the underlying tile.
+			//Change the underlying tile, and reset cap points.
 			myTile->symbol = 'f';      //fort
-		}
-		else
-		{
-			myTile->symbol = 'c';      //construction zone
+			myTile->capturePoints = 20;
+			myTile->minionOnTop->isCapturing = false;
 		}
 
 		myTile->setCharacterstics(InputLayer->inputLayerTexture, this);
 
 		InputLayer->status = gameBoard;
 		InputLayer->repairGraphics(this, playerFlag, myTile->minionOnTop, inputX, inputY);
+
+		//If we made it this far we did a successful deploy, so deselect
+		cursor.selectMinionPointer->status = hasfired;
+		deselectMinion();
+
+		return 0;
 	}
 
-	//If we made it this far we did a successful deploy, so deselect
-	cursor.selectMinionPointer->status = hasfired;
-	deselectMinion();
-
-	return 0;
 }
 
-//deployLandmine() will check for tile terrain constraints and cost constraints, as well as no one on that tile constraint..
-//deployLandmine() will invoke a similar graphic to repair, making the landmine blink several times.
-//within masterboard:
 int MasterBoard::deployLandmine(inputLayer* InputLayer, int inputX, int inputY)
 {
 	//First check for terrain constraints:
