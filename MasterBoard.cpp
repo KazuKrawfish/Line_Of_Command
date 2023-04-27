@@ -5,8 +5,7 @@
 /*
 The MasterBoard class is responsible for all "mechanical" gameplay actions. It contains the actual board with all tiles and minions,
 and calculates movements, attacks, supply, production, etc. Masterboard and inputLayer interact as a team, with cursor, minion, and tile
-classes as subordinate supporting classes. NB: It is understood that public members are dangerous but this has been done to speed
-development, and since this is almost entirely a solo effort.
+classes as subordinate supporting classes.
 */
 
 #include "MasterBoard.hpp"

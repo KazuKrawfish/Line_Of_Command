@@ -227,10 +227,11 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	//Reset button placement index
 	buttonPlacement = 0;
 
-	//Top menu buttons new game, load game, toggle editor mode
+	//Top menu buttons new game, load game, toggle editor mode, quit
+	int y = 0;
 	for (int i = 0; i < 4; i++)
 	{
-		int y = 0;
+		y = 0;
 
 		//For editModeOn, it has the same y-coord as the previous button, editModeOff.
 		if (i == editorModeOn)
@@ -243,12 +244,11 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 			//Only advance button position if it's a "unique" button. Not a editMode alternate button.
 			buttonPlacement++;
 		}
-
 		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, i, &(topMenuButtonTextureArray->at(i)), "TopMenuButton");
 	}
 
 	//Top menu buttons - new skirmish, new campaign, go back
-	int y = 0;
+	y = 0;
 	//Reset button placement index
 	buttonPlacement = 0;
 	for (int i = 4; i < 7; i++)
@@ -257,6 +257,10 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 		topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y + MM_HEIGHT_OFFSET, i, &(topMenuButtonTextureArray->at(i)), "TopMenuButton");
 		buttonPlacement++;
 	}
+
+	//Add quit button
+	y = MM_HEIGHT_OFFSET + TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * 3;
+	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, 3, &(topMenuButtonTextureArray->at(7)), "TopMenuButton");
 	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -1207,6 +1211,14 @@ int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, i
 			editorMode = true;
 		}
 
+		//Quit game
+		bool withinQuitButton = (topMenuButtons)[7].checkWithinButton(mousePosition.x, mousePosition.y);
+		if (withinQuitButton == true)
+		{
+			mywindow->close();
+			exit(0);
+		}
+
 	}
 	return 0;
 }
@@ -1216,7 +1228,6 @@ int mainMenu::printTopMenu()
 
 	sf::Sprite topMenuWallpaperSprite;
 	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
-	
 
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(otherGameTextures->at(3));
@@ -1235,7 +1246,7 @@ int mainMenu::printTopMenu()
 	topmenuText.setFillColor(sf::Color::Black);
 	mywindow->draw(topmenuText);
 
-	//Draw three buttons for top menu
+	//Draw four buttons for top menu
 	for (int i = 0; i < 2; i++)
 	{
 		mywindow->draw(topMenuButtons.at(i).mySprite);
@@ -1247,6 +1258,7 @@ int mainMenu::printTopMenu()
 	else {
 		mywindow->draw(topMenuButtons.at(3).mySprite);
 	}
+	mywindow->draw(topMenuButtons.at(7).mySprite);
 
 	mywindow->display();
 
@@ -1295,7 +1307,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	topmenuText.setFillColor(sf::Color::Black);
 	mywindow->draw(topmenuText);
 
-	//Draw two buttons for top menu new
+	//Draw three buttons for top menu new
 	for (int i = 4; i < 7; i++)
 	{
 		mywindow->draw(topMenuButtons.at(i).mySprite);

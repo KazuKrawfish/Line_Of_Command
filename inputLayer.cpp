@@ -616,7 +616,7 @@ int inputLayer::printStatusDialogBox(MasterBoard* boardToPrint)
 	case(2):
 	{
 		//Print capture explain:
-		sf::String capExplainString = "Capture points. Infantry and technicals\ncan capture enemy properties at 1 point\nper health per turn. 20 points\nare needed to capture a property.";
+		sf::String capExplainString = "Capture points. Infantry and technicals\ncan capture enemy properties at 1 point\nper health per turn. 20 points\nare needed to capture a property.\n\nAlso represents engineer build\nprogress.";
 		sf::Text capExplainText(capExplainString, *inputLayerFont, MainMenu->menuTextSize);
 		capExplainText.setPosition(explainTextPositionX, explainTextPositionY);
 		capExplainText.setFillColor(sf::Color::Black);
