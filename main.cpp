@@ -120,7 +120,7 @@ int main()
 
 
 	//Load topMenuButton textures
-	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off",  "top_Editor_Mode_On",  "top_New_Campaign", "top_New_Skirmish", "top_Back" , "top_Quit" };
+	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off",  "top_Editor_Mode_On",  "top_New_Campaign", "top_New_Skirmish", "top_Back" , "top_Quit", "upButton", "downButton", "Select" };
 	std::vector <sf::Texture> topMenuButtonTextureArray;
 	topMenuButtonTextureArray.resize(imageList.size());
 	initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
@@ -257,7 +257,7 @@ int main()
 	}
 	else //Otherwise proceed with just one set of instances 
 	{
-		sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
+		sf::RenderWindow mainWindow(desktopMode, "Line of Command");	//, sf::Style::Fullscreen); For debug ease
 
 		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &boldGameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);
 

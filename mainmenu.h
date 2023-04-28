@@ -17,6 +17,7 @@ InputLayer and masterBoard may call it, so they are somewhat circular-dependent.
 #include <SFML/Audio.hpp>
 #include <SFML/System/Vector2.hpp>
 #include "button.hpp"
+#include <filesystem>	
 
 enum mainMenuStatus { topmenu, playingMap };
 enum interactionMethod { unchosen, localSkirmish, localCampaign };

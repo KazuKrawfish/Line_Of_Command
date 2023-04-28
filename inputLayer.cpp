@@ -690,7 +690,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 	//Print current player, with treasury and potential event text.
 	sf::String playerStatus = &(boardToPrint->playerRoster[boardToPrint->playerFlag].name[0]);
 	snprintf(pointerToPrint, 100, "'s turn.\nTreasury: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
-	//snprintf(pointerToPrint, 100, "'s turn.\nTreasury Total: %d\n", boardToPrint->playerRoster[boardToPrint->playerFlag].treasury);
 	playerStatus += pointerToPrint;
 	playerStatus += &eventText[0];
 
@@ -1224,7 +1223,7 @@ int inputLayer::printInsertMinion(MasterBoard* boardToPrint)
 
 int inputLayer::printInsertTile(MasterBoard* boardToPrint)
 {
-	sf::String boardMessage = "Insert a tile by typing its symbol\nExit insert tile menu(x) \n";
+	sf::String boardMessage = "Insert a tile by typing its symbol\nExit (ESC) \n";
 
 	sf::Text newText(boardMessage, *inputLayerFont, MainMenu->menuTextSize);
 
@@ -2258,8 +2257,8 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 	Cursor* myCursor = &boardToInput->cursor;
 	tile* myTile = &boardToInput->Board[myCursor->XCoord][myCursor->YCoord];
 
-	//Return to gameBoard if player presses 'q'.
-	if (*Input == sf::Keyboard::Key::Q)
+	//Return to gameBoard if player presses 'Escape'.
+	if (*Input == sf::Keyboard::Key::Escape)
 	{
 		status = gameBoard;
 		return 1;
@@ -2306,6 +2305,8 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 		case(sf::Keyboard::Dash):
 			inputChar = '-';
 			break;
+		default:
+			inputChar = '!';
 		}
 	}
 	else
@@ -2345,11 +2346,13 @@ int inputLayer::insertTileInput(sf::Keyboard::Key* Input, MasterBoard* boardToIn
 		case(sf::Keyboard::Tilde):	//Test needed
 			inputChar = '~';
 			break;
+		default:
+			inputChar = '!';
 		}
 	}
 
 	//If input tile symbol is invalid, return 1.
-	if (myTile->consultMovementChart("Infantry") == -1)
+	if (inputChar == '!')
 		return 1;
 
 	//Prevent terrain from being somewhere that minion couldn't actually move.

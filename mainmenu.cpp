@@ -13,7 +13,7 @@
 #include <fstream>
 #include <stdio.h>
 #include "compie.hpp"
-#include <filesystem>
+
 
 
 class inputLayer;
@@ -258,11 +258,22 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 		buttonPlacement++;
 	}
 
-	//Add quit button
+	//Add quit button at end to not mess up menu functions
 	y = MM_HEIGHT_OFFSET + TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * 3;
-	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, 3, &(topMenuButtonTextureArray->at(7)), "TopMenuButton");
-	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, quitButton, &(topMenuButtonTextureArray->at(7)), "quitButton");
 
+	//Load game buttons - up and down scroll buttons
+	int x = MM_WIDTH_OFFSET + 40;
+	y = MM_HEIGHT_OFFSET + 40;
+	topMenuButtons.emplace_back(x, y, upDownButton, &(topMenuButtonTextureArray->at(8)), "upButton");
+
+	y = MM_HEIGHT_OFFSET + 40 + topMenuButtonTextureArray->at(9).getSize().y + 30 ;
+	topMenuButtons.emplace_back(x, y, upDownButton, &(topMenuButtonTextureArray->at(9)), "downButton");
+
+	y = MM_HEIGHT_OFFSET  + 40 + 2 * (topMenuButtonTextureArray->at(10).getSize().y + 30);
+	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "selectButton");
+
+	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -295,8 +306,6 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	}
 
 	//Faction choice buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 	//Take in other required textures
@@ -908,7 +917,7 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		//Need to print out mission/scenario printout here
 		if (gameType == localSkirmish)
 		{
-			newGameMap.open(".\\scenarios\\" + battleLabScenarioName + ".txt");
+			newGameMap.open(".\\scenarios\\" + battleLabScenarioName );
 			if (newGameMap.is_open() == false)
 			{
 				std::cout << "Could not open scenario. Aborting battle lab." << std::endl;
@@ -1389,6 +1398,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	//Await player input to move past the selected item.
 	getValidPlayerInput(mywindow);
+	mywindow->clear();
 
 
 	//Load the actual map
@@ -1406,13 +1416,115 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		//Need to print out mission/scenario printout here
 		if (gameType == localSkirmish)
 		{
-			mywindow->clear();
-			anotherTopMenuNewString += "Choose which scenario to load (Case sensitive): \n";
-			sf::String scenarioName = playerInputString(mywindow, myFont, anotherTopMenuNewString, lineOffset, "new", 330);
-			sf::Event event;
+			bool scenarioChosen = false;
+			std::string chosenScenarioName = "";
+			std::vector <std::string> listOfScenarios;
+			int highlightedName = 0;
 
-			std::string newScenario = scenarioName;
-			newGameMap.open(".\\scenarios\\" + newScenario + ".txt");
+			const std::filesystem::path myPath{ ".\\scenarios" };
+			for (const auto& entry : std::filesystem::directory_iterator(myPath))
+			{
+				listOfScenarios.push_back( entry.path().string() );
+				std::cout << entry.path() << std::endl;
+				
+			}
+
+			for (int i = 0; i < listOfScenarios.size(); i++)
+			{
+				listOfScenarios.at(i).erase(0, 12);
+				std::cout << listOfScenarios.at(i) << std::endl;
+			}
+
+			while (scenarioChosen == false)
+			{
+				mywindow->clear();
+				anotherTopMenuNewString += "Choose which scenario to load (Case sensitive): \n";
+
+				//To print list of scenarios, first determine start and end points
+				int startPoint = highlightedName - 5;
+				if (startPoint < 0)
+					startPoint = 0;
+				int endPoint = highlightedName + 5;
+				if (endPoint > listOfScenarios.size() - 1)
+					endPoint = listOfScenarios.size() - 1;
+
+				//Print backgrounds
+				sf::Sprite backgroundSprite;
+				backgroundSprite.setTexture(otherGameTextures->at(1));
+				mywindow->draw(backgroundSprite);
+
+				sf::Sprite menuBackgroundSprite;
+				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+				mywindow->draw(menuBackgroundSprite);
+
+				//Print title text
+				sf::Text titleText("New Game", *myFont, 50);
+				titleText.setPosition(MM_WIDTH_OFFSET + 470, MM_HEIGHT_OFFSET + 70);
+				titleText.setFillColor(sf::Color::Black);
+				mywindow->draw(titleText);
+
+				//Print up and down buttons
+				for (int i = startPoint; i < endPoint + 1; i++)
+				{
+					sf::Text scenarioListText(listOfScenarios.at(i), *myFont, menuTextSize + 4);
+					scenarioListText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET + 30*i);
+									
+					//Draw White if highlighted
+					if(i == highlightedName)
+						scenarioListText.setFillColor(sf::Color::Blue);
+					else
+						scenarioListText.setFillColor(sf::Color::Black);
+					
+					mywindow->draw(scenarioListText);
+					//Otherwise draw normal
+				}
+
+				//Print buttons and display
+				for (int i = 8; i < 11; i++)
+				{
+					mywindow->draw(topMenuButtons.at(i).mySprite);
+				}
+				mywindow->display();
+
+
+				sf::Event playerInput;
+				mywindow->waitEvent(playerInput);
+
+				//Keep polling until a legit player input, not just mouse movement.
+				if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left)	//Must be mouse click
+				{
+					//Get mouse position
+					sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
+
+					//Take user input
+					bool withinUpButton = (topMenuButtons)[8].checkWithinButton(mousePosition.x, mousePosition.y);
+					if (withinUpButton == true)
+					{
+						highlightedName--;
+						if (highlightedName < 0)
+							highlightedName = 0;
+					}
+					bool withinDownButton = (topMenuButtons)[9].checkWithinButton(mousePosition.x, mousePosition.y);
+					if (withinDownButton == true)
+					{
+						highlightedName++;
+						if (highlightedName > listOfScenarios.size() - 1)
+							highlightedName = listOfScenarios.size() - 1;
+					}
+					bool withinSelectButton = (topMenuButtons)[10].checkWithinButton(mousePosition.x, mousePosition.y);
+					if (withinSelectButton == true)
+					{
+						scenarioChosen = true;
+						chosenScenarioName = listOfScenarios.at(highlightedName);
+					}
+				}
+				
+			}
+
+
+			std::string newScenario = chosenScenarioName;
+			newGameMap.open(".\\scenarios\\" + newScenario );
 			if (newGameMap.is_open())
 			{
 				mywindow->clear();
@@ -1549,7 +1661,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		{
 			mywindow->clear();
 			char buffer[100];
-			snprintf(buffer, 330, "Input Player %d's name: \n", i);
+			snprintf(buffer, 100, "Input Player %d's name: \n", i);
 			sf::String announceString = buffer;
 			inputName = playerInputString(mywindow, myFont, announceString, 1, "new", 330);
 

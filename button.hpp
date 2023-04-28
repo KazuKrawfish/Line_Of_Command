@@ -19,7 +19,7 @@
 enum buttonType {
 	newGame, loadGame, editorModeOff, editorModeOn, newCampaign, newSkirmish, topBack1, loadCampaign, loadSkirmish,
 	exitToMainMenu, saveGame, loadGameFromGame, restart, soundOn, soundOff, speedNormal, speedFast, endTurn, resumePlay,
-	factoryButton, airbaseButton, portButton, statusButton, factionButton
+	factoryButton, airbaseButton, portButton, statusButton, factionButton, quitButton, upDownButton, selectButton
 };
 
 
