@@ -1492,28 +1492,39 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				mywindow->waitEvent(playerInput);
 
 				//Keep polling until a legit player input, not just mouse movement.
-				if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left)	//Must be mouse click
+				if ((playerInput.type == sf::Event::MouseButtonReleased && playerInput.mouseButton.button == sf::Mouse::Left)
+					|| playerInput.type  ==  sf::Event::KeyReleased)
+						//Must be mouse click
 				{
 					//Get mouse position
 					sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
 
 					//Take user input
-					bool withinUpButton = (topMenuButtons)[8].checkWithinButton(mousePosition.x, mousePosition.y);
-					if (withinUpButton == true)
+
+					bool withinUpButton = false;
+					if(playerInput.type == sf::Event::MouseButtonReleased)
+						withinUpButton = topMenuButtons[8].checkWithinButton(mousePosition.x, mousePosition.y);
+					if (withinUpButton == true || ( playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Up) )
 					{
 						highlightedName--;
 						if (highlightedName < 0)
 							highlightedName = 0;
 					}
-					bool withinDownButton = (topMenuButtons)[9].checkWithinButton(mousePosition.x, mousePosition.y);
-					if (withinDownButton == true)
+
+					bool withinDownButton = false;
+					if (playerInput.type == sf::Event::MouseButtonReleased)
+						withinDownButton = topMenuButtons[9].checkWithinButton(mousePosition.x, mousePosition.y);
+					if (withinDownButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Down))
 					{
 						highlightedName++;
 						if (highlightedName > listOfScenarios.size() - 1)
 							highlightedName = listOfScenarios.size() - 1;
 					}
-					bool withinSelectButton = (topMenuButtons)[10].checkWithinButton(mousePosition.x, mousePosition.y);
-					if (withinSelectButton == true)
+
+					bool withinSelectButton = false;
+					if (playerInput.type == sf::Event::MouseButtonReleased)
+						withinSelectButton = (topMenuButtons)[10].checkWithinButton(mousePosition.x, mousePosition.y);
+					if (withinSelectButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Enter))
 					{
 						scenarioChosen = true;
 						chosenScenarioName = listOfScenarios.at(highlightedName);
