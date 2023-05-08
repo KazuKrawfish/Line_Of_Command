@@ -2950,7 +2950,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 		//Exit to main menu
 		if (withinMainMenuButton == true)
 		{
-			MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
+			MainMenu->saveGameData(".\\savegames\\Auto_save", boardToInput);
 			exitToMainMenu(boardToInput);
 
 		}
@@ -2967,9 +2967,9 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 
 			std::string stdSaveGameName = ".\\savegames\\";
 			stdSaveGameName += saveGameName;
-			stdSaveGameName += "_save.txt";
+			stdSaveGameName += "_save";
 
-			MainMenu->gameSave(stdSaveGameName, boardToInput);
+			MainMenu->saveGameData(stdSaveGameName, boardToInput);
 
 			inputLayerWindow->clear();
 
@@ -3017,7 +3017,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset, "load", 150);
 				
 				std::string stdloadGameName = loadGameName;
-				loadGameSave.open(".\\savegames\\" + stdloadGameName + "_save.txt");
+				loadGameSave.open(".\\savegames\\" + stdloadGameName + "_save");
 				if (loadGameSave.is_open())
 				{
 					inputLayerWindow->clear();
@@ -3048,7 +3048,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 				}
 			}
 			//Actually load scenario. Initialize board, etc.
-			MainMenu->gameLoad(boardToInput, this, &loadGameSave);
+			MainMenu->loadGameData(boardToInput, this, &loadGameSave);
 			//Flush event queue to clear out "Enter" and other rifraf
 			sf::Event throwAwayEvent;
 			while (inputLayerWindow->pollEvent(throwAwayEvent));
@@ -3101,7 +3101,7 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			MainMenu->gameTurn += incrementGameTurn;
 
 			//Have to always keep an autosave!
-			MainMenu->gameSave(".\\savegames\\Auto_save.txt", boardToInput);
+			MainMenu->saveGameData(".\\savegames\\Auto_save", boardToInput);
 
 		}
 
@@ -3141,11 +3141,11 @@ int inputLayer::restartGame(MasterBoard* boardToInput)
 		if (boardToInput->missionFlag == true)
 		{
 
-			loadGame.open(".\\campaigns\\" + boardToInput->campaignName + "\\" + gameToLoad + ".txt");
+			loadGame.open(".\\campaigns\\" + boardToInput->campaignName + "\\" + gameToLoad );
 		}
 		else
 		{
-			loadGame.open(".\\scenarios\\" + gameToLoad + ".txt");
+			loadGame.open(".\\scenarios\\" + gameToLoad );
 		}
 
 		if (loadGame.is_open())
@@ -3161,7 +3161,7 @@ int inputLayer::restartGame(MasterBoard* boardToInput)
 
 	}
 	//Actually load scenario. Initialize board, etc.
-	MainMenu->gameLoad(boardToInput, this, &loadGame);
+	MainMenu->loadGameData(boardToInput, this, &loadGame);
 
 	//We don't always print mission briefing but we do here
 	printMissionBriefing(boardToInput);
@@ -3183,7 +3183,7 @@ int inputLayer::NextMission(MasterBoard* boardToInput)
 
 		std::string gameToLoad = MainMenu->nextMissionName;
 
-		loadGame.open(".\\campaigns\\" + boardToInput->campaignName + "\\" + gameToLoad + ".txt");
+		loadGame.open(".\\campaigns\\" + boardToInput->campaignName + "\\" + gameToLoad );
 
 
 		if (loadGame.is_open())
@@ -3200,7 +3200,7 @@ int inputLayer::NextMission(MasterBoard* boardToInput)
 	}
 	std::string playerName = boardToInput->playerRoster[1].name;
 	//Actually load scenario. Initialize board, etc.
-	MainMenu->gameLoad(boardToInput, this, &loadGame);
+	MainMenu->loadGameData(boardToInput, this, &loadGame);
 	boardToInput->playerRoster[1].name = playerName;
 	//NEED to transfer player information -  just the name for now.
 

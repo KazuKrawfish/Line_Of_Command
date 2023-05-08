@@ -199,7 +199,7 @@ int main()
 		std::cout << "Couldn't load image!" << std::endl;
 	}
 
-	if (!secondMainImage.loadFromFile("secondTilesAndUnits.png"))
+	if (!secondMainImage.loadFromFile("tilesAndUnitsAlternate.png"))
 	{
 		std::cout << "Couldn't load image!" << std::endl;
 	}

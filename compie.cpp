@@ -1970,7 +1970,7 @@ int compie::takeMyTurn(MasterBoard* boardToUse)
 		determineProduction(boardToUse);
 
 		//Have to always keep an autosave!
-		menuPointer->gameSave(".\\savegames\\Auto_save.txt", boardToUse);
+		menuPointer->saveGameData(".\\savegames\\Auto_save", boardToUse);
 
 
 		int incrementGameTurn = boardToUse->endTurn(InputLayer);

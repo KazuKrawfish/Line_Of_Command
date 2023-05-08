@@ -3,7 +3,6 @@
 //	mainMenu.cpp
 //
 
-
 #include "Minion.hpp"
 #include "MasterBoard.hpp"
 #include "inputLayer.hpp"
@@ -13,7 +12,6 @@
 #include <fstream>
 #include <stdio.h>
 #include "compie.hpp"
-
 
 
 class inputLayer;
@@ -82,7 +80,7 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 
 			inputString += event.text.unicode;
 			sf::Text inputText(inputString, *inputFont, menuTextSize);
-			inputText.setPosition( MM_WIDTH_OFFSET + offsetWidth, MM_HEIGHT_OFFSET + (menuTextSize + 10) * (LineNumber)+200);	//Position for strings for announcements and such
+			inputText.setPosition(MM_WIDTH_OFFSET + offsetWidth, MM_HEIGHT_OFFSET + (menuTextSize + 10) * (LineNumber)+200);	//Position for strings for announcements and such
 			inputText.setFillColor(sf::Color::Black);
 
 			myWindow->clear();
@@ -141,9 +139,9 @@ char getValidPlayerInput(sf::RenderWindow* myWindow)
 	return inputChar;
 }
 
-mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* inputFont, sf::Font* boldInputFont, std::vector <sf::Texture>* topMenuButtonTextureArray,
-					std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music * inputMusicArray,
-					std::vector <sf::Texture>* factionButtonTextureArray , std::string inputConfigFileName, std::string inputMapName )
+mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Font* inputFont, sf::Font* boldInputFont, std::vector <sf::Texture>* topMenuButtonTextureArray,
+	std::vector  <sf::Texture>* inputGameMenuButtonTextureArray, std::vector <sf::Texture>* inputOtherTextureArray, sf::Music* inputMusicArray,
+	std::vector <sf::Texture>* factionButtonTextureArray, std::string inputConfigFileName, std::string inputMapName)
 {
 	printTimer.restart();
 
@@ -161,9 +159,9 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	sf::Vector2u windowSize = myWindow->getSize();
 	std::cout << "Window width is: " << windowSize.x << std::endl;
 	std::cout << "Window height is: " << windowSize.y << std::endl;
-	
+
 	//Actually needs to be based off the various briefing backgrounds and such, not the game board itself.
-	MM_WIDTH_OFFSET = (windowSize.x - inputOtherTextureArray->at(5).getSize().x ) / 2;
+	MM_WIDTH_OFFSET = (windowSize.x - inputOtherTextureArray->at(5).getSize().x) / 2;
 	MM_HEIGHT_OFFSET = (windowSize.y - inputOtherTextureArray->at(5).getSize().y) / 2;
 	//MM_HEIGHT_OFFSET = (windowSize.y - MAX_WINDOW_HEIGHT * 50) / 2;
 
@@ -266,12 +264,15 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	int x = MM_WIDTH_OFFSET + 40;
 	y = MM_HEIGHT_OFFSET + 40;
 	topMenuButtons.emplace_back(x, y, upDownButton, &(topMenuButtonTextureArray->at(8)), "upButton");
-
-	y = MM_HEIGHT_OFFSET + 40 + topMenuButtonTextureArray->at(9).getSize().y + 30 ;
+	y = MM_HEIGHT_OFFSET + 40 + topMenuButtonTextureArray->at(9).getSize().y + 30;
 	topMenuButtons.emplace_back(x, y, upDownButton, &(topMenuButtonTextureArray->at(9)), "downButton");
-
-	y = MM_HEIGHT_OFFSET  + 40 + 2 * (topMenuButtonTextureArray->at(10).getSize().y + 30);
+	y = MM_HEIGHT_OFFSET + 40 + 2 * (topMenuButtonTextureArray->at(10).getSize().y + 30);
 	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "selectButton");
+
+	y = MM_HEIGHT_OFFSET + 40 + 2 * (topMenuButtonTextureArray->at(11).getSize().y + 30);
+	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "computerPlayerButton");
+	y = MM_HEIGHT_OFFSET + 40 + 2 * (topMenuButtonTextureArray->at(12).getSize().y + 30);
+	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "humanPlayerButton");
 
 	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -296,7 +297,7 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 	//Factionbutton creation
 	for (int i = 0; i < 2; i++)
 	{
-		for (int j = 0; j < 2; j++) 
+		for (int j = 0; j < 2; j++)
 		{
 			int y = i * (factionButtonHeight + factionBetweenMargin) + factionButtonsTop + MM_HEIGHT_OFFSET;
 			int x = j * (factionButtonWidth + factionBetweenMargin) + factionButtonsLeft + MM_WIDTH_OFFSET;
@@ -304,7 +305,6 @@ mainMenu::mainMenu(	sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fo
 			factionNumber++;
 		}
 	}
-
 	//Faction choice buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -332,14 +332,6 @@ mainMenu::mainMenu(std::string inputConfigFileName, std::string inputMapName)
 
 }
 
-
-//Gameplay note:
-//As currently constructed, host for a new scenario must be player 1. Anyone join will play the turn assigned based on their player name.
-//Thus host never says "his" player name, because that is the first one inputted!
-//Similarly, if you host for a loaded game, you are playing as whose turn it was, so you should only host for whose turn was current when saved.
-//Finally, for host, you currently must start with a unique session name, and they will be cleared every day to start.
-
-
 int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 {
 	for (int x = 0; x < LoadBoard->BOARD_WIDTH; x++)
@@ -361,127 +353,125 @@ int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 		}
 	}
 
-
 	return 0;
 }
 
-int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
+int mainMenu::saveGameData(std::string inputSaveGameName, MasterBoard* boardToPrint)
 {
-	std::ofstream saveGame(inputSaveGameName);
+	std::ofstream saveGameStream(inputSaveGameName);
 
-	saveGame << "Savegame_YesNo" << std::endl;
-	saveGame << 1 << std::endl;
+	saveGameStream << "Savegame_YesNo" << std::endl;
+	saveGameStream << 1 << std::endl;
 
 	//Unique to save_game vs scenario. First save number of players, and then player names (User names):
-	saveGame << "Number_of_players_below:" << std::endl;
-	saveGame << boardToPrint->NUMBEROFPLAYERS << std::endl;
+	saveGameStream << "Number_of_players_below:" << std::endl;
+	saveGameStream << boardToPrint->NUMBEROFPLAYERS << std::endl;
 
 
 	//*********************************************//
 	//Input "Mission load" data here
-	saveGame << "Mission_On_Off" << std::endl;		//Mission or not
-	saveGame << boardToPrint->missionFlag << std::endl;
+	saveGameStream << "Mission_On_Off" << std::endl;		//Mission or not
+	saveGameStream << boardToPrint->missionFlag << std::endl;
 
-	saveGame << "Campaign_Name" << std::endl;		//Mission or not
-	saveGame << boardToPrint->campaignName << std::endl;
+	saveGameStream << "Campaign_Name" << std::endl;		//Mission or not
+	saveGameStream << boardToPrint->campaignName << std::endl;
 
-	saveGame << "ScenarioOrMissionName" << std::endl;
-	saveGame << boardToPrint->scenarioOrMissionName << std::endl;	//Must be exactly the same as the txt file's name
+	saveGameStream << "ScenarioOrMissionName" << std::endl;
+	saveGameStream << boardToPrint->scenarioOrMissionName << std::endl;	//Must be exactly the same as the txt file's name
 
-	saveGame << "TurnLimit_Or_0_ForOff" << std::endl;		//TurnLength - either 0 for no max turn length, or int to indicate length
-	saveGame << boardToPrint->missionTurnLength << std::endl;
+	saveGameStream << "TurnLimit_Or_0_ForOff" << std::endl;		//TurnLength - either 0 for no max turn length, or int to indicate length
+	saveGameStream << boardToPrint->missionTurnLength << std::endl;
 
-	saveGame << "Who_wins_after_turn_limit" << std::endl;		//Indicates who will win if turn length is met.
-	saveGame << boardToPrint->whoHoldsOut << std::endl;
+	saveGameStream << "Who_wins_after_turn_limit" << std::endl;		//Indicates who will win if turn length is met.
+	saveGameStream << boardToPrint->whoHoldsOut << std::endl;
 
-	saveGame << "Name_of_next_mission_(Same_Directory)" << std::endl;		//Name of next mission
-	saveGame << nextMissionName << std::endl;
+	saveGameStream << "Name_of_next_mission_(Same_Directory)" << std::endl;		//Name of next mission
+	saveGameStream << nextMissionName << std::endl;
 
-	saveGame << "Mission_Briefing " << std::endl;	//String with mission info
-	saveGame << briefingLineNumber << " ";
-	saveGame << missionBriefing;
+	saveGameStream << "Mission_Briefing " << std::endl;	//String with mission info
+	saveGameStream << briefingLineNumber << " ";
+	saveGameStream << missionBriefing;
 
 	//End Mission Data Load
 	//*********************************************//
 
 
-
-	saveGame << "Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction" << std::endl;
+	saveGameStream << "Player_Data:_Name_PlayerType_StillAlive_Treasury_Faction" << std::endl;
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
-		saveGame << boardToPrint->playerRoster[i].name << std::endl;
-		saveGame << int(boardToPrint->playerRoster[i].playerType) << std::endl;
-		saveGame << int(boardToPrint->playerRoster[i].stillAlive) << std::endl;
-		saveGame << boardToPrint->playerRoster[i].treasury << std::endl;
-		saveGame << boardToPrint->playerRoster[i].playerFaction << std::endl;
+		saveGameStream << boardToPrint->playerRoster[i].name << std::endl;
+		saveGameStream << int(boardToPrint->playerRoster[i].playerType) << std::endl;
+		saveGameStream << int(boardToPrint->playerRoster[i].stillAlive) << std::endl;
+		saveGameStream << boardToPrint->playerRoster[i].treasury << std::endl;
+		saveGameStream << boardToPrint->playerRoster[i].playerFaction << std::endl;
 	}
 
 	//Then save the game turn.
-	saveGame << "Game_turn_below:" << std::endl;
-	saveGame << gameTurn << std::endl;
+	saveGameStream << "Game_turn_below:" << std::endl;
+	saveGameStream << gameTurn << std::endl;
 
 	//Then save fog of war status.
-	saveGame << "Fog_Of_War:" << std::endl;
-	saveGame << boardToPrint->fogOfWar << std::endl;
+	saveGameStream << "Fog_Of_War:" << std::endl;
+	saveGameStream << boardToPrint->fogOfWar << std::endl;
 
 
 	//Then save the map size:
-	saveGame << "Map_width_below:" << std::endl;
-	saveGame << boardToPrint->BOARD_WIDTH << std::endl;
-	saveGame << "Map_height_below:" << std::endl;
-	saveGame << boardToPrint->BOARD_HEIGHT << std::endl;
+	saveGameStream << "Map_width_below:" << std::endl;
+	saveGameStream << boardToPrint->BOARD_WIDTH << std::endl;
+	saveGameStream << "Map_height_below:" << std::endl;
+	saveGameStream << boardToPrint->BOARD_HEIGHT << std::endl;
 
 	//Then save whos turn it is:
-	saveGame << "Player_whose_turn_it_is_below:" << std::endl;
-	saveGame << boardToPrint->playerFlag << std::endl;
+	saveGameStream << "Player_whose_turn_it_is_below:" << std::endl;
+	saveGameStream << boardToPrint->playerFlag << std::endl;
 
 	//Terrain save:
 	//Iterate through board and save the exact symbol.
 	//Saving symbol and controller separately for ease of edit and viewing.
 	//Only pain point is do mass control-edits, but viewability is protected.
-	saveGame << "Map_terrain_below:" << std::endl;
+	saveGameStream << "Map_terrain_below:" << std::endl;
 	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
 		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
-			saveGame << boardToPrint->Board[x][y].symbol;
+			saveGameStream << boardToPrint->Board[x][y].symbol;
 		}
-		saveGame << std::endl;
+		saveGameStream << std::endl;
 	}
 
 	//Iterate through board and save the controller.
-	saveGame << "Property_controller_number_below:" << std::endl;
+	saveGameStream << "Property_controller_number_below:" << std::endl;
 	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
 		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
-			saveGame << boardToPrint->Board[x][y].controller;
+			saveGameStream << boardToPrint->Board[x][y].controller;
 
 		}
-		saveGame << std::endl;
+		saveGameStream << std::endl;
 	}
 
 	//Save minion ban list. Start with number of banned minion types.
 	//Number of banned types
 	int numberOfBannedTypes = boardToPrint->banList.size();
 
-	saveGame << "Number_Of_Banned_Minions" << std::endl;
-	saveGame << numberOfBannedTypes << std::endl;
+	saveGameStream << "Number_Of_Banned_Minions" << std::endl;
+	saveGameStream << numberOfBannedTypes << std::endl;
 
-	saveGame << "Banned_Minion_List" << std::endl;
+	saveGameStream << "Banned_Minion_List" << std::endl;
 	//Then write out ban list
 	for (int i = 0; i < numberOfBannedTypes; i++)
 	{
-		saveGame << boardToPrint->banList.at(i) << std::endl;
+		saveGameStream << boardToPrint->banList.at(i) << std::endl;
 	}
 
 
 	//Note the number of minions:
-	saveGame << "Total_minions_below:" << std::endl;
-	saveGame << boardToPrint->totalNumberOfMinions << std::endl;
+	saveGameStream << "Total_minions_below:" << std::endl;
+	saveGameStream << boardToPrint->totalNumberOfMinions << std::endl;
 
 	//Go through entire minionRoster and save each value associated with each minion, one line per minion.
-	saveGame << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,PriAmmo,SecAmmo):" << std::endl;
+	saveGameStream << "Minion_roster_below_(XCoord,YCoord,Team,Seniority,Status,Health,Veterancy,CapPoints,TransportStatus,Fuel,PriAmmo,SecAmmo):" << std::endl;
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
 	{
 		//First cycle through all non transported minions and do them
@@ -489,7 +479,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 		{
 			int beingTransported = 0;
 
-			saveGame << boardToPrint->minionRoster[i]->type << " "
+			saveGameStream << boardToPrint->minionRoster[i]->type << " "
 				<< boardToPrint->minionRoster[i]->locationX << " "
 				<< boardToPrint->minionRoster[i]->locationY << " "
 				<< boardToPrint->minionRoster[i]->team << " "
@@ -516,7 +506,7 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 		if (boardToPrint->minionRoster[i] != NULL && boardToPrint->minionRoster[i]->transporter != NULL)
 		{
 			beingTransported = 1;
-			saveGame << boardToPrint->minionRoster[i]->type << " "
+			saveGameStream << boardToPrint->minionRoster[i]->type << " "
 				<< boardToPrint->minionRoster[i]->transporter->locationX << " "
 				<< boardToPrint->minionRoster[i]->transporter->locationY << " "
 				<< boardToPrint->minionRoster[i]->team << " "
@@ -532,12 +522,12 @@ int mainMenu::gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint)
 				std::endl;
 		}
 	}
-	saveGame.close();
+	saveGameStream.close();
 	return 1;
 }
 
 //Load scenario game and initialize the board with its contents.
-int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame)
+int mainMenu::loadGameData(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* dataStream)
 {
 	veryFirstTurn = true;
 
@@ -546,45 +536,45 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 	std::string ThrowawayString;
 
-	*saveGame >> ThrowawayString;
-	*saveGame >> isItSaveGame;
+	*dataStream >> ThrowawayString;
+	*dataStream >> isItSaveGame;
 
 	//First load number of players from save
 	//Remember to have one exta for ease of access (Player "0" is blank)
-	*saveGame >> ThrowawayString;
-	*saveGame >> boardToPrint->NUMBEROFPLAYERS;
+	*dataStream >> ThrowawayString;
+	*dataStream >> boardToPrint->NUMBEROFPLAYERS;
 	boardToPrint->playerRoster.resize(boardToPrint->NUMBEROFPLAYERS + 1);
 
 	//*********************************************//
 	//Input "Mission load" data here
-	*saveGame >> ThrowawayString;		//Campaign_game
-	*saveGame >> boardToPrint->missionFlag;
+	*dataStream >> ThrowawayString;		//Campaign_game
+	*dataStream >> boardToPrint->missionFlag;
 
-	*saveGame >> ThrowawayString;		//Campaign Name - used to navigate menu for next level
-	*saveGame >> boardToPrint->campaignName;
+	*dataStream >> ThrowawayString;		//Campaign Name - used to navigate menu for next level
+	*dataStream >> boardToPrint->campaignName;
 
-	*saveGame >> ThrowawayString;
-	*saveGame >> boardToPrint->scenarioOrMissionName;	//Must be exactly the same as the txt file's name
+	*dataStream >> ThrowawayString;
+	*dataStream >> boardToPrint->scenarioOrMissionName;	//Must be exactly the same as the txt file's name
 
-	*saveGame >> ThrowawayString;		//TurnLength - either 0 for no max turn length, or int to indicate length
-	*saveGame >> boardToPrint->missionTurnLength;
+	*dataStream >> ThrowawayString;		//TurnLength - either 0 for no max turn length, or int to indicate length
+	*dataStream >> boardToPrint->missionTurnLength;
 
-	*saveGame >> ThrowawayString;		//Indicates who will win if turn length is met.
-	*saveGame >> boardToPrint->whoHoldsOut;
+	*dataStream >> ThrowawayString;		//Indicates who will win if turn length is met.
+	*dataStream >> boardToPrint->whoHoldsOut;
 
-	*saveGame >> ThrowawayString;		//Name of next mission
-	*saveGame >> nextMissionName;
+	*dataStream >> ThrowawayString;		//Name of next mission
+	*dataStream >> nextMissionName;
 
 	briefingLineNumber = 0;
-	*saveGame >> ThrowawayString;		//String with mission info
-	*saveGame >> briefingLineNumber;
+	*dataStream >> ThrowawayString;		//String with mission info
+	*dataStream >> briefingLineNumber;
 
 	missionBriefing = "";
 
 	for (int i = 0; i < briefingLineNumber; i++)
 	{
 		std::string singleLine;
-		std::getline(*saveGame, singleLine);
+		std::getline(*dataStream, singleLine);
 		missionBriefing += singleLine;
 		missionBriefing += "\n";
 	}
@@ -594,18 +584,18 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 
 	//Unique to save_game vs scenario. Load player names (User names):
-	*saveGame >> ThrowawayString;
+	*dataStream >> ThrowawayString;
 	for (int i = 1; i <= boardToPrint->NUMBEROFPLAYERS; i++)
 	{
 		int playerType = 0;
 		int factionType = 0;
-				
-		*saveGame >> boardToPrint->playerRoster[i].name;	//For new game this should be ~
-		*saveGame >> playerType;
-		*saveGame >> boardToPrint->playerRoster[i].stillAlive;
-		*saveGame >> boardToPrint->playerRoster[i].treasury;
-		*saveGame >> factionType;
-			
+
+		*dataStream >> boardToPrint->playerRoster[i].name;	//For new game this should be ~
+		*dataStream >> playerType;
+		*dataStream >> boardToPrint->playerRoster[i].stillAlive;
+		*dataStream >> boardToPrint->playerRoster[i].treasury;
+		*dataStream >> factionType;
+
 		switch (factionType)
 		{
 		case(0):
@@ -635,24 +625,24 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 	}
 
 	//Then load the game turn.
-	*saveGame >> ThrowawayString;
-	*saveGame >> gameTurn;
+	*dataStream >> ThrowawayString;
+	*dataStream >> gameTurn;
 
 	//Then load fog of war status - in "new" game this should be overriden by player choice.
-	*saveGame >> ThrowawayString;
-	*saveGame >> boardToPrint->fogOfWar;
+	*dataStream >> ThrowawayString;
+	*dataStream >> boardToPrint->fogOfWar;
 
 	//If this is a new game, clear the treasury.
 	//(If going from a game in middle of play, to new game).
-	//Otherwise leave the values from the loadGame portion.
+	//Otherwise leave the values from the loadGameData portion.
 	//Clear treasury not necessary, just use whatever is in the scenario.
 
 	//First load the map size:
 	//Ideally we can create new vector or whatever to have different map size:
-	*saveGame >> ThrowawayString;
-	*saveGame >> boardToPrint->BOARD_WIDTH;
-	*saveGame >> ThrowawayString;
-	*saveGame >> boardToPrint->BOARD_HEIGHT;
+	*dataStream >> ThrowawayString;
+	*dataStream >> boardToPrint->BOARD_WIDTH;
+	*dataStream >> ThrowawayString;
+	*dataStream >> boardToPrint->BOARD_HEIGHT;
 
 	//Once board height and width are loaded, we try to adjust window size to either smaller or larger.
 	if (boardToPrint->BOARD_WIDTH < MAX_WINDOW_WIDTH)
@@ -674,7 +664,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 	//Resize the map based on new data.
 	//Not sure why we have to give an additional line but it segfaulted otherwise
-	boardToPrint->Board.resize(boardToPrint->BOARD_WIDTH );	//+1)
+	boardToPrint->Board.resize(boardToPrint->BOARD_WIDTH);	//+1)
 	for (int i = 0; i < boardToPrint->BOARD_WIDTH; i++)
 	{
 		boardToPrint->Board[i].resize(boardToPrint->BOARD_HEIGHT);
@@ -682,11 +672,11 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 	//Then load player data:
 	//This is the current player whos turn it is:
-	*saveGame >> ThrowawayString;
-	*saveGame >> boardToPrint->playerFlag;
+	*dataStream >> ThrowawayString;
+	*dataStream >> boardToPrint->playerFlag;
 
 	//Then load map
-	*saveGame >> ThrowawayString;
+	*dataStream >> ThrowawayString;
 
 	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
@@ -694,7 +684,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
 			char checkonMe = 'L';
-			*saveGame >> checkonMe;
+			*dataStream >> checkonMe;
 			boardToPrint->Board[x][y].symbol = checkonMe;
 
 			//Also resize for withinVision
@@ -708,13 +698,13 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 	//This is for properties.
 	char inputProperties;
-	*saveGame >> ThrowawayString;
+	*dataStream >> ThrowawayString;
 	for (int y = 0; y < boardToPrint->BOARD_HEIGHT; y++)
 	{
 
 		for (int x = 0; x < boardToPrint->BOARD_WIDTH; x++)
 		{
-			*saveGame >> inputProperties;
+			*dataStream >> inputProperties;
 			boardToPrint->Board[x][y].controller = (int(inputProperties)) - 48;
 		}
 	}
@@ -723,32 +713,32 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 
 	//Load minion ban list. Start with number of banned minion types.
 	//Number of banned types
-	*saveGame >> ThrowawayString;
+	*dataStream >> ThrowawayString;
 	int numberOfBannedTypes = 0;
-	*saveGame >> numberOfBannedTypes;
+	*dataStream >> numberOfBannedTypes;
 
-	*saveGame >> ThrowawayString;
+	*dataStream >> ThrowawayString;
 	//Then create ban list
 	for (int i = 0; i < numberOfBannedTypes; i++)
 	{
 		std::string bannedMinionType;
-		*saveGame >> bannedMinionType;
+		*dataStream >> bannedMinionType;
 		boardToPrint->banList.push_back(bannedMinionType);
 	}
 
 
 	//Then load minion data:
-	*saveGame >> ThrowawayString;
+	*dataStream >> ThrowawayString;
 	int numberOfMinions;
-	*saveGame >> numberOfMinions;
+	*dataStream >> numberOfMinions;
 	int health, locationX, locationY, team, seniority, status, veterancy, capturePoints, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo;
 	std::string type;
-	*saveGame >> ThrowawayString;
+	*dataStream >> ThrowawayString;
 
 	//Initialize all minions.
 	for (int y = 0; y < numberOfMinions; y++)
 	{
-		*saveGame >> type
+		*dataStream >> type
 			>> locationX
 			>> locationY
 			>> team
@@ -788,7 +778,7 @@ int mainMenu::gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::i
 		}
 	}
 
-	saveGame->close();
+	dataStream->close();
 	return 1;
 }
 
@@ -827,7 +817,7 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 	mywindow->clear();
 
-	if(InputLayer->soundsOn == true)
+	if (InputLayer->soundsOn == true)
 		musicArray[0].play();
 
 	mywindow->draw(startWallpaperSprite);
@@ -856,7 +846,6 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	return 0;
 }
 
-//Make sure all compie paths return to main menu.
 int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile)
 {
 	std::cout << "Entering battle lab." << std::endl;
@@ -869,7 +858,7 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	//TurnLimit
 	//200
 	//Scenario_Name
-	//midway.txt
+	//midway
 
 	battleLabTurnLimit = 0;
 	int battleLabNumberDraws = 0;
@@ -917,20 +906,20 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		//Need to print out mission/scenario printout here
 		if (gameType == localSkirmish)
 		{
-			newGameMap.open(".\\scenarios\\" + battleLabScenarioName );
+			newGameMap.open(".\\scenarios\\" + battleLabScenarioName);
 			if (newGameMap.is_open() == false)
 			{
 				std::cout << "Could not open scenario. Aborting battle lab." << std::endl;
 				return 1;
 			}
-			else 
+			else
 			{
 				std::cout << "Successfully opened scenario " << battleLabScenarioName << std::endl;
 			}
 		}
 
 		//Actually load scenario. Initialize board, etc.
-		gameLoad(boardToPlay, InputLayer, &newGameMap);
+		loadGameData(boardToPlay, InputLayer, &newGameMap);
 		newGameMap.close();
 
 		//Initialize compies if not done by gameLoad (They were initialized if it is a mission or a savegame)
@@ -939,7 +928,7 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		int variableInfantryAttackBonus = 2;			//Intended range is 1-3 for reasonable behavior. Makes attacking infantry more attractive - would be difficult to attack them with expensive minions otherwise
 		int variableInfantryBaseline = 5;				//No idea what a reasonable range is, probably between 0 - 10. Describes min. number of infantry required in army.
 		int variableArmySizeFactor = 4;					//Reasonable range is 1 - 8. 1 makes larger armies, 8 smaller.
-		
+
 		outputFile << "********** Starting game number: " << i << " ****************" << std::endl;
 
 		if (boardToPlay->missionFlag == false)
@@ -953,11 +942,11 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 				//variableInfantryAttackBonus = 1 + rand() % 3;
 				//variableInfantryBaseline = rand() % 11;
 				variableArmySizeFactor = 1 + rand() % 8;
-							   			
+
 				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, variableRepairThreshold, variableMinionAggressionBonus,
 					variableInfantryAttackBonus, variableInfantryBaseline, variableArmySizeFactor);
 
-				outputFile << "Repair threshold for player " << i << ": "<< variableRepairThreshold << std::endl;
+				outputFile << "Repair threshold for player " << i << ": " << variableRepairThreshold << std::endl;
 				outputFile << "Aggression bonus for player " << i << ": " << variableMinionAggressionBonus << std::endl;
 				outputFile << "Willingness to attack infantry for player " << i << ": " << variableInfantryAttackBonus << std::endl;
 				outputFile << "Infantry component size for player " << i << ": " << variableInfantryBaseline << std::endl;
@@ -999,7 +988,7 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 
 int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
-	
+
 	//Run as long as the user wants. Infinite while loop.
 	while (true)
 	{
@@ -1043,7 +1032,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 					playerInputReceived = false;
 
 				//Only print repeatedly if actually playing the board
-				if(menuStatus == playingMap)
+				if (menuStatus == playingMap)
 				{
 					//Advance the printTimer and reset after 1 second of real life time
 					if (printTimer.getElapsedTime().asSeconds() > float(1))
@@ -1066,7 +1055,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 					}
 
 					InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
-				}	
+				}
 
 			}
 
@@ -1076,19 +1065,19 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 				exit(0);
 			}
 			else
-			if (playerInput.type == sf::Event::KeyPressed)
-			{
-				Input = playerInput.key.code;
-			}
-			else
-				if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left) //sf::Mouse::isButtonPressed(sf::Mouse::Left)) //
+				if (playerInput.type == sf::Event::KeyPressed)
 				{
-					Input = sf::Keyboard::Quote;	//'`' represents mouseclick placeholder
+					Input = playerInput.key.code;
 				}
-				else if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Right)	//Right click
-				{
-					Input = sf::Keyboard::Comma;	//This is right click indicator
-				}
+				else
+					if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left) //sf::Mouse::isButtonPressed(sf::Mouse::Left)) //
+					{
+						Input = sf::Keyboard::Quote;	//'`' represents mouseclick placeholder
+					}
+					else if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Right)	//Right click
+					{
+						Input = sf::Keyboard::Comma;	//This is right click indicator
+					}
 		}
 
 
@@ -1157,7 +1146,6 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 				}
 
 				//This prints the screen AFTER the latest input has taken effect.
-				//Is this messing with remote play? Not sure.
 				//As long as battlelab is not on, print the screen.
 				if (battleLabOn == false)
 				{
@@ -1165,7 +1153,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 					InputLayer->printScreen(boardToPlay, boardToPlay->playerFlag, false);
 				}
-			
+
 			}
 
 
@@ -1173,7 +1161,6 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 	return 0;
 }
 
-//For later: int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
 	//If valid mouse click
@@ -1243,7 +1230,7 @@ int mainMenu::printTopMenu()
 	topMenuSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 
 	mywindow->clear();
-	
+
 	mywindow->draw(topMenuWallpaperSprite);
 
 	topMenuSprite.setPosition(450 + MM_WIDTH_OFFSET, 150 + MM_HEIGHT_OFFSET);
@@ -1274,7 +1261,7 @@ int mainMenu::printTopMenu()
 	return 0;
 }
 
-int mainMenu::printWaitingScreen()
+/*int mainMenu::printWaitingScreen()
 {
 	mywindow->clear();
 	sf::String waitingScreenString("Waiting for other player(s) \n");
@@ -1282,7 +1269,7 @@ int mainMenu::printWaitingScreen()
 	mywindow->draw(text);
 	mywindow->display();
 	return 0;
-}
+}*/
 
 
 int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer)
@@ -1298,7 +1285,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	//First draw out buttons, then take in input from mouse.
 	sf::Sprite topMenuWallpaperSprite;
 	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
-	
+
 
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(otherGameTextures->at(3));
@@ -1311,7 +1298,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	mywindow->draw(topMenuSprite);
 
 	sf::String topmenuString = "MAIN MENU";
-	sf::Text topmenuText(topmenuString, *myBoldFont, menuTextSize+5);
+	sf::Text topmenuText(topmenuString, *myBoldFont, menuTextSize + 5);
 	topmenuText.setPosition(520 + MM_WIDTH_OFFSET, 180 + MM_HEIGHT_OFFSET);
 	topmenuText.setFillColor(sf::Color::Black);
 	mywindow->draw(topmenuText);
@@ -1333,73 +1320,72 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		sf::Event playerInput;
 		mywindow->waitEvent(playerInput);
 
-		//Keep polling until a legit player input, not just mouse movement.
-		if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left)	//Must be mouse click
-		{
-			//Get mouse position
-			sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
-
-			sf::String nextTopMenuNewString;
-			bool withinSkirmishButton = (topMenuButtons)[newSkirmish].checkWithinButton(mousePosition.x, mousePosition.y);
-			if (withinSkirmishButton == true)
+			//Keep polling until a legit player input, not just mouse movement.
+			if (playerInput.type == sf::Event::MouseButtonPressed && playerInput.mouseButton.button == sf::Mouse::Left)	//Must be mouse click
 			{
-				mywindow->clear();
+				//Get mouse position
+				sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
 
-				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(otherGameTextures->at(1));
-				mywindow->draw(backgroundSprite);
+				sf::String nextTopMenuNewString;
+				bool withinSkirmishButton = (topMenuButtons)[newSkirmish].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinSkirmishButton == true)
+				{
+					mywindow->clear();
 
-				sf::Sprite menuBackgroundSprite;
-				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
-				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
-				mywindow->draw(menuBackgroundSprite);
+					sf::Sprite backgroundSprite;
+					backgroundSprite.setTexture(otherGameTextures->at(1));
+					mywindow->draw(backgroundSprite);
 
-				nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
-				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
-				newText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET);
-				newText.setFillColor(sf::Color::Black);
+					sf::Sprite menuBackgroundSprite;
+					menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+					menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+					mywindow->draw(menuBackgroundSprite);
 
-				mywindow->draw(newText);
-				mywindow->display();
-				gameType = localSkirmish;
+					nextTopMenuNewString = "Local skirmish selected. Press any key to continue.\n";
+					sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize);
+					newText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET);
+					newText.setFillColor(sf::Color::Black);
+
+					mywindow->draw(newText);
+					mywindow->display();
+					gameType = localSkirmish;
+				}
+
+				bool withinCampaignButton = (topMenuButtons)[newCampaign].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinCampaignButton == true)
+				{
+					mywindow->clear();
+
+					sf::Sprite backgroundSprite;
+					backgroundSprite.setTexture(otherGameTextures->at(1));
+					mywindow->draw(backgroundSprite);
+
+					sf::Sprite menuBackgroundSprite;
+					menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+					menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+					mywindow->draw(menuBackgroundSprite);
+
+					nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
+					sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize + 4);
+					newText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET);
+					newText.setFillColor(sf::Color::Black);
+
+					mywindow->draw(newText);
+					mywindow->display();
+					gameType = localCampaign;
+				}
+
+				bool withinBackButton = (topMenuButtons)[topBack1].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinBackButton == true)
+				{
+					return 1;
+				}
 			}
-
-			bool withinCampaignButton = (topMenuButtons)[newCampaign].checkWithinButton(mousePosition.x, mousePosition.y);
-			if (withinCampaignButton == true)
-			{
-				mywindow->clear();
-
-				sf::Sprite backgroundSprite;
-				backgroundSprite.setTexture(otherGameTextures->at(1));
-				mywindow->draw(backgroundSprite);
-
-				sf::Sprite menuBackgroundSprite;
-				menuBackgroundSprite.setTexture(otherGameTextures->at(6));
-				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
-				mywindow->draw(menuBackgroundSprite);
-
-				nextTopMenuNewString = "Local campaign selected. Press any key to continue.\n";
-				sf::Text newText(nextTopMenuNewString, *myFont, menuTextSize+4);
-				newText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET);
-				newText.setFillColor(sf::Color::Black);
-
-				mywindow->draw(newText);
-				mywindow->display();
-				gameType = localCampaign;
-			}
-
-			bool withinBackButton = (topMenuButtons)[topBack1].checkWithinButton(mousePosition.x, mousePosition.y);
-			if (withinBackButton == true)
-			{
-				return 1;
-			}
-		}
 	}
 
 	//Await player input to move past the selected item.
 	getValidPlayerInput(mywindow);
 	mywindow->clear();
-
 
 	//Load the actual map
 	std::ifstream newGameMap;
@@ -1424,9 +1410,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			const std::filesystem::path myPath{ ".\\scenarios" };
 			for (const auto& entry : std::filesystem::directory_iterator(myPath))
 			{
-				listOfScenarios.push_back( entry.path().string() );
+				listOfScenarios.push_back(entry.path().string());
 				std::cout << entry.path() << std::endl;
-				
+
 			}
 
 			for (int i = 0; i < listOfScenarios.size(); i++)
@@ -1464,23 +1450,23 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				titleText.setFillColor(sf::Color::Black);
 				mywindow->draw(titleText);
 
-				//Print up and down buttons
+				//Print text elements and display
 				for (int i = startPoint; i < endPoint + 1; i++)
 				{
 					sf::Text scenarioListText(listOfScenarios.at(i), *myFont, menuTextSize + 4);
-					scenarioListText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET + 30*i);
-									
+					scenarioListText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET + 30 * i);
+
 					//Draw White if highlighted
-					if(i == highlightedName)
+					if (i == highlightedName)
 						scenarioListText.setFillColor(sf::Color::Blue);
 					else
 						scenarioListText.setFillColor(sf::Color::Black);
-					
+
 					mywindow->draw(scenarioListText);
 					//Otherwise draw normal
 				}
 
-				//Print buttons and display
+				//Print up and down buttons and display
 				for (int i = 8; i < 11; i++)
 				{
 					mywindow->draw(topMenuButtons.at(i).mySprite);
@@ -1493,8 +1479,8 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 				//Keep polling until a legit player input, not just mouse movement.
 				if ((playerInput.type == sf::Event::MouseButtonReleased && playerInput.mouseButton.button == sf::Mouse::Left)
-					|| playerInput.type  ==  sf::Event::KeyReleased)
-						//Must be mouse click
+					|| playerInput.type == sf::Event::KeyReleased)
+					//Must be mouse click
 				{
 					//Get mouse position
 					sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
@@ -1502,9 +1488,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 					//Take user input
 
 					bool withinUpButton = false;
-					if(playerInput.type == sf::Event::MouseButtonReleased)
+					if (playerInput.type == sf::Event::MouseButtonReleased)
 						withinUpButton = topMenuButtons[8].checkWithinButton(mousePosition.x, mousePosition.y);
-					if (withinUpButton == true || ( playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Up) )
+					if (withinUpButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Up))
 					{
 						highlightedName--;
 						if (highlightedName < 0)
@@ -1530,12 +1516,12 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 						chosenScenarioName = listOfScenarios.at(highlightedName);
 					}
 				}
-				
+
 			}
 
 
 			std::string newScenario = chosenScenarioName;
-			newGameMap.open(".\\scenarios\\" + newScenario );
+			newGameMap.open(".\\scenarios\\" + newScenario);
 			if (newGameMap.is_open())
 			{
 				mywindow->clear();
@@ -1585,7 +1571,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			std::string newMission = "";
 
 			std::ifstream newCampaign;
-			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\" + newCampaignName + ".txt");
+			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\" + newCampaignName);
 
 			if (newCampaign.is_open())
 			{
@@ -1631,7 +1617,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 
 				newCampaign >> newMission;
-				newGameMap.open(".\\campaigns\\" + newCampaignName + "\\" + newMission + ".txt");
+				newGameMap.open(".\\campaigns\\" + newCampaignName + "\\" + newMission);
 
 			}
 			else
@@ -1647,17 +1633,12 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 		}
 	}
 	//Actually load scenario. Initialize board, etc.
-	gameLoad(boardToPlay, InputLayer, &newGameMap);
+	loadGameData(boardToPlay, InputLayer, &newGameMap);
 	newGameMap.close();
 
 	//Flush event queue to clear out "Enter" and other rifraf
 	sf::Event throwAwayEvent;
 	while (mywindow->pollEvent(throwAwayEvent));
-
-	std::ifstream loadSession;
-	bool sessionCreationSuccessful = false;
-	sf::String topMenuNewString;
-	//Determine player names for number of players
 
 	//We added one to the array, just like treasury, for easy access.
 	int numberOfCompies = 0;
@@ -1681,14 +1662,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			bool playerTypeDecided = false;
 			while (!playerTypeDecided)
 			{
-				char playerTypeInput = ' ';
-				topMenuNewString = "Is this player human (h) or computer (c)? \n";
-				sf::Text anotherText(topMenuNewString, *myFont, menuTextSize);
-				anotherText.setPosition(MM_WIDTH_OFFSET + 330, MM_HEIGHT_OFFSET + 200);
-				anotherText.setFillColor(sf::Color::Black);
-
 				mywindow->clear();
 
+				//Draw background
 				sf::Sprite backgroundSprite;
 				backgroundSprite.setTexture(otherGameTextures->at(1));
 				mywindow->draw(backgroundSprite);
@@ -1698,37 +1674,63 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 				mywindow->draw(menuBackgroundSprite);
 
+				//Print title text
+				sf::Text titleText("New Game", *myFont, 50);
+				titleText.setPosition(MM_WIDTH_OFFSET + 470, MM_HEIGHT_OFFSET + 70);
+				titleText.setFillColor(sf::Color::Black);
+				mywindow->draw(titleText);
+
+				sf::String topMenuNewString = "Is this player human (h) or computer (c)? \n";
+				sf::Text anotherText(topMenuNewString, *myFont, menuTextSize);
+				anotherText.setPosition(MM_WIDTH_OFFSET + 330, MM_HEIGHT_OFFSET + 200);
+				anotherText.setFillColor(sf::Color::Black);
 				mywindow->draw(anotherText);
+
+				//Draw comp/human buttons
+				mywindow->draw(topMenuButtons.at(11).mySprite);
+				mywindow->draw(topMenuButtons.at(12).mySprite);
 
 				mywindow->display();
 
-				playerTypeInput = getValidPlayerInput(mywindow);
+				sf::Event playerInput;
+				mywindow->waitEvent(playerInput);
 
-				if (playerTypeInput == 'c' || playerTypeInput == 'h')
+				//Keep polling until a legit player input, not just mouse movement.
+				if ((playerInput.type == sf::Event::MouseButtonReleased && playerInput.mouseButton.button == sf::Mouse::Left)
+					|| playerInput.type == sf::Event::KeyReleased)
+					//Must be mouse click
 				{
-					if (playerTypeInput == 'h')
-					{
-						boardToPlay->playerRoster[i].playerType = humanPlayer;
-					}
-					else if (playerTypeInput == 'c')
+					//Get mouse position
+					sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
+
+					//Determine whether they want computer or human for this player
+					bool withinCompButton = false;
+					if (playerInput.type == sf::Event::MouseButtonReleased)
+						withinCompButton = (topMenuButtons)[11].checkWithinButton(mousePosition.x, mousePosition.y);
+					if (withinCompButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::C))
 					{
 						boardToPlay->playerRoster[i].playerType = computerPlayer;
 						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, -1, -1, -1, -1, -1);	//Use default behaviors
+						playerTypeDecided = true;
 					}
-					playerTypeDecided = true;
-				}
-			}
 
+					bool withinHumanButton = false;
+					if (playerInput.type == sf::Event::MouseButtonReleased)
+						withinHumanButton = (topMenuButtons)[12].checkWithinButton(mousePosition.x, mousePosition.y);
+					if (withinHumanButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::H))
+					{
+						boardToPlay->playerRoster[i].playerType = humanPlayer;
+						playerTypeDecided = true;
+					}
+				}
+
+
+			}
 
 
 			bool factionDecided = false;
 			while (!factionDecided)
 			{
-				topMenuNewString = "Choose this player's faction. \n";
-				sf::Text factionChooseText(topMenuNewString, *myFont, menuTextSize);
-				factionChooseText.setPosition(500 + MM_WIDTH_OFFSET, 140 + MM_HEIGHT_OFFSET);
-				factionChooseText.setFillColor(sf::Color::Black);
-
 				mywindow->clear();
 
 				sf::Sprite backgroundSprite;
@@ -1740,10 +1742,20 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
 				mywindow->draw(menuBackgroundSprite);
 
-				mywindow->draw(factionChooseText);
-
 				for (int i = 0; i < factionChoiceButtons.size(); i++)
 					mywindow->draw(factionChoiceButtons.at(i).mySprite);
+
+				//Print title text
+				sf::Text titleText("New Game", *myFont, 50);
+				titleText.setPosition(MM_WIDTH_OFFSET + 470, MM_HEIGHT_OFFSET + 70);
+				titleText.setFillColor(sf::Color::Black);
+				mywindow->draw(titleText);
+
+				std::string topMenuNewString = "Choose this player's faction. \n";
+				sf::Text factionChooseText(topMenuNewString, *myFont, menuTextSize);
+				factionChooseText.setPosition(500 + MM_WIDTH_OFFSET, 140 + MM_HEIGHT_OFFSET);
+				factionChooseText.setFillColor(sf::Color::Black);
+				mywindow->draw(factionChooseText);
 
 				mywindow->display();
 
@@ -1778,9 +1790,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 	else	//If campaign game we just give player 1's name, and compie has already been initialized.
 	{
 		mywindow->clear();
-		topMenuNewString = "Input Player 1's name: \n";
+		std::string topMenuNewString = "Input Player 1's name: \n";
 
-		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1, "new",400);
+		inputName = playerInputString(mywindow, myFont, topMenuNewString, 1, "new", 400);
 		boardToPlay->playerRoster[1].name = inputName;
 
 	}
@@ -1822,29 +1834,144 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	}
 
 	//Load the actual save game
-	std::ifstream loadGameSave;
+	std::ifstream loadGameStream;
 
 	bool loadsuccessful = false;
-	sf::String topMenuNewString;
+	sf::String topMenuLoadString;
 	int announcementLength = 1;
 
-	topMenuNewString = "Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
+	topMenuLoadString = "Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
 	//Prompt user and load scenario
 	while (loadsuccessful == false)
 	{
 
+		bool scenarioChosen = false;
+		std::vector <std::string> listOfSavegames;
+		int highlightedName = 0;
+		std::string chosenSaveName = "";
 
-		sf::String scenarioName = playerInputString(mywindow, myFont, topMenuNewString, announcementLength, "load", 150);
-		std::string saveToLoad = scenarioName;
+		//Find all available save games and add them to the list
+		const std::filesystem::path myPath{ ".\\savegames" };
+		for (const auto& entry : std::filesystem::directory_iterator(myPath))
+		{
+			listOfSavegames.push_back(entry.path().string());
+			std::cout << entry.path() << std::endl;
 
-		saveToLoad += "_save.txt";
-		loadGameSave.open(".\\savegames\\" + saveToLoad);
-		if (loadGameSave.is_open())
+		}
+
+		for (int i = 0; i < listOfSavegames.size(); i++)
+		{
+			listOfSavegames.at(i).erase(0, 12);
+			std::cout << listOfSavegames.at(i) << std::endl;
+		}
+
+		while (scenarioChosen == false)
 		{
 			mywindow->clear();
-			topMenuNewString = "Save game successfully loaded! Press any key to continue.\n";
+			topMenuLoadString += "Choose which savegame to load: \n";
 
-			sf::Text newText(topMenuNewString, *myFont, menuTextSize);
+			//To print list of scenarios, first determine start and end points
+			int startPoint = highlightedName - 5;
+			if (startPoint < 0)
+				startPoint = 0;
+			int endPoint = highlightedName + 5;
+			if (endPoint > listOfSavegames.size() - 1)
+				endPoint = listOfSavegames.size() - 1;
+
+			//Print backgrounds
+			sf::Sprite backgroundSprite;
+			backgroundSprite.setTexture(otherGameTextures->at(1));
+			mywindow->draw(backgroundSprite);
+
+			sf::Sprite menuBackgroundSprite;
+			menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+			menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+			mywindow->draw(menuBackgroundSprite);
+
+			//Print title text
+			sf::Text titleText("Load Game", *myFont, 50);
+			titleText.setPosition(MM_WIDTH_OFFSET + 470, MM_HEIGHT_OFFSET + 70);
+			titleText.setFillColor(sf::Color::Black);
+			mywindow->draw(titleText);
+
+			//Print text elements and display
+			for (int i = startPoint; i < endPoint + 1; i++)
+			{
+				sf::Text scenarioListText(listOfSavegames.at(i), *myFont, menuTextSize + 4);
+				scenarioListText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET + 30 * i);
+
+				//Draw White if highlighted
+				if (i == highlightedName)
+					scenarioListText.setFillColor(sf::Color::Blue);
+				else
+					scenarioListText.setFillColor(sf::Color::Black);
+
+				mywindow->draw(scenarioListText);
+				//Otherwise draw normal
+			}
+
+			//Print up and down buttons and display
+			for (int i = 8; i < 11; i++)
+			{
+				mywindow->draw(topMenuButtons.at(i).mySprite);
+			}
+			mywindow->display();
+
+
+			sf::Event playerInput;
+			mywindow->waitEvent(playerInput);
+
+			//Keep polling until a legit player input, not just mouse movement.
+			if ((playerInput.type == sf::Event::MouseButtonReleased && playerInput.mouseButton.button == sf::Mouse::Left)
+				|| playerInput.type == sf::Event::KeyReleased)
+				//Must be mouse click
+			{
+				//Get mouse position
+				sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
+
+				//Take user input
+
+				bool withinUpButton = false;
+				if (playerInput.type == sf::Event::MouseButtonReleased)
+					withinUpButton = topMenuButtons[8].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinUpButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Up))
+				{
+					highlightedName--;
+					if (highlightedName < 0)
+						highlightedName = 0;
+				}
+
+				bool withinDownButton = false;
+				if (playerInput.type == sf::Event::MouseButtonReleased)
+					withinDownButton = topMenuButtons[9].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinDownButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Down))
+				{
+					highlightedName++;
+					if (highlightedName > listOfSavegames.size() - 1)
+						highlightedName = listOfSavegames.size() - 1;
+				}
+
+				bool withinSelectButton = false;
+				if (playerInput.type == sf::Event::MouseButtonReleased)
+					withinSelectButton = (topMenuButtons)[10].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinSelectButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Enter))
+				{
+					scenarioChosen = true;
+					chosenSaveName = listOfSavegames.at(highlightedName);
+				}
+			}
+
+		}
+
+
+		//After player chooses a save, try to load that save
+		loadGameStream.open(".\\savegames\\" + chosenSaveName);
+		if (loadGameStream.is_open())
+		{
+			mywindow->clear();
+			topMenuLoadString = "Save game successfully loaded! Press any key to continue.\n";
+
+			sf::Text newText(topMenuLoadString, *myFont, menuTextSize);
 			newText.setFillColor(sf::Color::Black);
 			newText.setPosition(330 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
 
@@ -1867,17 +1994,14 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 		}
 		else
 		{
-			topMenuNewString = "Could not load save game. Please check that it exists and the right spelling was used.\nChoose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
+			topMenuLoadString = "Could not load save game. Please check that it exists.\nChoose which save game to load: \n";
 			announcementLength = 2;
 		}
 
 	}
 	//Actually load scenario. Initialize board, etc.
-	gameLoad(boardToPlay, InputLayer, &loadGameSave);
-	loadGameSave.close();
-
-	std::ifstream loadSession;
-	bool sessionCreationSuccessful = false;
+	loadGameData(boardToPlay, InputLayer, &loadGameStream);
+	loadGameStream.close();
 
 	//Determines if they print or not.
 	int numberOfHumanPlayers = 0;

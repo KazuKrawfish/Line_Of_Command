@@ -48,14 +48,13 @@ public:
 
 	//Game session management///////////////////
 	int introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer);
-	int gameLoad(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame);
+	int loadGameData(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame);
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer);
-	int gameSave(std::string inputSaveGameName, MasterBoard* boardToPrint);
+	int saveGameData(std::string inputSaveGameName, MasterBoard* boardToPrint);
 	//Game session management///////////////////
 
 	//Other functions///////////////////////////
-	int printWaitingScreen();
 	sf::String playerInputString(sf::RenderWindow* myWindow, sf::Font* inputFont, sf::String AnnouncementString, int LineNumber, std::string backgroundType, int offsetWidth);
 	//Other functions///////////////////////////
 
