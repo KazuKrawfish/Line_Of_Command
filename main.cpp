@@ -120,7 +120,7 @@ int main()
 
 
 	//Load topMenuButton textures
-	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off",  "top_Editor_Mode_On",  "top_New_Campaign", "top_New_Skirmish", "top_Back" , "top_Quit", "upButton", "downButton", "Select" };
+	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off",  "top_Editor_Mode_On",  "top_New_Campaign", "top_New_Skirmish", "top_Back" , "top_Quit", "upButton", "downButton", "Select", "top_Computer", "top_Human" };
 	std::vector <sf::Texture> topMenuButtonTextureArray;
 	topMenuButtonTextureArray.resize(imageList.size());
 	initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);

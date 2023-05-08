@@ -269,10 +269,10 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	y = MM_HEIGHT_OFFSET + 40 + 2 * (topMenuButtonTextureArray->at(10).getSize().y + 30);
 	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "selectButton");
 
-	y = MM_HEIGHT_OFFSET + 40 + 2 * (topMenuButtonTextureArray->at(11).getSize().y + 30);
-	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "computerPlayerButton");
-	y = MM_HEIGHT_OFFSET + 40 + 2 * (topMenuButtonTextureArray->at(12).getSize().y + 30);
-	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "humanPlayerButton");
+	y = TopMenuTop + TopTopMargin + MM_HEIGHT_OFFSET;
+	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, selectButton, &(topMenuButtonTextureArray->at(11)), "computerPlayerButton");
+	y = TopMenuTop + TopTopMargin + TopButtonHeight + TopBetweenMargin + MM_HEIGHT_OFFSET;
+	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, selectButton, &(topMenuButtonTextureArray->at(12)), "humanPlayerButton");
 
 	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
