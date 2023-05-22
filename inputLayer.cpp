@@ -3008,52 +3008,20 @@ int inputLayer::menuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 			std::ifstream loadGameSave;
 			bool loadsuccessful = false;
 
-			//Prompt user and load scenario
-			int lineOffset = 1;
-			while (loadsuccessful == false)
+			//Determine game to load
+			bool didItLoad = MainMenu->determineGameToLoad(boardToInput,  this,  &loadGameSave);
+
+			//Gives chance for player to back out and return to current game.
+			if (didItLoad == true)
 			{
-
-				sf::String loadPrompt = "Choose which save game to load (Case sensitive): \n";
-				sf::String loadGameName = MainMenu->playerInputString(inputLayerWindow, inputLayerFont, loadPrompt, lineOffset, "load", 150);
-				
-				std::string stdloadGameName = loadGameName;
-				loadGameSave.open(".\\savegames\\" + stdloadGameName + "_save");
-				if (loadGameSave.is_open())
-				{
-					inputLayerWindow->clear();
-					sf::String successful = "Successfully loaded! Press any key to continue.\n";
-
-					sf::Sprite backgroundSprite;
-					backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
-					inputLayerWindow->draw(backgroundSprite);
-
-					sf::Sprite menuBackgroundSprite;
-					menuBackgroundSprite.setTexture(MainMenu->otherGameTextures->at(5));
-					menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
-					inputLayerWindow->draw(menuBackgroundSprite);
-
-					sf::Text newText(successful, *inputLayerFont, MainMenu->menuTextSize);
-					newText.setPosition(IL_WIDTH_OFFSET + 100, IL_HEIGHT_OFFSET + 200);
-					newText.setFillColor(sf::Color::Black);
-					inputLayerWindow->draw(newText);
-					inputLayerWindow->display();
-
-					loadsuccessful = true;
-				}
-				else
-				{
-					sf::String loadPrompt = "Could not load save game. Please check that it exists and the right spelling was used.\nChoose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
-					lineOffset = 2;
-
-				}
+				//Actually load scenario. Initialize board, etc.
+				MainMenu->loadGameData(boardToInput, this, &loadGameSave);
+				//Flush event queue to clear out "Enter" and other rifraf
+				sf::Event throwAwayEvent;
+				while (inputLayerWindow->pollEvent(throwAwayEvent));
+				//Give player a chance to click.
+				getValidPlayerInput(inputLayerWindow);
 			}
-			//Actually load scenario. Initialize board, etc.
-			MainMenu->loadGameData(boardToInput, this, &loadGameSave);
-			//Flush event queue to clear out "Enter" and other rifraf
-			sf::Event throwAwayEvent;
-			while (inputLayerWindow->pollEvent(throwAwayEvent));
-			//Give player a chance to click.
-			getValidPlayerInput(inputLayerWindow);
 
 			status = gameBoard;
 		}

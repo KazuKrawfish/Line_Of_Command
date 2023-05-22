@@ -269,6 +269,11 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	y = MM_HEIGHT_OFFSET + 40 + 2 * (topMenuButtonTextureArray->at(10).getSize().y + 30);
 	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "selectButton");
 
+	//Back button
+	y = MM_HEIGHT_OFFSET + TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * 3;
+	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, topBack1, &(topMenuButtonTextureArray->at(6)), "backButton");
+
+	//Human / computer choice buttons
 	y = TopMenuTop + TopTopMargin + MM_HEIGHT_OFFSET;
 	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, selectButton, &(topMenuButtonTextureArray->at(11)), "computerPlayerButton");
 	y = TopMenuTop + TopTopMargin + TopButtonHeight + TopBetweenMargin + MM_HEIGHT_OFFSET;
@@ -331,6 +336,182 @@ mainMenu::mainMenu(std::string inputConfigFileName, std::string inputMapName)
 
 
 }
+
+//New
+bool mainMenu::determineGameToLoad(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* loadGameStream)
+{
+	bool loadsuccessful = false;
+	std::string topMenuLoadString;
+	//Prompt user and load scenario
+	while (loadsuccessful == false)
+	{
+
+		bool scenarioChosen = false;
+		std::vector <std::string> listOfSavegames;
+		int highlightedName = 0;
+		std::string chosenSaveName = "";
+
+		//Find all available save games and add them to the list
+		const std::filesystem::path myPath{ ".\\savegames" };
+		for (const auto& entry : std::filesystem::directory_iterator(myPath))
+		{
+			listOfSavegames.push_back(entry.path().string());
+			std::cout << entry.path() << std::endl;
+
+		}
+
+		for (int i = 0; i < listOfSavegames.size(); i++)
+		{
+			listOfSavegames.at(i).erase(0, 12);
+			std::cout << listOfSavegames.at(i) << std::endl;
+		}
+
+		while (scenarioChosen == false)
+		{
+			mywindow->clear();
+			topMenuLoadString += "Choose which savegame to load: \n";
+
+			//To print list of scenarios, first determine start and end points
+			int startPoint = highlightedName - 5;
+			if (startPoint < 0)
+				startPoint = 0;
+			int endPoint = highlightedName + 5;
+			if (endPoint > listOfSavegames.size() - 1)
+				endPoint = listOfSavegames.size() - 1;
+
+			//Print backgrounds
+			sf::Sprite backgroundSprite;
+			backgroundSprite.setTexture(otherGameTextures->at(1));
+			mywindow->draw(backgroundSprite);
+
+			sf::Sprite menuBackgroundSprite;
+			menuBackgroundSprite.setTexture(otherGameTextures->at(6));
+			menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+			mywindow->draw(menuBackgroundSprite);
+
+			//Print title text
+			sf::Text titleText("Load Game", *myFont, 50);
+			titleText.setPosition(MM_WIDTH_OFFSET + 470, MM_HEIGHT_OFFSET + 70);
+			titleText.setFillColor(sf::Color::Black);
+			mywindow->draw(titleText);
+
+			//Print text elements and display
+			for (int i = startPoint; i < endPoint + 1; i++)
+			{
+				sf::Text scenarioListText(listOfSavegames.at(i), *myFont, menuTextSize + 4);
+				scenarioListText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET + 30 * i);
+
+				//Draw White if highlighted
+				if (i == highlightedName)
+					scenarioListText.setFillColor(sf::Color::Blue);
+				else
+					scenarioListText.setFillColor(sf::Color::Black);
+
+				mywindow->draw(scenarioListText);
+				//Otherwise draw normal
+			}
+
+			//Print up and down buttons and display
+			for (int i = 8; i < 11; i++)
+			{
+				mywindow->draw(topMenuButtons.at(i).mySprite);
+			}
+			//Print back button
+			mywindow->draw(topMenuButtons.at(6).mySprite);
+			mywindow->display();
+
+
+			sf::Event playerInput;
+			mywindow->waitEvent(playerInput);
+
+			//Keep polling until a legit player input, not just mouse movement.
+			if ((playerInput.type == sf::Event::MouseButtonReleased && playerInput.mouseButton.button == sf::Mouse::Left)
+				|| playerInput.type == sf::Event::KeyReleased)
+				//Must be mouse click
+			{
+				//Get mouse position
+				sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
+
+				//Take user input
+
+				bool withinUpButton = false;
+				if (playerInput.type == sf::Event::MouseButtonReleased)
+					withinUpButton = topMenuButtons[8].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinUpButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Up))
+				{
+					highlightedName--;
+					if (highlightedName < 0)
+						highlightedName = 0;
+				}
+
+				bool withinDownButton = false;
+				if (playerInput.type == sf::Event::MouseButtonReleased)
+					withinDownButton = topMenuButtons[9].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinDownButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Down))
+				{
+					highlightedName++;
+					if (highlightedName > listOfSavegames.size() - 1)
+						highlightedName = listOfSavegames.size() - 1;
+				}
+
+				bool withinSelectButton = false;
+				if (playerInput.type == sf::Event::MouseButtonReleased)
+					withinSelectButton = (topMenuButtons)[10].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinSelectButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Enter))
+				{
+					scenarioChosen = true;
+					chosenSaveName = listOfSavegames.at(highlightedName);
+				}
+
+				bool withinBackButton = false;
+				if (playerInput.type == sf::Event::MouseButtonReleased)
+					withinBackButton = (topMenuButtons)[6].checkWithinButton(mousePosition.x, mousePosition.y);
+				if (withinBackButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Escape))
+				{
+					return false;
+				}
+
+
+			}
+
+		}
+
+
+		//After player chooses a save, try to load that save
+		loadGameStream->open(".\\savegames\\" + chosenSaveName);
+		if (loadGameStream->is_open())
+		{
+			mywindow->clear();
+			topMenuLoadString = "Save game successfully loaded! Press any key to continue.\n";
+
+			sf::Text newText(topMenuLoadString, *myFont, menuTextSize);
+			newText.setFillColor(sf::Color::Black);
+			newText.setPosition(330 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
+
+			sf::Sprite backgroundSprite;
+			backgroundSprite.setTexture(otherGameTextures->at(1));
+			mywindow->draw(backgroundSprite);
+
+			sf::Sprite menuBackgroundSprite;
+			menuBackgroundSprite.setTexture(otherGameTextures->at(5));
+			menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
+			mywindow->draw(menuBackgroundSprite);
+
+
+			mywindow->draw(newText);
+			mywindow->display();
+
+			loadsuccessful = true;
+
+			getValidPlayerInput(mywindow);
+		}
+
+	}
+
+	return true;
+
+}
+
 
 int mainMenu::setCharacteristics(MasterBoard* LoadBoard)
 {
@@ -1836,189 +2017,38 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 	//Load the actual save game
 	std::ifstream loadGameStream;
 
-	bool loadsuccessful = false;
-	sf::String topMenuLoadString;
-	int announcementLength = 1;
+	//Prompt user input and find game to load
+	bool didItLoad = determineGameToLoad( boardToPlay,  InputLayer,  &loadGameStream);
 
-	topMenuLoadString = "Choose which save game to load (Case sensitive. Do not use _save portion of save.): \n";
-	//Prompt user and load scenario
-	while (loadsuccessful == false)
+	if (didItLoad == true)
 	{
+		//Actually load scenario. Initialize board, etc.
+		loadGameData(boardToPlay, InputLayer, &loadGameStream);
+		loadGameStream.close();
 
-		bool scenarioChosen = false;
-		std::vector <std::string> listOfSavegames;
-		int highlightedName = 0;
-		std::string chosenSaveName = "";
-
-		//Find all available save games and add them to the list
-		const std::filesystem::path myPath{ ".\\savegames" };
-		for (const auto& entry : std::filesystem::directory_iterator(myPath))
+		//Determines if they print or not.
+		int numberOfHumanPlayers = 0;
+		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 		{
-			listOfSavegames.push_back(entry.path().string());
-			std::cout << entry.path() << std::endl;
-
-		}
-
-		for (int i = 0; i < listOfSavegames.size(); i++)
-		{
-			listOfSavegames.at(i).erase(0, 12);
-			std::cout << listOfSavegames.at(i) << std::endl;
-		}
-
-		while (scenarioChosen == false)
-		{
-			mywindow->clear();
-			topMenuLoadString += "Choose which savegame to load: \n";
-
-			//To print list of scenarios, first determine start and end points
-			int startPoint = highlightedName - 5;
-			if (startPoint < 0)
-				startPoint = 0;
-			int endPoint = highlightedName + 5;
-			if (endPoint > listOfSavegames.size() - 1)
-				endPoint = listOfSavegames.size() - 1;
-
-			//Print backgrounds
-			sf::Sprite backgroundSprite;
-			backgroundSprite.setTexture(otherGameTextures->at(1));
-			mywindow->draw(backgroundSprite);
-
-			sf::Sprite menuBackgroundSprite;
-			menuBackgroundSprite.setTexture(otherGameTextures->at(6));
-			menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
-			mywindow->draw(menuBackgroundSprite);
-
-			//Print title text
-			sf::Text titleText("Load Game", *myFont, 50);
-			titleText.setPosition(MM_WIDTH_OFFSET + 470, MM_HEIGHT_OFFSET + 70);
-			titleText.setFillColor(sf::Color::Black);
-			mywindow->draw(titleText);
-
-			//Print text elements and display
-			for (int i = startPoint; i < endPoint + 1; i++)
+			if (boardToPlay->playerRoster[i].playerType == humanPlayer)
 			{
-				sf::Text scenarioListText(listOfSavegames.at(i), *myFont, menuTextSize + 4);
-				scenarioListText.setPosition(330 + MM_WIDTH_OFFSET, 300 + MM_HEIGHT_OFFSET + 30 * i);
-
-				//Draw White if highlighted
-				if (i == highlightedName)
-					scenarioListText.setFillColor(sf::Color::Blue);
-				else
-					scenarioListText.setFillColor(sf::Color::Black);
-
-				mywindow->draw(scenarioListText);
-				//Otherwise draw normal
+				numberOfHumanPlayers++;
 			}
-
-			//Print up and down buttons and display
-			for (int i = 8; i < 11; i++)
-			{
-				mywindow->draw(topMenuButtons.at(i).mySprite);
-			}
-			mywindow->display();
-
-
-			sf::Event playerInput;
-			mywindow->waitEvent(playerInput);
-
-			//Keep polling until a legit player input, not just mouse movement.
-			if ((playerInput.type == sf::Event::MouseButtonReleased && playerInput.mouseButton.button == sf::Mouse::Left)
-				|| playerInput.type == sf::Event::KeyReleased)
-				//Must be mouse click
-			{
-				//Get mouse position
-				sf::Vector2i mousePosition = sf::Mouse::getPosition(*(mywindow));
-
-				//Take user input
-
-				bool withinUpButton = false;
-				if (playerInput.type == sf::Event::MouseButtonReleased)
-					withinUpButton = topMenuButtons[8].checkWithinButton(mousePosition.x, mousePosition.y);
-				if (withinUpButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Up))
-				{
-					highlightedName--;
-					if (highlightedName < 0)
-						highlightedName = 0;
-				}
-
-				bool withinDownButton = false;
-				if (playerInput.type == sf::Event::MouseButtonReleased)
-					withinDownButton = topMenuButtons[9].checkWithinButton(mousePosition.x, mousePosition.y);
-				if (withinDownButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Down))
-				{
-					highlightedName++;
-					if (highlightedName > listOfSavegames.size() - 1)
-						highlightedName = listOfSavegames.size() - 1;
-				}
-
-				bool withinSelectButton = false;
-				if (playerInput.type == sf::Event::MouseButtonReleased)
-					withinSelectButton = (topMenuButtons)[10].checkWithinButton(mousePosition.x, mousePosition.y);
-				if (withinSelectButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::Enter))
-				{
-					scenarioChosen = true;
-					chosenSaveName = listOfSavegames.at(highlightedName);
-				}
-			}
-
 		}
 
-
-		//After player chooses a save, try to load that save
-		loadGameStream.open(".\\savegames\\" + chosenSaveName);
-		if (loadGameStream.is_open())
+		if (numberOfHumanPlayers < 2)
 		{
-			mywindow->clear();
-			topMenuLoadString = "Save game successfully loaded! Press any key to continue.\n";
-
-			sf::Text newText(topMenuLoadString, *myFont, menuTextSize);
-			newText.setFillColor(sf::Color::Black);
-			newText.setPosition(330 + MM_WIDTH_OFFSET, 200 + MM_HEIGHT_OFFSET);
-
-			sf::Sprite backgroundSprite;
-			backgroundSprite.setTexture(otherGameTextures->at(1));
-			mywindow->draw(backgroundSprite);
-
-			sf::Sprite menuBackgroundSprite;
-			menuBackgroundSprite.setTexture(otherGameTextures->at(5));
-			menuBackgroundSprite.setPosition(MM_WIDTH_OFFSET, MM_HEIGHT_OFFSET);
-			mywindow->draw(menuBackgroundSprite);
-
-
-			mywindow->draw(newText);
-			mywindow->display();
-
-			loadsuccessful = true;
-
-			getValidPlayerInput(mywindow);
+			boardToPlay->isItSinglePlayerGame = true;
 		}
-		else
-		{
-			topMenuLoadString = "Could not load save game. Please check that it exists.\nChoose which save game to load: \n";
-			announcementLength = 2;
-		}
+		else boardToPlay->isItSinglePlayerGame = false;
 
+		menuStatus = playingMap;
+		return 0;
 	}
-	//Actually load scenario. Initialize board, etc.
-	loadGameData(boardToPlay, InputLayer, &loadGameStream);
-	loadGameStream.close();
-
-	//Determines if they print or not.
-	int numberOfHumanPlayers = 0;
-	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
+	else
 	{
-		if (boardToPlay->playerRoster[i].playerType == humanPlayer)
-		{
-			numberOfHumanPlayers++;
-		}
+		//Back button
+		menuStatus = topmenu;
+		return 1;
 	}
-
-	if (numberOfHumanPlayers < 2)
-	{
-		boardToPlay->isItSinglePlayerGame = true;
-	}
-	else boardToPlay->isItSinglePlayerGame = false;
-
-	menuStatus = playingMap;
-	return 0;
 }

@@ -48,6 +48,7 @@ public:
 
 	//Game session management///////////////////
 	int introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer);
+	bool determineGameToLoad( MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* loadGameStream);
 	int loadGameData(MasterBoard* boardToPrint, inputLayer* InputLayer, std::ifstream* saveGame);
 	int setCharacteristics(MasterBoard* LoadBoard);
 	int playGame(MasterBoard* boardToPlay, inputLayer* InputLayer);
