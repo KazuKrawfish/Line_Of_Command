@@ -121,6 +121,7 @@ public:
 
 	//Upkeep Functions/////////////////////////
 	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber);
+	int individualRepair(Minion* MinionToRepair, inputLayer* InputLayer, int observerNumber);
 	int repairMinions(inputLayer* InputLayer, int observerNumber);
 	int resupplyMinions(inputLayer* InputLayer, int observerNumber);
 	//Upkeep Functions/////////////////////////

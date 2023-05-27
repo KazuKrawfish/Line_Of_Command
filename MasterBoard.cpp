@@ -3287,6 +3287,56 @@ int MasterBoard::upkeep(inputLayer* InputLayer, int observerNumber)
 	return 0;
 }
 
+int MasterBoard::individualRepair(Minion* MinionToRepair,  inputLayer* InputLayer, int observerNumber)
+{
+	int success = 0;		
+
+	//Can only repair friendly non-infantry minion
+	if (MinionToRepair != NULL && MinionToRepair->team == playerFlag && MinionToRepair->specialtyGroup != infantry)
+	{
+		//Must have enough money
+
+
+
+		int minionCost = consultMinionCostChart(MinionToRepair->type, '~');
+		//silent repair
+		if (MinionToRepair->health > 94)
+		{
+			MinionToRepair->health = 100;
+		}
+		//"1 health" repair
+		//Need enough money to repair
+		else if (MinionToRepair->health <= 94 && MinionToRepair->health > 84 && int(minionCost / 10) <= playerRoster[playerFlag].treasury)
+		{
+			MinionToRepair->health = 100;
+			playerRoster[playerFlag].treasury -= int(minionCost / 10);
+		}
+		else if (int(minionCost / 10) <= playerRoster[playerFlag].treasury)
+		{
+			MinionToRepair->health += 10;
+			playerRoster[playerFlag].treasury -= int(minionCost / 10);
+		}
+		else 
+		{
+			success = 1;
+		}
+	}
+	else success = 1;
+
+
+	if (success == 0)
+	{
+		InputLayer->repairGraphics(this, observerNumber, MinionToRepair, MinionToRepair->locationX, MinionToRepair->locationY);
+		
+		//If we made it this far we did a successful repair, so deselect
+		cursor.selectMinionPointer->status = hasfired;
+		deselectMinion();
+
+	}
+
+	return success;
+}
+
 int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 {
 	std::cout << "Repair ALL MINIONS" << std::endl;
@@ -3324,7 +3374,9 @@ int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 
 		if (repairThisMinion == true)
 		{
-			InputLayer->repairGraphics(this, observerNumber, minionRoster[i], minionRoster[i]->locationX, minionRoster[i]->locationY);
+			bool showRepair = true;
+			
+			int minionCost = consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol);
 
 			//silent repair
 			if (minionRoster[i]->health > 94)
@@ -3332,23 +3384,31 @@ int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 				minionRoster[i]->health = 100;
 			}
 			//"1 health" repair
-			else if (minionRoster[i]->health <= 94 && minionRoster[i]->health > 84)
+			//Need enough money to repair
+			else if (minionRoster[i]->health <= 94 && minionRoster[i]->health > 84 && int(minionCost/10) <= playerRoster[playerFlag].treasury)
 			{
 				minionRoster[i]->health = 100;
-				playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 10);
+				playerRoster[playerFlag].treasury -= int(minionCost / 10);
 			}
 			//"2" repair, but close enough to not just add
-			else if (minionRoster[i]->health <= 84 && minionRoster[i]->health > 80)
+			else if (minionRoster[i]->health <= 84 && minionRoster[i]->health > 80 && int(minionCost / 5) <= playerRoster[playerFlag].treasury)
 			{
 				minionRoster[i]->health = 100;
-				playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
+				playerRoster[playerFlag].treasury -= int(minionCost/ 5);
 			}
 			//Standard "2" repair
-			else
+			else if( int(minionCost / 5) <= playerRoster[playerFlag].treasury)
 			{
 				minionRoster[i]->health += 20;
-				playerRoster[playerFlag].treasury -= int(consultMinionCostChart(minionRoster[i]->type, Board[minionRoster[i]->locationX][minionRoster[i]->locationY].symbol) / 5);
+				playerRoster[playerFlag].treasury -= int(minionCost / 5);
 			}
+			else 
+			{
+				showRepair = false;
+			}
+
+			if(showRepair == true)
+				InputLayer->repairGraphics(this, observerNumber, minionRoster[i], minionRoster[i]->locationX, minionRoster[i]->locationY);
 		}
 
 	}

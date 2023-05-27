@@ -269,15 +269,18 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	y = MM_HEIGHT_OFFSET + 40 + 2 * (topMenuButtonTextureArray->at(10).getSize().y + 30);
 	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "selectButton");
 
-	//Back button
-	y = MM_HEIGHT_OFFSET + TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * 3;
-	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, topBack1, &(topMenuButtonTextureArray->at(6)), "backButton");
-
 	//Human / computer choice buttons
 	y = TopMenuTop + TopTopMargin + MM_HEIGHT_OFFSET;
+	std::cout << "Computer y: "<< y << std::endl;
 	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, selectButton, &(topMenuButtonTextureArray->at(11)), "computerPlayerButton");
 	y = TopMenuTop + TopTopMargin + TopButtonHeight + TopBetweenMargin + MM_HEIGHT_OFFSET;
+	std::cout <<"Human y : " << y << std::endl;
 	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, selectButton, &(topMenuButtonTextureArray->at(12)), "humanPlayerButton");
+
+	//Back button # 2 (Load, save, etc)
+	//This needs its own additional back button
+	y = MM_HEIGHT_OFFSET + TopMenuTop + TopTopMargin + (TopButtonHeight + TopBetweenMargin) * 3;
+	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, topBack1, &(topMenuButtonTextureArray->at(6)), "backButton");
 
 	//Top menu buttons ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

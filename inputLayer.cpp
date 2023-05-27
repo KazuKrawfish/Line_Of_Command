@@ -2616,10 +2616,18 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 							{
 								*Input = sf::Keyboard::Key::L;      //L for landmine. Operative dropping a landmine.
 							}
-							else  //Otherwise attempt to move there.
-							{
-								*Input = sf::Keyboard::Key::M;
-							}
+							else  //If this space has a friendly minion and we are type Engineer, attempt to repair.
+								if (boardToInput->cursor.selectMinionPointer->type == "Engineer" &&
+									(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired ||
+										boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
+									&& targetedTile->hasMinionOnTop == true && targetedTile->minionOnTop->team == boardToInput->playerFlag)
+								{
+									*Input = sf::Keyboard::Key::J;      //J For job- repair.
+								}
+								else  //Otherwise attempt to move there.
+								{
+									*Input = sf::Keyboard::Key::M;
+								}
 				}
 		}
 	}
@@ -2789,15 +2797,28 @@ int inputLayer::minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput)
 	}
 
 	//Must be engineer, must have moved already.
-	if (*Input == sf::Keyboard::Key::B && boardToInput->cursor.selectMinionFlag == true)
+	if (boardToInput->cursor.selectMinionFlag == true)
 		if( boardToInput->cursor.selectMinionPointer->type == "Engineer")		
-			if(boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
-		{
-			if (boardToInput->buildImprovement(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+			if (boardToInput->cursor.selectMinionPointer->status == hasmovedhasntfired || boardToInput->cursor.selectMinionPointer->status == gaveupmovehasntfired)
 			{
-				status = gameBoard;
+				if (*Input == sf::Keyboard::Key::B)
+				{
+					if (boardToInput->buildImprovement(this, boardToInput->cursor.getX(), boardToInput->cursor.getY()) == 0)
+					{
+						status = gameBoard;
+					}
+				}else
+					if (*Input == sf::Keyboard::Key::J)
+					{
+						tile* targetTile = &boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()];
+						//If successfully repair that minion, swap back to gameboard status
+						if (targetTile->hasMinionOnTop == true && boardToInput->individualRepair(targetTile->minionOnTop, this, boardToInput->playerFlag) == 0)
+						{
+						status = gameBoard;
+						}
+					}
+	
 			}
-		}
 
 	//'U' - If submarine, attempt to surface or dive
 	//Cursor must be on top of selected minion.
