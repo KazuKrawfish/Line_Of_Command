@@ -1325,7 +1325,7 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 				//Note that this doesn't deal with "status".
 				if (boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer && boardToPlay->playerRoster[boardToPlay->playerFlag].stillAlive == true)
 				{
-					computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn(boardToPlay);
+					computerPlayerRoster[boardToPlay->playerFlag].takeMyTurn();
 
 				}
 

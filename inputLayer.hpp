@@ -120,7 +120,7 @@ public:
 	std::vector <sf::Sound>* soundEffects;
 	 sf::Music* gameMusic = NULL;
 	bool soundsOn = false;
-	int speedFactor = 1;		//1 is normal. 3 is "high". 10 is ultra fast.
+	int speedFactor = 3;		//1 is normal. 3 is "high". 10 is ultra fast.
 	sf::Texture* inputLayerTexture = NULL;
 	sf::Texture* secondInputLayerTexture = NULL;
 	sf::Font* inputLayerFont = NULL;
