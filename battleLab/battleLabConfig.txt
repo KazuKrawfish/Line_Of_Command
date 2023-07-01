@@ -1,8 +1,8 @@
 runBattleLab_0_Off_1_On
-0
+1
 Number_Of_Runs
 5
 TurnLimit
-40
+50
 Output_Name
-multivariableTest2
+landerTest

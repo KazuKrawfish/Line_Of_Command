@@ -133,7 +133,7 @@ int compie::buildLandMassMap(int x, int y, int nextNumber)
 			if (compieLandMassMap.grid[x - 1][y].landMassNumber == 0)
 			{
 				compieLandMassMap.grid[x - 1][y].landMassNumber = myNumber;
-				buildLandMassMap( x - 1, y, nextNumber);
+				buildLandMassMap(x - 1, y, nextNumber);
 			}
 		}
 		if (y > 0)
@@ -141,7 +141,7 @@ int compie::buildLandMassMap(int x, int y, int nextNumber)
 			if (compieLandMassMap.grid[x][y - 1].landMassNumber == 0)
 			{
 				compieLandMassMap.grid[x][y - 1].landMassNumber = myNumber;
-				buildLandMassMap( x, y - 1, nextNumber);
+				buildLandMassMap(x, y - 1, nextNumber);
 			}
 		}
 		if (y < masterBoardPointer->BOARD_HEIGHT - 1)
@@ -149,7 +149,7 @@ int compie::buildLandMassMap(int x, int y, int nextNumber)
 			if (compieLandMassMap.grid[x][y + 1].landMassNumber == 0)
 			{
 				compieLandMassMap.grid[x][y + 1].landMassNumber = myNumber;
-				buildLandMassMap( x, y + 1, nextNumber);
+				buildLandMassMap(x, y + 1, nextNumber);
 			}
 		}
 		if (x < masterBoardPointer->BOARD_WIDTH - 1)
@@ -157,7 +157,7 @@ int compie::buildLandMassMap(int x, int y, int nextNumber)
 			if (compieLandMassMap.grid[x + 1][y].landMassNumber == 0)
 			{
 				compieLandMassMap.grid[x + 1][y].landMassNumber = myNumber;
-				buildLandMassMap( x + 1, y, nextNumber);
+				buildLandMassMap(x + 1, y, nextNumber);
 			}
 		}
 
@@ -354,7 +354,7 @@ int compie::analyzeMap()
 		{
 			//If this landMassSquare is passable, call recursive builder.
 			if (compieLandMassMap.grid[x][y].landMassNumber != -1)
-				nextLandMassNumber = buildLandMassMap( x, y, nextLandMassNumber);
+				nextLandMassNumber = buildLandMassMap(x, y, nextLandMassNumber);
 		}
 	}
 
@@ -371,7 +371,7 @@ int compie::analyzeMap()
 			{
 				if (compieLandMassMap.roster[compieLandMassMap.grid[x][y].landMassNumber].initialized == false)
 				{
-					analyzeSingleLandMass( compieLandMassMap.grid[x][y].landMassNumber);
+					analyzeSingleLandMass(compieLandMassMap.grid[x][y].landMassNumber);
 				}
 			}
 
@@ -741,7 +741,7 @@ int compie::transportSearchForPickup(compieMinionRecord* selectedMinionRecord)
 	}
 
 	//Call the short term pathfinder and return its result. 999 indicates trouble.
-	return findClosestTileToObjective( selectedMinionRecord);
+	return findClosestTileToObjective(selectedMinionRecord);
 
 }
 
@@ -999,7 +999,7 @@ int compie::transportSearchForDrop(compieMinionRecord* selectedMinionRecord)
 
 
 	//Call the short term pathfinder and return its result. 999 indicates trouble.
-	return findClosestTileToObjective( selectedMinionRecord);
+	return findClosestTileToObjective(selectedMinionRecord);
 
 }
 
@@ -1149,7 +1149,7 @@ int compie::strategicAdvance(compieMinionRecord* selectedMinionRecord)
 	}
 
 	//Call the short term pathfinder and return its result. 999 indicates trouble.
-	return findClosestTileToObjective( selectedMinionRecord);
+	return findClosestTileToObjective(selectedMinionRecord);
 
 }
 
@@ -1191,7 +1191,7 @@ int compie::strategicWithdraw(compieMinionRecord* selectedMinionRecord)
 
 
 	//Call the short term pathfinder and return its result. 999 indicates trouble.
-	return findClosestTileToObjective( selectedMinionRecord);
+	return findClosestTileToObjective(selectedMinionRecord);
 
 }
 
@@ -1206,13 +1206,13 @@ int compie::checkAdjacentTilesForBestValuedEnemy(int currentX, int currentY, Cur
 	//Calculate the damage our minion would do to them, as well as the counterattack damage:
 
 
-	checkSingleTileForCombatValue(currentX, currentY, currentX - 1, currentY, myCursor,  relativeSuitabilityScore, selectedMinionRecord);
+	checkSingleTileForCombatValue(currentX, currentY, currentX - 1, currentY, myCursor, relativeSuitabilityScore, selectedMinionRecord);
 
-	checkSingleTileForCombatValue(currentX, currentY, currentX + 1, currentY, myCursor,  relativeSuitabilityScore, selectedMinionRecord);
+	checkSingleTileForCombatValue(currentX, currentY, currentX + 1, currentY, myCursor, relativeSuitabilityScore, selectedMinionRecord);
 
-	checkSingleTileForCombatValue(currentX, currentY, currentX, currentY - 1, myCursor,  relativeSuitabilityScore, selectedMinionRecord);
+	checkSingleTileForCombatValue(currentX, currentY, currentX, currentY - 1, myCursor, relativeSuitabilityScore, selectedMinionRecord);
 
-	checkSingleTileForCombatValue(currentX, currentY, currentX, currentY + 1, myCursor,  relativeSuitabilityScore, selectedMinionRecord);
+	checkSingleTileForCombatValue(currentX, currentY, currentX, currentY + 1, myCursor, relativeSuitabilityScore, selectedMinionRecord);
 
 	return 0;
 }
@@ -1373,7 +1373,7 @@ double compie::findBestValuedEnemyWithinLocalArea(compieMinionRecord* selectedMi
 				(myCursor->selectMinionPointer->locationY == y && myCursor->selectMinionPointer->locationX == x))
 				&& masterBoardPointer->Board[x][y].withinRange == true)
 			{
-				checkAdjacentTilesForBestValuedEnemy(x, y, myCursor,  &relativeSuitabilityScore, selectedMinionRecord);
+				checkAdjacentTilesForBestValuedEnemy(x, y, myCursor, &relativeSuitabilityScore, selectedMinionRecord);
 				//Already checked for closeness in the function itself so no need to do anything else
 			}
 			//Check each tile if suitable for artillery fire
@@ -1386,7 +1386,7 @@ double compie::findBestValuedEnemyWithinLocalArea(compieMinionRecord* selectedMi
 					//Must be within range but outside minimum range
 					if (myCursor->selectMinionPointer->minAttackRange < masterBoardPointer->computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y)
 						&& myCursor->selectMinionPointer->attackRange >= masterBoardPointer->computeDistance(myCursor->selectMinionPointer->locationX, x, myCursor->selectMinionPointer->locationY, y))
-						checkSingleTileForCombatValue(myCursor->selectMinionPointer->locationX, myCursor->selectMinionPointer->locationY, x, y, myCursor,  &relativeSuitabilityScore, selectedMinionRecord);
+						checkSingleTileForCombatValue(myCursor->selectMinionPointer->locationX, myCursor->selectMinionPointer->locationY, x, y, myCursor, &relativeSuitabilityScore, selectedMinionRecord);
 				}
 		}
 	}
@@ -1501,7 +1501,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 			//Air minions need to accurately assess their chance of reaching a fuel point.
 			if (myMinion->domain == air)
 			{
-				tile* closestAirbase = findClosestAirbase( myMinion);
+				tile* closestAirbase = findClosestAirbase(myMinion);
 				if (closestAirbase != NULL)
 				{
 					distanceToAirbase = masterBoardPointer->computeDistance(closestAirbase->locationX, myMinion->locationX, closestAirbase->locationY, myMinion->locationY);
@@ -1518,7 +1518,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 					|| (myMinion->currentPriAmmo == 0 && myMinion->maxPriAmmo != -1)  //Actually has pri weapon, and that weapon is out of ammo
 					|| (myMinion->currentSecAmmo == 0 && myMinion->maxSecAmmo != -1))))	//Actually has secondary weapon which is out of ammo 
 			{
-				int distance = strategicWithdraw( selectedMinionRecord);
+				int distance = strategicWithdraw(selectedMinionRecord);
 				if (distance < 999 && distance >= 0)	//Error code is -1
 				{
 					selectedMinionRecord->tasking = withdraw;
@@ -1533,7 +1533,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 					//If transport who already has a minion, look for suitable drop point.
 					if (myMinion->firstMinionBeingTransported != NULL)
 					{
-						int distance = transportSearchForDrop( selectedMinionRecord);
+						int distance = transportSearchForDrop(selectedMinionRecord);
 						if (distance < 999 && distance >= 0)
 						{
 							selectedMinionRecord->tasking = dropOff;
@@ -1543,7 +1543,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 					}
 					else    //Otherwise, need to try to pickup a new minion.
 					{
-						int distance = transportSearchForPickup( selectedMinionRecord);
+						int distance = transportSearchForPickup(selectedMinionRecord);
 						if (distance < 999 && distance >= 0)
 						{
 							selectedMinionRecord->tasking = pickUp;
@@ -1564,13 +1564,13 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 						tasked = true;
 					}
 					else
-						if (defendHeadquarters( selectedMinionRecord) == 1)
+						if (defendHeadquarters(selectedMinionRecord) == 1)
 						{	//Not sure if this is actually happening, may need to add tasking and taskingStatus.
 							std::cout << "Headquarters under attack!" << std::endl;
 
 						}
 						else		//DefendProperty ensures that defending prop has higher priority than attacking a local minion regardless of cost
-							if (defendProperty( selectedMinionRecord) == 1)
+							if (defendProperty(selectedMinionRecord) == 1)
 							{
 								selectedMinionRecord->tasking = defendProp;
 								selectedMinionRecord->taskingStatus = immediateExecute;
@@ -1579,7 +1579,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 							else
 							{
 								//Otherwise see if there are enemies in local area within range and suitable to attack.
-								double relativeSuitabilityScore = findBestValuedEnemyWithinLocalArea( selectedMinionRecord);
+								double relativeSuitabilityScore = findBestValuedEnemyWithinLocalArea(selectedMinionRecord);
 								if (relativeSuitabilityScore > 0 && selectedMinionRecord->potentialAttackTile != NULL)
 								{
 									selectedMinionRecord->tasking = attackLocalMinion;
@@ -1589,7 +1589,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 								else
 								{
 									//If capable of capping properties, attempt to do so.
-									int distance = findPropertyWithinLocalArea( &returnX, &returnY, selectedMinionRecord);
+									int distance = findPropertyWithinLocalArea(&returnX, &returnY, selectedMinionRecord);
 									if (distance < 999 && selectedMinionRecord->potentialMoveTile != NULL
 										&& masterBoardPointer->cursor.selectMinionPointer->captureCapable == true)
 									{
@@ -1600,7 +1600,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 									}
 									else
 									{
-										int distance = strategicAdvance( selectedMinionRecord);
+										int distance = strategicAdvance(selectedMinionRecord);
 										if (distance < 999 && distance >= 0)	//Error code is -1
 										{
 											selectedMinionRecord->tasking = advance;
@@ -1625,7 +1625,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 	//If carrying a minion, check for potential drop off.
 	if (selectedMinionRecord->recordedMinion->firstMinionBeingTransported != NULL)
 	{
-		int rangeToObjective = transportAttemptDropOff( selectedMinionRecord);
+		int rangeToObjective = transportAttemptDropOff(selectedMinionRecord);
 
 		//As long as at least one minion is to be dropped, set tasking to such.
 		//We will attempt to drop minions on two tiles within the actual execution, if possible.
@@ -1643,7 +1643,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 		double suitabilityScore = 0;
 
 		checkAdjacentTilesForBestValuedEnemy(selectedMinionRecord->recordedMinion->locationX, selectedMinionRecord->recordedMinion->locationY,
-			&masterBoardPointer->cursor,  &suitabilityScore, selectedMinionRecord);
+			&masterBoardPointer->cursor, &suitabilityScore, selectedMinionRecord);
 
 		if (selectedMinionRecord->potentialAttackTile != NULL)
 		{
@@ -1767,7 +1767,7 @@ int compie::executeMinionTasks(compieMinionRecord* selectedMinionRecord)
 	if (selectedMinionRecord->tasking == advance || selectedMinionRecord->tasking == withdraw || selectedMinionRecord->tasking == dropOff)
 	{
 		masterBoardPointer->selectMinion(masterBoardPointer->cursor.getX(), masterBoardPointer->cursor.getY());
-		determinePotentialMinionTasking( selectedMinionRecord);
+		determinePotentialMinionTasking(selectedMinionRecord);
 	}
 
 	//Then deselect and maybe carry out orders.
@@ -1895,11 +1895,11 @@ int compie::takeMyTurn()
 			//Move cursor, then select minion, then determine tasks
 			masterBoardPointer->cursor.relocate(compieMinionRoster[i]->recordedMinion->locationX, compieMinionRoster[i]->recordedMinion->locationY);
 			masterBoardPointer->selectMinion(masterBoardPointer->cursor.XCoord, masterBoardPointer->cursor.YCoord);
-			determinePotentialMinionTasking( compieMinionRoster[i]);
+			determinePotentialMinionTasking(compieMinionRoster[i]);
 
 			if (compieMinionRoster[i]->tasking == attackLocalMinion)
 			{
-				gameEndCode = executeMinionTasks( compieMinionRoster[i]);
+				gameEndCode = executeMinionTasks(compieMinionRoster[i]);
 			}
 			else //If we couldn't find someone to shoot, reset to awaiting tasking, and move on.
 			{
@@ -1938,14 +1938,14 @@ int compie::takeMyTurn()
 				//If awaitingTasking, determine tasking.
 				if (compieMinionRoster[i]->taskingStatus == (awaitingTasking))
 				{
-					determinePotentialMinionTasking( compieMinionRoster[i]);
+					determinePotentialMinionTasking(compieMinionRoster[i]);
 				}
 
 				//If tasking is immediateExecute, do it now.
 				//Should already be selected
 				if (compieMinionRoster[i]->taskingStatus == (immediateExecute))
 				{
-					gameEndCode = executeMinionTasks( compieMinionRoster[i]);
+					gameEndCode = executeMinionTasks(compieMinionRoster[i]);
 				}
 				if (gameEndCode == 999)
 					return 999;
@@ -1959,7 +1959,7 @@ int compie::takeMyTurn()
 				//If we are on Wave 3, execute, regardless of priority.
 				if (waveIterator == 3)
 				{
-					gameEndCode = executeMinionTasks( compieMinionRoster[i]);
+					gameEndCode = executeMinionTasks(compieMinionRoster[i]);
 				}
 				if (gameEndCode == 999)
 					return 999;
@@ -1982,7 +1982,7 @@ int compie::takeMyTurn()
 		determineProduction();
 
 		//Have to always keep an autosave!
-		menuPointer->saveGameData(".\\savegames\\Auto_save" , masterBoardPointer);
+		menuPointer->saveGameData(".\\savegames\\Auto_save", masterBoardPointer);
 
 
 		int incrementGameTurn = masterBoardPointer->endTurn(InputLayer);
@@ -2326,6 +2326,90 @@ int compie::determineProduction()
 	return 0;
 }
 
+int compie::newDetermineProduction()
+{
+	double navalPortValueFactor = 10;
+	double navalHQValueFactor = 20;
+	double transportFactor = 5;
+
+	//Start with ships
+	for (int n = 0; n < compiePropertyRoster.size(); n++ )
+	{
+		if (compiePropertyRoster.at(n).symbol == 'P')
+		{
+			//Create custom path map for this port
+			std::vector<std::vector<pathSquare>> portTerrainOnlyPathMap(masterBoardPointer->BOARD_WIDTH, std::vector<pathSquare>(masterBoardPointer->BOARD_HEIGHT));
+
+			masterBoardPointer->buildTerrainOnlyPathMap(true, compiePropertyRoster.at(n).recordedTile->locationX, compiePropertyRoster.at(n).recordedTile->locationY, "Gunboat", portTerrainOnlyPathMap);
+			//Requires buildTerrainOnlyPathMap to now accept minion typeand reference to pathmap instead of minion.
+
+				//Now go through map and for each tile, add score to this port's options depending on what we see
+				for (int x = 0; x < masterBoardPointer->BOARD_WIDTH; x++)
+				{
+					for (int y = 0; y < masterBoardPointer->BOARD_HEIGHT; y++)
+					{
+						//Must be accessible to a ship
+						if (portTerrainOnlyPathMap[x][y].distanceFromMinion != -1)
+						{
+							double inverseDistance = 1 / (portTerrainOnlyPathMap[x][y].distanceFromMinion);
+							if (masterBoardPointer->Board[x][y].hasMinionOnTop)
+							{
+								Minion * minionOnTop = masterBoardPointer->Board[x][y].minionOnTop;
+
+								//Enemy sea unit, must be visible
+								if (minionOnTop->team != compiePlayerFlag && minionOnTop->domain == sea 
+									&& masterBoardPointer->Board[x][y].withinVision[compiePlayerFlag] == true)
+								{
+									for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+									{
+										double bestAttackScore = 0;
+										double throwawayPriScore = 0;
+										double throwawaySecScore = 0;
+										masterBoardPointer->consultAttackValuesChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, minionOnTop->type, throwawayPriScore, throwawaySecScore, bestAttackScore);
+										compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * bestAttackScore;
+									}
+								}								
+							}
+							
+							//Enemy port or other property (Accessible to ship?!?!?)
+							if (masterBoardPointer->Board[x][y].checkForProperty() == true && masterBoardPointer->Board[x][y].controller != compiePlayerFlag)
+							{
+								for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+								{
+									compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * navalPortValueFactor;
+								}
+							}
+
+							//Shoals are good for landers/gunboats
+							if (masterBoardPointer->Board[x][y].symbol == '*')
+							{
+							//This is not great but allows landers and gunboats to be rep'd for transporting to shoals and such
+							compiePropertyRoster.at(n).purchasePreferenceList.at(0).preferenceScore += inverseDistance * transportFactor;
+							compiePropertyRoster.at(n).purchasePreferenceList.at(2).preferenceScore += inverseDistance * transportFactor * 2;
+							}
+						}
+
+						//For enemy HQ, we ignore if it's accessible and just compute the straight line distance.
+						if (masterBoardPointer->Board[x][y].symbol == 'Q')
+						{
+							double inverseDistance = 1 / (masterBoardPointer->computeDistance(x, compiePropertyRoster.at(n).recordedTile->locationX, y, compiePropertyRoster.at(n).recordedTile->locationY));
+							for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+							{
+								compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * navalHQValueFactor;
+							}
+						}
+					}
+				}
+
+
+		}
+	}
+
+
+	return 0;
+
+}
+
 int compie::buildCompieMinionRoster()
 {
 	int numberOfCompieMinions = 0;
@@ -2369,6 +2453,28 @@ int compie::buildCompieMinionRoster()
 					compieLandMassMap.roster[compieLandMassMap.grid[gridX][gridY].landMassNumber].onlyInfantryArmySizeHere++;
 				}
 			}
+		}
+	}
+
+	return 0;
+}
+
+int compie::buildCompieProductionPropertyRoster()
+{
+	compiePropertyRoster.clear();
+
+	//Go through map and find all of our factories, ports, etc.
+	for (int x = 0; x < masterBoardPointer->BOARD_WIDTH; x++)
+	{
+		for (int y = 0; y < masterBoardPointer->BOARD_HEIGHT; y++)
+		{
+			//If the current tile is friendly production-property
+			if (masterBoardPointer->Board[x][y].controller == masterBoardPointer->playerFlag)
+				if (masterBoardPointer->Board[x][y].symbol == 'P' || masterBoardPointer->Board[x][y].symbol == 'h' || masterBoardPointer->Board[x][y].symbol == 'A')
+				{
+					compiePropertyRoster.emplace_back(&masterBoardPointer->Board[x][y]);
+				}
+
 		}
 	}
 

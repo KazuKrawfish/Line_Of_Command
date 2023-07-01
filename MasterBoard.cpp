@@ -279,164 +279,159 @@ const double SECONDARY_ATTACK_VALUES_MATRIX[27][22] = {
 //Assign numeric values for different units to access attack values matrix easier.
 //Assumes attacking minion is selected. Otherwise withinRange won't work.
 //Needs defaults to catch error!!!!
-double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion, bool& isAmmoUsed, int& weaponUsed, bool ignoreLimitations)
+
+double MasterBoard::consultAttackValuesChart(std::string attackingType, std::string defendingType,  double & primaryAttackValue, double & secondaryAttackValue , double & bestAttackValue) 
 {
-	//Assume ammo is not used until told otherwise.
-	isAmmoUsed = false;
-
-	//Weapon used starts at 0, ie nothing used
-	weaponUsed = 0;
-
 	int x = -1;
 	int y = -1;
 
 
-	if (defendingMinion.type == "Infantry" || defendingMinion.type == "Operative" || defendingMinion.type == "Cavalry" || defendingMinion.type == "Landmine")
+	if (defendingType == "Infantry" || defendingType == "Operative" || defendingType == "Cavalry" || defendingType == "Landmine")
 		x = 0;
 	else
-	if (defendingMinion.type == "Specialist" || defendingMinion.type == "Insurgent" || defendingMinion.type == "Engineer")
+	if (defendingType == "Specialist" || defendingType == "Insurgent" || defendingType == "Engineer")
 		x = 1;
 	else
-	if (defendingMinion.type == "Armor" || defendingMinion.type == "Upgunned_Armor" )
+	if (defendingType == "Armor" || defendingType == "Upgunned_Armor" )
 		x = 2;
 	else
-	if (defendingMinion.type == "Artillery" || defendingMinion.type == "Assault_Gun" )
+	if (defendingType == "Artillery" || defendingType == "Assault_Gun" )
 		x = 3;
 	else
-	if (defendingMinion.type == "Recon" || defendingMinion.type == "Technical")
+	if (defendingType == "Recon" || defendingType == "Technical")
 		x = 4;
 	else
-	if (defendingMinion.type == "Rocket_Artillery" || defendingMinion.type == "Victory_Launcher")
+	if (defendingType == "Rocket_Artillery" || defendingType == "Victory_Launcher")
 		x = 5;
 	else
-	if (defendingMinion.type == "Heavy_Armor")
+	if (defendingType == "Heavy_Armor")
 		x = 6;
 	else
-	if (defendingMinion.type == "Anti-Aircraft" || defendingMinion.type == "IFV")
+	if (defendingType == "Anti-Aircraft" || defendingType == "IFV")
 		x = 7;
 	else
-	if (defendingMinion.type == "Attack_Copter")
+	if (defendingType == "Attack_Copter")
 		x = 8;
 	else
-	if (defendingMinion.type == "Transport_Copter")
+	if (defendingType == "Transport_Copter")
 		x = 9;
 	else
-	if (defendingMinion.type == "APC")
+	if (defendingType == "APC")
 		x = 10;
 	else
-	if (defendingMinion.type == "Interceptor")
+	if (defendingType == "Interceptor")
 		x = 11;
 	else
-	if (defendingMinion.type == "Bomber" || defendingMinion.type == "Multirole")
+	if (defendingType == "Bomber" || defendingType == "Multirole")
 		x = 12;
 	else
-	if (defendingMinion.type == "Lander")
+	if (defendingType == "Lander")
 		x = 13;
 	else
-	if (defendingMinion.type == "Battleship")
+	if (defendingType == "Battleship")
 		x = 14;
 	else
-	if (defendingMinion.type == "Cruiser")
+	if (defendingType == "Cruiser")
 		x = 15;
 	else
-	if (defendingMinion.type == "Gunboat")
+	if (defendingType == "Gunboat")
 		x = 16;
 	else
-	if (defendingMinion.type == "Submarine")
+	if (defendingType == "Submarine")
 		x = 17;
 	else
-	if (defendingMinion.type == "Aircraft_Carrier")
+	if (defendingType == "Aircraft_Carrier")
 		x = 18;
 	else
-	if (defendingMinion.type == "Artillery_Emplacement" || defendingMinion.type == "SAM_Site")
+	if (defendingType == "Artillery_Emplacement" || defendingType == "SAM_Site")
 		x = 19;
 	else
-	if (defendingMinion.type == "Modern_Armor" || defendingMinion.type == "Super_Heavy_Armor")
+	if (defendingType == "Modern_Armor" || defendingType == "Super_Heavy_Armor")
 		x = 20;
 	else
-	if (defendingMinion.type == "Advanced_Fighter")
+	if (defendingType == "Advanced_Fighter")
 		x = 21;
 
 
-	if (attackingMinion.type == "Infantry" || attackingMinion.type == "Operative" || attackingMinion.type == "Cavalry" || attackingMinion.type == "Engineer")
+	if (attackingType == "Infantry" || attackingType == "Operative" || attackingType == "Cavalry" || attackingType == "Engineer")
 		y = 0;
 	else
-	if (attackingMinion.type == "Specialist" || attackingMinion.type == "Insurgent")
+	if (attackingType == "Specialist" || attackingType == "Insurgent")
 		y = 1;
 	else
-	if (attackingMinion.type == "Armor")
+	if (attackingType == "Armor")
 		y = 2;
 	else
-	if (attackingMinion.type == "Artillery" || attackingMinion.type == "Landmine")
+	if (attackingType == "Artillery" || attackingType == "Landmine")
 		y = 3;
 	else
-	if (attackingMinion.type == "Recon" || attackingMinion.type == "Technical")
+	if (attackingType == "Recon" || attackingType == "Technical")
 		y = 4;
 	else
-	if (attackingMinion.type == "Rocket_Artillery")
+	if (attackingType == "Rocket_Artillery")
 		y = 5;
 	else
-	if (attackingMinion.type == "Heavy_Armor" || attackingMinion.type == "Upgunned_Armor")
+	if (attackingType == "Heavy_Armor" || attackingType == "Upgunned_Armor")
 		y = 6;
 	else
-	if (attackingMinion.type == "Anti-Aircraft")
+	if (attackingType == "Anti-Aircraft")
 		y = 7;
 	else
-	if (attackingMinion.type == "Attack_Copter")
+	if (attackingType == "Attack_Copter")
 		y = 8;
 	else
-	if (attackingMinion.type == "Transport_Copter")
+	if (attackingType == "Transport_Copter")
 		y = 9;
 	else
-	if (attackingMinion.type == "APC")
+	if (attackingType == "APC")
 		y = 10;
 	else
-	if (attackingMinion.type == "Interceptor")
+	if (attackingType == "Interceptor")
 		y = 11;
 	else
-	if (attackingMinion.type == "Bomber")
+	if (attackingType == "Bomber")
 		y = 12;
 	else
-	if (attackingMinion.type == "Lander")
+	if (attackingType == "Lander")
 		y = 13;
 	else
-	if (attackingMinion.type == "Battleship")
+	if (attackingType == "Battleship")
 		y = 14;
 	else
-	if (attackingMinion.type == "Cruiser")
+	if (attackingType == "Cruiser")
 		y = 15;
 	else
-	if (attackingMinion.type == "Gunboat")
+	if (attackingType == "Gunboat")
 		y = 16;
 	else
-	if (attackingMinion.type == "Submarine")
+	if (attackingType == "Submarine")
 		y = 17;
 	else
-	if (attackingMinion.type == "Aircraft_Carrier")
+	if (attackingType == "Aircraft_Carrier")
 		y = 18;
 	else
-	if (attackingMinion.type == "Artillery_Emplacement")
+	if (attackingType == "Artillery_Emplacement")
 		y = 19;
 	else
-	if (attackingMinion.type == "SAM_Site")
+	if (attackingType == "SAM_Site")
 		y = 20;
 	else
-	if (attackingMinion.type == "Assault_Gun")
+	if (attackingType == "Assault_Gun")
 		y = 21;
 	else
-	if (attackingMinion.type == "Modern_Armor" || attackingMinion.type == "Super_Heavy_Armor")
+	if (attackingType == "Modern_Armor" || attackingType == "Super_Heavy_Armor")
 		y = 22;
 	else
-	if (attackingMinion.type == "Multirole")
+	if (attackingType == "Multirole")
 		y = 23;
 	else
-	if (attackingMinion.type == "Advanced_Fighter")
+	if (attackingType == "Advanced_Fighter")
 		y = 24;
 	else
-	if (attackingMinion.type == "IFV")
+	if (attackingType == "IFV")
 		y = 25;
     else
-	if (attackingMinion.type == "Victory_Launcher")
+	if (attackingType == "Victory_Launcher")
 		y = 26;
 
 
@@ -445,141 +440,43 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 		std::cout << "ERROR Does not exist within attack values matrix" << std::endl;
 		return -1;
 	}
-
-	double attackScore = 0;
-
-	if (attackingMinion.rangeType == hybridRange)
+	else 
 	{
-		if (attackingMinion.status == gaveupmovehasntfired || attackingMinion.status == hasntmovedorfired)
-		{	//If hybrid and didn't move, can still do direct attack with secondary weapon.
-			//Had to change to allow AA to counterattack with secondary weapon.
-			if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
-			{
-				if (attackingMinion.currentSecAmmo > 0)
-				{
-					isAmmoUsed = true;
-					attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
-					weaponUsed = 2;
-				}
-				else if (attackingMinion.maxSecAmmo == 0)
-				{
-					isAmmoUsed = false;
-					attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
-					weaponUsed = 2;
-				}
-			}
-			else
-			{
-				//If hybrid and didn't move, and not within adjacent, can attack with ranged attack. AKA primary.
-				int distance = computeDistance(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY);
-				if (distance > attackingMinion.minAttackRange && distance <= attackingMinion.attackRange)
-				{
-					if (attackingMinion.currentPriAmmo > 0)
-					{
-						isAmmoUsed = true;
-						attackScore = ATTACK_VALUES_MATRIX[y][x];
-						weaponUsed = 1;
-					}
-					else if (attackingMinion.maxPriAmmo == 0)
-					{
-						isAmmoUsed = false;
-						attackScore = ATTACK_VALUES_MATRIX[y][x];
-						weaponUsed = 1;
-					}
-				}
-			}
-		}
-		//If hybrid and moved, can only do direct attack with secondary weapon.
-		if (attackingMinion.status == hasmovedhasntfired)
-		{
-			if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
-			{
-				if (attackingMinion.currentSecAmmo > 0)
-				{
-					isAmmoUsed = true;
-					attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
-					weaponUsed = 2;
-				}
-				else if (attackingMinion.maxSecAmmo == 0)
-				{
-					isAmmoUsed = false;
-					attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
-					weaponUsed = 2;
-				}
-			}
-		}
-
-
-	}
-	if (attackingMinion.rangeType == rangedFire)
-	{
-		if (attackingMinion.status == gaveupmovehasntfired)
-		{
-			//If rangedFire and didn't move, and not within adjacent, can attack with ranged attack. AKA primary.
-			int distance = computeDistance(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY);
-			if (distance > attackingMinion.minAttackRange && distance <= attackingMinion.attackRange)
-			{
-				if (attackingMinion.currentPriAmmo > 0)
-				{
-					isAmmoUsed = true;
-					attackScore = ATTACK_VALUES_MATRIX[y][x];
-					weaponUsed = 1;
-				}
-				else if (attackingMinion.maxPriAmmo == 0)
-				{
-					isAmmoUsed = false;
-					attackScore = ATTACK_VALUES_MATRIX[y][x];
-					weaponUsed = 1;
-				}
-			}
-		}
-
-	}
-
-	if (attackingMinion.rangeType == directFire)
-	{
-		if (attackingMinion.status != hasfired)
-		{
-
-			if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
-			{
-				if (ATTACK_VALUES_MATRIX[y][x] > SECONDARY_ATTACK_VALUES_MATRIX[y][x]
-					&& (attackingMinion.currentPriAmmo > 0 || attackingMinion.maxPriAmmo == 0))
-				{
-					attackScore = ATTACK_VALUES_MATRIX[y][x];
-					weaponUsed = 1;
-				}
-				else if (ATTACK_VALUES_MATRIX[y][x] <= SECONDARY_ATTACK_VALUES_MATRIX[y][x]
-					&& (attackingMinion.currentSecAmmo > 0 || attackingMinion.maxSecAmmo == 0))
-				{
-					attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
-					weaponUsed = 2;
-				}
-			}
-			if (weaponUsed == 1 && attackingMinion.maxPriAmmo > 0)
-			{
-				isAmmoUsed = true;
-			}
-			if (weaponUsed == 2 && attackingMinion.maxSecAmmo > 0)
-			{
-				isAmmoUsed = true;
-			}
-		}
-
+		primaryAttackValue = ATTACK_VALUES_MATRIX[y][x];
+		secondaryAttackValue = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+		return 0;
 	}
 
 
-	//If ignoreLimitations is on, ignore the previous value and calculate again, ignoring status, ammo, and distance.
+}
+
+double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion, bool& isAmmoUsed, int& weaponUsed, bool ignoreLimitations)
+{
+	//Assume ammo is not used until told otherwise.
+	isAmmoUsed = false;
+
+	//Weapon used starts at 0, ie nothing used
+	weaponUsed = 0;
+
+	double primaryAttackScore = 0;
+	double secondaryAttackScore = 0;
+	double bestAttackValue = 0;
+
+	double finalAttackScore = 0;
+
+	consultAttackValuesChart(attackingMinion.type, defendingMinion.type, primaryAttackScore, secondaryAttackScore , bestAttackValue);
+
+	//If ignoreLimitations is on, calculate by ignoring status, ammo, and distance.
 	if (ignoreLimitations == true)
 	{
-		if (ATTACK_VALUES_MATRIX[y][x] > SECONDARY_ATTACK_VALUES_MATRIX[y][x])
+		if (primaryAttackScore > secondaryAttackScore)
 		{
-			attackScore = ATTACK_VALUES_MATRIX[y][x];
+			finalAttackScore = primaryAttackScore;
 			weaponUsed = 1;
 		}
-		else if (ATTACK_VALUES_MATRIX[y][x] <= SECONDARY_ATTACK_VALUES_MATRIX[y][x])
+		else if (primaryAttackScore <= secondaryAttackScore)
 		{
-			attackScore = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+			finalAttackScore = secondaryAttackScore;
 			weaponUsed = 2;
 		}
 		if (weaponUsed == 1 && attackingMinion.maxPriAmmo > 0)
@@ -592,9 +489,129 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 		}
 
 	}
+	else
+	{
+		if (attackingMinion.rangeType == hybridRange)
+		{
+			if (attackingMinion.status == gaveupmovehasntfired || attackingMinion.status == hasntmovedorfired)
+			{	//If hybrid and didn't move, can still do direct attack with secondary weapon.
+				//Had to change to allow AA to counterattack with secondary weapon.
+				if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
+				{
+					if (attackingMinion.currentSecAmmo > 0)
+					{
+						isAmmoUsed = true;
+						finalAttackScore = secondaryAttackScore;
+						weaponUsed = 2;
+					}
+					else if (attackingMinion.maxSecAmmo == 0)
+					{
+						isAmmoUsed = false;
+						finalAttackScore = secondaryAttackScore;
+						weaponUsed = 2;
+					}
+				}
+				else
+				{
+					//If hybrid and didn't move, and not within adjacent, can attack with ranged attack. AKA primary.
+					int distance = computeDistance(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY);
+					if (distance > attackingMinion.minAttackRange && distance <= attackingMinion.attackRange)
+					{
+						if (attackingMinion.currentPriAmmo > 0)
+						{
+							isAmmoUsed = true;
+							finalAttackScore = primaryAttackScore;
+							weaponUsed = 1;
+						}
+						else if (attackingMinion.maxPriAmmo == 0)
+						{
+							isAmmoUsed = false;
+							finalAttackScore = primaryAttackScore;
+							weaponUsed = 1;
+						}
+					}
+				}
+			}
+			//If hybrid and moved, can only do direct attack with secondary weapon.
+			if (attackingMinion.status == hasmovedhasntfired)
+			{
+				if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
+				{
+					if (attackingMinion.currentSecAmmo > 0)
+					{
+						isAmmoUsed = true;
+						finalAttackScore = secondaryAttackScore;
+						weaponUsed = 2;
+					}
+					else if (attackingMinion.maxSecAmmo == 0)
+					{
+						isAmmoUsed = false;
+						finalAttackScore = secondaryAttackScore;
+						weaponUsed = 2;
+					}
+				}
+			}
 
 
-	return attackScore;
+		}
+		if (attackingMinion.rangeType == rangedFire)
+		{
+			if (attackingMinion.status == gaveupmovehasntfired)
+			{
+				//If rangedFire and didn't move, and not within adjacent, can attack with ranged attack. AKA primary.
+				int distance = computeDistance(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY);
+				if (distance > attackingMinion.minAttackRange && distance <= attackingMinion.attackRange)
+				{
+					if (attackingMinion.currentPriAmmo > 0)
+					{
+						isAmmoUsed = true;
+						finalAttackScore = primaryAttackScore;
+						weaponUsed = 1;
+					}
+					else if (attackingMinion.maxPriAmmo == 0)
+					{
+						isAmmoUsed = false;
+						finalAttackScore = primaryAttackScore;
+						weaponUsed = 1;
+					}
+				}
+			}
+
+		}
+
+		if (attackingMinion.rangeType == directFire)
+		{
+			if (attackingMinion.status != hasfired)
+			{
+
+				if (isAdjacent(attackingMinion.locationX, defendingMinion.locationX, attackingMinion.locationY, defendingMinion.locationY))
+				{
+					if (primaryAttackScore > secondaryAttackScore
+						&& (attackingMinion.currentPriAmmo > 0 || attackingMinion.maxPriAmmo == 0))
+					{
+						finalAttackScore = primaryAttackScore;
+						weaponUsed = 1;
+					}
+					else if (primaryAttackScore <= secondaryAttackScore
+						&& (attackingMinion.currentSecAmmo > 0 || attackingMinion.maxSecAmmo == 0))
+					{
+						finalAttackScore = secondaryAttackScore;
+						weaponUsed = 2;
+					}
+				}
+				if (weaponUsed == 1 && attackingMinion.maxPriAmmo > 0)
+				{
+					isAmmoUsed = true;
+				}
+				if (weaponUsed == 2 && attackingMinion.maxSecAmmo > 0)
+				{
+					isAmmoUsed = true;
+				}
+			}
+
+		}
+	}
+	return finalAttackScore;
 
 }
 
@@ -801,8 +818,17 @@ MasterBoard::MasterBoard(sf::Texture* inputTexture , sf::Texture* inputSecondTex
 	return;
 }
 
+//Called by masterboard for normal operations
 //This service builds another parallel set of distances that ignores all units.
 int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion)
+{
+
+	return buildTerrainOnlyPathMap(isItInitialCall, x, y, inputMinion->type, inputMinion->terrainOnlyPathMap);
+
+}
+
+//Called by compie to build its custom path maps
+int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, std::string inputType, std::vector<std::vector<pathSquare>> &inputPathMap)	
 {
 
 	//If this is first call, reset myPathMap
@@ -813,46 +839,46 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 		{
 			for (int j = 0; j < BOARD_HEIGHT; j++)
 			{
-				inputMinion->terrainOnlyPathMap[i][j].distanceFromMinion = -1;
-				inputMinion->terrainOnlyPathMap[i][j].wasVisited = false;
+				inputPathMap[i][j].distanceFromMinion = -1;
+				inputPathMap[i][j].wasVisited = false;
 			}
 		}
 	}
 
-	if (Board[x][y].consultMovementChart(inputMinion->type) == 99)
+	if (Board[x][y].consultMovementChart(inputType) == 99)
 		return 0;
 
 
 	//Check each neighbor to find lowest path FROM minion to this square, from among them.
 	int lowestNeighboringPath = 99999;
-	if (x - 1 >= 0 && inputMinion->terrainOnlyPathMap[x - 1][y].wasVisited == true)
+	if (x - 1 >= 0 && inputPathMap[x - 1][y].wasVisited == true)
 	{
-		if (inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion != -1 && inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion < lowestNeighboringPath)
+		if (inputPathMap[x - 1][y].distanceFromMinion != -1 && inputPathMap[x - 1][y].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion;
+			lowestNeighboringPath = inputPathMap[x - 1][y].distanceFromMinion;
 
 		}
 	}
-	if (y - 1 >= 0 && inputMinion->terrainOnlyPathMap[x][y - 1].wasVisited == true)
+	if (y - 1 >= 0 && inputPathMap[x][y - 1].wasVisited == true)
 	{
-		if (inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion != -1 && inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion < lowestNeighboringPath)
+		if (inputPathMap[x][y - 1].distanceFromMinion != -1 && inputPathMap[x][y - 1].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion;
+			lowestNeighboringPath = inputPathMap[x][y - 1].distanceFromMinion;
 
 		}
 	}
-	if (x + 1 < BOARD_WIDTH && inputMinion->terrainOnlyPathMap[x + 1][y].wasVisited == true)
+	if (x + 1 < BOARD_WIDTH && inputPathMap[x + 1][y].wasVisited == true)
 	{
-		if (inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion != -1 && inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion < lowestNeighboringPath)
+		if (inputPathMap[x + 1][y].distanceFromMinion != -1 && inputPathMap[x + 1][y].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion;
+			lowestNeighboringPath = inputPathMap[x + 1][y].distanceFromMinion;
 		}
 	}
-	if (y + 1 < BOARD_HEIGHT && inputMinion->terrainOnlyPathMap[x][y + 1].wasVisited == true)
+	if (y + 1 < BOARD_HEIGHT && inputPathMap[x][y + 1].wasVisited == true)
 	{
-		if (inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion != -1 && inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion < lowestNeighboringPath)
+		if (inputPathMap[x][y + 1].distanceFromMinion != -1 && inputPathMap[x][y + 1].distanceFromMinion < lowestNeighboringPath)
 		{
-			lowestNeighboringPath = inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion;
+			lowestNeighboringPath = inputPathMap[x][y + 1].distanceFromMinion;
 
 		}
 	}
@@ -863,18 +889,18 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 	{
 		//Initialize start point
 		//Cost to get to here from here 0.
-		inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion = 0;
+		inputPathMap[x][y].distanceFromMinion = 0;
 	}
 	else if (lowestNeighboringPath == 99999)
 	{   //It's physically impossible to get here from minion
-		inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion = -1;
+		inputPathMap[x][y].distanceFromMinion = -1;
 	}
 	else
 	{
-		inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(inputMinion->type);
+		inputPathMap[x][y].distanceFromMinion = lowestNeighboringPath + Board[x][y].consultMovementChart(inputType);
 	}
 
-	inputMinion->terrainOnlyPathMap[x][y].wasVisited = true;
+	inputPathMap[x][y].wasVisited = true;
 
 
 	//Now call the function for eaching neighbor that is passable (not 99 move cost or off board), and hasn't been visited, or
@@ -883,43 +909,43 @@ int MasterBoard::buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Min
 	if (x - 1 >= 0)
 	{
 		//Terrain only path will ignore all minions.
-		if ((Board[x - 1][y].consultMovementChart(inputMinion->type) != 99 && inputMinion->terrainOnlyPathMap[x - 1][y].wasVisited != true) ||
-			(Board[x - 1][y].consultMovementChart(inputMinion->type) != 99 &&
-			(inputMinion->terrainOnlyPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputMinion->type)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+		if ((Board[x - 1][y].consultMovementChart(inputType) != 99 && inputPathMap[x - 1][y].wasVisited != true) ||
+			(Board[x - 1][y].consultMovementChart(inputType) != 99 &&
+			(inputPathMap[x - 1][y].distanceFromMinion - Board[x - 1][y].consultMovementChart(inputType)) > inputPathMap[x][y].distanceFromMinion))
 		{
-			buildTerrainOnlyPathMap(false, x - 1, y, inputMinion);
+			buildTerrainOnlyPathMap(false, x - 1, y, inputType, inputPathMap);			
 		}
 	}
 
 	if (y - 1 >= 0)
 	{
 		//Terrain only path will ignore all minions.
-		if ((Board[x][y - 1].consultMovementChart(inputMinion->type) != 99 && inputMinion->terrainOnlyPathMap[x][y - 1].wasVisited != true) ||
-			(Board[x][y - 1].consultMovementChart(inputMinion->type) != 99 &&
-			(inputMinion->terrainOnlyPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputMinion->type)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+		if ((Board[x][y - 1].consultMovementChart(inputType) != 99 && inputPathMap[x][y - 1].wasVisited != true) ||
+			(Board[x][y - 1].consultMovementChart(inputType) != 99 &&
+			(inputPathMap[x][y - 1].distanceFromMinion - Board[x][y - 1].consultMovementChart(inputType)) > inputPathMap[x][y].distanceFromMinion))
 		{
-			buildTerrainOnlyPathMap(false, x, y - 1, inputMinion);
+			buildTerrainOnlyPathMap(false, x, y - 1, inputType, inputPathMap);
 		}
 	}
 
 	if (x + 1 < BOARD_WIDTH)
 	{
 		//Terrain only path will ignore all minions.
-		if ((Board[x + 1][y].consultMovementChart(inputMinion->type) != 99
-			&& inputMinion->terrainOnlyPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputMinion->type) != 99
-				&& (inputMinion->terrainOnlyPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputMinion->type)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+		if ((Board[x + 1][y].consultMovementChart(inputType) != 99
+			&& inputPathMap[x + 1][y].wasVisited != true) || (Board[x + 1][y].consultMovementChart(inputType) != 99
+				&& (inputPathMap[x + 1][y].distanceFromMinion - Board[x + 1][y].consultMovementChart(inputType)) > inputPathMap[x][y].distanceFromMinion))
 		{
-			buildTerrainOnlyPathMap(false, x + 1, y, inputMinion);
+			buildTerrainOnlyPathMap(false, x + 1, y, inputType, inputPathMap);
 		}
 	}
 
 	if (y + 1 < BOARD_HEIGHT)
 	{
 		//Terrain only path will ignore all minions.
-		if ((Board[x][y + 1].consultMovementChart(inputMinion->type) != 99 && inputMinion->terrainOnlyPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputMinion->type) != 99 &&
-			(inputMinion->terrainOnlyPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputMinion->type)) > inputMinion->terrainOnlyPathMap[x][y].distanceFromMinion))
+		if ((Board[x][y + 1].consultMovementChart(inputType) != 99 && inputPathMap[x][y + 1].wasVisited != true) || (Board[x][y + 1].consultMovementChart(inputType) != 99 &&
+			(inputPathMap[x][y + 1].distanceFromMinion - Board[x][y + 1].consultMovementChart(inputType)) > inputPathMap[x][y].distanceFromMinion))
 		{
-			buildTerrainOnlyPathMap(false, x, y + 1, inputMinion);
+			buildTerrainOnlyPathMap(false, x, y + 1, inputType, inputPathMap);
 		}
 	}
 

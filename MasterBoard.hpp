@@ -61,6 +61,7 @@ public:
 	int checkWindow();
 	int clearBoard(inputLayer* InputLayer);
 	int computeDistance(int inputX1, int inputX2, int inputY1, int inputY2);
+	double consultAttackValuesChart(std::string attackingType, std::string defendingType, double& primaryAttackValue, double& secondaryAttackValue, double& bestAttackValue);
 	double consultAttackValuesChart(Minion& attackingMinion, Minion& defendingMinion, bool& isAmmoUsed, int& weaponUsed, bool ignoreLimitations);
 	//Board Management Functions//////////////
 
@@ -68,6 +69,7 @@ public:
 	int buildPath(bool isItInitialCall, int x, int y, std::string minionType, std::vector<std::vector<pathSquare>>& pathMapPointer);
 	int buildApparentPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
 	int buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, Minion* inputMinion);
+	int buildTerrainOnlyPathMap(bool isItInitialCall, int x, int y, std::string inputType, std::vector<std::vector<pathSquare>>& inputPathMap);
 	bool hasAdjacentMinion(int inputX, int inputY, int observerNumber);
 	//Pathfinding Functions////////////////////
 

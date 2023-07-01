@@ -20,13 +20,14 @@
 #include "Tile.hpp"
 #include "inputLayer.hpp"
 #include "compieMinionRecord.hpp"
-
+#include "compiePropertyRecord.hpp"
 
 
 class inputLayer;
 class Cursor;
 class mainMenu;
 class compieMinionRecord;
+class compiePropertyRecord;
 
 //Used to make up compie's land mass map.
 
@@ -82,9 +83,6 @@ class compie
 {
 public:
 
-	//New functions
-	int buildMinionScoreMap(compieMinionRecord* selectedMinionRecord);	//Builds score map for given minion.
-
 	compie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer);
 	compie() { return; };
 	int initalizeCompie(mainMenu* inputMenu, int inputPlayerFlag, inputLayer* providedInputLayer, MasterBoard* boardToUse, int inputRepairThreshold,
@@ -116,8 +114,14 @@ public:
 	//New functions for new compie 2_0
 	int buildCompieMinionRoster();
 
+	//New functions for new compie 3_0
+	int newDetermineProduction();
+	int buildMinionScoreMap(compieMinionRecord* selectedMinionRecord);	//Builds score map for given minion.
+	int buildCompieProductionPropertyRoster();
+
 	//Used for compie minion calculations.
 	std::vector <compieMinionRecord*>  compieMinionRoster;
+	std::vector <compiePropertyRecord> compiePropertyRoster;
 
 	//LandMass contains a grid of squares
 	landMass compieLandMassMap;
