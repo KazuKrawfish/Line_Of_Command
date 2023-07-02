@@ -1979,7 +1979,7 @@ int compie::takeMyTurn()
 	if (masterBoardPointer->playerRoster[compiePlayerFlag].stillAlive == true)
 	{
 
-		determineProduction();
+		newDetermineProduction();
 
 		//Have to always keep an autosave!
 		menuPointer->saveGameData(".\\savegames\\Auto_save", masterBoardPointer);
@@ -2332,10 +2332,13 @@ int compie::newDetermineProduction()
 	double navalHQValueFactor = 20;
 	double transportFactor = 5;
 
+	buildCompieProductionPropertyRoster();
+
 	//Start with ships
 	for (int n = 0; n < compiePropertyRoster.size(); n++ )
 	{
-		if (compiePropertyRoster.at(n).symbol == 'P')
+		//Must be port and NOT have any minion on it
+		if (compiePropertyRoster.at(n).symbol == 'P'  && compiePropertyRoster.at(n).recordedTile->hasMinionOnTop == false)
 		{
 			//Create custom path map for this port
 			std::vector<std::vector<pathSquare>> portTerrainOnlyPathMap(masterBoardPointer->BOARD_WIDTH, std::vector<pathSquare>(masterBoardPointer->BOARD_HEIGHT));
@@ -2343,65 +2346,105 @@ int compie::newDetermineProduction()
 			masterBoardPointer->buildTerrainOnlyPathMap(true, compiePropertyRoster.at(n).recordedTile->locationX, compiePropertyRoster.at(n).recordedTile->locationY, "Gunboat", portTerrainOnlyPathMap);
 			//Requires buildTerrainOnlyPathMap to now accept minion typeand reference to pathmap instead of minion.
 
-				//Now go through map and for each tile, add score to this port's options depending on what we see
-				for (int x = 0; x < masterBoardPointer->BOARD_WIDTH; x++)
+			//Now go through map and for each tile, add score to this port's options depending on what we see
+			for (int x = 0; x < masterBoardPointer->BOARD_WIDTH; x++)
+			{
+				for (int y = 0; y < masterBoardPointer->BOARD_HEIGHT; y++)
 				{
-					for (int y = 0; y < masterBoardPointer->BOARD_HEIGHT; y++)
+					//Must be accessible to a ship
+					if (portTerrainOnlyPathMap[x][y].distanceFromMinion != -1)
 					{
-						//Must be accessible to a ship
-						if (portTerrainOnlyPathMap[x][y].distanceFromMinion != -1)
+						double inverseDistance = 1 / double (1 + portTerrainOnlyPathMap[x][y].distanceFromMinion);
+						if (masterBoardPointer->Board[x][y].hasMinionOnTop)
 						{
-							double inverseDistance = 1 / (portTerrainOnlyPathMap[x][y].distanceFromMinion);
-							if (masterBoardPointer->Board[x][y].hasMinionOnTop)
-							{
-								Minion * minionOnTop = masterBoardPointer->Board[x][y].minionOnTop;
+							Minion * minionOnTop = masterBoardPointer->Board[x][y].minionOnTop;
 
-								//Enemy sea unit, must be visible
-								if (minionOnTop->team != compiePlayerFlag && minionOnTop->domain == sea 
-									&& masterBoardPointer->Board[x][y].withinVision[compiePlayerFlag] == true)
-								{
-									for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
-									{
-										double bestAttackScore = 0;
-										double throwawayPriScore = 0;
-										double throwawaySecScore = 0;
-										masterBoardPointer->consultAttackValuesChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, minionOnTop->type, throwawayPriScore, throwawaySecScore, bestAttackScore);
-										compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * bestAttackScore;
-									}
-								}								
-							}
-							
-							//Enemy port or other property (Accessible to ship?!?!?)
-							if (masterBoardPointer->Board[x][y].checkForProperty() == true && masterBoardPointer->Board[x][y].controller != compiePlayerFlag)
+							//Enemy sea unit, must be visible
+							if (minionOnTop->team != compiePlayerFlag && minionOnTop->domain == sea 
+								&& masterBoardPointer->Board[x][y].withinVision[compiePlayerFlag] == true)
 							{
 								for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
 								{
-									compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * navalPortValueFactor;
+									double bestAttackScore = 0;
+									double throwawayPriScore = 0;
+									double throwawaySecScore = 0;
+									masterBoardPointer->consultAttackValuesChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, minionOnTop->type, throwawayPriScore, throwawaySecScore, bestAttackScore);
+									compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * bestAttackScore;
 								}
-							}
-
-							//Shoals are good for landers/gunboats
-							if (masterBoardPointer->Board[x][y].symbol == '*')
+							}								
+						}
+							
+						//Enemy port or other property (Accessible to ship?!?!?)
+						if (masterBoardPointer->Board[x][y].checkForProperty() == true && masterBoardPointer->Board[x][y].controller != compiePlayerFlag)
+						{
+							for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
 							{
-							//This is not great but allows landers and gunboats to be rep'd for transporting to shoals and such
-							compiePropertyRoster.at(n).purchasePreferenceList.at(0).preferenceScore += inverseDistance * transportFactor;
-							compiePropertyRoster.at(n).purchasePreferenceList.at(2).preferenceScore += inverseDistance * transportFactor * 2;
+								compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * navalPortValueFactor;
 							}
 						}
 
-						//For enemy HQ, we ignore if it's accessible and just compute the straight line distance.
-						if (masterBoardPointer->Board[x][y].symbol == 'Q')
+						//Shoals are good for landers/gunboats
+						if (masterBoardPointer->Board[x][y].symbol == '*')
 						{
-							double inverseDistance = 1 / (masterBoardPointer->computeDistance(x, compiePropertyRoster.at(n).recordedTile->locationX, y, compiePropertyRoster.at(n).recordedTile->locationY));
-							for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
-							{
-								compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * navalHQValueFactor;
-							}
+						//This is not great but allows landers and gunboats to be rep'd for transporting to shoals and such
+						compiePropertyRoster.at(n).purchasePreferenceList.at(0).preferenceScore += inverseDistance * transportFactor;
+						compiePropertyRoster.at(n).purchasePreferenceList.at(2).preferenceScore += inverseDistance * transportFactor * 2;
+						}
+					}
+
+					//For enemy HQ, we ignore if it's accessible and just compute the straight line distance.
+					if (masterBoardPointer->Board[x][y].symbol == 'Q')
+					{
+						double inverseDistance = 1 / double (1 + masterBoardPointer->computeDistance(x, compiePropertyRoster.at(n).recordedTile->locationX, y, compiePropertyRoster.at(n).recordedTile->locationY));
+						for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+						{
+							compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * navalHQValueFactor;
 						}
 					}
 				}
+			}
+		}
+	
+		//Now factor in the amount of money we have - the more out of budget a minion costs, the more it decreases its preference.
+		for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+		{
+			//Multiply the preference score by how far from purchasing we are (Assuming we don't have enough treasury currently)
+			int minionCost = masterBoardPointer->consultMinionCostChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, '~');
+			double overCostFactor = masterBoardPointer->playerRoster[compiePlayerFlag].treasury / double (minionCost);
 
+			if (overCostFactor > 1)
+				overCostFactor = 1;
 
+			compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore *= overCostFactor;
+		}
+	}
+
+	//Need to do the sorting but for now just pick one port to build at
+	int bestBase = -1;
+	int bestMinion = -1;
+	double bestPreferenceScore = 0;
+	for (int n = 0; n < compiePropertyRoster.size(); n++)
+	{
+		for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+		{
+			if (compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore > bestPreferenceScore)
+			{
+				bestPreferenceScore = compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore;
+				bestBase = n;
+				bestMinion = j;
+			}
+		}
+	}
+
+	if (bestBase != -1 && bestMinion != -1)
+	{
+		std::cout << "Would like to buy: " << compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type << std::endl;
+		if (masterBoardPointer->consultMinionCostChart(compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type, 'P') <= masterBoardPointer->playerRoster[compiePlayerFlag].treasury
+			&& std::find(masterBoardPointer->banList.begin(), masterBoardPointer->banList.end(), compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type) == masterBoardPointer->banList.end())
+		{
+			//Must be able to actually afford the unit.				
+			int success = masterBoardPointer->attemptPurchaseMinion(compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type,
+				compiePropertyRoster.at(bestBase).recordedTile->locationX, compiePropertyRoster.at(bestBase).recordedTile->locationY, masterBoardPointer->playerFlag);
 		}
 	}
 
