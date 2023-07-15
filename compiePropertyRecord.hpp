@@ -21,11 +21,13 @@ struct preferredPurchase
 {
 	std::string type = "";
 	double preferenceScore = 0;
+	specialtyGroupType specialtyGroup = normal;
 
-	preferredPurchase(std::string inputType, double inputPreference) 
+	preferredPurchase(std::string inputType, double inputPreference, specialtyGroupType inputSpecialty)
 	{
 		type = inputType;
 		preferenceScore = inputPreference;
+		specialtyGroup = inputSpecialty;
 	};
 };
 

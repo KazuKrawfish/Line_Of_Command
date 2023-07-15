@@ -2332,6 +2332,10 @@ int compie::newDetermineProduction()
 	double navalHQValueFactor = 20;
 	double transportFactor = 5;
 
+	double landPropertyFactor = 10;
+	double landHQValueFactor = 20;
+	double terrainFactor = 0.1;
+
 	buildCompieProductionPropertyRoster();
 
 	//Start with ships
@@ -2418,36 +2422,150 @@ int compie::newDetermineProduction()
 			compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore *= overCostFactor;
 		}
 	}
-
-	//Need to do the sorting but for now just pick one port to build at
-	int bestBase = -1;
-	int bestMinion = -1;
-	double bestPreferenceScore = 0;
+	
+	//Next land minions
 	for (int n = 0; n < compiePropertyRoster.size(); n++)
 	{
-		for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+		//Must be factory and NOT have any minion on it
+		if (compiePropertyRoster.at(n).symbol == 'h' && compiePropertyRoster.at(n).recordedTile->hasMinionOnTop == false)
 		{
-			if (compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore > bestPreferenceScore)
+			//Create one path map for vehicles, later we will try to differentiate for infantry too
+			std::vector<std::vector<pathSquare>> factoryVehicleTerrainOnlyPathMap(masterBoardPointer->BOARD_WIDTH, std::vector<pathSquare>(masterBoardPointer->BOARD_HEIGHT));
+
+			masterBoardPointer->buildTerrainOnlyPathMap(true, compiePropertyRoster.at(n).recordedTile->locationX, compiePropertyRoster.at(n).recordedTile->locationY, "Armor", factoryVehicleTerrainOnlyPathMap);
+
+			//Now go through map and for each tile, add score to this factory's options depending on what we see
+			for (int x = 0; x < masterBoardPointer->BOARD_WIDTH; x++)
 			{
-				bestPreferenceScore = compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore;
-				bestBase = n;
-				bestMinion = j;
+				for (int y = 0; y < masterBoardPointer->BOARD_HEIGHT; y++)
+				{
+					//Must be accessible to an vehicle
+					if (factoryVehicleTerrainOnlyPathMap[x][y].distanceFromMinion != -1)
+					{
+						double inverseDistance = 1 / double(1 + factoryVehicleTerrainOnlyPathMap[x][y].distanceFromMinion);
+						if (masterBoardPointer->Board[x][y].hasMinionOnTop)
+						{
+							Minion* minionOnTop = masterBoardPointer->Board[x][y].minionOnTop;
+
+							//Enemy minion, must be visible
+							if (minionOnTop->team != compiePlayerFlag && masterBoardPointer->Board[x][y].withinVision[compiePlayerFlag] == true)
+							{
+								for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+								{
+									double bestAttackScore = 0;
+									double throwawayPriScore = 0;
+									double throwawaySecScore = 0;
+									masterBoardPointer->consultAttackValuesChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, minionOnTop->type, throwawayPriScore, throwawaySecScore, bestAttackScore);
+									
+									//Add score from a potential combat
+									compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * bestAttackScore;
+								}
+							}
+						}
+
+						//Enemy property
+						if (masterBoardPointer->Board[x][y].checkForProperty() == true && masterBoardPointer->Board[x][y].controller != compiePlayerFlag)
+						{
+							for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+							{
+								//Adjust depending on if infantry or not
+								double adjustedPropertyFactor = 0;
+								if (compiePropertyRoster.at(n).purchasePreferenceList.at(j).specialtyGroup == infantry)
+									adjustedPropertyFactor = landPropertyFactor;
+								else
+									adjustedPropertyFactor = 0.2 * landPropertyFactor;
+
+								compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * adjustedPropertyFactor;
+							}
+						}
+
+					}
+
+					//For enemy HQ, we ignore if it's accessible and just compute the straight line distance.
+					if (masterBoardPointer->Board[x][y].symbol == 'Q')
+					{
+						double inverseDistance = 1 / double(1 + masterBoardPointer->computeDistance(x, compiePropertyRoster.at(n).recordedTile->locationX, y, compiePropertyRoster.at(n).recordedTile->locationY));
+						for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+						{
+							compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * landHQValueFactor;
+						}
+					}
+
+				}
 			}
 		}
 	}
 
-	if (bestBase != -1 && bestMinion != -1)
-	{
-		std::cout << "Would like to buy: " << compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type << std::endl;
-		if (masterBoardPointer->consultMinionCostChart(compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type, 'P') <= masterBoardPointer->playerRoster[compiePlayerFlag].treasury
-			&& std::find(masterBoardPointer->banList.begin(), masterBoardPointer->banList.end(), compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type) == masterBoardPointer->banList.end())
-		{
-			//Must be able to actually afford the unit.				
-			int success = masterBoardPointer->attemptPurchaseMinion(compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type,
-				compiePropertyRoster.at(bestBase).recordedTile->locationX, compiePropertyRoster.at(bestBase).recordedTile->locationY, masterBoardPointer->playerFlag);
-		}
-	}
+	//Now actually try to build minions
 
+	//Variables to determine best property to build at
+	int bestBase = -1;
+	int bestMinion = -1;
+	double bestPreferenceScore = 0;
+	//Keep attempting to buy minions until we decide otherwise
+	bool stillBuyingMinions = true;
+	while (stillBuyingMinions == true)
+	{
+
+		//Go through property roster looking for best base to build at, and best minion to buy there.
+		for (int n = 0; n < compiePropertyRoster.size(); n++)
+		{
+			//Must be free to build a minion
+			if (compiePropertyRoster.at(n).recordedTile->hasMinionOnTop == false)
+			{
+				for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+				{
+					if (compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore > bestPreferenceScore)
+					{
+						//We must be allowed to build this minion AND it's in our faction
+						if (masterBoardPointer->checkFactionAvailability(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, compiePlayerFlag) == true &&
+							std::find(masterBoardPointer->banList.begin(), masterBoardPointer->banList.end(), compiePropertyRoster.at(n).purchasePreferenceList.at(j).type) == masterBoardPointer->banList.end())
+						{
+							bestPreferenceScore = compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore;
+							bestBase = n;
+							bestMinion = j;
+						}
+					}
+				}
+			}
+		}
+
+		if (bestBase != -1 && bestMinion != -1)
+		{
+			std::cout << "Would like to buy: " << compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type << std::endl;
+			if (masterBoardPointer->consultMinionCostChart(compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type, '~') <= masterBoardPointer->playerRoster[compiePlayerFlag].treasury)
+			{
+				//Must be able to actually afford the unit.				
+				int success = masterBoardPointer->attemptPurchaseMinion(compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type,
+					compiePropertyRoster.at(bestBase).recordedTile->locationX, compiePropertyRoster.at(bestBase).recordedTile->locationY, masterBoardPointer->playerFlag);
+			
+				//If purchased our preferred minion successfully, reset counters and continue trying to purchase minions.
+				if (success == 0)
+				{
+					bestBase = -1;
+					bestMinion = -1;
+					bestPreferenceScore = 0;
+				}
+				else
+				{
+					stillBuyingMinions = false;
+				}
+					
+
+			}
+			else 
+			{	//If we didn't have enough money to buy preferred minion, stop buying minions for this turn.
+				//(Might be saving up for a larger minion, for example)
+				stillBuyingMinions = false;
+			}
+		}
+		else 
+		{
+			//If we couldn't find a valid property, we're done building minions for this turn.
+			stillBuyingMinions = false;
+		}
+
+	}
 
 	return 0;
 

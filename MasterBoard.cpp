@@ -444,6 +444,12 @@ double MasterBoard::consultAttackValuesChart(std::string attackingType, std::str
 	{
 		primaryAttackValue = ATTACK_VALUES_MATRIX[y][x];
 		secondaryAttackValue = SECONDARY_ATTACK_VALUES_MATRIX[y][x];
+		
+		//Determine the best of the two values for easy access
+		if (primaryAttackValue > secondaryAttackValue)
+			bestAttackValue = primaryAttackValue;
+		else bestAttackValue = secondaryAttackValue;
+
 		return 0;
 	}
 
@@ -460,6 +466,8 @@ double MasterBoard::consultAttackValuesChart(Minion& attackingMinion, Minion& de
 
 	double primaryAttackScore = 0;
 	double secondaryAttackScore = 0;
+
+	//Throwaway since we're gonna check for ammo and other things
 	double bestAttackValue = 0;
 
 	double finalAttackScore = 0;
