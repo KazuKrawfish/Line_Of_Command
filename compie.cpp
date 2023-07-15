@@ -2328,13 +2328,21 @@ int compie::determineProduction()
 
 int compie::newDetermineProduction()
 {
-	double navalPortValueFactor = 10;
-	double navalHQValueFactor = 20;
-	double transportFactor = 5;
+	//The order of magnitude is 100 for most values since combat values are based on gold cost, which is in thousands
+	double navalPortValueFactor = 100;
+	double navalHQValueFactor = 200;
+	double transportFactor = 50;
 
-	double landPropertyFactor = 10;
-	double landHQValueFactor = 20;
+	double landPropertyFactor = 100;
+	double landHQValueFactor = 200;
 	double terrainFactor = 0.1;
+	double nearbyMinionNegativeMultiplier = 200;
+
+	//Range should be range 0-1, decimal.
+	double efficiencyFactor = 0.1;	//1 indicates subtract full cost of a minion
+
+	//Note, higher number makes infantry more preferred.
+	double nonInfantryPenalty = 2;
 
 	buildCompieProductionPropertyRoster();
 
@@ -2369,11 +2377,17 @@ int compie::newDetermineProduction()
 							{
 								for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
 								{
+									//First see what the combat results are
 									double bestAttackScore = 0;
 									double throwawayPriScore = 0;
 									double throwawaySecScore = 0;
 									masterBoardPointer->consultAttackValuesChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, minionOnTop->type, throwawayPriScore, throwawaySecScore, bestAttackScore);
-									compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * bestAttackScore;
+
+									//Then multiply by the cost of the enemy minion and subtract by our minion's cost and efficiencyFactor
+									double combatValue = bestAttackScore * masterBoardPointer->consultMinionCostChart(minionOnTop->type, '~');
+									double combatCost = masterBoardPointer->consultMinionCostChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, '~') * efficiencyFactor;
+
+									compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * ( combatValue - combatCost);
 								}
 							}								
 						}
@@ -2397,7 +2411,7 @@ int compie::newDetermineProduction()
 					}
 
 					//For enemy HQ, we ignore if it's accessible and just compute the straight line distance.
-					if (masterBoardPointer->Board[x][y].symbol == 'Q')
+					if (masterBoardPointer->Board[x][y].symbol == 'Q' && masterBoardPointer->Board[x][y].controller != compiePlayerFlag)
 					{
 						double inverseDistance = 1 / double (1 + masterBoardPointer->computeDistance(x, compiePropertyRoster.at(n).recordedTile->locationX, y, compiePropertyRoster.at(n).recordedTile->locationY));
 						for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
@@ -2452,15 +2466,28 @@ int compie::newDetermineProduction()
 							{
 								for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
 								{
+									//Add score from a potential combat
 									double bestAttackScore = 0;
 									double throwawayPriScore = 0;
 									double throwawaySecScore = 0;
 									masterBoardPointer->consultAttackValuesChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, minionOnTop->type, throwawayPriScore, throwawaySecScore, bestAttackScore);
 									
-									//Add score from a potential combat
-									compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * bestAttackScore;
+									//Then multiply by the cost of the enemy minion
+									double combatValue = bestAttackScore * masterBoardPointer->consultMinionCostChart(minionOnTop->type, '~');
+									double combatCost = masterBoardPointer->consultMinionCostChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, '~') * efficiencyFactor;
+
+									compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * (combatValue - combatCost);
 								}
 							}
+
+							//If friendly minion, subtract a small amount based on distance
+							if(minionOnTop->team == compiePlayerFlag)
+								for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+								{
+									if(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type == minionOnTop->type)
+										compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore -= inverseDistance * nearbyMinionNegativeMultiplier;
+								}
+
 						}
 
 						//Enemy property
@@ -2473,7 +2500,7 @@ int compie::newDetermineProduction()
 								if (compiePropertyRoster.at(n).purchasePreferenceList.at(j).specialtyGroup == infantry)
 									adjustedPropertyFactor = landPropertyFactor;
 								else
-									adjustedPropertyFactor = 0.2 * landPropertyFactor;
+									adjustedPropertyFactor =  landPropertyFactor / nonInfantryPenalty;
 
 								compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore += inverseDistance * adjustedPropertyFactor;
 							}
@@ -2482,7 +2509,7 @@ int compie::newDetermineProduction()
 					}
 
 					//For enemy HQ, we ignore if it's accessible and just compute the straight line distance.
-					if (masterBoardPointer->Board[x][y].symbol == 'Q')
+					if (masterBoardPointer->Board[x][y].symbol == 'Q' && masterBoardPointer->Board[x][y].controller != compiePlayerFlag)
 					{
 						double inverseDistance = 1 / double(1 + masterBoardPointer->computeDistance(x, compiePropertyRoster.at(n).recordedTile->locationX, y, compiePropertyRoster.at(n).recordedTile->locationY));
 						for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
@@ -2492,6 +2519,19 @@ int compie::newDetermineProduction()
 					}
 
 				}
+			}
+
+			//Now factor in the amount of money we have - the more out of budget a minion costs, the more it decreases its preference.
+			for (int j = 0; j < compiePropertyRoster.at(n).purchasePreferenceList.size(); j++)
+			{
+				//Multiply the preference score by how far from purchasing we are (Assuming we don't have enough treasury currently)
+				int minionCost = masterBoardPointer->consultMinionCostChart(compiePropertyRoster.at(n).purchasePreferenceList.at(j).type, '~');
+				double overCostFactor = masterBoardPointer->playerRoster[compiePlayerFlag].treasury / double(minionCost);
+
+				if (overCostFactor > 1)
+					overCostFactor = 1;
+
+				compiePropertyRoster.at(n).purchasePreferenceList.at(j).preferenceScore *= overCostFactor;
 			}
 		}
 	}
