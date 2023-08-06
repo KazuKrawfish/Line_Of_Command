@@ -21,7 +21,9 @@ development, and since this is almost entirely a solo effort.
 class Cursor;
 const int GLOBALSUPPLYCAP = 100;		//Global variables declarations
 
-enum playerTypeKind { humanPlayer, computerPlayer };
+//Types of players. Note: Local and Remote Human are still treated as similar for many game functions.
+enum playerTypeKind { localHumanPlayer, computerPlayer , remoteHumanPlayer };	
+
 enum factionType {NeutralFaction, NorthRedonia, SouthRedonia, Ormosa, Torran};
 
 class playerRosterEntry
@@ -40,7 +42,7 @@ public:
 	};
 
 	int treasury = 0;
-	playerTypeKind playerType = humanPlayer;
+	playerTypeKind playerType = localHumanPlayer;
 	std::string name;
 	int playerFlag = -1;
 	bool stillAlive = true;

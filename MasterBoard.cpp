@@ -2749,7 +2749,7 @@ int MasterBoard::playerVictory(int winningPlayer, inputLayer* InputLayer)
 	bool humanPlayerPresent = false;
 	for (int i = 1; i < playerRoster.size(); i++)
 	{
-		if (playerRoster[i].playerType == humanPlayer)
+		if (playerRoster[i].playerType != computerPlayer)
 			humanPlayerPresent = true;
 	}
 
@@ -2822,7 +2822,7 @@ int MasterBoard::playerDefeat(int losingPlayer, int winningPlayer, inputLayer* I
 			playersLeft++;
 		}
 
-		if (playerRoster[i].playerType == humanPlayer)
+		if (playerRoster[i].playerType != computerPlayer)
 			humanPlayerPresent = true;
 	}
 

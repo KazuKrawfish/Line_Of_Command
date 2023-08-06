@@ -120,7 +120,11 @@ int main()
 
 
 	//Load topMenuButton textures
-	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off",  "top_Editor_Mode_On",  "top_New_Campaign", "top_New_Skirmish", "top_Back" , "top_Quit", "upButton", "downButton", "Select", "top_Computer", "top_Human" };
+	//NOTE: There is one less texture than total top menu buttons, because top_Back is used twice. So every button after back #2 uses 
+	//the index of that button's particular image + 1.
+	std::vector <std::string> imageList = { "top_New_Game", "top_Load_Game", "top_Editor_Mode_Off",  "top_Editor_Mode_On",  "top_New_Campaign", 
+											"top_New_Skirmish", "top_Back" , "top_Quit", "upButton", "downButton", "Select", "top_Computer", 
+											"top_Human", "top_Remote_Join", "top_Remote_Host", "top_Remote_Game", "top_Remote_Human"};
 	std::vector <sf::Texture> topMenuButtonTextureArray;
 	topMenuButtonTextureArray.resize(imageList.size());
 	initializeTextureArray("topMenuButtons", imageList, topMenuButtonTextureArray);
@@ -133,8 +137,8 @@ int main()
 
 	//Load other textures
 	std::vector <std::string> otherImagesList = { "startScreenBackground", "topMenuBackground", "startScreenStatement", "topMenuBox", "Sidebar", "loadGameBackground",
-		"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", "dialogBox" , "gameplayBackground",
-		"inGameMenu"};
+													"newGameBackground","saveGameBackground", "nextPlayerBackground", "missionBriefingBackground", "victoryDefeatBackground", 
+													"dialogBox" , "gameplayBackground", "inGameMenu" , "remoteGameBackground"};
 	std::vector <sf::Texture> otherTextureArray;
 	otherTextureArray.resize(otherImagesList.size());
 	initializeTextureArray("otherImages", otherImagesList, otherTextureArray);

@@ -22,7 +22,8 @@ class Button;
 
 
 enum otherImages { startScreenBackground, topMenuBackground, startScreenStatement, topMenuBox };
-enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer, compieTakingTurn, insertMinion, insertTile };
+enum gameInputLayer { gameBoard, menu, minionAction, propertyAction, waitingForNextLocalPlayer, 
+						compieTakingTurn, insertMinion, insertTile, waitingForHost, waitingForClient };
 enum specialKey { showMinions, hideMinions };
 enum rangeVisibleStatus { showRange, hideRange };
 

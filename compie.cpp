@@ -1992,7 +1992,7 @@ int compie::takeMyTurn()
 		bool allComputerPlayers = true;
 		for (int i = 1; i < masterBoardPointer->NUMBEROFPLAYERS + 1; i++)
 		{
-			if (masterBoardPointer->playerRoster[i].playerType == humanPlayer)
+			if (masterBoardPointer->playerRoster[i].playerType != computerPlayer)
 				allComputerPlayers = false;
 		}
 		if (allComputerPlayers == false)

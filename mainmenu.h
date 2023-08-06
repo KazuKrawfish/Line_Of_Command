@@ -20,7 +20,9 @@ InputLayer and masterBoard may call it, so they are somewhat circular-dependent.
 #include <filesystem>	
 
 enum mainMenuStatus { topmenu, playingMap };
-enum interactionMethod { unchosen, localSkirmish, localCampaign };
+
+//Determine if game is skirmish or campaign, and remote or local
+enum interactionMethod { unchosen, localSkirmish, localCampaign, remoteHost, remoteClient };
 
 //Forward declare global utilities
 char getValidPlayerInput(sf::RenderWindow* myWindow);
@@ -40,10 +42,12 @@ public:
 	mainMenu(std::string inputConfigFileName, std::string inputMapListName);
 
 	//Main Menu Interface //////////////////////
+	int printTopMenuBackground();
 	int printTopMenu();
 	int topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
 	int topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
+	int topMenuRemote(char* Input, MasterBoard* boardToPlay, inputLayer* InputLayer);
 	//Main Menu Interface //////////////////////
 
 	//Game session management///////////////////
@@ -116,6 +120,14 @@ public:
 	int battleLabWinningPlayer = 0;
 	int runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std::ifstream* configFile);
 	//Battle Lab/////////////////////////////////
+
+	//Remote play////////////////////////////////
+	int waitingForRemoteClient();
+	int waitingForRemoteHost();
+	sf::String remoteHostIPAddress = "";
+	int remoteHostPortNumber = 0;
+	int myPlayerNumber = 0;
+	//Remote play////////////////////////////////
 
 };
 

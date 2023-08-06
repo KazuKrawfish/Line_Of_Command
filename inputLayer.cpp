@@ -1339,7 +1339,7 @@ int inputLayer::printUpperScreen(MasterBoard* boardToPrint, int observerNumber, 
 
 int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 {
-	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
+	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == localHumanPlayer)
 	{
 		inputLayerWindow->clear();
 		
@@ -1387,7 +1387,7 @@ int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, 
 	}
 
 	//If player controlled, tile the minion moves through will always be visible.
-	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType == humanPlayer)
+	if (boardToPrint->playerRoster[boardToPrint->playerFlag].playerType != computerPlayer)
 	{
 		boardToPrint->Board[locationX][locationY].withinVision[observerNumber] = true;
 	}
@@ -1977,7 +1977,7 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 	//Only lasts one input.
 	status = gameBoard;
 
-	if (boardToInput->playerRoster[boardToInput->playerFlag].playerType == humanPlayer) {
+	if (boardToInput->playerRoster[boardToInput->playerFlag].playerType != computerPlayer) {
 		if (MainMenu->editorMode == true)	//If debug, see from 0's perspective.
 		{
 			boardToInput->upkeep(this, 0);
