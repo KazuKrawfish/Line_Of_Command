@@ -16,6 +16,7 @@ InputLayer and masterBoard may call it, so they are somewhat circular-dependent.
 #include "MasterBoard.hpp"
 #include <SFML/Audio.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Network.hpp>
 #include "button.hpp"
 #include <filesystem>	
 
@@ -122,8 +123,15 @@ public:
 	//Battle Lab/////////////////////////////////
 
 	//Remote play////////////////////////////////
-	int waitingForRemoteClient();
-	int waitingForRemoteHost();
+	//Handle sending/receiving game updates between host and client
+	int waitingForRemoteClient(MasterBoard* boardToPlay , inputLayer* InputLayer );
+	int waitingForRemoteHost(MasterBoard* boardToPlay , inputLayer* InputLayer);
+	int updateRemoteHost(MasterBoard* boardToPlay, inputLayer* InputLayer);
+
+	//Similar to loadGameData and saveGameData
+	int loadGameDataFromPacket(MasterBoard* boardToPrint, sf::Packet* gamePacket , inputLayer* InputLayer);
+	int saveGameDataToPacket( MasterBoard* boardToPrint , sf::Packet* gamePacket , inputLayer* InputLayer);
+
 	sf::String remoteHostIPAddress = "";
 	int remoteHostPortNumber = 0;
 	int myPlayerNumber = 0;

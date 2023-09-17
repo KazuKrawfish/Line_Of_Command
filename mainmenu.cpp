@@ -2281,64 +2281,461 @@ int mainMenu::topMenuLoad(char* Input, MasterBoard* boardToPlay, inputLayer* Inp
 //Then either passes the game to the next remote player, or transitions to host/compie control.
 //While this function is running, printWaitingForRemoteClient() is printed.
 //This function doesn't have while loop built in to allow control to go back to playGame().
-int mainMenu::waitingForRemoteClient()
+int mainMenu::waitingForRemoteClient(MasterBoard* boardToPlay, inputLayer* InputLayer)
 {
+	sf::TcpListener listener;
+
+	// bind the listener to a port
+	if (listener.listen(53000) != sf::Socket::Done)
+	{
+		std::cout << "Could not bind listener to a port" << std::endl;
+	}
 
 	while (menuStatus != playingMap)
 	{
-		/*
-		get message on port
-			OR
-			for (messages queue on port)
 
-				if (valid game message)
+		// accept a new connection
+		//This is blocking
+		sf::TcpSocket client;
+		if (listener.accept(client) == sf::Socket::Done)
+		{
+			sf::Packet receivedPacket;
+			//First see if client is updating or asking for update
+			client.receive(receivedPacket);
+
+			sf::String statusLine;
+			receivedPacket >> statusLine;
+
+			if (statusLine == "Request_Update")
+			{
+				sf::Packet updateToSend;
+				
+				saveGameDataToPacket(boardToPlay, &updateToSend , InputLayer);
+
+				client.send(updateToSend);
+
+				client.disconnect();
+			}
+			else
+			if(statusLine == "Update_Follows")
+			{
+				sf::String nextLine;
+				int freshUpdate = loadGameDataFromPacket(boardToPlay, &receivedPacket , InputLayer);
+
+				//update our own internal game data
+				//If it's host's turn or compie's turn, take back control
+				if (freshUpdate == 0)
 				{
-					if (client asking for updated game state)
-						send client our updated game data
-					else
-						if (client providing its own updated game data)
-						{
-							update our own internal game data
-								//If it's host's turn or compie's turn, take back control
-								if (boardToPlay->playerFlag == myPersonalPlayerNumber || boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == compie)
-								{
-									menuStatus = playingMap;
-								}
-						}
-
+					menuStatus = playingMap;
 				}
-			*/
+
+			}
+		}
+		else
+		{
+			// error...
+		}
 
 	}
 	return 0;
 }
 
-
-int mainMenu::waitingForRemoteHost()
+int mainMenu::waitingForRemoteHost(MasterBoard* boardToPlay , inputLayer* InputLayer)
 {
-	/*
-	send updated game data only once to host.
+	//Client asking for update:
+	sf::TcpSocket socket;
+	sf::Packet packetToSend;
 
-		while (menuStatus != playingMap)
+
+	while (menuStatus != playingMap)
+	{
+		sf::Time timeout = sf::seconds(5);
+		sf::Socket::Status status = socket.connect("192.168.0.5", 53000, timeout);
+		if (status != sf::Socket::Disconnected)
 		{
+			packetToSend.clear();
+			sf::String message = "Request_Update";
+			packetToSend << message;
 
-			ask host for updated game data after given wait time
+			//Ask host for an update
+			socket.send(packetToSend);
 
-				if (valid game message is returned)
+			//Get status of game from host - are we still waiting or is there an update?
+			//If update available, get updated game file.
+			//If no update available, do nothing.
+			sf::Packet receivePacket;
+			socket.receive(receivePacket);
+			
+			sf::String header;
+			receivePacket >> header ;
+		
+			//Always load up the most recent game data.
+			//This may cause unecessary sending/receiving game data. We don't care.
+			if (header == "Update_Follows")
+			{
+				int freshUpdate = loadGameDataFromPacket(boardToPlay, &receivePacket , InputLayer);
+
+				//If it's a fresh update (Our NEXT turn) then play, otherwise still waiting
+				//Compies are played by host player
+				if (freshUpdate == 0)
 				{
-					if (host providing updated game state)
-					{
-						update our own internal game data
-							//If it's this player's turn, take back control
-							if (boardToPlay->playerFlag == myPersonalPlayerNumber)
-							{
-								menuStatus = playingMap;
-							}
-					}
-					//Host update should be the only the client sees.
-					//If not, do nothing.
+					menuStatus = playingMap;
 				}
+			}
+			
+			//Then close socket.
+			socket.disconnect();
+
 		}
-		*/
+		else
+		{
+			//If can't open socket, try again later
+			std::cout << "Couldn't conenct" << std::endl;
+			continue;
+		}
+	}
+
+
+	return 0;
+}
+
+int mainMenu::loadGameDataFromPacket(MasterBoard* boardToPlay, sf::Packet* gamePacket, inputLayer* InputLayer)
+{
+	std::string ThrowawayString;
+
+	//Then load the game turn.
+	int newTurnValue = 0;
+	*gamePacket >> ThrowawayString;
+	*gamePacket >> newTurnValue;
+	
+	//This is the current player whos turn it is:
+	int nextPlayerFlag = 0;
+	*gamePacket >> ThrowawayString;
+	*gamePacket >> nextPlayerFlag;
+
+	//Host checks for either compie's next turn, our host's next turn
+	if (gameType == remoteHost)
+	{
+		if ((nextPlayerFlag == myPlayerNumber || boardToPlay->playerRoster[nextPlayerFlag].playerType == computerPlayer)
+			&& gameTurn + 1 == newTurnValue)
+		{
+			gameTurn = newTurnValue;
+			boardToPlay->playerFlag = nextPlayerFlag;
+
+		}
+		else return 1;
+	}
+	else
+	{
+		//Non-host merely checks for our next turn
+		if (nextPlayerFlag == myPlayerNumber && gameTurn + 1 == newTurnValue)
+		{
+			gameTurn = newTurnValue;
+			boardToPlay->playerFlag = nextPlayerFlag;
+		}
+		else return 1;
+	}
+
+	boardToPlay->clearBoard(InputLayer);
+	   
+
+	//Pretty sure this is never true because loadfrompacket means it's coming after someone took their turn
+	//veryFirstTurn = true;
+	   
+	*gamePacket >> ThrowawayString;
+	*gamePacket >> isItSaveGame;
+
+	//First load number of players from packet
+	*gamePacket >> ThrowawayString;
+	*gamePacket >> boardToPlay->NUMBEROFPLAYERS;
+	boardToPlay->playerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
+
+	//*********************************************//
+	//Input "Mission load" data here
+	//*gamePacket >> ThrowawayString;			//Campaign_game
+	//*gamePacket >> boardToPlay->missionFlag;
+
+	//Must be remote skirmish
+	/*if (gameType == unchosen)
+	{
+		if (boardToPrint->missionFlag == 1)
+			gameType == localCampaign;
+		else gameType = localSkirmish;
+	}*/
+
+	//* dataStream >> ThrowawayString;		//Campaign Name - used to navigate menu for next level
+	//*dataStream >> boardToPrint->campaignName;
+
+	*gamePacket >> ThrowawayString;
+	*gamePacket >> boardToPlay->scenarioOrMissionName;	//Must be exactly the same as the txt file's name
+
+	//*dataStream >> ThrowawayString;		//TurnLength - either 0 for no max turn length, or int to indicate length
+	//*dataStream >> boardToPrint->missionTurnLength;
+
+	//*dataStream >> ThrowawayString;		//Indicates who will win if turn length is met.
+	//*dataStream >> boardToPrint->whoHoldsOut;
+
+	//*dataStream >> ThrowawayString;		//Name of next mission
+	//*dataStream >> nextMissionName;
+
+	//briefingLineNumber = 0;
+	//*dataStream >> ThrowawayString;		//String with mission info
+	//*dataStream >> briefingLineNumber;
+	//missionBriefing = "";
+	/*
+	for (int i = 0; i < briefingLineNumber; i++)
+	{
+		std::string singleLine;
+		std::getline(*dataStream, singleLine);
+		missionBriefing += singleLine;
+		missionBriefing += "\n";
+	}*/
+
+
+	//End Mission Data Load
+	//*********************************************//
+
+	//Must verify this is updated by checking game turn and player flag.
+	//If not same player flag, AND next game turn, return 1.
+
+
+
+
+	//Unique to save_game vs scenario. Load player names (User names):
+	*gamePacket >> ThrowawayString;
+	for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
+	{
+		int playerType = 0;
+		int factionType = 0;
+
+		*gamePacket >> boardToPlay->playerRoster[i].name;	//For new game this should be ~
+		*gamePacket >> playerType;
+		*gamePacket >> boardToPlay->playerRoster[i].stillAlive;
+		*gamePacket >> boardToPlay->playerRoster[i].treasury;
+		*gamePacket >> factionType;
+
+		switch (factionType)
+		{
+		case(0):
+			boardToPlay->playerRoster[i].playerFaction = NeutralFaction;
+			break;
+		case(1):
+			boardToPlay->playerRoster[i].playerFaction = NorthRedonia;
+			break;
+		case(2):
+			boardToPlay->playerRoster[i].playerFaction = SouthRedonia;
+			break;
+		case(3):
+			boardToPlay->playerRoster[i].playerFaction = Ormosa;
+			break;
+		case(4):
+			boardToPlay->playerRoster[i].playerFaction = Torran;
+			break;
+		}
+
+
+		if (playerType == 0)
+			boardToPlay->playerRoster[i].playerType = localHumanPlayer;
+		else if (playerType == 1)
+		{
+			boardToPlay->playerRoster[i].playerType = computerPlayer;
+		}
+		else if (playerType == 2)
+		{
+			boardToPlay->playerRoster[i].playerType = remoteHumanPlayer;
+		}
+
+	}
+
+
+
+	//Then load fog of war status - in "new" game this should be overriden by player choice.
+	*gamePacket >> ThrowawayString;
+	*gamePacket >> boardToPlay->fogOfWar;
+
+	//If this is a new game, clear the treasury.
+	//(If going from a game in middle of play, to new game).
+	//Otherwise leave the values from the loadGameData portion.
+	//Clear treasury not necessary, just use whatever is in the scenario.
+
+	//First load the map size:
+	//Ideally we can create new vector or whatever to have different map size:
+	*gamePacket >> ThrowawayString;
+	*gamePacket >> boardToPlay->BOARD_WIDTH;
+	*gamePacket >> ThrowawayString;
+	*gamePacket >> boardToPlay->BOARD_HEIGHT;
+
+	//Once board height and width are loaded, we try to adjust window size to either smaller or larger.
+	if (boardToPlay->BOARD_WIDTH < MAX_WINDOW_WIDTH)
+	{
+		boardToPlay->WINDOW_WIDTH = boardToPlay->BOARD_WIDTH;
+	}
+	else
+	{
+		boardToPlay->WINDOW_WIDTH = MAX_WINDOW_WIDTH;
+	}
+	if (boardToPlay->BOARD_HEIGHT < MAX_WINDOW_HEIGHT)
+	{
+		boardToPlay->WINDOW_HEIGHT = boardToPlay->BOARD_HEIGHT;
+	}
+	else
+	{
+		boardToPlay->WINDOW_HEIGHT = MAX_WINDOW_HEIGHT;
+	}
+
+	//Resize the map based on new data.
+	//Not sure why we have to give an additional line but it segfaulted otherwise
+	boardToPlay->Board.resize(boardToPlay->BOARD_WIDTH);	//+1)
+	for (int i = 0; i < boardToPlay->BOARD_WIDTH; i++)
+	{
+		boardToPlay->Board[i].resize(boardToPlay->BOARD_HEIGHT);
+	}
+
+	//Then load player data:
+
+
+	//Then load map
+	*gamePacket >> ThrowawayString;
+
+	for (int y = 0; y < boardToPlay->BOARD_HEIGHT; y++)
+	{
+
+		for (int x = 0; x < boardToPlay->BOARD_WIDTH; x++)
+		{
+			std::string checkonMe = "L";
+			*gamePacket >> checkonMe;
+			boardToPlay->Board[x][y].symbol = checkonMe.at(0);
+
+			//Also resize for withinVision
+			boardToPlay->Board[x][y].withinVision.resize(boardToPlay->NUMBEROFPLAYERS + 1);
+			for (int n = 0; n < boardToPlay->NUMBEROFPLAYERS + 1; n++)
+				boardToPlay->Board[x][y].withinVision[n] = false;
+
+		}
+	}
+
+
+	//This is for properties.
+	int inputProperties;
+	*gamePacket >> ThrowawayString;
+	for (int y = 0; y < boardToPlay->BOARD_HEIGHT; y++)
+	{
+
+		for (int x = 0; x < boardToPlay->BOARD_WIDTH; x++)
+		{
+			*gamePacket >> inputProperties;
+			boardToPlay->Board[x][y].controller = inputProperties;
+		}
+	}
+	//After team data is loaded, set property characteristics.
+	setCharacteristics(boardToPlay);
+
+	//Load minion ban list. Start with number of banned minion types.
+	//Number of banned types
+	*gamePacket >> ThrowawayString;
+	int numberOfBannedTypes = 0;
+	*gamePacket >> numberOfBannedTypes;
+
+	*gamePacket >> ThrowawayString;
+	//Then create ban list
+	for (int i = 0; i < numberOfBannedTypes; i++)
+	{
+		std::string bannedMinionType;
+		*gamePacket >> bannedMinionType;
+		boardToPlay->banList.push_back(bannedMinionType);
+	}
+
+
+	//Then load minion data:
+	*gamePacket >> ThrowawayString;
+	int numberOfMinions;
+	*gamePacket >> numberOfMinions;
+	int health, locationX, locationY, team, seniority, status, veterancy, capturePoints, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo;
+	std::string type;
+	*gamePacket >> ThrowawayString;
+
+	//Initialize all minions.
+	for (int y = 0; y < numberOfMinions; y++)
+	{
+		*gamePacket >> type
+			>> locationX
+			>> locationY
+			>> team
+			>> seniority
+			>> status
+			>> health
+			>> veterancy
+			>> capturePoints
+			>> beingTransported
+			>> inputFuel
+			>> inputPriAmmo
+			>> inputSecAmmo;
+
+		//Regardless of transport status, we pass the saved location- it either represents the minion's position
+		//Or the transport's position.
+		boardToPlay->createMinion(type, locationX, locationY, team, health, status, veterancy, beingTransported, inputFuel, inputPriAmmo, inputSecAmmo);
+
+		//Set capture status.
+		if (capturePoints != 20)
+		{
+			boardToPlay->Board[locationX][locationY].minionOnTop->isCapturing = true;
+			boardToPlay->Board[locationX][locationY].capturePoints = capturePoints;
+		}
+
+
+	}
+
+	//Initialize all compies at this stage if a mission (We are certain who is a compie)
+	//Or if it's a load game
+	if (boardToPlay->missionFlag == true || isItSaveGame == true)
+	{
+		computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
+		for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
+		{
+			if (boardToPlay->playerRoster[i].playerType == computerPlayer)
+				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, -1, -1, -1, -1, -1);	//Use default behaviors
+		}
+	}
+
+	gamePacket->clear();
+
+
+	return 0;
+}
+
+int mainMenu::saveGameDataToPacket(MasterBoard* boardToPlay, sf::Packet* gamePacket , inputLayer* InputLayer)
+{
+	//First element is the header
+	*gamePacket << "Update_Follows";
+
+	//Then indicate
+
+
+	return 0;
+}
+
+//Called once by client to send information to remote host
+int mainMenu::updateRemoteHost(MasterBoard* boardToPlay , inputLayer* InputLayer)
+{
+	//Client asking for update:
+	sf::TcpSocket socket;
+	sf::Packet packetToSend;
+
+	bool stillWaiting = true;
+	while (stillWaiting == true)
+	{
+		sf::Time timeout = sf::seconds(5);
+		sf::Socket::Status status = socket.connect("192.168.0.5", 53000, timeout);
+		if (status != sf::Socket::Disconnected)
+		{
+			packetToSend.clear();
+			sf::String message = "Update_Follows";
+			packetToSend << message;
+
+			//Ask host for an update
+			socket.send(packetToSend);
+		}
+	}
+
 	return 0;
 }
