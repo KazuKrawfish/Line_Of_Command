@@ -25,6 +25,10 @@ sf::String mainMenu::playerInputString(sf::RenderWindow* myWindow, sf::Font* inp
 {
 	sf::String inputString = "";
 	sf::Event event;
+
+	//Flush the event queue to avoid hanging \ns for multiple line entries in a row
+	while (myWindow->pollEvent(event));
+
 	bool stringFinished = false;
 
 	myWindow->clear();
@@ -1470,7 +1474,9 @@ int mainMenu::topMenuRemote(char* Input, MasterBoard* boardToPlay, inputLayer* I
 	//Prompt for IP
 	snprintf(outputBuffer, 100, "Input IP Address of host:\n");
 	sf::String announceString = outputBuffer;
-	remoteHostIPAddress = playerInputString(mywindow, myFont, announceString, 1, "remote", 330);
+	sf::String inputIPAdressString;
+	inputIPAdressString = playerInputString(mywindow, myFont, announceString, 1, "remote", 330);
+	remoteHostIPAddress = new sf::IpAddress(inputIPAdressString);
 
 	//Prompt for port
 	snprintf(outputBuffer, 100, "Input host Port number:\n");
@@ -1487,6 +1493,8 @@ int mainMenu::topMenuRemote(char* Input, MasterBoard* boardToPlay, inputLayer* I
 		{
 			mywindow->draw(topMenuButtons.at(i).mySprite);
 		}
+
+		mywindow->display();
 
 		//Get input
 		//Determine if load or new
@@ -1534,6 +1542,14 @@ int mainMenu::topMenuRemote(char* Input, MasterBoard* boardToPlay, inputLayer* I
 		if (gameType == remoteClient)
 		{
 			//attempt to establish connection with host
+			sf::TcpSocket socket;
+
+			sf::Time timeout = sf::seconds(5);
+			sf::Socket::Status status = socket.connect(*remoteHostIPAddress, remoteHostPortNumber, timeout);
+
+			if (status == sf::Socket::Status::NotReady || status == sf::Socket::Status::Error)
+				std::cout << "Socket error" << std::endl;
+
 
 			//Prompt for player number - do not ask for name, since that is explicitly asked from host.
 			//This means host has to ask the player what they want their name to be.
@@ -2286,7 +2302,7 @@ int mainMenu::waitingForRemoteClient(MasterBoard* boardToPlay, inputLayer* Input
 	sf::TcpListener listener;
 
 	// bind the listener to a port
-	if (listener.listen(53000) != sf::Socket::Done)
+	if (listener.listen(remoteHostPortNumber) != sf::Socket::Done)
 	{
 		std::cout << "Could not bind listener to a port" << std::endl;
 	}
@@ -2350,7 +2366,7 @@ int mainMenu::waitingForRemoteHost(MasterBoard* boardToPlay , inputLayer* InputL
 	while (menuStatus != playingMap)
 	{
 		sf::Time timeout = sf::seconds(5);
-		sf::Socket::Status status = socket.connect("192.168.0.5", 53000, timeout);
+		sf::Socket::Status status = socket.connect(*remoteHostIPAddress, remoteHostPortNumber, timeout);
 		if (status != sf::Socket::Disconnected)
 		{
 			packetToSend.clear();
@@ -2725,7 +2741,7 @@ int mainMenu::updateRemoteHost(MasterBoard* boardToPlay , inputLayer* InputLayer
 	while (stillWaiting == true)
 	{
 		sf::Time timeout = sf::seconds(5);
-		sf::Socket::Status status = socket.connect("192.168.0.5", 53000, timeout);
+		sf::Socket::Status status = socket.connect(*remoteHostIPAddress, remoteHostPortNumber, timeout);
 		if (status != sf::Socket::Disconnected)
 		{
 			packetToSend.clear();

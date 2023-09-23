@@ -132,7 +132,7 @@ public:
 	int loadGameDataFromPacket(MasterBoard* boardToPrint, sf::Packet* gamePacket , inputLayer* InputLayer);
 	int saveGameDataToPacket( MasterBoard* boardToPrint , sf::Packet* gamePacket , inputLayer* InputLayer);
 
-	sf::String remoteHostIPAddress = "";
+	sf::IpAddress * remoteHostIPAddress;
 	int remoteHostPortNumber = 0;
 	int myPlayerNumber = 0;
 	//Remote play////////////////////////////////
