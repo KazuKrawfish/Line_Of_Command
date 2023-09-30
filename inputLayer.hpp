@@ -81,6 +81,11 @@ public:
 	int propertyMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
 	int minionInput(sf::Keyboard::Key* Input, MasterBoard* boardToInput);
 
+	//Remote Play
+	int waitingScreenRemoteClient(MasterBoard* boardToInput);
+	int waitingScreenRemoteHost(MasterBoard* boardToInput);
+	int printWaitingScreenRemote(MasterBoard* boardToPrint);
+
 
 	//Interconnex
 	int restartGame(MasterBoard* boardToInput);

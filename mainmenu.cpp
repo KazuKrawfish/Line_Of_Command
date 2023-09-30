@@ -1311,22 +1311,31 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		else
 			if (menuStatus == playingMap)
 			{
+
 				if (musicArray != NULL)
 				{
 					if (musicArray[0].getStatus() == sf::SoundSource::Playing)
 						musicArray[0].stop();
 				}
 
-				//Only call upkeep before play commences if it is a new game AND very first turn
-				//And not compie. Compie performs upkeep in its own function.
-				if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType != computerPlayer)
+				if (gameType == remoteClient && remoteClientAwaitingFirstUpdate == true)
 				{
-					boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
-					veryFirstTurn = false;
+					//If we are remote client we have to get an update from the host before we even know what the map is, etc.
+					remoteClientAwaitingFirstUpdate = false;
 				}
-				else    //Still want to update vision even if we're not doing upkeep.
+				else
 				{
-					boardToPlay->setVisionField(boardToPlay->playerFlag);
+					//Only call upkeep before play commences if it is a new game AND very first turn
+					//And not compie. Compie performs upkeep in its own function.
+					if (veryFirstTurn == true && isItSaveGame == false && boardToPlay->playerRoster[boardToPlay->playerFlag].playerType != computerPlayer)
+					{
+						boardToPlay->upkeep(InputLayer, boardToPlay->playerFlag);
+						veryFirstTurn = false;
+					}
+					else    //Still want to update vision even if we're not doing upkeep.
+					{
+						boardToPlay->setVisionField(boardToPlay->playerFlag);
+					}
 				}
 
 				if (InputLayer->status == gameBoard)
@@ -1351,11 +1360,11 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 				}
 				else if (InputLayer->status == waitingForHost)
 				{
-					InputLayer->waitingScreenInput(boardToPlay);
+					InputLayer->waitingScreenRemoteClient(boardToPlay);
 				}
 				else if (InputLayer->status == waitingForClient)
 				{
-					InputLayer->waitingScreenInput(boardToPlay);
+					InputLayer->waitingScreenRemoteHost(boardToPlay);
 				}
 				else if (InputLayer->status == insertMinion)
 				{
@@ -1618,16 +1627,20 @@ int mainMenu::topMenuInput(sf::Keyboard::Key* Input, MasterBoard* boardToPlay, i
 					if (boardToPlay->playerFlag == myPlayerNumber || boardToPlay->playerRoster[boardToPlay->playerFlag].playerType == computerPlayer)
 					{
 						InputLayer->status = gameBoard;
+						menuStatus = playingMap;
 					}
 					else
 					{
 						InputLayer->status = waitingForClient;
+						menuStatus = playingMap;
 					}
 				}
 				else
 					if (gameType == remoteClient)
 					{
 						InputLayer->status = waitingForHost;
+						menuStatus = playingMap;
+						remoteClientAwaitingFirstUpdate = true;
 					}
 
 			}
@@ -2301,6 +2314,8 @@ int mainMenu::waitingForRemoteClient(MasterBoard* boardToPlay, inputLayer* Input
 {
 	sf::TcpListener listener;
 
+	InputLayer->printWaitingScreenRemote(boardToPlay);
+
 	// bind the listener to a port
 	if (listener.listen(remoteHostPortNumber) != sf::Socket::Done)
 	{
@@ -2325,6 +2340,8 @@ int mainMenu::waitingForRemoteClient(MasterBoard* boardToPlay, inputLayer* Input
 			if (statusLine == "Request_Update")
 			{
 				sf::Packet updateToSend;
+
+				updateToSend << "Update_Follows";
 				
 				saveGameDataToPacket(boardToPlay, &updateToSend , InputLayer);
 
@@ -2362,9 +2379,12 @@ int mainMenu::waitingForRemoteHost(MasterBoard* boardToPlay , inputLayer* InputL
 	sf::TcpSocket socket;
 	sf::Packet packetToSend;
 
+	//Bad to print here but it's stuck in a loop so do it anyway
+	InputLayer->printWaitingScreenRemote(boardToPlay);
 
 	while (menuStatus != playingMap)
 	{
+
 		sf::Time timeout = sf::seconds(5);
 		sf::Socket::Status status = socket.connect(*remoteHostIPAddress, remoteHostPortNumber, timeout);
 		if (status != sf::Socket::Disconnected)
@@ -2409,6 +2429,16 @@ int mainMenu::waitingForRemoteHost(MasterBoard* boardToPlay , inputLayer* InputL
 			std::cout << "Couldn't conenct" << std::endl;
 			continue;
 		}
+
+		//Delay before requesting update again;
+		sf::Clock timer;
+		timer.restart();
+		sf::Time elapsedTime;
+		while (elapsedTime.asSeconds() < updateRequestDelay)
+		{
+			elapsedTime = timer.getElapsedTime();
+		}
+
 	}
 
 
@@ -2733,7 +2763,7 @@ int mainMenu::saveGameDataToPacket(MasterBoard* boardToPlay, sf::Packet* gamePac
 //Called once by client to send information to remote host
 int mainMenu::updateRemoteHost(MasterBoard* boardToPlay , inputLayer* InputLayer)
 {
-	//Client asking for update:
+	//Client sending update:
 	sf::TcpSocket socket;
 	sf::Packet packetToSend;
 
@@ -2745,10 +2775,10 @@ int mainMenu::updateRemoteHost(MasterBoard* boardToPlay , inputLayer* InputLayer
 		if (status != sf::Socket::Disconnected)
 		{
 			packetToSend.clear();
-			sf::String message = "Update_Follows";
-			packetToSend << message;
 
-			//Ask host for an update
+			//Generate my save data and send it
+			saveGameDataToPacket(boardToPlay, &packetToSend, InputLayer);
+
 			socket.send(packetToSend);
 		}
 	}

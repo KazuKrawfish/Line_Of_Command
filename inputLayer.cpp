@@ -1371,6 +1371,39 @@ int inputLayer::printWaitingScreen(MasterBoard* boardToPrint)
 
 }
 
+int inputLayer::printWaitingScreenRemote(MasterBoard* boardToPrint)
+{
+
+	inputLayerWindow->clear();
+
+	sf::Sprite backgroundSprite;
+	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
+	inputLayerWindow->draw(backgroundSprite);
+
+	sf::Sprite menuBackgroundSprite;
+	menuBackgroundSprite.setTexture(MainMenu->otherGameTextures->at(8));
+	menuBackgroundSprite.setPosition(IL_WIDTH_OFFSET, IL_HEIGHT_OFFSET);
+	inputLayerWindow->draw(menuBackgroundSprite);
+
+	//Title text
+	sf::String titleString = "WAITING FOR REMOTE PLAYER";
+	sf::Text titleText(titleString, *inputLayerFont, 50);
+	titleText.setPosition(IL_WIDTH_OFFSET + 450, IL_HEIGHT_OFFSET + 70);
+	titleText.setFillColor(sf::Color::Black);
+	inputLayerWindow->draw(titleText);
+
+	sf::String announceString = boardToPrint->playerRoster[boardToPrint->playerFlag].name;
+	announceString += "This may take a while.  \n";
+	sf::Text newText(announceString, *inputLayerFont, 20);
+	newText.setPosition(IL_WIDTH_OFFSET + 450, IL_HEIGHT_OFFSET + 200);
+	newText.setFillColor(sf::Color::Black);
+	inputLayerWindow->draw(newText);
+	inputLayerWindow->display();
+
+	return 0;
+
+}
+
 //movementGraphics is called for every tile as the path is verified. If that tile is within vision OR this is player turn,
 //we will print movement "animation" i.e. the minion sprite flashing on that tile for 200 ms.
 int inputLayer::movementGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToMove, int locationX, int locationY)
@@ -1926,7 +1959,10 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 	//Check for battle lab before actually printing
 	if (MainMenu->battleLabOn == false)
 	{
-		if (status != waitingForNextLocalPlayer)
+		//Each waiting screen has its own specific type
+		if(status == waitingForNextLocalPlayer)
+			printWaitingScreen(boardToPrint);
+		else 
 		{
 			inputLayerWindow->clear();
 			printUpperScreen(boardToPrint, observerNumber, withinAnimation);
@@ -1934,8 +1970,6 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 			inputLayerWindow->display();
 
 		}
-		else printWaitingScreen(boardToPrint);
-
 
 		//If not playing music already, play music for that player's faction
 		if (soundsOn == true)
@@ -1999,6 +2033,66 @@ int inputLayer::waitingScreenInput(MasterBoard* boardToInput)
 
 	return 0;
 }
+
+int inputLayer::waitingScreenRemoteClient(MasterBoard* boardToInput)
+{
+	//Send updated info to remote host AND get the valid return.
+	MainMenu->updateRemoteHost(boardToInput, this);
+
+	//Then we ask host for update game information repeatedly until getting fresh update.
+	//This may take a while.
+	while (boardToInput->playerFlag != MainMenu->myPlayerNumber)
+	{
+		MainMenu->waitingForRemoteHost( boardToInput,this );
+	}
+
+	//No player input required, this is auto-refreshing/auto-completes after getting a remote update.
+	//getValidPlayerInput(inputLayerWindow);
+
+
+	//Only lasts one input.
+	status = gameBoard;
+
+	//Need to do updates since we are not hitting standard waiting screen input
+	if (boardToInput->isItSinglePlayerGame == false && boardToInput->playerRoster[boardToInput->playerFlag].playerType == computerPlayer)	//If compie during multiplayer, no sight
+	{
+		boardToInput->upkeep(this, -1);
+	}
+	else
+	{
+		boardToInput->upkeep(this, boardToInput->playerFlag);
+	}
+	
+	return 0;
+
+}
+
+int inputLayer::waitingScreenRemoteHost(MasterBoard* boardToInput)
+{
+	//Send updated info to remote host AND get the valid return. This may take a while.
+	MainMenu->waitingForRemoteClient(boardToInput, this);
+
+	//No player input required, this is auto-refreshing/auto-completes after getting a remote update.
+	//getValidPlayerInput(inputLayerWindow);
+
+	//Only lasts one input.
+	status = gameBoard;
+
+	//Need to do updates since we are not hitting standard waiting screen input
+	if (boardToInput->isItSinglePlayerGame == false && boardToInput->playerRoster[boardToInput->playerFlag].playerType == computerPlayer)	//If compie during multiplayer, no sight
+	{
+		boardToInput->upkeep(this, -1);
+	}
+	else
+	{
+		boardToInput->upkeep(this, boardToInput->playerFlag);
+	}
+
+	return 0;
+
+}
+int printWaitingScreenRemoteClient(MasterBoard* boardToPrint);
+int printWaitingScreenRemoteHost(MasterBoard* boardToPrint);
 
 int inputLayer::insertMinionInput(sf::Event* Input, MasterBoard* boardToInput)
 {

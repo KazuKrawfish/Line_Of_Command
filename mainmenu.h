@@ -135,6 +135,8 @@ public:
 	sf::IpAddress * remoteHostIPAddress;
 	int remoteHostPortNumber = 0;
 	int myPlayerNumber = 0;
+	float updateRequestDelay = 2;
+	bool remoteClientAwaitingFirstUpdate = false;
 	//Remote play////////////////////////////////
 
 };

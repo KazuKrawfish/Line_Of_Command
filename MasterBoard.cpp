@@ -3242,7 +3242,19 @@ int MasterBoard::endTurn(inputLayer* InputLayer) {
 	{
 		InputLayer->status = gameBoard;
 	}
-	else InputLayer->status = waitingForNextLocalPlayer;
+	else	//Depends on remote and if hosting or client
+		if (InputLayer->MainMenu->gameType == localSkirmish)
+		{
+			InputLayer->status = waitingForNextLocalPlayer;
+		}
+		else if (InputLayer->MainMenu->gameType == remoteHost)
+			{
+				InputLayer->status = waitingForClient;
+			}
+			else if (InputLayer->MainMenu->gameType == remoteClient)
+				{
+					InputLayer->status = waitingForHost;
+				}
 
 
 	return gameTurnIncrement;
