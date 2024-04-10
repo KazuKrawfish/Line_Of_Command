@@ -16,6 +16,14 @@ By pitting two computer players against each other in many battles and analyzing
 ## Licensing
 Copyright 2022, Supercontinent Software Ltd. You may not redistribute this software without prior consent of Supercontinent Software.
 
+### External Libraries used by SFML (From their website)
+	freetype is distributed under the FTL license or the GPL license
+	libjpeg is in the public domain
+	stb_image is in the public domain
+	OpenAL Soft is distributed under the LGPL license
+	libogg is distributed under the BSD 3 license
+	libvorbis is distributed under the BSD 3 license
+	libflac is distributed under the BSD 3 license
 
 
 
