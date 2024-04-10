@@ -1993,7 +1993,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			std::string newMission = "";
 
 			std::ifstream newCampaign;
-			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\" + newCampaignName);
+			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\" + newCampaignName + ".txt");
 
 			if (newCampaign.is_open())
 			{
@@ -2037,7 +2037,7 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				getValidPlayerInput(mywindow);
 
 				newCampaign >> newMission;
-				newGameMap.open(".\\campaigns\\" + newCampaignName + "\\" + newMission);
+				newGameMap.open(".\\campaigns\\" + newCampaignName + "\\" + newMission+ ".txt");
 
 			}
 			else
