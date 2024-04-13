@@ -36,6 +36,17 @@ Control is based around the cursor, a black box with spaces between the corners.
     -T - Attempt select below cursor.
     -M - If minion  selected, move below the cursor.
     -R - If minion selected, attack below the cursor.
+    -#0 - Toggle hide/show minions.
+    -#9 - Show range of minion beneath cursor.
+  
+### Editor Mode
+
+Editor mode has several features that are accessed via the below keyboard inputs:
+
+    -X - Insert minion at cursor location. Follow this with the minion type's first three letters. Infantry is "inf", Armor is "arm", etc. Must be legal placement, so no tanks in the water!
+    -Q - Change the tile at cursor location. Follow this with the tile symbol letter. Plains is ".", forest is "+", etc. Must also be legal placement, so cannot place a land tile below a battleship, for instance.
+    -Z - Delete minion at cursor location.
+    -V - Immediately win the current game. If in campaign, will advance to the next mission.
 
 ### Minion State
 
@@ -51,6 +62,8 @@ Special actions
     -Infantry minions can capture after moving/holding, by right clicking on their own position. They must be above an enemy property.
     -Transports can unload after moving/holding. Their drop range is shown in orange, and they drop the unit wherever is clicked.
     -Supply units (APC) can resupply all adjacent minions after moving/holding. Do so by right clicking on their own position.
+    -Operative can deploy landmine by clicking on an adjacent tile after moving. This costs gold.
+    -Engineer can build fortifications after moving, by clicking on their own position. This costs gold and can only be clear/forest tiles.
 
 ### Production
 

@@ -222,10 +222,13 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	const int TopMenuTop = 200;
 	const int TopMenuLeft = 470;
 
-	//Offset for first button and between buttons.
-	const int TopTopMargin = 50;
-	const int TopLeftMargin = 30;
+	//Offset for first button:
+	const int TopTopMargin = 20;
+	//Margin between buttons:
 	int TopBetweenMargin = 60;
+
+	const int TopLeftMargin = 30;
+
 
 	//Top menu buttons are larger, so get new size number.
 	sf::Vector2u TopTextureSize = (*inputGameMenuButtonTextureArray).at(0).getSize(); 	//Buttons must all be same height, so use the first button's height
@@ -280,10 +283,11 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	topMenuButtons.emplace_back(x, y, selectButton, &(topMenuButtonTextureArray->at(10)), "selectButton");
 
 	//Human / computer choice buttons
-	y = TopMenuTop + TopTopMargin + MM_HEIGHT_OFFSET;
+	int additionalMargin = 30;
+	y = TopMenuTop + TopTopMargin + MM_HEIGHT_OFFSET + additionalMargin;
 	std::cout << "Computer y: " << y << std::endl;
 	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, selectButton, &(topMenuButtonTextureArray->at(11)), "computerPlayerButton");
-	y = TopMenuTop + TopTopMargin + TopButtonHeight + TopBetweenMargin + MM_HEIGHT_OFFSET;
+	y = TopMenuTop + TopTopMargin + TopButtonHeight + TopBetweenMargin + MM_HEIGHT_OFFSET + additionalMargin;
 	std::cout << "Human y : " << y << std::endl;
 	topMenuButtons.emplace_back(TopMenuLeft + TopLeftMargin + MM_WIDTH_OFFSET, y, selectButton, &(topMenuButtonTextureArray->at(12)), "humanPlayerButton");
 
@@ -1406,7 +1410,7 @@ int mainMenu::printTopMenuBackground()
 	topMenuWallpaperSprite.setTexture(otherGameTextures->at(1));
 	sf::Sprite topMenuSprite;
 	topMenuSprite.setTexture(otherGameTextures->at(3));
-	topMenuSprite.setPosition(450 + MM_WIDTH_OFFSET, 150 + MM_HEIGHT_OFFSET);
+	topMenuSprite.setPosition(450 + MM_WIDTH_OFFSET, 100 + MM_HEIGHT_OFFSET);
 
 	mywindow->clear();
 	mywindow->draw(topMenuWallpaperSprite);
@@ -1414,7 +1418,7 @@ int mainMenu::printTopMenuBackground()
 
 	sf::String topmenuString = "MAIN MENU";
 	sf::Text topmenuText(topmenuString, *myBoldFont, menuTextSize + 5);
-	topmenuText.setPosition(520 + MM_WIDTH_OFFSET, 180 + MM_HEIGHT_OFFSET);
+	topmenuText.setPosition(520 + MM_WIDTH_OFFSET, 130 + MM_HEIGHT_OFFSET);
 	topmenuText.setFillColor(sf::Color::Black);
 	mywindow->draw(topmenuText);
 
