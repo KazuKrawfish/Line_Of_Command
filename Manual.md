@@ -19,7 +19,7 @@ You cannot currently back out of new-game, you must either select a map and then
 
 ### Load Game
 
-Load game by entering the exact name of the save-game name, minus the "_save.txt" extension. To load the auto-save file, which is saved after every turn, enter "auto".
+Load game by selecting the map using the arrow buttons on the side. To load the auto-save file, which is saved after every turn, select "auto".
 
 #
 ## GamePlay
