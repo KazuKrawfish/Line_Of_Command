@@ -1997,7 +1997,9 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 			std::string newMission = "";
 
 			std::ifstream newCampaign;
-			newCampaign.open(".\\campaigns\\" + newCampaignName + "\\" + newCampaignName + ".txt");
+			std::string campaign_link = ".\\campaigns\\" + newCampaignName + "\\" + newCampaignName ;
+			std::cerr << "campaign name: "<<campaign_link << std::endl;
+			newCampaign.open(campaign_link);
 
 			if (newCampaign.is_open())
 			{
@@ -2041,11 +2043,15 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				getValidPlayerInput(mywindow);
 
 				newCampaign >> newMission;
-				newGameMap.open(".\\campaigns\\" + newCampaignName + "\\" + newMission+ ".txt");
+				std::string mission_name = ".\\campaigns\\" + newCampaignName + "\\" + newMission;
+				newGameMap.open(mission_name);
+				std::cerr << "mission name: " << mission_name << std::endl;
+
 
 			}
 			else
 			{
+				loadsuccessful = true;
 				mywindow->clear();
 				anotherTopMenuNewString = "Could not load campaign.\nPlease check that it exists and the right spelling was used. \n";
 				lineOffset = 3;
