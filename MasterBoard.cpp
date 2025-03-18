@@ -119,7 +119,7 @@ int MasterBoard::landmineCheck(int inputX, int inputY, inputLayer* InputLayer, i
 
 }
 
-int MasterBoard::singleSquareResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber, int xVal, int yVal)
+void MasterBoard::singleSquareResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber, int xVal, int yVal)
 {
 	if (Board[xVal][yVal].hasMinionOnTop == true && Board[xVal][yVal].minionOnTop->team == playerFlag)
 	{
@@ -148,6 +148,7 @@ int MasterBoard::singleSquareResupply(Minion* SupplyUnit, bool isItDuringUpkeep,
 			}
 		}
 	}
+	return;
 }
 
 
