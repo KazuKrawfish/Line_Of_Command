@@ -119,6 +119,38 @@ int MasterBoard::landmineCheck(int inputX, int inputY, inputLayer* InputLayer, i
 
 }
 
+int MasterBoard::singleSquareResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber, int xVal, int yVal)
+{
+	if (Board[xVal][yVal].hasMinionOnTop == true && Board[xVal][yVal].minionOnTop->team == playerFlag)
+	{
+		if ((Board[xVal][yVal].minionOnTop->domain != air && SupplyUnit->type != "APC")
+		|| (Board[xVal][yVal].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
+		{
+			bool supplied = false;
+			if (Board[xVal][yVal].minionOnTop->currentFuel != Board[xVal][yVal].minionOnTop->maxFuel)
+			{
+				Board[xVal][yVal].minionOnTop->currentFuel = Board[xVal][yVal].minionOnTop->maxFuel;
+				supplied = true;
+			}
+			if (Board[xVal][yVal].minionOnTop->currentPriAmmo != Board[xVal][yVal].minionOnTop->maxPriAmmo)
+			{
+				Board[xVal][yVal].minionOnTop->currentPriAmmo = Board[xVal][yVal].minionOnTop->maxPriAmmo;
+				supplied = true;
+			}
+			if (Board[xVal][yVal].minionOnTop->currentSecAmmo != Board[xVal][yVal].minionOnTop->maxSecAmmo)			
+			{
+				Board[xVal][yVal].minionOnTop->currentSecAmmo = Board[xVal][yVal].minionOnTop->maxSecAmmo;
+				supplied = true;
+			}
+			if (supplied == true)
+			{
+				InputLayer->supplyGraphics(this, observerNumber, Board[xVal][yVal].minionOnTop, xVal, yVal);
+			}
+		}
+	}
+}
+
+
 //Are the currentfuel vs max fuel checks needed ?
 int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber)
 {
@@ -128,65 +160,25 @@ int MasterBoard::individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, i
 
 	//Check each surrounding tile for a ground or sea unit and resupply them if this is APC
 	//Or if this is ac carrier and they're air.
-	if (x < BOARD_WIDTH - 1 && Board[x + 1][y].hasMinionOnTop == true && Board[x + 1][y].minionOnTop->team == playerFlag)
-		if ((Board[x + 1][y].minionOnTop->domain != air && SupplyUnit->type != "APC")
-			|| (Board[x + 1][y].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
-		{
-			if (Board[x + 1][y].minionOnTop->currentFuel != Board[x + 1][y].minionOnTop->maxFuel ||
-				Board[x + 1][y].minionOnTop->currentPriAmmo != Board[x + 1][y].minionOnTop->maxPriAmmo ||
-				Board[x + 1][y].minionOnTop->currentSecAmmo != Board[x + 1][y].minionOnTop->maxSecAmmo)
-			{
-				Board[x + 1][y].minionOnTop->currentFuel = Board[x + 1][y].minionOnTop->maxFuel;
-				Board[x + 1][y].minionOnTop->currentPriAmmo = Board[x + 1][y].minionOnTop->maxPriAmmo;
-				Board[x + 1][y].minionOnTop->currentSecAmmo = Board[x + 1][y].minionOnTop->maxSecAmmo;
-				InputLayer->supplyGraphics(this, observerNumber, Board[x + 1][y].minionOnTop, Board[x + 1][y].minionOnTop->locationX, Board[x + 1][y].minionOnTop->locationY);
-			}
-		}
+	if (x < BOARD_WIDTH - 1)
+	{
+		singleSquareResupply( SupplyUnit, isItDuringUpkeep, InputLayer, observerNumber, x + 1, y);
+	}
 
-	if (x > 0 && Board[x - 1][y].hasMinionOnTop == true && Board[x - 1][y].minionOnTop->team == playerFlag)
-		if ((Board[x - 1][y].minionOnTop->domain != air && SupplyUnit->type != "APC")
-			|| (Board[x - 1][y].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
-		{
-			if (Board[x - 1][y].minionOnTop->currentFuel != Board[x - 1][y].minionOnTop->maxFuel ||
-				Board[x - 1][y].minionOnTop->currentPriAmmo != Board[x - 1][y].minionOnTop->maxPriAmmo ||
-				Board[x - 1][y].minionOnTop->currentSecAmmo != Board[x - 1][y].minionOnTop->maxSecAmmo)
-			{
-				Board[x - 1][y].minionOnTop->currentFuel = Board[x - 1][y].minionOnTop->maxFuel;
-				Board[x - 1][y].minionOnTop->currentPriAmmo = Board[x - 1][y].minionOnTop->maxPriAmmo;
-				Board[x - 1][y].minionOnTop->currentSecAmmo = Board[x - 1][y].minionOnTop->maxSecAmmo;
-				InputLayer->supplyGraphics(this, observerNumber, Board[x - 1][y].minionOnTop, Board[x - 1][y].minionOnTop->locationX, Board[x - 1][y].minionOnTop->locationY);
-			}
-		}
+	if (y < BOARD_HEIGHT - 1)
+	{
+		singleSquareResupply( SupplyUnit, isItDuringUpkeep, InputLayer, observerNumber, x , y + 1);
+	}
 
-	if (y < BOARD_HEIGHT - 1 && Board[x][y + 1].hasMinionOnTop == true && Board[x][y + 1].minionOnTop->team == playerFlag)
-		if ((Board[x][y + 1].minionOnTop->domain != air && SupplyUnit->type != "APC")
-			|| (Board[x][y + 1].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
-		{
-			if (Board[x][y + 1].minionOnTop->currentFuel != Board[x][y + 1].minionOnTop->maxFuel ||
-				Board[x][y + 1].minionOnTop->currentPriAmmo != Board[x][y + 1].minionOnTop->maxPriAmmo ||
-				Board[x][y + 1].minionOnTop->currentSecAmmo != Board[x][y + 1].minionOnTop->maxSecAmmo)
-			{
-				Board[x][y + 1].minionOnTop->currentFuel = Board[x][y + 1].minionOnTop->maxFuel;
-				Board[x][y + 1].minionOnTop->currentPriAmmo = Board[x][y + 1].minionOnTop->maxPriAmmo;
-				Board[x][y + 1].minionOnTop->currentSecAmmo = Board[x][y + 1].minionOnTop->maxSecAmmo;
-				InputLayer->supplyGraphics(this, observerNumber, Board[x][y + 1].minionOnTop, Board[x][y + 1].minionOnTop->locationX, Board[x][y + 1].minionOnTop->locationY);
-			}
-		}
+	if (x > 0)
+	{
+		singleSquareResupply( SupplyUnit, isItDuringUpkeep, InputLayer, observerNumber, x - 1, y );
+	}
 
-	if (y > 0 && Board[x][y - 1].hasMinionOnTop == true && Board[x][y - 1].minionOnTop->team == playerFlag)
-		if ((Board[x][y - 1].minionOnTop->domain != air && SupplyUnit->type != "APC")
-			|| (Board[x][y - 1].minionOnTop->domain == air && SupplyUnit->type != "Aircraft_Carrier"))
-		{
-			if (Board[x][y - 1].minionOnTop->currentFuel != Board[x][y - 1].minionOnTop->maxFuel ||
-				Board[x][y - 1].minionOnTop->currentPriAmmo != Board[x][y - 1].minionOnTop->maxPriAmmo ||
-				Board[x][y - 1].minionOnTop->currentSecAmmo != Board[x][y - 1].minionOnTop->maxSecAmmo)
-			{
-				Board[x][y - 1].minionOnTop->currentFuel = Board[x][y - 1].minionOnTop->maxFuel;
-				Board[x][y - 1].minionOnTop->currentPriAmmo = Board[x][y - 1].minionOnTop->maxPriAmmo;
-				Board[x][y - 1].minionOnTop->currentSecAmmo = Board[x][y - 1].minionOnTop->maxSecAmmo;
-				InputLayer->supplyGraphics(this, observerNumber, Board[x][y - 1].minionOnTop, Board[x][y - 1].minionOnTop->locationX, Board[x][y - 1].minionOnTop->locationY);
-			}
-		}
+	if (y > 0)
+	{
+		singleSquareResupply( SupplyUnit, isItDuringUpkeep, InputLayer, observerNumber, x , y - 1);
+	}
 
 	//Carrier gets to resupply its carried minion
 	if (SupplyUnit->type != "Aircraft_Carrier" && SupplyUnit->firstMinionBeingTransported != NULL)
@@ -3341,8 +3333,6 @@ int MasterBoard::individualRepair(Minion* MinionToRepair,  inputLayer* InputLaye
 	if (MinionToRepair != NULL && MinionToRepair->team == playerFlag && MinionToRepair->specialtyGroup != infantry)
 	{
 		//Must have enough money
-
-
 
 		int minionCost = consultMinionCostChart(MinionToRepair->type, '~');
 		//silent repair

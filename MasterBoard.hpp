@@ -124,6 +124,7 @@ public:
 	//Begin/End Turn Functions/////////////////
 
 	//Upkeep Functions/////////////////////////
+	int singleSquareResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber, int xVal, int yVal);
 	int individualResupply(Minion* SupplyUnit, bool isItDuringUpkeep, inputLayer* InputLayer, int observerNumber);
 	int individualRepair(Minion* MinionToRepair, inputLayer* InputLayer, int observerNumber);
 	int repairMinions(inputLayer* InputLayer, int observerNumber);

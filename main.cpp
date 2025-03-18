@@ -1,4 +1,4 @@
-//Copyright 2022, Supercontinent Software Ltd.
+//Copyright 2025, Supercontinent Software Ltd.
 //
 //	main.cpp
 //
@@ -17,32 +17,7 @@
 #include "mainmenu.h"
 #include <thread>
 
-/*
-#ifdef _WIN32
-#include <conio.h>
-#include <windows.h>
-#elif defined(__unix__)
-#include <iostream>
-#include <stdio.h>
-#define SetConsoleTextAttribute(X,ATTR)
-#define GetStdHandle(x)
-#define STD_OUTPUT_HANDLE
-#define _getch() getc(stdin)
-#else
-#error "Unknown build target!"
-#endif
-*/
-
-
-
-//Global for the moment to support faster production
-//Everyone needs access to this at all times so it seems reasonable
-const int rectArrayWidth = 41;
-const int rectArrayHeight = 16;
 std::vector <std::vector<sf::IntRect>> rectArray;
-
-
-
 
 int initializeTextureArray(std::string directory, const std::vector <std::string>& imageNameList,  std::vector <sf::Texture>& buttonTextureArray)
 {
@@ -179,6 +154,9 @@ int main()
 	std::vector <sf::SoundBuffer > soundEffectBuffers;
 	std::vector <sf::Sound> soundEffects;
 	soundEffects.resize(numberOfSoundEffects + 1);
+
+	const int rectArrayWidth = 41;
+	const int rectArrayHeight = 16;
 
 	//Initialize intRect grid
 	rectArray.resize(rectArrayWidth + 1);
