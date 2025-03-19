@@ -131,9 +131,10 @@ int main()
 	initializeTextureArray("otherImages/Flags", factionTexturesList, factionTexturesArray);
 
 	//Load music
+
 	std::vector <std::string> gameMusicList = { "introTheme", "briefingTheme" , "victoryTheme" , "ARNRTheme", "southRedoniaTheme", "ormosaTheme", "torranTheme" };
 	sf::Music gameMusicArray[7];
-	//gameMusicArray.resize(gameMusicList.size());
+#if USE_MUSIC
 	for (int i = 0; i < 7; i++)
 	{
 		if (!gameMusicArray[i].openFromFile("music/" + gameMusicList[i] + ".wav"))
@@ -142,6 +143,7 @@ int main()
 
 		}
 	}
+#endif
 
 	sf::Texture mainTexture;
 	sf::Texture secondMainTexture;
@@ -239,7 +241,9 @@ int main()
 	}
 	else //Otherwise proceed with just one set of instances 
 	{
-		sf::RenderWindow mainWindow(desktopMode, "Line of Command");	//, sf::Style::Fullscreen); For debug ease
+		sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
+		//sf::RenderWindow mainWindow(desktopMode, "Line of Command");	
+
 
 		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &boldGameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);
 

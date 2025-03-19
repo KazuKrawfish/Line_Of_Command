@@ -2883,7 +2883,6 @@ int MasterBoard::deselectMinion()
 //Landmine attack is the only way a landmine does damage. It does not counterfire and it doesn't use normal attackMinion.
 int MasterBoard::landmineAttack(int attackingX, int attackingY, inputLayer* InputLayer, int observerNumber)
 {
-
 	
 	//Simplify by finding shorthand values first.
 	Minion* attackingMinion = Board[attackingX][attackingY].minionOnTop;

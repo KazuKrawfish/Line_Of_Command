@@ -1245,6 +1245,7 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 
 	//If not playing music already, play music, but first stop all the other music
 	//Crude method to ensure we stopped playing previous faction music if it was different
+#if USE_MUSIC
 	if (soundsOn == true && gameMusic[1].getStatus() != sf::SoundSource::Status::Playing)
 	{
 		for (int i = 3; i < 7; i++)
@@ -1253,6 +1254,8 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 		}
 		gameMusic[1].play();
 	}
+#endif
+
 
 	sf::String boardMessage;
 
@@ -1299,8 +1302,9 @@ int inputLayer::printMissionBriefing(MasterBoard* boardToInput)
 	inputLayerWindow->pollEvent(event);
 
 	//Turn off music
+#if USE_MUSIC
 	gameMusic[1].stop();
-
+#endif 
 
 	return 0;
 
@@ -1871,7 +1875,7 @@ int inputLayer::trapGraphics(MasterBoard* boardToPrint, int observerNumber, Mini
 		(*soundEffects)[trapped].stop();
 	}
 
-
+	return 0;
 }
 
 int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Minion* minionToSupply, int locationX, int locationY)
@@ -1952,6 +1956,8 @@ int inputLayer::repairGraphics(MasterBoard* boardToPrint, int observerNumber, Mi
 	{
 		(*soundEffects)[repair].stop();
 	}
+
+	return 0;
 }
 
 int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool withinAnimation)
@@ -1971,6 +1977,7 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 
 		}
 
+#if USE_MUSIC
 		//If not playing music already, play music for that player's faction
 		if (soundsOn == true)
 		{
@@ -1996,6 +2003,7 @@ int inputLayer::printScreen(MasterBoard* boardToPrint, int observerNumber, bool 
 				gameMusic[i].stop();
 			}
 		}
+#endif
 
 		//Reset line tracker after each print.
 		menuLineTracker = 1;
@@ -3011,6 +3019,7 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 	inputLayerWindow->clear();
 
 	//If not playing music already, play music
+#if USE_MUSIC
 	if (soundsOn == true && gameMusic[2].getStatus() != sf::SoundSource::Status::Playing)
 	{
 		for (int i = 3; i < 7; i++)
@@ -3020,6 +3029,7 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 
 		gameMusic[2].play();
 	}
+#endif
 
 	sf::Sprite backgroundSprite;
 	backgroundSprite.setTexture(MainMenu->otherGameTextures->at(1));
@@ -3045,7 +3055,9 @@ int inputLayer::printPlayerVictory(int playerVictorious, MasterBoard* boardToPri
 	//Wait for one input.
 	getValidPlayerInput(inputLayerWindow);
 
+#if USE_MUSIC
 	gameMusic[2].stop();
+#endif
 
 	return 0;
 }
@@ -3421,29 +3433,28 @@ int inputLayer::exitToMainMenu(MasterBoard* boardToInput)
 	MainMenu->menuStatus = topmenu;
 	MainMenu->skipOneInput = true;
 
-
+#if USE_MUSIC
 	//Stop whatever music was happening before.
 	if (soundsOn == true)
 	{
-
 		//Turn off all music playing
 		for (int i = 0; i < 7; i++)
 		{
 			gameMusic[i].stop();
 		}
-
 		//Play main menu music again.
 		if (gameMusic[0].getStatus() != sf::SoundSource::Playing)
 			gameMusic[0].play();
-
 	}
+#endif
+
 
 	//If battle lab is on, we need to get back to that instance of playGame()
 	if (MainMenu->battleLabOn == false)
 	{
 		MainMenu->playGame(boardToInput, this);
 	}
-	else
+	
 
 	return 0;
 }

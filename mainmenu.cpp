@@ -162,7 +162,7 @@ mainMenu::mainMenu(sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Fon
 	myFont = inputFont;
 	myBoldFont = boldInputFont;
 	mywindow = myWindow;
-	computerPlayerRoster.resize(1);	//Arbitray resize to prevent exceptions.
+	computerPlayerRoster.resize(1);	//Arbitrary resize to prevent exceptions.
 
 	//Determine offsets for mainmenu AND for inputLayer
 	sf::Vector2u windowSize = myWindow->getSize();
@@ -1042,8 +1042,10 @@ int mainMenu::introScreen(MasterBoard* boardToPlay, inputLayer* InputLayer)
 
 	mywindow->clear();
 
+#if USE_MUSIC
 	if (InputLayer->soundsOn == true)
 		musicArray[0].play();
+#endif
 
 	mywindow->draw(startWallpaperSprite);
 	mywindow->draw(startScreenStatementSprite);
@@ -1315,12 +1317,13 @@ int mainMenu::playGame(MasterBoard* boardToPlay, inputLayer* InputLayer)
 		else
 			if (menuStatus == playingMap)
 			{
-
+#if USE_MUSIC
 				if (musicArray != NULL)
 				{
 					if (musicArray[0].getStatus() == sf::SoundSource::Playing)
 						musicArray[0].stop();
 				}
+#endif
 
 				if (gameType == remoteClient && remoteClientAwaitingFirstUpdate == true)
 				{
@@ -2113,9 +2116,10 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 				//Draw comp/human buttons (If remote, two types of human players - local and remote)
 				mywindow->draw(topMenuButtons.at(11).mySprite);
 				mywindow->draw(topMenuButtons.at(12).mySprite);
-				if(gameType == remoteHost)
+				if (gameType == remoteHost)
+				{
 					mywindow->draw(topMenuButtons.at(16).mySprite);
-
+				}
 				mywindow->display();
 
 				sf::Event playerInput;
@@ -2131,32 +2135,43 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 					//Determine whether they want computer or human for this player
 					bool withinCompButton = false;
-					if (playerInput.type == sf::Event::MouseButtonReleased)
-						withinCompButton = (topMenuButtons)[11].checkWithinButton(mousePosition.x, mousePosition.y);
-					if (withinCompButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::C))
-					{
-						boardToPlay->playerRoster[i].playerType = computerPlayer;
-						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, -1, -1, -1, -1, -1);	//Use default behaviors
-						playerTypeDecided = true;
-					}
-
 					bool withinLocalHumanButton = false;
+					bool withinRemoteHumanButton = false;
+
+
 					if (playerInput.type == sf::Event::MouseButtonReleased)
-						withinLocalHumanButton = (topMenuButtons)[12].checkWithinButton(mousePosition.x, mousePosition.y);
-					if (withinLocalHumanButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::H))
 					{
-						boardToPlay->playerRoster[i].playerType = localHumanPlayer;
-						playerTypeDecided = true;
+						withinCompButton = (topMenuButtons)[11].checkWithinButton(mousePosition.x, mousePosition.y);
+						if (withinCompButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::C))
+						{
+							boardToPlay->playerRoster[i].playerType = computerPlayer;
+							computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, -1, -1, -1, -1, -1);	//Use default behaviors
+							playerTypeDecided = true;
+						}
+						else
+						{
+							withinLocalHumanButton = (topMenuButtons)[12].checkWithinButton(mousePosition.x, mousePosition.y);
+							if (withinLocalHumanButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::H))
+							{
+								boardToPlay->playerRoster[i].playerType = localHumanPlayer;
+								playerTypeDecided = true;
+							}
+							else
+							{
+								if (playerInput.type == sf::Event::MouseButtonReleased)
+									withinRemoteHumanButton = (topMenuButtons)[16].checkWithinButton(mousePosition.x, mousePosition.y);
+								if (withinRemoteHumanButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::H))
+								{
+									boardToPlay->playerRoster[i].playerType = remoteHumanPlayer;
+									playerTypeDecided = true;
+								}
+							}
+						}
 					}
 
-					bool withinRemoteHumanButton = false;
-					if (playerInput.type == sf::Event::MouseButtonReleased)
-						withinRemoteHumanButton = (topMenuButtons)[12].checkWithinButton(mousePosition.x, mousePosition.y);
-					if (withinRemoteHumanButton == true || (playerInput.type == sf::Event::KeyReleased && playerInput.key.code == sf::Keyboard::H))
-					{
-						boardToPlay->playerRoster[i].playerType = remoteHumanPlayer;
-						playerTypeDecided = true;
-					}
+
+
+
 				}
 
 			}
@@ -2255,9 +2270,11 @@ int mainMenu::topMenuNew(char* Input, MasterBoard* boardToPlay, inputLayer* Inpu
 
 	menuStatus = playingMap;
 
+#if USE_MUSIC
 	//If we start new game, stop menu music since we're getting briefing music
 	if (musicArray[0].getStatus() == sf::SoundSource::Playing)
 		musicArray[0].stop();
+#endif
 
 	//Before entering play, make sure to print out briefing.
 	InputLayer->printMissionBriefing(boardToPlay);

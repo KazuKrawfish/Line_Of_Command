@@ -28,7 +28,7 @@ enum interactionMethod { unchosen, localSkirmish, localCampaign, remoteHost, rem
 //Forward declare global utilities
 char getValidPlayerInput(sf::RenderWindow* myWindow);
 
-
+#define USE_MUSIC 0
 
 class mainMenu
 {
