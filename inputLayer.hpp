@@ -35,7 +35,7 @@ public:
 
 	inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Texture* secondGameTexture,
 		sf::Font* inputFont, sf::Font* inputBoldFont, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons, std::vector <sf::Texture>* statusTextures,
-		sf::Music * inputGameMusic);
+		sf::Music * inputGameMusic , std::map<char, sf::Texture>* inputTerrainImages);
 	inputLayer(mainMenu* inputMainMenu);	//Battlelab constructor
 
 	//Print Functions:///////////////////////////////////////////////////////
@@ -120,6 +120,7 @@ public:
 	std::vector <Button> portButtons;
 
 	std::vector <Button> statusButtons;
+	std::map <char, sf::Sprite> terrainImages;
 	//MenuCrawlerObjects /////////////////////////
 
 	//SFML Objects		/////////////////////////

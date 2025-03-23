@@ -766,7 +766,7 @@ int mainMenu::loadGameData(MasterBoard* boardToPrint, inputLayer* InputLayer, st
 	if (gameType == unchosen)
 	{
 		if (boardToPrint->missionFlag == 1)
-			gameType == localCampaign;
+			gameType = localCampaign;
 		else gameType = localSkirmish;
 	}
 

@@ -124,11 +124,29 @@ int main()
 	statusTexturesArray.resize(statusTextureList.size());
 	initializeTextureArray("otherImages", statusTextureList, statusTexturesArray);
 
-	//Load status indicators
+	//Load flags
 	std::vector <std::string> factionTexturesList = { "NorthRedoniaFlag" , "SouthRedoniaFlag", "OrmosaFlag" , "TorranFlag" };
 	std::vector <sf::Texture> factionTexturesArray;
 	factionTexturesArray.resize(factionTexturesList.size());
 	initializeTextureArray("otherImages/Flags", factionTexturesList, factionTexturesArray);
+
+	std::map<char, std::string> symbols = { {'.',"plains.png"},{'+',"forest.png"},{'-',"river.png"},{'n',"settlement.png"} };		//'~','n','^','f','H'}
+	std::map<char, sf::Texture> terrainTextures;
+	for (std::map<char, std::string>::iterator i = symbols.begin(); i != symbols.end(); i++)
+	{
+		sf::Texture loader;
+
+		std::cout << i->first << " ; " << i->second << std::endl;
+		std::string fileName = "otherImages/Terrain/" + i->second;
+		if (!loader.loadFromFile(fileName))
+		{
+			std::cout << "Couldn't load: " << fileName<< std::endl;
+
+		}
+		terrainTextures.emplace(i->first,loader) ;
+	}
+
+
 
 	//Load music
 
@@ -241,13 +259,13 @@ int main()
 	}
 	else //Otherwise proceed with just one set of instances 
 	{
-		sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
-		//sf::RenderWindow mainWindow(desktopMode, "Line of Command");	
+		//sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
+		sf::RenderWindow mainWindow(desktopMode, "Line of Command");	
 
 
 		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &boldGameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);
 
-		inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &secondMainTexture, &gameFont, &boldGameFont, &soundEffects, & MainMenu.gameMenuButtons, & statusTexturesArray, & (gameMusicArray[0]));
+		inputLayer InputLayer(&MainMenu, &mainWindow, &mainTexture, &secondMainTexture, &gameFont, &boldGameFont, &soundEffects, & MainMenu.gameMenuButtons, & statusTexturesArray, & (gameMusicArray[0]) , &terrainTextures);
 		MasterBoard GameBoard(&mainTexture , &secondMainTexture);
 
 		MainMenu.introScreen(&GameBoard, &InputLayer);

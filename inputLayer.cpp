@@ -26,7 +26,7 @@ char getValidPlayerInput(sf::RenderWindow* myWindow);
 
 inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::Texture* gameTexture, sf::Texture* secondGameTexture,
 	sf::Font* inputFont, sf::Font* inputBoldFont, std::vector <sf::Sound>* inputSoundEffects, std::vector <Button>* inputMenuButtons,
-	std::vector <sf::Texture>* statusTextures,  sf::Music * inputGameMusic)
+	std::vector <sf::Texture>* statusTextures,  sf::Music * inputGameMusic, std::map <char, sf::Texture>* inputTerrainImages)
 {
 	inputLayerTexture = gameTexture;
 	secondInputLayerTexture = secondGameTexture;
@@ -165,6 +165,13 @@ inputLayer::inputLayer(mainMenu* inputMainMenu, sf::RenderWindow* myWindow, sf::
 		}
 	}
 
+
+	//Create tile detail images, and give them all the same location, below the status buttons.
+	for (std::map<char, sf::Texture>::iterator i = inputTerrainImages->begin() ; i != inputTerrainImages->end(); i++)
+	{
+		terrainImages.emplace(i->first, sf::Sprite(i->second));
+		terrainImages.at(i->first).setPosition(menuLeft + 30 + IL_WIDTH_OFFSET, menuTop + (3 * (statusButtonHeight + 9)) + IL_HEIGHT_OFFSET);
+	}
 
 	return;
 }
@@ -739,8 +746,6 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 
 		if (currentTile->hasMinionOnTop == true && currentTile->withinVision[observerNumber] && unseenStealthEnemyHere == false)
 		{
-
-
 			//If tile is undergoing capture, let us know.
 			if (currentTile->capturePoints != 20)
 			{
@@ -871,6 +876,18 @@ int inputLayer::printStatus(MasterBoard* boardToPrint, int observerNumber)
 			productionNumberText.setFillColor(sf::Color::Black);
 			inputLayerWindow->draw(productionNumberText);
 		}
+	
+		//Also print out terrain image, if it exists
+		std::map<char, sf::Sprite>::iterator i = terrainImages.find(currentTile->symbol);
+		if (i != terrainImages.end())
+		{
+			inputLayerWindow->draw(terrainImages.at(currentTile->symbol));
+		}
+		else
+		{
+			std::cout << "Terrain image for " << currentTile->symbol << "Doesn't exist!" << std::endl;
+		}
+
 	}
 
 
@@ -1170,7 +1187,6 @@ int inputLayer::printLowerScreen(MasterBoard* boardToPrint, int observerNumber) 
 					printMinionMenu(boardToPrint);
 				}
 				else
-
 					if (status == propertyAction)
 					{
 						printPropertyMenu(boardToPrint);
@@ -2523,10 +2539,7 @@ int inputLayer::gameBoardInput(sf::Keyboard::Key* Input, MasterBoard* boardToInp
 			{
 				if ((statusButtons)[i].checkWithinButton(mousePosition.x, mousePosition.y) == true)
 				{
-					if (boardToInput->Board[boardToInput->cursor.getX()][boardToInput->cursor.getY()].hasMinionOnTop == true)
-					{
-						dialogBoxOpen = i;
-					}
+				dialogBoxOpen = i;
 				}
 			}
 
