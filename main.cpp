@@ -243,7 +243,7 @@ int main()
 	{
 		//Close window to prevent freezing
 		std::vector <std::thread> threadList; 
-
+		std::cout << "Total maps:" << mapList.size() << std::endl;
 		for (int i = 0; i < mapList.size(); i++)
 		{
 			threadList.push_back(std::thread(buildThread, battleLabConfigFileName, mapList.at(i) ));
@@ -254,13 +254,15 @@ int main()
 		for (int i = 0; i < mapList.size(); i++)
 		{
 			threadList.at(i).join();
+			std::cout << "Thread joined" << std::endl;
+
 		}
 
 	}
 	else //Otherwise proceed with just one set of instances 
 	{
-		//sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
-		sf::RenderWindow mainWindow(desktopMode, "Line of Command");	
+		sf::RenderWindow mainWindow(desktopMode, "Line of Command", sf::Style::Fullscreen);
+		//sf::RenderWindow mainWindow(desktopMode, "Line of Command");	
 
 
 		mainMenu MainMenu(&mainWindow, &mainTexture, &gameFont, &boldGameFont, &topMenuButtonTextureArray, &gameMenuButtonTextureArray, &otherTextureArray, &(gameMusicArray[0]), &factionTexturesArray, battleLabConfigFileName, mapListName);

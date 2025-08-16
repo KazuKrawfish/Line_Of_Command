@@ -1079,13 +1079,24 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 
 	//Battle lab expects the following in config file:
 	//runBattleLab_0_Off_1_On
-	//0
+	//1
 	//Number_Of_Runs
-	//100
+	//5
 	//TurnLimit
-	//200
-	//Scenario_Name
-	//midway
+	//50
+	//Output_Name
+	//run2_01JUL2025
+	//Player_1_Variables
+	//Repair_Threshold
+	//40
+	//Aggression
+	//0
+	//Infantry_AttackBonus
+	//2
+	//Infantry_Baseline
+	//5
+	//Army_Size
+	//4
 
 	battleLabTurnLimit = 0;
 	int battleLabNumberDraws = 0;
@@ -1105,6 +1116,29 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	*configFile >> ThrowawayString;
 	*configFile >> outputName;
 
+	//Player 1 (Control) Variables
+	int controlRepairThreshold = 40;				//10-90 represents when a minion will attempt to repair, on a 100 hp scale. 40 gives best behavior so far.
+	int controlMinionAggressionBonus = 0;			//Intended range is -20 - 20 for reasonable behavior. Allows compie minions to attack even when the odds are against them.
+	int controlInfantryAttackBonus = 2;			//Intended range is 1-3 for reasonable behavior. Makes attacking infantry more attractive - would be difficult to attack them with expensive minions otherwise
+	int controlInfantryBaseline = 5;				//No idea what a reasonable range is, probably between 0 - 10. Describes min. number of infantry required in army.
+	int controlArmySizeFactor = 4;					//Reasonable range is 1 - 8. 1 makes larger armies, 8 smaller.
+
+	*configFile >> ThrowawayString;
+	*configFile >> ThrowawayString;
+	*configFile >> controlRepairThreshold;
+
+	*configFile >> ThrowawayString;
+	*configFile >> controlMinionAggressionBonus; 
+
+	*configFile >> ThrowawayString;
+	*configFile >> controlInfantryAttackBonus;
+
+	*configFile >> ThrowawayString;
+	*configFile >> controlInfantryBaseline;
+	
+	*configFile >> ThrowawayString;
+	*configFile >> controlArmySizeFactor;
+
 	std::ofstream outputFile;
 	outputFile.open(".\\battlelab\\" + outputName + "_" + battleLabScenarioName + ".txt");
 
@@ -1114,6 +1148,12 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 
 	//Track several characteristics to describe compie's behavior:
 	int armySizeFactor[2] = { 1,1 };	//From 1 to 10
+
+	outputFile << "Repair threshold for player player 1: " << controlRepairThreshold << std::endl;
+	outputFile << "Aggression bonus for player player 1: " << controlMinionAggressionBonus << std::endl;
+	outputFile << "Willingness to attack infantry for player 1: " << controlInfantryAttackBonus << std::endl;
+	outputFile << "Infantry component size for player 1: " << controlInfantryBaseline << std::endl;
+	outputFile << "Army size factor for player 1: " << controlArmySizeFactor << std::endl;
 
 	//Run given scenario according to number of runs directed
 	for (int i = 0; i < numberOfRuns; i++)
@@ -1136,7 +1176,7 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 			newGameMap.open(".\\scenarios\\" + battleLabScenarioName);
 			if (newGameMap.is_open() == false)
 			{
-				std::cout << "Could not open scenario. Aborting battle lab." << std::endl;
+				std::cout << "Could not open scenario " << battleLabScenarioName <<" Aborting battle lab." << std::endl;
 				return 1;
 			}
 			else
@@ -1149,12 +1189,6 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 		loadGameData(boardToPlay, InputLayer, &newGameMap);
 		newGameMap.close();
 
-		//Initialize compies if not done by gameLoad (They were initialized if it is a mission or a savegame)
-		int variableRepairThreshold = 40;				//10-90 represents when a minion will attempt to repair, on a 100 hp scale. 40 gives best behavior so far.
-		int variableMinionAggressionBonus = 0;			//Intended range is -20 - 20 for reasonable behavior. Allows compie minions to attack even when the odds are against them.
-		int variableInfantryAttackBonus = 2;			//Intended range is 1-3 for reasonable behavior. Makes attacking infantry more attractive - would be difficult to attack them with expensive minions otherwise
-		int variableInfantryBaseline = 5;				//No idea what a reasonable range is, probably between 0 - 10. Describes min. number of infantry required in army.
-		int variableArmySizeFactor = 4;					//Reasonable range is 1 - 8. 1 makes larger armies, 8 smaller.
 
 		outputFile << "********** Starting game number: " << i << " ****************" << std::endl;
 
@@ -1163,21 +1197,30 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 			computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
 			for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
 			{
-				//Randomize input values
-				//variableRepairThreshold = 10 + rand() % 81;
-				//variableMinionAggressionBonus = -20 + rand() % 41;
-				//variableInfantryAttackBonus = 1 + rand() % 3;
-				//variableInfantryBaseline = rand() % 11;
-				variableArmySizeFactor = 1 + rand() % 8;
+				//Control compie, these stay set to the default
+				if (i == 1)
+				{
+					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, controlRepairThreshold, controlMinionAggressionBonus,
+						controlInfantryAttackBonus, controlInfantryBaseline, controlArmySizeFactor);
+				}
+				else
+				{
+					//Randomize input values
+					int randomRepairThreshold = 10 + rand() % 81;
+					int randomeMinionAggressionBonus = -20 + rand() % 41;
+					int randomInfantryAttackBonus = 1 + rand() % 3;
+					int randomInfantryBaseline = rand() % 11;
+					int randomArmySizeFactor = 1 + rand() % 8;
 
-				computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, variableRepairThreshold, variableMinionAggressionBonus,
-					variableInfantryAttackBonus, variableInfantryBaseline, variableArmySizeFactor);
+					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, randomRepairThreshold, randomeMinionAggressionBonus,
+						randomInfantryAttackBonus, randomInfantryBaseline, randomArmySizeFactor);
 
-				outputFile << "Repair threshold for player " << i << ": " << variableRepairThreshold << std::endl;
-				outputFile << "Aggression bonus for player " << i << ": " << variableMinionAggressionBonus << std::endl;
-				outputFile << "Willingness to attack infantry for player " << i << ": " << variableInfantryAttackBonus << std::endl;
-				outputFile << "Infantry component size for player " << i << ": " << variableInfantryBaseline << std::endl;
-				outputFile << "Army size factor for player " << i << ": " << variableArmySizeFactor << std::endl;
+					outputFile << "Repair threshold for player " << i << ": " << randomRepairThreshold << std::endl;
+					outputFile << "Aggression bonus for player " << i << ": " << randomeMinionAggressionBonus << std::endl;
+					outputFile << "Willingness to attack infantry for player " << i << ": " << randomInfantryAttackBonus << std::endl;
+					outputFile << "Infantry component size for player " << i << ": " << randomInfantryBaseline << std::endl;
+					outputFile << "Army size factor for player " << i << ": " << randomArmySizeFactor << std::endl;
+				}
 			}
 		}
 

@@ -1467,7 +1467,7 @@ int compie::determinePotentialMinionTasking(compieMinionRecord* selectedMinionRe
 	if (selectedMinionRecord->recordedMinion == NULL || masterBoardPointer->cursor.selectMinionPointer == NULL)
 		return 1;
 
-	std::cout << "Determining task for " << selectedMinionRecord->recordedMinion->description << " " << selectedMinionRecord->recordedMinion->seniority << std::endl;
+	//std::cout << "Determining task for " << selectedMinionRecord->recordedMinion->description << " " << selectedMinionRecord->recordedMinion->seniority << std::endl;
 
 	int returnX = 0;
 	int returnY = 0;
@@ -1670,7 +1670,7 @@ int compie::executeMinionTasks(compieMinionRecord* selectedMinionRecord)
 	if (selectedMinionRecord->recordedMinion == NULL || masterBoardPointer->cursor.selectMinionPointer == NULL)
 		return 1;
 
-	std::cout << "Moving " << selectedMinionRecord->recordedMinion->description << " " << selectedMinionRecord->recordedMinion->seniority << std::endl;
+	//std::cout << "Moving " << selectedMinionRecord->recordedMinion->description << " " << selectedMinionRecord->recordedMinion->seniority << std::endl;
 
 	int whoIsWatching = -1;		//-1 Is "default" meaning in a standard multiplayer game, nothing is printed during compie turn. It's hidden from view.
 
@@ -1863,7 +1863,7 @@ int compie::buildMinionScoreMap(compieMinionRecord* selectedMinionRecord)
 
 int compie::takeMyTurn()
 {
-	std::cout << "Compie player " << masterBoardPointer->playerFlag << "'s " << InputLayer->MainMenu->gameTurn << " turn" << std::endl;
+	//std::cout << "Compie player " << masterBoardPointer->playerFlag << "'s " << InputLayer->MainMenu->gameTurn << " turn" << std::endl;
 	int whoIsWatching = -1;		//-1 Is "default" meaning in a standard multiplayer game, nothing is printed during compie turn. It's hidden from view.
 
 	//If we're in debug mode, give player vision over everything.
@@ -2572,7 +2572,7 @@ int compie::newDetermineProduction()
 
 		if (bestBase != -1 && bestMinion != -1)
 		{
-			std::cout << "Would like to buy: " << compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type << std::endl;
+			//std::cout << "Would like to buy: " << compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type << std::endl;
 			if (masterBoardPointer->consultMinionCostChart(compiePropertyRoster.at(bestBase).purchasePreferenceList.at(bestMinion).type, '~') <= masterBoardPointer->playerRoster[compiePlayerFlag].treasury)
 			{
 				//Must be able to actually afford the unit.				
@@ -2617,8 +2617,8 @@ int compie::buildCompieMinionRoster()
 
 	//A new compieMinionRoster every turn, instead of trying to track minion deaths.
 
-	if (InputLayer->MainMenu->gameTurn > 30)
-		std::cout << "Late" << std::endl;
+	//if (InputLayer->MainMenu->gameTurn > 30)
+	//	std::cout << "Late" << std::endl;
 
 	//Go through minion Roster.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)

@@ -2100,14 +2100,14 @@ int MasterBoard::selectMinion(int inputX, int inputY)
 {
 	if (inputX == -1 || inputY == -1)
 	{
-		std::cout << "Invalid selectMinion coordinates!" << std::endl;
+		//std::cout << "Invalid selectMinion coordinates!" << std::endl;
 		return -1;
 	}
 
 	//Return if already selected
 	if (cursor.selectMinionFlag == true)
 	{
-		std::cout << "Minion already selected." << std::endl;
+		//std::cout << "Minion already selected." << std::endl;
 		return 1;
 	}
 
@@ -2859,7 +2859,7 @@ int MasterBoard::deselectMinion()
 
 	if (cursor.selectMinionFlag == false)
 	{
-		std::cout << "Minion already de-selected." << std::endl;
+		//std::cout << "Minion already de-selected." << std::endl;
 		return 1;
 	}
 
@@ -2931,7 +2931,7 @@ int MasterBoard::attackMinion(int inputX, int inputY, inputLayer* InputLayer, in
 
 	if (attackingMinion == NULL || defendingMinion == NULL)
 	{
-		std::cout << "Couldn't attack, one of the minions doesn't exist!" << std::endl;
+		//std::cout << "Couldn't attack, one of the minions doesn't exist!" << std::endl;
 		return -1;
 	}
 
@@ -3375,7 +3375,7 @@ int MasterBoard::individualRepair(Minion* MinionToRepair,  inputLayer* InputLaye
 
 int MasterBoard::repairMinions(inputLayer* InputLayer, int observerNumber)
 {
-	std::cout << "Repair ALL MINIONS" << std::endl;
+	//std::cout << "Repair ALL MINIONS" << std::endl;
 
 	//This was terminating "early" since it would hit a NULL spot so minions wouldn't get seen to be healed.
 	for (int i = 0; i < GLOBALSUPPLYCAP; i++)
