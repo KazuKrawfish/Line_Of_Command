@@ -12,6 +12,7 @@
 #include <fstream>
 #include <stdio.h>
 #include "compie.hpp"
+#include "battleLab.hpp"
 
 
 class inputLayer;
@@ -1099,9 +1100,6 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	//4
 
 	battleLabTurnLimit = 0;
-	int battleLabNumberDraws = 0;
-	int battleLabnumberPlayerOneWins = 0;
-	int battleLabnumberPlayerTwoWins = 0;
 
 	std::string ThrowawayString;
 	int numberOfRuns = 0;
@@ -1117,11 +1115,22 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	*configFile >> outputName;
 
 	//Player 1 (Control) Variables
-	int controlRepairThreshold = 40;				//10-90 represents when a minion will attempt to repair, on a 100 hp scale. 40 gives best behavior so far.
-	int controlMinionAggressionBonus = 0;			//Intended range is -20 - 20 for reasonable behavior. Allows compie minions to attack even when the odds are against them.
-	int controlInfantryAttackBonus = 2;			//Intended range is 1-3 for reasonable behavior. Makes attacking infantry more attractive - would be difficult to attack them with expensive minions otherwise
-	int controlInfantryBaseline = 5;				//No idea what a reasonable range is, probably between 0 - 10. Describes min. number of infantry required in army.
-	int controlArmySizeFactor = 4;					//Reasonable range is 1 - 8. 1 makes larger armies, 8 smaller.
+	int controlRepairThreshold;					//10-90 represents when a minion will attempt to repair, on a 100 hp scale. 40 gives best behavior so far.
+	int controlMinionAggressionBonus;			//Intended range is -20 - 20 for reasonable behavior. Allows compie minions to attack even when the odds are against them.
+	int controlInfantryAttackBonus;				//Intended range is 1-3 for reasonable behavior. Makes attacking infantry more attractive - would be difficult to attack them with expensive minions otherwise
+	int controlInfantryBaseline;				//No idea what a reasonable range is, probably between 0 - 10. Describes min. number of infantry required in army.
+	int controlArmySizeFactor;					//Reasonable range is 1 - 8. 1 makes larger armies, 8 smaller.
+
+	int winningRepairThreshold = 0;					
+	int winningAggressiveness = 0;		
+	int winningInfantryBonus = 0;			
+	int winningInfantryBaseline = 0;				
+	int winningSizeFactor = 0;	
+
+	//Here best draws and player 2 wins means related to P1, so they should be lower if P1 did well.
+	int bestPlayerOneWins = 0;
+	int bestPlayerTwoWins = 0;
+	int bestDraws = 0;
 
 	*configFile >> ThrowawayString;
 	*configFile >> ThrowawayString;
@@ -1147,110 +1156,164 @@ int mainMenu::runBattleLab(MasterBoard* boardToPlay, inputLayer* InputLayer, std
 	InputLayer->soundsOn = false;
 
 	//Track several characteristics to describe compie's behavior:
-	int armySizeFactor[2] = { 1,1 };	//From 1 to 10
+	//int armySizeFactor[2] = { 1,1 };	//From 1 to 10
 
-	outputFile << "Repair threshold for player player 1: " << controlRepairThreshold << std::endl;
-	outputFile << "Aggression bonus for player player 1: " << controlMinionAggressionBonus << std::endl;
-	outputFile << "Willingness to attack infantry for player 1: " << controlInfantryAttackBonus << std::endl;
-	outputFile << "Infantry component size for player 1: " << controlInfantryBaseline << std::endl;
-	outputFile << "Army size factor for player 1: " << controlArmySizeFactor << std::endl;
-
-	//Run given scenario according to number of runs directed
-	for (int i = 0; i < numberOfRuns; i++)
+	//First loop is to determine the "control" values for compie 1, who then fights a variety of compie 2 types.
+	for(int j = 0; j < numberOfRuns; j++)
 	{
-		battleLabReset = false;
+		//Randomize input values
+		controlRepairThreshold = 10 + rand() % 81;
+		controlMinionAggressionBonus = -20 + rand() % 41;
+		controlInfantryAttackBonus = 1 + rand() % 3;
+		controlInfantryBaseline = rand() % 11;
+		controlArmySizeFactor = 1 + rand() % 8;
 
-		if (computerPlayerRoster.empty() == false)
+		outputFile << "Repair threshold for player player 1: " << controlRepairThreshold << std::endl;
+		outputFile << "Aggression bonus for player player 1: " << controlMinionAggressionBonus << std::endl;
+		outputFile << "Willingness to attack infantry for player 1: " << controlInfantryAttackBonus << std::endl;
+		outputFile << "Infantry component size for player 1: " << controlInfantryBaseline << std::endl;
+		outputFile << "Army size factor for player 1: " << controlArmySizeFactor << std::endl;		
+
+		int battleLabNumberDraws = 0;
+		int battleLabnumberPlayerOneWins = 0;
+		int battleLabnumberPlayerTwoWins = 0;
+
+		//Run given scenario according to number of runs directed
+		for (int i = 0; i < numberOfRuns; i++)
 		{
-			computerPlayerRoster.clear();
-		}
 
-		gameType = localSkirmish;
+			battleLabReset = false;
 
-		//Load the actual map
-		std::ifstream newGameMap;
-
-		//Need to print out mission/scenario printout here
-		if (gameType == localSkirmish)
-		{
-			newGameMap.open(".\\scenarios\\" + battleLabScenarioName);
-			if (newGameMap.is_open() == false)
+			if (computerPlayerRoster.empty() == false)
 			{
-				std::cout << "Could not open scenario " << battleLabScenarioName <<" Aborting battle lab." << std::endl;
-				return 1;
+				computerPlayerRoster.clear();
 			}
-			else
+
+			gameType = localSkirmish;
+
+			//Load the actual map
+			std::ifstream newGameMap;
+
+			//Need to print out mission/scenario printout here
+			if (gameType == localSkirmish)
 			{
-				std::cout << "Successfully opened scenario " << battleLabScenarioName << std::endl;
-			}
-		}
-
-		//Actually load scenario. Initialize board, etc.
-		loadGameData(boardToPlay, InputLayer, &newGameMap);
-		newGameMap.close();
-
-
-		outputFile << "********** Starting game number: " << i << " ****************" << std::endl;
-
-		if (boardToPlay->missionFlag == false)
-		{
-			computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
-			for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
-			{
-				//Control compie, these stay set to the default
-				if (i == 1)
+				newGameMap.open(".\\scenarios\\" + battleLabScenarioName);
+				if (newGameMap.is_open() == false)
 				{
-					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, controlRepairThreshold, controlMinionAggressionBonus,
-						controlInfantryAttackBonus, controlInfantryBaseline, controlArmySizeFactor);
+					std::cout << "Could not open scenario " << battleLabScenarioName <<" Aborting battle lab." << std::endl;
+					return 1;
 				}
 				else
 				{
-					//Randomize input values
-					int randomRepairThreshold = 10 + rand() % 81;
-					int randomeMinionAggressionBonus = -20 + rand() % 41;
-					int randomInfantryAttackBonus = 1 + rand() % 3;
-					int randomInfantryBaseline = rand() % 11;
-					int randomArmySizeFactor = 1 + rand() % 8;
-
-					computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, randomRepairThreshold, randomeMinionAggressionBonus,
-						randomInfantryAttackBonus, randomInfantryBaseline, randomArmySizeFactor);
-
-					outputFile << "Repair threshold for player " << i << ": " << randomRepairThreshold << std::endl;
-					outputFile << "Aggression bonus for player " << i << ": " << randomeMinionAggressionBonus << std::endl;
-					outputFile << "Willingness to attack infantry for player " << i << ": " << randomInfantryAttackBonus << std::endl;
-					outputFile << "Infantry component size for player " << i << ": " << randomInfantryBaseline << std::endl;
-					outputFile << "Army size factor for player " << i << ": " << randomArmySizeFactor << std::endl;
+					std::cout << "Successfully opened scenario " << battleLabScenarioName << std::endl;
 				}
 			}
+
+			//Actually load scenario. Initialize board, etc.
+			loadGameData(boardToPlay, InputLayer, &newGameMap);
+			newGameMap.close();
+
+
+			outputFile << "********** Starting game number: " << i << " ****************" << std::endl;
+
+			if (boardToPlay->missionFlag == false)
+			{
+				computerPlayerRoster.resize(boardToPlay->NUMBEROFPLAYERS + 1);
+				for (int i = 1; i <= boardToPlay->NUMBEROFPLAYERS; i++)
+				{
+					//Control compie, these stay set to the default
+					if (i == 1)
+					{
+						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, controlRepairThreshold, controlMinionAggressionBonus,
+							controlInfantryAttackBonus, controlInfantryBaseline, controlArmySizeFactor);
+					}
+					else
+					{
+						//Randomize input values
+						int randomRepairThreshold = 10 + rand() % 81;
+						int randomeMinionAggressionBonus = -20 + rand() % 41;
+						int randomInfantryAttackBonus = 1 + rand() % 3;
+						int randomInfantryBaseline = rand() % 11;
+						int randomArmySizeFactor = 1 + rand() % 8;
+
+						computerPlayerRoster[i].initalizeCompie(this, i, InputLayer, boardToPlay, randomRepairThreshold, randomeMinionAggressionBonus,
+							randomInfantryAttackBonus, randomInfantryBaseline, randomArmySizeFactor);
+
+						outputFile << "Repair threshold for player " << i << ": " << randomRepairThreshold << std::endl;
+						outputFile << "Aggression bonus for player " << i << ": " << randomeMinionAggressionBonus << std::endl;
+						outputFile << "Willingness to attack infantry for player " << i << ": " << randomInfantryAttackBonus << std::endl;
+						outputFile << "Infantry component size for player " << i << ": " << randomInfantryBaseline << std::endl;
+						outputFile << "Army size factor for player " << i << ": " << randomArmySizeFactor << std::endl;
+					}
+				}
+			}
+
+			boardToPlay->isItSinglePlayerGame = true;
+
+			menuStatus = playingMap;
+
+			skipOneInput = true;
+
+			//Turn off mission flag so we come back to main menu after the game is resolved.
+			boardToPlay->missionFlag = false;
+
+			//After loading scenario for this iteration, play game.
+			playGame(boardToPlay, InputLayer);
+
+			if (battleLabWinningPlayer == 1)
+				battleLabnumberPlayerOneWins++;
+			else if (battleLabWinningPlayer == 2)
+				battleLabnumberPlayerTwoWins++;
+			else battleLabNumberDraws++;
+
+			//Put out status
+			outputFile << "********** Completed game number: " << i << " ****************" << std::endl;
+			outputFile << "Winner: Player " << battleLabWinningPlayer << std::endl;
+			outputFile << "Number of turns in this game: " << gameTurn << std::endl;
+			outputFile << "\tPlayer 1 wins: " << battleLabnumberPlayerOneWins << std::endl;
+			outputFile << "\tPlayer 2 wins: " << battleLabnumberPlayerTwoWins << std::endl;
+			outputFile << "\tNumber of draws: " << battleLabNumberDraws << std::endl << std::endl << std::endl;
+
 		}
 
-		boardToPlay->isItSinglePlayerGame = true;
+		if ( battleLabnumberPlayerOneWins > bestPlayerOneWins)
+		{
+			bestPlayerOneWins = battleLabnumberPlayerOneWins;
+			bestPlayerTwoWins = battleLabnumberPlayerTwoWins;
+			bestDraws = battleLabNumberDraws;
 
-		menuStatus = playingMap;
+			winningRepairThreshold = controlRepairThreshold;					
+			winningAggressiveness = controlMinionAggressionBonus;		
+			winningInfantryBonus = controlInfantryAttackBonus;			
+			winningInfantryBaseline = controlInfantryBaseline;				
+			winningSizeFactor = controlArmySizeFactor;	
+		}
 
-		skipOneInput = true;
-
-		//Turn off mission flag so we come back to main menu after the game is resolved.
-		boardToPlay->missionFlag = false;
-
-		//After loading scenario for this iteration, play game.
-		playGame(boardToPlay, InputLayer);
-
-		if (battleLabWinningPlayer == 1)
-			battleLabnumberPlayerOneWins++;
-		else if (battleLabWinningPlayer == 2)
-			battleLabnumberPlayerTwoWins++;
-		else battleLabNumberDraws++;
-
-		//Put out status
-		outputFile << "********** Completed game number: " << i << " ****************" << std::endl;
-		outputFile << "Winner: Player " << battleLabWinningPlayer << std::endl;
-		outputFile << "Number of turns in this game: " << gameTurn << std::endl;
-		outputFile << "\tPlayer 1 wins: " << battleLabnumberPlayerOneWins << std::endl;
-		outputFile << "\tPlayer 2 wins: " << battleLabnumberPlayerTwoWins << std::endl;
-		outputFile << "\tNumber of draws: " << battleLabNumberDraws << std::endl << std::endl << std::endl;
 
 	}
+
+	returnData results;
+
+	results.repairThreshold = winningRepairThreshold;					
+	results.compieMinionAggressionBonus = winningAggressiveness;		
+	results.compieInfantryAttackBonus = winningInfantryBonus;			
+	results.compieInfantryBaseline = winningInfantryBaseline;				
+	results. compieArmySizeFactor = winningSizeFactor;			
+
+	results.playerOneWins = bestPlayerOneWins;
+	results.playerTwoWins = bestPlayerTwoWins;
+	results.draws = bestDraws;
+
+	//Put out status
+	outputFile << "********** Final Results ****************" << std::endl;
+	outputFile << "Best Player 1 Wins: " << bestPlayerOneWins << " Wins, " << bestPlayerTwoWins << " Losses, "<< bestDraws<< " Draws." <<std::endl;
+	outputFile << "Repair Threshold: " << winningRepairThreshold << std::endl;
+	outputFile << "Aggression factor: " << winningAggressiveness << std::endl;
+	outputFile << "Infantry attack bonus: " << winningInfantryBonus << std::endl;
+	outputFile << "Infantry baseline: " << winningInfantryBaseline << std::endl;
+	outputFile << "Size Factor: " << winningSizeFactor << std::endl;
+
+	outputFile.close();
 
 	return 0;
 }

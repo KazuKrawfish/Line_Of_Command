@@ -153,6 +153,7 @@ public:
 			defenseFactor = 1.1;
 			mySprite.setTextureRect(rectArray[0][0]);
 			myFogSprite.setTextureRect(rectArray[0][1]);
+			//myImage = &PlainsImage;
 			break;
 		}
 		case('f'):

@@ -19,6 +19,7 @@ InputLayer and masterBoard may call it, so they are somewhat circular-dependent.
 #include <SFML/Network.hpp>
 #include "button.hpp"
 #include <filesystem>	
+#include "battleLab.hpp"
 
 enum mainMenuStatus { topmenu, playingMap };
 

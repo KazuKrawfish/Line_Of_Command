@@ -1,13 +1,20 @@
-EXECUTABLE=AWSimulation
+EXECUTABLE=Line_Of_Command
 
-#CPPFLAGS=-g $(shell root-config --cflags)
-#LDFLAGS=-g $(shell root-config --ldflags)
-#LDLIBS=$(shell root-config --libs)
 
-LDLIBS=-lncurses
+LDLIBS=
 
-SRCS=MasterBoard.cpp Minion.cpp compie.cpp  Cursor.cpp inputLayer.cpp main.cpp  mainmenu.cpp
-OBJS=$(subst .cpp,.o,$(SRCS))
+SOURCE += compie.cpp
+SOURCE += compieMinionRecord.cpp
+SOURCE += compiePropertyRecord.cpp
+SOURCE += Cursor.cpp
+SOURCE += inputLayer.cpp
+SOURCE += main.cpp
+SOURCE += mainmenu.cpp
+SOURCE += MasterBoard.cpp 
+SOURCE += Minion.cpp
+
+       
+OBJS=$(subst .cpp,.o,$(SOURCE))
 
 all: $(EXECUTABLE)
 
@@ -16,7 +23,7 @@ $(EXECUTABLE): $(OBJS)
 
 depend: .depend
 
-.depend: $(SRCS)
+.depend: $(SOURCE)
 	$(RM) ./.depend
 	$(CXX) $(CPPFLAGS) -MM $^>> ./.depend;
 
